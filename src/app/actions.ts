@@ -5,9 +5,17 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { transactions, goals } from '@/lib/data';
 
-const schema = z.object({
+const analysisSchema = z.object({
   financialHabits: z.string().min(20, { message: 'Por favor, descreva seus hábitos financeiros com mais detalhes.' }),
 });
+
+const transactionSchema = z.object({
+  description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
+  amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
+  type: z.enum(['income', 'expense'], { required_error: 'O tipo é obrigatório.' }),
+  category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
+});
+
 
 export type AnalysisState = {
   message?: string | null;
@@ -18,8 +26,18 @@ export type AnalysisState = {
   };
 };
 
+export type TransactionState = {
+  message?: string | null;
+  errors?: {
+    description?: string[];
+    amount?: string[];
+    type?: string[];
+    category?: string[];
+  };
+}
+
 export async function analyzeBudget(prevState: AnalysisState, formData: FormData): Promise<AnalysisState> {
-  const validatedFields = schema.safeParse({
+  const validatedFields = analysisSchema.safeParse({
     financialHabits: formData.get('financialHabits'),
   });
 
@@ -67,4 +85,27 @@ export async function analyzeBudget(prevState: AnalysisState, formData: FormData
       message: 'Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.',
     };
   }
+}
+
+export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const validatedFields = transactionSchema.safeParse({
+    description: formData.get('description'),
+    amount: formData.get('amount'),
+    type: formData.get('type'),
+    category: formData.get('category'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+  
+  // NOTE: This is mock data. In a real application, you would save this to a database.
+  console.log('New transaction added:', validatedFields.data);
+
+  revalidatePath('/');
+
+  return { message: 'Transação adicionada com sucesso!' };
 }

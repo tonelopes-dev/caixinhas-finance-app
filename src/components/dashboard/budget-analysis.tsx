@@ -37,7 +37,6 @@ export default function BudgetAnalysis({ income, expenses, goals }: BudgetAnalys
       toast({
         title: "Análise Pronta!",
         description: "Sua análise de orçamento personalizada está pronta.",
-        variant: "default",
       })
     } else if (state.message) {
       toast({
