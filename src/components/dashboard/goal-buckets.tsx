@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -20,17 +21,21 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
   
-  const featuredGoals = goals.filter(g => g.isFeatured && g.currentAmount < g.targetAmount);
-  const otherIncompleteGoals = goals.filter(g => !g.isFeatured && g.currentAmount < g.targetAmount);
+  const incompleteGoals = goals.filter(g => g.currentAmount < g.targetAmount);
 
-  // Sort by highest progress percentage
-  otherIncompleteGoals.sort((a, b) => {
+  // Sort all incomplete goals by progress percentage in descending order
+  incompleteGoals.sort((a, b) => {
     const progressA = a.currentAmount / a.targetAmount;
     const progressB = b.currentAmount / b.targetAmount;
     return progressB - progressA;
   });
 
-  const goalsToShow = [...featuredGoals, ...otherIncompleteGoals].slice(0, 3);
+  // Separate featured from non-featured, maintaining the sort order
+  const featuredGoals = incompleteGoals.filter(g => g.isFeatured);
+  const otherGoals = incompleteGoals.filter(g => !g.isFeatured);
+
+  // Show featured goals first, then other goals, up to a max of 3
+  const goalsToShow = [...featuredGoals, ...otherGoals].slice(0, 3);
 
 
   return (
