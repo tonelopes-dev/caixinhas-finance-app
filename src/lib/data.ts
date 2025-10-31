@@ -29,9 +29,19 @@ export const guests: Guest[] = [
     }
 ];
 
+export const bankLogos = [
+    'https://cdn.worldvectorlogo.com/logos/nubank-1.svg',
+    'https://cdn.worldvectorlogo.com/logos/banco-inter.svg',
+    'https://cdn.worldvectorlogo.com/logos/c6-bank.svg',
+    'https://cdn.worldvectorlogo.com/logos/itau-unibanco-2.svg',
+    'https://cdn.worldvectorlogo.com/logos/bradesco-logo-2.svg',
+    'https://cdn.worldvectorlogo.com/logos/banco-do-brasil-logo.svg',
+    'https://cdn.worldvectorlogo.com/logos/caixa-economica-federal.svg',
+]
+
 export const accounts: Account[] = [
-  { id: 'acc1', name: 'Conta Principal', bank: 'Banco Digital', type: 'checking' },
-  { id: 'acc2', name: 'Poupança Conjunta', bank: 'Banco Tradicional', type: 'savings' },
+  { id: 'acc1', name: 'Conta Principal', bank: 'Banco Digital', type: 'checking', logoUrl: bankLogos[0] },
+  { id: 'acc2', name: 'Poupança Conjunta', bank: 'Banco Tradicional', type: 'savings', logoUrl: bankLogos[4] },
   { id: 'acc3', name: 'Carteira', bank: 'Dinheiro Físico', type: 'other' },
 ];
 
@@ -116,7 +126,7 @@ export const transactions: Transaction[] = [
     { id: '6', date: '2024-07-24', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'pix' },
     { id: '7', date: '2024-07-23', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
     { id: '8', date: '2024-07-22', description: 'Depósito Caixinha Europa', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1' },
-    { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
+    { id: '9', date: '20_4-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
     { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Outros', sourceAccountId: 'acc1', paymentMethod: 'cash' },
     { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1' },
     { id: '12', date: '2024-07-18', description: 'Rendimento Freelance', amount: 800, type: 'income', category: 'Freelance', destinationAccountId: 'acc1' },

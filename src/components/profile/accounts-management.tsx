@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { accounts } from '@/lib/data';
+import { accounts, bankLogos } from '@/lib/data';
 import { Landmark, PlusCircle, Trash2, Edit } from 'lucide-react';
 import {
   Dialog,
@@ -24,9 +25,14 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { Account } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
+import { Wallet } from 'lucide-react';
+
 
 function EditAccountDialog({ account }: { account: Account }) {
     const [open, setOpen] = React.useState(false);
+    const [selectedLogo, setSelectedLogo] = React.useState(account.logoUrl);
+
     return (
          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -47,6 +53,23 @@ function EditAccountDialog({ account }: { account: Account }) {
                 </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+                 <div className="space-y-2">
+                    <Label>Logo do Banco</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {bankLogos.map((logo, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setSelectedLogo(logo)}
+                                className={cn(
+                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted p-1 transition-all",
+                                    selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
+                                )}
+                            >
+                                <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-8 w-8 object-contain" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
                 <div className="space-y-2">
                     <Label htmlFor="account-name">Nome da Conta</Label>
                     <Input
@@ -159,8 +182,12 @@ export function AccountsManagement() {
               className="flex items-center justify-between rounded-lg border p-3"
             >
               <div className="flex items-center gap-4">
-                <div className="rounded-full bg-muted p-2">
-                    <Landmark className="h-5 w-5 text-muted-foreground" />
+                <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
+                    {account.logoUrl ? (
+                         <Image src={account.logoUrl} alt={account.bank} width={28} height={28} className="h-7 w-7 object-contain" />
+                    ) : (
+                        account.type === 'other' ? <Wallet className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
+                    )}
                 </div>
                 <div>
                   <p className="font-medium">{account.name}</p>

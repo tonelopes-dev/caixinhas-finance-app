@@ -3,6 +3,7 @@ export type Account = {
   name: string;
   bank: string;
   type: 'checking' | 'savings' | 'investment' | 'other';
+  logoUrl?: string;
 };
 
 export type Transaction = {
