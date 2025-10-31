@@ -13,11 +13,11 @@ import { Paintbrush, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const themes = [
-  { name: "Padrão", background: "60 56% 91%", secondary: "60 30% 88%" },
-  { name: "Oceano", background: "210 40% 91%", secondary: "210 30% 88%" },
-  { name: "Amanhecer", background: "30 60% 91%", secondary: "30 40% 88%" },
-  { name: "Floresta", background: "120 20% 91%", secondary: "120 15% 88%" },
-  { name: "Lavanda", background: "260 50% 92%", secondary: "260 35% 89%" },
+  { name: "Padrão", background: "60 56% 91%", primary: "45 65% 52%" }, // Original Gold
+  { name: "Oceano", background: "210 40% 91%", primary: "220 80% 55%" }, // Blue
+  { name: "Amanhecer", background: "30 60% 91%", primary: "25 95% 55%" }, // Orange
+  { name: "Floresta", background: "120 20% 91%", primary: "130 50% 45%" }, // Green
+  { name: "Lavanda", background: "260 50% 92%", primary: "250 60% 60%" }, // Purple
 ];
 
 export function ThemeSwitcher() {
@@ -35,7 +35,7 @@ export function ThemeSwitcher() {
   const applyTheme = (theme: typeof themes[0]) => {
     const root = document.documentElement;
     root.style.setProperty("--background", theme.background);
-    root.style.setProperty("--secondary", theme.secondary);
+    root.style.setProperty("--primary", theme.primary);
   };
 
   const handleThemeChange = (themeName: string) => {
@@ -43,7 +43,7 @@ export function ThemeSwitcher() {
     if (theme) {
       applyTheme(theme);
       localStorage.setItem("app-theme", themeName);
-      setCurrentTheme(themeName);
+      setCurrentTheme(theme.name);
     }
   };
   
@@ -69,7 +69,7 @@ export function ThemeSwitcher() {
                 <div
                   className="h-4 w-4 rounded-full border"
                   style={{
-                    background: `radial-gradient(circle at top left, hsl(${theme.secondary}), hsl(${theme.background}) 50%)`,
+                    backgroundColor: `hsl(${theme.primary})`,
                   }}
                 />
                 <span>{theme.name}</span>
