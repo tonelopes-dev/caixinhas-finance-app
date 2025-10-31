@@ -1,4 +1,5 @@
 
+
 import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -166,6 +167,19 @@ export const invitations: Invitation[] = [
     id: '2',
     goalName: 'Festa de Casamento',
     invitedBy: 'João',
+    status: 'pending',
+  },
+  {
+    id: '3',
+    goalName: 'Cofre da Família',
+    invitedBy: 'Seus Pais',
+    status: 'pending',
+    type: 'vault'
+  },
+  {
+    id: '4',
+    goalName: 'Reforma da Casa',
+    invitedBy: 'Arquiteto',
     status: 'pending',
   }
 ];

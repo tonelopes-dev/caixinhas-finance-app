@@ -30,7 +30,7 @@ export default function InvitationsPage() {
               Convites Pendentes
             </CardTitle>
             <CardDescription>
-              Você foi convidado(a) para participar destas caixinhas.
+              Você foi convidado(a) para participar destas caixinhas e cofres.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -38,7 +38,7 @@ export default function InvitationsPage() {
               <div key={invitation.id} className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <p className="font-medium">
-                    <span className="font-bold">{invitation.invitedBy}</span> te convidou para a caixinha <span className="font-bold text-primary">{invitation.goalName}</span>.
+                    <span className="font-bold">{invitation.invitedBy}</span> te convidou para {invitation.type === 'vault' ? 'o cofre' : 'a caixinha'} <span className="font-bold text-primary">{invitation.goalName}</span>.
                   </p>
                 </div>
                 <div className="flex gap-2">

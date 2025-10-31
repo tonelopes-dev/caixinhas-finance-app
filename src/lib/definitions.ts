@@ -54,6 +54,7 @@ export type Invitation = {
   goalName: string;
   invitedBy: string;
   status: 'pending' | 'accepted' | 'declined';
+  type?: 'goal' | 'vault';
 };
 
 export type Guest = {
