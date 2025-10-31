@@ -223,7 +223,7 @@ export default function TransactionsPage() {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2, duration: 0.5 }}
+            transition={{ delay: 1.3, duration: 0.5 }}
         >
             <Card>
             <CardHeader>
@@ -325,6 +325,7 @@ export default function TransactionsPage() {
                                             <Landmark className="h-3 w-3 text-red-500" />
                                             <span>{getAccountName(t.sourceAccountId)}</span>
                                         </div>
+
                                     )}
                                     {t.destinationAccountId && (
                                         <div className='flex items-center gap-1 text-muted-foreground mt-1'>
