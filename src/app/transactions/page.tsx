@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ListFilter, ArrowRight, ArrowDown, Banknote, Landmark, CreditCard, PiggyBank, Briefcase } from 'lucide-react';
+import { ArrowLeft, ListFilter, ArrowRight, ArrowDown, Banknote, Landmark, CreditCard, PiggyBank, Briefcase, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { transactions as allTransactions, accounts, goals } from '@/lib/data';
 import { useMemo, useState } from 'react';
 
@@ -21,6 +21,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { AddTransactionSheet } from '@/components/dashboard/add-transaction-sheet';
 import {
@@ -33,6 +39,8 @@ import {
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/lib/definitions';
+import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
+import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -227,6 +235,7 @@ export default function TransactionsPage() {
                   <TableHead className="hidden lg:table-cell">Contas</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
+                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -281,13 +290,26 @@ export default function TransactionsPage() {
                                 {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
                                 {formatCurrency(t.amount)}
                             </TableCell>
+                            <TableCell className="text-right">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <EditTransactionSheet transaction={t} />
+                                        <DeleteTransactionDialog transactionId={t.id} />
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
                         </TableRow>
                     )
                 })}
                 {filteredTransactions.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="py-8 text-center text-muted-foreground"
                     >
                       Nenhuma transação encontrada para os filtros selecionados.

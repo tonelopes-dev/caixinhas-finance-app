@@ -11,6 +11,7 @@ const analysisSchema = z.object({
 });
 
 const transactionSchema = z.object({
+  id: z.string().optional(),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
@@ -47,6 +48,10 @@ const deleteGoalSchema = z.object({
   id: z.string(),
 });
 
+const deleteTransactionSchema = z.object({
+  id: z.string(),
+});
+
 
 export type AnalysisState = {
   message?: string | null;
@@ -60,6 +65,7 @@ export type AnalysisState = {
 export type TransactionState = {
   message?: string | null;
   errors?: {
+    id?: string[];
     description?: string[];
     amount?: string[];
     type?: string[];
@@ -173,6 +179,69 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 
   return { message: 'Transação adicionada com sucesso!' };
 }
+
+export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const validatedFields = transactionSchema.safeParse({
+    id: formData.get('id'),
+    description: formData.get('description'),
+    amount: formData.get('amount'),
+    type: formData.get('type'),
+    category: formData.get('category'),
+    date: formData.get('date'),
+    sourceAccountId: formData.get('sourceAccountId'),
+    destinationAccountId: formData.get('destinationAccountId'),
+    paymentMethod: formData.get('paymentMethod'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+
+  const { id, ...data } = validatedFields.data;
+  const index = transactions.findIndex(t => t.id === id);
+
+  if (index > -1) {
+    transactions[index] = {
+      ...transactions[index],
+      ...data,
+      date: data.date || transactions[index].date,
+    };
+    console.log(`Transaction with id ${id} updated.`);
+    revalidatePath('/');
+    revalidatePath('/transactions');
+    return { message: 'Transação atualizada com sucesso!' };
+  }
+  
+  return { message: 'Erro: Transação não encontrada.' };
+}
+
+export async function deleteTransaction(formData: FormData) {
+  const validatedFields = deleteTransactionSchema.safeParse({
+    id: formData.get('id'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      message: 'ID da transação inválido.',
+    };
+  }
+  
+  const { id } = validatedFields.data;
+  const index = transactions.findIndex(t => t.id === id);
+
+  if (index > -1) {
+    transactions.splice(index, 1);
+    console.log(`Transaction with id ${id} deleted.`);
+  }
+
+  revalidatePath('/');
+  revalidatePath('/transactions');
+  return { message: 'Transação excluída com sucesso!' };
+}
+
 
 export async function addGoal(prevState: GoalState, formData: FormData): Promise<GoalState> {
   const validatedFields = goalSchema.safeParse({
