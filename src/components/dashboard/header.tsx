@@ -30,7 +30,7 @@ export default function Header({ user, partner }: HeaderProps) {
       </div>
       <div className="ml-auto flex items-center gap-4">
         <div className="flex -space-x-2">
-            <Avatar className="h-9 w-9 border-2 border-background">
+            <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
               <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
               <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
             </Avatar>
@@ -50,7 +50,7 @@ export default function Header({ user, partner }: HeaderProps) {
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-4">
-               <Avatar className="h-9 w-9 border-2 border-background">
+               <Avatar className="h-9 w-9 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
                 <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="woman portrait"/>
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
