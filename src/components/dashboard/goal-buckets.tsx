@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -25,6 +27,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
       <CardContent className="grid gap-4">
         {goals.slice(0, 3).map((goal) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
+          const participants = goal.participants ?? (goal.visibility === 'shared' ? [user, partner] : [user]);
           return (
             <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-3 -m-3 transition-colors hover:bg-muted/50">
               <div className="text-4xl transition-transform group-hover:scale-110">{goal.emoji}</div>
@@ -40,16 +43,19 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                 </div>
                 <Progress value={progress} className="h-3 mt-2" />
                 <div className="flex items-center gap-1 mt-2">
-                    <Avatar className="h-6 w-6 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
-                        <AvatarImage src={user.avatarUrl} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    {goal.visibility === 'shared' && (
-                      <Avatar className="h-6 w-6 border-2 -ml-3" style={{borderColor: 'hsl(var(--chart-2))'}}>
-                          <AvatarImage src={partner.avatarUrl} alt={partner.name} />
-                          <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    )}
+                    <div className="flex -space-x-2 overflow-hidden">
+                        {participants.slice(0, 4).map((p, index) => (
+                             <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                <AvatarImage src={p.avatarUrl} alt={p.name} />
+                                <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                        ))}
+                        {participants.length > 4 && (
+                            <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                <AvatarFallback>+{participants.length - 4}</AvatarFallback>
+                            </Avatar>
+                        )}
+                    </div>
                 </div>
               </div>
             </Link>

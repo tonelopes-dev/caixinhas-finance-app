@@ -48,6 +48,7 @@ export default function GoalsPage() {
           <CardContent className="grid gap-6 md:grid-cols-2">
             {goals.map((goal) => {
               const progress = (goal.currentAmount / goal.targetAmount) * 100;
+              const participants = goal.participants ?? (goal.visibility === 'shared' ? [user, partner] : [user]);
               return (
                 <Link href={`/goals/${goal.id}`} key={goal.id}>
                   <Card className="flex h-full flex-col transition-all hover:shadow-md">
@@ -72,19 +73,20 @@ export default function GoalsPage() {
                     </CardContent>
                     <CardFooter className="flex items-center gap-2 pt-4">
                       <div className="flex -space-x-2 overflow-hidden">
-                        <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                          <AvatarImage src={user.avatarUrl} />
-                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        {goal.visibility === 'shared' && (
-                          <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                             <AvatarImage src={partner.avatarUrl} />
-                             <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
+                        {participants.slice(0, 5).map((p, index) => (
+                           <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                             <AvatarImage src={p.avatarUrl} alt={p.name}/>
+                             <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
                           </Avatar>
+                        ))}
+                        {participants.length > 5 && (
+                            <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                               <AvatarFallback>+{participants.length - 5}</AvatarFallback>
+                            </Avatar>
                         )}
                       </div>
                       <span className='text-xs text-muted-foreground'>
-                        {goal.visibility === 'shared' ? 'Você e Parceiro(a)' : 'Apenas você'}
+                        {participants.length > 1 ? `${participants.length} participantes` : 'Apenas você'}
                       </span>
                     </CardFooter>
                   </Card>
