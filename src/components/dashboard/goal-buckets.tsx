@@ -67,7 +67,15 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
             </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex-col items-stretch gap-4 border-t pt-6">
+        {goals.length > 3 && (
+            <Button variant="ghost" asChild>
+                <Link href="/goals">
+                    Ver todas as caixinhas
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
+        )}
         <Button variant="outline" className="w-full" asChild>
           <Link href="/goals/new">
             <PlusCircle className="mr-2 h-4 w-4" />
