@@ -166,7 +166,7 @@ export default function TransactionsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Card className="mb-8">
               <CardHeader>
@@ -281,7 +281,7 @@ export default function TransactionsPage() {
                 >
                     {filteredTransactions.map((t) => {
                         const typeInfo = getTypeDisplay(t.type);
-                        const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
+                        const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod!]?.icon : null;
 
                         return (
                             <motion.tr variants={itemVariants} key={t.id}>
