@@ -12,6 +12,14 @@ const Progress = React.forwardRef<
 >(({ className, value, ...props }, ref) => {
   const progressRef = React.useRef(null);
   const isInView = useInView(progressRef, { once: true });
+  
+  const getProgressColor = (progress: number) => {
+    // Hue from 0 (red) to 120 (green)
+    const hue = (progress / 100) * 120;
+    return `hsl(${hue}, 80%, 45%)`;
+  };
+
+  const color = getProgressColor(value || 0);
 
   return (
     <ProgressPrimitive.Root
@@ -23,9 +31,10 @@ const Progress = React.forwardRef<
       {...props}
     >
       <motion.div
-        className="h-full w-full flex-1 bg-primary"
+        className="h-full w-full flex-1"
         style={{
-          transformOrigin: 'left'
+          transformOrigin: 'left',
+          backgroundColor: color,
         }}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: isInView ? (value || 0) / 100 : 0 }}
