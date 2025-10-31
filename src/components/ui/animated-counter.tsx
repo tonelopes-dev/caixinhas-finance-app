@@ -3,7 +3,13 @@
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
 
-export function AnimatedCounter({ value, className }: { value: number; className?: string }) {
+type AnimatedCounterProps = {
+  value: number;
+  className?: string;
+  formatter?: (value: number) => string;
+};
+
+export function AnimatedCounter({ value, className, formatter }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const motionValue = useMotionValue(0);
   const springValue = useSpring(motionValue, {
@@ -21,13 +27,14 @@ export function AnimatedCounter({ value, className }: { value: number; className
   useEffect(() => {
     const unsubscribe = springValue.on("change", (latest) => {
       if (ref.current) {
-        ref.current.textContent = Intl.NumberFormat("en-US").format(
-          latest.toFixed(0)
-        );
+        const formattedValue = formatter 
+          ? formatter(latest)
+          : new Intl.NumberFormat("en-US").format(latest);
+        ref.current.textContent = formattedValue;
       }
     });
     return unsubscribe;
-  }, [springValue]);
+  }, [springValue, formatter]);
 
   return <span ref={ref} className={className} />;
 }

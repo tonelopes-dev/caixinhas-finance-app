@@ -69,7 +69,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
                 <div className="flex-1">
                     <CardTitle className="font-headline text-3xl">{goal.name}</CardTitle>
                     <CardDescription>
-                        {formatCurrency(goal.currentAmount)} de {formatCurrency(goal.targetAmount)}
+                        <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de {formatCurrency(goal.targetAmount)}
                     </CardDescription>
                 </div>
             </div>
