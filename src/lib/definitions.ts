@@ -33,6 +33,7 @@ export type Goal = {
   emoji: string;
   visibility: 'shared' | 'private';
   participants?: GoalParticipant[];
+  isFeatured?: boolean;
 };
 
 export type User = {

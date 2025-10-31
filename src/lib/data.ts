@@ -74,6 +74,7 @@ export const goals: Goal[] = [
     currentAmount: 15000,
     emoji: '🏡',
     visibility: 'shared',
+    isFeatured: true,
   },
   {
     id: 'goal3',

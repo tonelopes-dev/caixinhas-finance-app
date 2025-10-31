@@ -19,6 +19,19 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
+  
+  const featuredGoals = goals.filter(g => g.isFeatured && g.currentAmount < g.targetAmount);
+  const otherIncompleteGoals = goals.filter(g => !g.isFeatured && g.currentAmount < g.targetAmount);
+
+  // Sort by highest progress percentage
+  otherIncompleteGoals.sort((a, b) => {
+    const progressA = a.currentAmount / a.targetAmount;
+    const progressB = b.currentAmount / b.targetAmount;
+    return progressB - progressA;
+  });
+
+  const goalsToShow = [...featuredGoals, ...otherIncompleteGoals].slice(0, 3);
+
 
   return (
     <Card>
@@ -27,7 +40,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
         <CardDescription>Onde os planos de vocês ganham vida.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        {goals.slice(0, 3).map((goal) => {
+        {goalsToShow.map((goal) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           const participants = goal.participants ?? (goal.visibility === 'shared' ? [user, partner] : [user]);
           return (
@@ -69,7 +82,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
             </Link>
           );
         })}
-         {goals.length === 0 && (
+         {goalsToShow.length === 0 && (
           <p className="text-center text-muted-foreground py-4">Nenhuma caixinha criada ainda. Que tal começar um novo sonho?</p>
         )}
       </CardContent>
