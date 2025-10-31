@@ -43,7 +43,10 @@ const budgetAnalysisPrompt = ai.definePrompt({
   Analyze the user's income, expenses, shared goals, and financial habits to provide actionable insights.
 
   Income: {{income}}
-  Expenses: {{#each (toArray expenses)}}{{key}}: {{value}}\n{{/each}}
+  Expenses:
+  {{#each (toArray expenses)}}
+  - {{this.key}}: {{this.value}}
+  {{/each}}
   Shared Goals:
   {{#each sharedGoals}}
   - Name: {{name}}, Target Amount: {{targetAmount}}, Current Savings: {{currentSavings}}
