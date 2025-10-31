@@ -101,7 +101,7 @@ const getTypeDisplay = (type: Transaction['type']) => {
 export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
-  const [yearFilter, setYearFilter] = useState(currentYear.toString());
+  const [yearFilter, setYearFilter] = useState('all');
 
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter((transaction) => {
