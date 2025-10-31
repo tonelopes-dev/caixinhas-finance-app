@@ -136,6 +136,7 @@ export default function TransactionsPage() {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
+        delayChildren: 1.5,
       },
     },
   };
@@ -187,7 +188,7 @@ export default function TransactionsPage() {
                   <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <motion.div className="grid gap-4 md:grid-cols-3" variants={containerVariants}>
+                  <motion.div className="grid gap-4 md:grid-cols-3" initial="hidden" animate="visible" variants={containerVariants}>
                       <motion.div variants={summaryItemVariants(0.5)} className='flex items-center gap-4 rounded-lg border p-4'>
                           <div className="rounded-full bg-primary/10 p-3">
                               <Wallet className="h-6 w-6 text-primary" />
