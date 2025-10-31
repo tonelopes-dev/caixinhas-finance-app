@@ -24,6 +24,17 @@ const PersonalizedBudgetAnalysisInputSchema = z.object({
 });
 export type PersonalizedBudgetAnalysisInput = z.infer<typeof PersonalizedBudgetAnalysisInputSchema>;
 
+const ProcessedBudgetAnalysisInputSchema = z.object({
+  income: z.number(),
+  expensesJSON: z.string(),
+  sharedGoals: z.array(z.object({
+    name: z.string(),
+    targetAmount: z.number(),
+    currentSavings: z.number(),
+  })),
+  financialHabits: z.string(),
+});
+
 const PersonalizedBudgetAnalysisOutputSchema = z.object({
   analysis: z.string().describe('A personalized analysis of the user\u2019s spending patterns and saving opportunities.'),
   suggestions: z.array(z.string()).describe('A list of suggestions for optimizing savings towards shared goals.'),
@@ -36,14 +47,14 @@ export async function personalizedBudgetAnalysis(input: PersonalizedBudgetAnalys
 
 const budgetAnalysisPrompt = ai.definePrompt({
   name: 'budgetAnalysisPrompt',
-  input: {schema: PersonalizedBudgetAnalysisInputSchema},
+  input: {schema: ProcessedBudgetAnalysisInputSchema},
   output: {schema: PersonalizedBudgetAnalysisOutputSchema},
   prompt: `You are a financial advisor providing personalized budget analysis and savings suggestions for couples.
 
   Analyze the user's income, expenses, shared goals, and financial habits to provide actionable insights.
 
   Income: {{income}}
-  Expenses: {{{JSON.stringify expenses}}}
+  Expenses (as JSON): {{{expensesJSON}}}
   Shared Goals:
   {{#each sharedGoals}}
   - Name: {{name}}, Target Amount: {{targetAmount}}, Current Savings: {{currentSavings}}
@@ -66,7 +77,13 @@ const personalizedBudgetAnalysisFlow = ai.defineFlow(
     outputSchema: PersonalizedBudgetAnalysisOutputSchema,
   },
   async input => {
-    const {output} = await budgetAnalysisPrompt(input);
+    // Convert expenses object to a JSON string before passing to the prompt
+    const processedInput = {
+      ...input,
+      expensesJSON: JSON.stringify(input.expenses, null, 2),
+    };
+
+    const {output} = await budgetAnalysisPrompt(processedInput);
     return output!;
   }
 );
