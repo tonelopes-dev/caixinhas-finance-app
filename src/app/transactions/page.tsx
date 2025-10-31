@@ -152,6 +152,19 @@ export default function TransactionsPage() {
     },
   };
 
+  const summaryItemVariants = (delay: number) => ({
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        ease: 'easeOut',
+        duration: 0.5,
+        delay,
+      },
+    },
+  });
+
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -164,9 +177,9 @@ export default function TransactionsPage() {
         </Button>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
         >
           <Card className="mb-8">
               <CardHeader>
@@ -174,8 +187,8 @@ export default function TransactionsPage() {
                   <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
-                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                  <motion.div className="grid gap-4 md:grid-cols-3" variants={containerVariants}>
+                      <motion.div variants={summaryItemVariants(0.5)} className='flex items-center gap-4 rounded-lg border p-4'>
                           <div className="rounded-full bg-primary/10 p-3">
                               <Wallet className="h-6 w-6 text-primary" />
                           </div>
@@ -183,8 +196,8 @@ export default function TransactionsPage() {
                               <p className="text-sm text-muted-foreground">Saldo Líquido</p>
                               <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
                           </div>
-                      </div>
-                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                      </motion.div>
+                      <motion.div variants={summaryItemVariants(0.6)} className='flex items-center gap-4 rounded-lg border p-4'>
                           <div className="rounded-full bg-green-500/10 p-3">
                               <TrendingUp className="h-6 w-6 text-green-500" />
                           </div>
@@ -192,8 +205,8 @@ export default function TransactionsPage() {
                               <p className="text-sm text-muted-foreground">Entradas</p>
                               <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
                           </div>
-                      </div>
-                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                      </motion.div>
+                      <motion.div variants={summaryItemVariants(0.7)} className='flex items-center gap-4 rounded-lg border p-4'>
                           <div className="rounded-full bg-red-500/10 p-3">
                               <TrendingDown className="h-6 w-6 text-red-500" />
                           </div>
@@ -201,8 +214,8 @@ export default function TransactionsPage() {
                               <p className="text-sm text-muted-foreground">Saídas</p>
                               <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
                           </div>
-                      </div>
-                  </div>
+                      </motion.div>
+                  </motion.div>
               </CardContent>
           </Card>
         </motion.div>
