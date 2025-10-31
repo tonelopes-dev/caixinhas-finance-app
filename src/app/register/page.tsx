@@ -39,7 +39,7 @@ export default function RegisterPage() {
             </div>
             <div className="flex flex-col justify-center bg-background p-8 md:p-12">
                 <Card className="w-full max-w-md border-0 shadow-none">
-                    <CardHeader className="text-center px-0">
+                    <CardHeader className="text-center">
                         <div className="mx-auto mb-4">
                             <Logo className="h-12 w-12" />
                         </div>
@@ -48,7 +48,7 @@ export default function RegisterPage() {
                             Comece a planejar e economizar para seus objetivos compartilhados hoje mesmo.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="grid gap-4 px-0">
+                    <CardContent className="grid gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Seu Nome</Label>
                             <Input id="name" placeholder="Como podemos te chamar?" required />
@@ -65,7 +65,7 @@ export default function RegisterPage() {
                             Criar conta gratuitamente
                         </Button>
                     </CardContent>
-                    <CardFooter className="flex-col items-center justify-center text-sm px-0">
+                    <CardFooter className="flex-col items-center justify-center text-sm">
                         <p className="text-center text-muted-foreground">
                             Ao se cadastrar, você concorda com nossos{' '}
                             <Link href="/terms" className="underline hover:text-primary">
