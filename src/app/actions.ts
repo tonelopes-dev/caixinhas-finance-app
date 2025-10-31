@@ -1,9 +1,10 @@
 "use server";
 
 import { personalizedBudgetAnalysis } from '@/ai/flows/personalized-budget-analysis';
+import { sendEmail } from '@/ai/flows/send-email-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { transactions, goals } from '@/lib/data';
+import { transactions, goals, user } from '@/lib/data';
 import { redirect } from 'next/navigation';
 
 const analysisSchema = z.object({
@@ -52,6 +53,20 @@ const deleteTransactionSchema = z.object({
   id: z.string(),
 });
 
+const registerSchema = z.object({
+    name: z.string().min(1, { message: 'O nome é obrigatório.' }),
+    email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
+    password: z.string().min(8, { message: 'A senha deve ter pelo menos 8 caracteres.' }),
+});
+
+const inviteSchema = z.object({
+  email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
+});
+
+const passwordResetSchema = z.object({
+  email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
+});
+
 
 export type AnalysisState = {
   message?: string | null;
@@ -93,6 +108,16 @@ export type GoalTransactionState = {
     amount?: string[];
   };
 }
+
+export type GenericState = {
+    message?: string | null;
+    errors?: {
+        email?: string[];
+        name?: string[];
+        password?: string[];
+    }
+}
+
 
 export async function analyzeBudget(prevState: AnalysisState, formData: FormData): Promise<AnalysisState> {
   const validatedFields = analysisSchema.safeParse({
@@ -352,4 +377,98 @@ export async function deleteGoal(formData: FormData) {
 
   revalidatePath('/');
   redirect('/');
+}
+
+export async function registerUser(prevState: GenericState, formData: FormData): Promise<GenericState> {
+    const validatedFields = registerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Falha na validação. Por favor, verifique os campos.',
+        };
+    }
+
+    // In a real app, you'd save the user to the database here.
+    console.log('New user registered:', validatedFields.data);
+
+    try {
+        await sendEmail({
+            to: validatedFields.data.email,
+            subject: 'Bem-vindo(a) ao DreamVault!',
+            body: `<h1>Olá, ${validatedFields.data.name}!</h1><p>Sua conta no DreamVault foi criada com sucesso. Comece a planejar seus sonhos hoje mesmo!</p>`
+        });
+    } catch (error) {
+        console.error("Email sending failed:", error);
+        // We don't block registration if email fails, but we could log it.
+    }
+
+    // This would typically redirect to the login page or the dashboard
+    redirect('/login');
+}
+
+
+export async function sendPartnerInvite(prevState: GenericState, formData: FormData): Promise<GenericState> {
+    const validatedFields = inviteSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Falha na validação.',
+        };
+    }
+    
+    try {
+        await sendEmail({
+            to: validatedFields.data.email,
+            subject: `Você foi convidado(a) para o DreamVault por ${user.name}!`,
+            body: `<h1>Convite para o DreamVault</h1><p>${user.name} te convidou para planejarem seus sonhos juntos. Clique no link para aceitar: [link de convite aqui]</p>`
+        });
+        return { message: 'Convite enviado com sucesso!' };
+    } catch (error) {
+        console.error("Email sending failed:", error);
+        return { message: 'Ocorreu um erro ao enviar o convite. Tente novamente.' };
+    }
+}
+
+
+export async function sendGoalInvite(email: string, goalName: string): Promise<{message: string}> {
+    if(!email) return { message: 'E-mail inválido.'};
+    
+    try {
+        await sendEmail({
+            to: email,
+            subject: `Você foi convidado(a) para a caixinha "${goalName}"`,
+            body: `<h1>Convite para Caixinha</h1><p>${user.name} te convidou para participar da caixinha "${goalName}".`
+        });
+        return { message: 'Convite enviado com sucesso!' };
+    } catch (error) {
+        console.error("Email sending failed:", error);
+        return { message: 'Ocorreu um erro ao enviar o convite. Tente novamente.' };
+    }
+}
+
+
+export async function sendPasswordReset(prevState: GenericState, formData: FormData): Promise<GenericState> {
+    const validatedFields = passwordResetSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Falha na validação.',
+        };
+    }
+
+    try {
+        await sendEmail({
+            to: validatedFields.data.email,
+            subject: 'Redefinição de Senha - DreamVault',
+            body: `<h1>Redefinição de Senha</h1><p>Recebemos uma solicitação para redefinir sua senha. Clique no link para criar uma nova senha: [link de redefinição aqui]</p>`
+        });
+        return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
+    } catch (error) {
+        console.error("Email sending failed:", error);
+        // Don't reveal if the email exists or not
+        return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
+    }
 }

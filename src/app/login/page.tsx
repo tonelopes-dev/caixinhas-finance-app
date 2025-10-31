@@ -1,5 +1,7 @@
 'use client';
 
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { sendPasswordReset, type GenericState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,6 +16,67 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { useFormStatus } from 'react-dom';
+
+
+function ResetPasswordDialog() {
+    const initialState: GenericState = {};
+    const [state, dispatch] = useActionState(sendPasswordReset, initialState);
+    const { toast } = useToast();
+    const formRef = useRef<HTMLFormElement>(null);
+    const [open, setOpen] = useState(false);
+    const { pending } = useFormStatus();
+
+    useEffect(() => {
+        if(state.message) {
+            toast({ title: "Redefinição de Senha", description: state.message });
+            setOpen(false);
+            formRef.current?.reset();
+        }
+    }, [state, toast]);
+    
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                 <Link href="#" className="ml-auto inline-block text-sm underline">
+                    Esqueceu sua senha?
+                </Link>
+            </DialogTrigger>
+            <DialogContent>
+                <form action={dispatch} ref={formRef}>
+                    <DialogHeader>
+                        <DialogTitle>Redefinir Senha</DialogTitle>
+                        <DialogDescription>
+                            Digite seu e-mail para enviarmos um link de redefinição de senha.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email-reset">E-mail</Label>
+                            <Input
+                                id="email-reset"
+                                name="email"
+                                type="email"
+                                placeholder="nome@example.com"
+                                required
+                            />
+                            {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="ghost">Cancelar</Button>
+                        </DialogClose>
+                        <Button type="submit" disabled={pending}>{pending ? 'Enviando...' : 'Enviar Link'}</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -67,9 +130,7 @@ export default function LoginPage() {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Senha</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Esqueceu sua senha?
-              </Link>
+              <ResetPasswordDialog />
             </div>
             <Input id="password" type="password" required />
           </div>

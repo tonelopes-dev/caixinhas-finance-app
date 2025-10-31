@@ -15,9 +15,36 @@ import { Logo } from '@/components/logo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useActionState, useEffect } from 'react';
+import { registerUser, type GenericState } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+import { useFormStatus } from 'react-dom';
+
+
+function SubmitButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={pending}>
+            {pending ? 'Criando conta...' : 'Criar conta gratuitamente'}
+        </Button>
+    )
+}
 
 export default function RegisterPage() {
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
+    const initialState: GenericState = {};
+    const [state, dispatch] = useActionState(registerUser, initialState);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if(state?.message && state?.errors) {
+            toast({
+                title: "Erro de Validação",
+                description: state.message,
+                variant: 'destructive',
+            })
+        }
+    }, [state, toast]);
     
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-card p-4">
@@ -39,46 +66,49 @@ export default function RegisterPage() {
             </div>
             <div className="flex flex-col justify-center bg-background p-8 md:p-12">
                 <Card className="w-full max-w-md border-0 shadow-none">
-                    <CardHeader className="text-center">
-                        <div className="mx-auto mb-4">
-                            <Logo className="h-12 w-12" />
-                        </div>
-                        <CardTitle className="text-3xl font-headline">Realize seus sonhos em casal.</CardTitle>
-                        <CardDescription className="text-base">
-                            Comece a planejar e economizar para seus objetivos compartilhados hoje mesmo.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Seu Nome</Label>
-                            <Input id="name" placeholder="Como podemos te chamar?" required />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">E-mail</Label>
-                            <Input id="email" type="email" placeholder="seu.melhor@email.com" required />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Crie uma Senha</Label>
-                            <Input id="password" type="password" placeholder="Pelo menos 8 caracteres" required />
-                        </div>
-                        <Button type="submit" className="w-full mt-4 py-6 text-lg">
-                            Criar conta gratuitamente
-                        </Button>
-                    </CardContent>
-                    <CardFooter className="flex-col items-center justify-center text-sm">
-                        <p className="text-center text-muted-foreground">
-                            Ao se cadastrar, você concorda com nossos{' '}
-                            <Link href="/terms" className="underline hover:text-primary">
-                                Termos de Serviço
-                            </Link>.
-                        </p>
-                        <p className="mt-4">
-                            Já tem uma conta?{' '}
-                            <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
-                                Faça Login
-                            </Link>
-                        </p>
-                    </CardFooter>
+                    <form action={dispatch}>
+                        <CardHeader className="text-center px-0">
+                            <div className="mx-auto mb-4">
+                                <Logo className="h-12 w-12" />
+                            </div>
+                            <CardTitle className="text-3xl font-headline">Realize seus sonhos em casal.</CardTitle>
+                            <CardDescription className="text-base">
+                                Comece a planejar e economizar para seus objetivos compartilhados hoje mesmo.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4 px-0">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Seu Nome</Label>
+                                <Input id="name" name="name" placeholder="Como podemos te chamar?" required />
+                                 {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">E-mail</Label>
+                                <Input id="email" name="email" type="email" placeholder="seu.melhor@email.com" required />
+                                {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="password">Crie uma Senha</Label>
+                                <Input id="password" name="password" type="password" placeholder="Pelo menos 8 caracteres" required />
+                                {state?.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
+                            </div>
+                            <SubmitButton />
+                        </CardContent>
+                        <CardFooter className="flex-col items-center justify-center text-sm px-0">
+                            <p className="text-center text-muted-foreground">
+                                Ao se cadastrar, você concorda com nossos{' '}
+                                <Link href="/terms" className="underline hover:text-primary">
+                                    Termos de Serviço
+                                </Link>.
+                            </p>
+                            <p className="mt-4">
+                                Já tem uma conta?{' '}
+                                <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+                                    Faça Login
+                                </Link>
+                            </p>
+                        </CardFooter>
+                    </form>
                 </Card>
             </div>
         </div>
