@@ -3,9 +3,6 @@ import { notFound } from 'next/navigation';
 import {
   ArrowLeft,
   Settings,
-  ArrowDown,
-  ArrowUp,
-  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +15,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { goals } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 
 const goalActivity = [
     {
@@ -100,14 +98,8 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
           </CardHeader>
           <CardContent>
             <div className="flex gap-2 my-4">
-                <Button className="flex-1">
-                    <ArrowDown className="mr-2 h-4 w-4" />
-                    Guardar Dinheiro
-                </Button>
-                 <Button className="flex-1" variant="secondary">
-                    <ArrowUp className="mr-2 h-4 w-4" />
-                    Retirar Dinheiro
-                </Button>
+                <GoalTransactionDialog type="deposit" goalId={goal.id} />
+                <GoalTransactionDialog type="withdrawal" goalId={goal.id} />
             </div>
 
             <h3 className="font-headline text-xl font-semibold mt-8 mb-4">Histórico de Atividades</h3>

@@ -23,6 +23,13 @@ const goalSchema = z.object({
   targetAmount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
 });
 
+const goalTransactionSchema = z.object({
+  amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
+  type: z.enum(['deposit', 'withdrawal']),
+  goalId: z.string(),
+});
+
+
 export type AnalysisState = {
   message?: string | null;
   analysis?: string;
@@ -48,6 +55,13 @@ export type GoalState = {
     name?: string[];
     emoji?: string[];
     targetAmount?: string[];
+  };
+}
+
+export type GoalTransactionState = {
+  message?: string | null;
+  errors?: {
+    amount?: string[];
   };
 }
 
@@ -118,6 +132,11 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   }
   
   // NOTE: This is mock data. In a real application, you would save this to a database.
+  transactions.push({
+    id: (transactions.length + 1).toString(),
+    date: new Date().toISOString().split('T')[0],
+    ...validatedFields.data
+  })
   console.log('New transaction added:', validatedFields.data);
 
   revalidatePath('/');
@@ -140,8 +159,48 @@ export async function addGoal(prevState: GoalState, formData: FormData): Promise
   }
 
   // NOTE: This is mock data. In a real application, you would save this to a database.
+  goals.push({
+    id: (goals.length + 1).toString(),
+    currentAmount: 0,
+    ...validatedFields.data
+  })
   console.log('New goal added:', validatedFields.data);
   
   revalidatePath('/');
   redirect('/');
+}
+
+export async function goalTransaction(prevState: GoalTransactionState, formData: FormData): Promise<GoalTransactionState> {
+  const validatedFields = goalTransactionSchema.safeParse({
+    amount: formData.get('amount'),
+    type: formData.get('type'),
+    goalId: formData.get('goalId'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+  
+  // NOTE: This is mock data. In a real application, you would save this to a database.
+  console.log('Goal transaction:', validatedFields.data);
+  const { amount, type, goalId } = validatedFields.data;
+
+  const goal = goals.find(g => g.id === goalId);
+
+  if (goal) {
+    if (type === 'deposit') {
+      goal.currentAmount += amount;
+    } else {
+      goal.currentAmount = Math.max(0, goal.currentAmount - amount);
+    }
+  }
+
+  revalidatePath(`/goals/${goalId}`);
+  revalidatePath(`/`);
+
+
+  return { message: 'Transação na caixinha realizada com sucesso!' };
 }
