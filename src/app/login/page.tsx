@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useFormStatus } from 'react-dom';
 
