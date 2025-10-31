@@ -142,15 +142,13 @@ export function CategoriesManagement() {
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {expenseCategories.map((category) => (
-            <div key={category} className="group relative">
-                <Badge variant="outline" className="py-2 pl-3 pr-8 text-sm">
-                    {category}
-                </Badge>
-                 <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Badge key={category} variant="outline" className="group flex items-center gap-2 py-1.5 pl-3 pr-1 text-sm">
+                <span>{category}</span>
+                 <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <EditCategoryDialog category={category} />
                     <DeleteCategoryDialog category={category} />
                 </div>
-            </div>
+            </Badge>
           ))}
         </div>
       </CardContent>
