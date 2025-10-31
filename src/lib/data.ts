@@ -119,6 +119,15 @@ export const transactions: Transaction[] = [
     { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
     { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Outros', sourceAccountId: 'acc1', paymentMethod: 'cash' },
     { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1' },
+    { id: '12', date: '2024-07-18', description: 'Rendimento Freelance', amount: 800, type: 'income', category: 'Freelance', destinationAccountId: 'acc1' },
+    { id: '13', date: '2024-07-17', description: 'Assinatura Streaming', amount: 45.90, type: 'expense', category: 'Utilidades', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
+    { id: '14', date: '2024-07-16', description: 'Farmácia', amount: 75.20, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card' },
+    { id: '15', date: '2024-07-15', description: 'Depósito Caixinha Casamento', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal7' },
+    { id: '16', date: '2024-07-10', description: 'Compra Online (Roupas)', amount: 250, type: 'expense', category: 'Roupas', sourceAccountId: 'acc1', paymentMethod: 'pix' },
+    { id: '17', date: '2024-07-05', description: 'Mensalidade Academia', amount: 120, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card' },
+    { id: '18', date: '2024-06-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1' },
+    { id: '19', date: '2024-06-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2' },
+    { id: '20', date: '2024-06-25', description: 'Aluguel', amount: 1500, type: 'expense', category: 'Casa', sourceAccountId: 'acc2', paymentMethod: 'transfer' },
 ];
 
 
