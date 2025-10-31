@@ -225,7 +225,7 @@ export default function TransactionsPage() {
                   <TableHead>Transação</TableHead>
                   <TableHead className="hidden md:table-cell">Categoria</TableHead>
                   <TableHead className="hidden lg:table-cell">Contas</TableHead>
-                  <TableHead className="hidden sm:table-cell">Data</TableHead>
+                  <TableHead>Data</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
                 </TableRow>
               </TableHeader>
@@ -272,7 +272,7 @@ export default function TransactionsPage() {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell className="hidden sm:table-cell">{formatDate(t.date)}</TableCell>
+                            <TableCell>{formatDate(t.date)}</TableCell>
                             <TableCell className={cn("text-right font-medium", {
                                 'text-green-600': t.type === 'income',
                                 'text-foreground': t.type === 'expense',
