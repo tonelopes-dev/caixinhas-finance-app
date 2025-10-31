@@ -39,6 +39,8 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
   if (!goal) {
     notFound();
   }
+  
+  const allParticipants = [user, partner, ...(goal.participants || [])];
 
   const goalActivity = transactions.filter(t => t.type === 'transfer' && (t.sourceAccountId === goal.id || t.destinationAccountId === goal.id)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -89,7 +91,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             <div className="space-y-4">
                 {goalActivity.map(activity => {
                     const isDeposit = activity.destinationAccountId === goal.id;
-                    const actor = activity.actor === 'partner' ? partner : user;
+                    const actor = allParticipants.find(p => p.id === activity.actor) || user;
                     return (
                         <div key={activity.id} className="flex items-center gap-4">
                             <Avatar className="h-9 w-9">

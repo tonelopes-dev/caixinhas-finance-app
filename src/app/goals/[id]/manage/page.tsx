@@ -70,7 +70,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                 >
                   <Label
                     className={cn(
-                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground',
+                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                       visibility === 'shared' && 'border-primary'
                     )}
                   >
@@ -85,7 +85,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                   </Label>
                   <Label
                     className={cn(
-                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground',
+                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                       visibility === 'private' && 'border-primary'
                     )}
                   >

@@ -1,5 +1,4 @@
 
-
 import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -57,15 +56,9 @@ export const goals: Goal[] = [
     visibility: 'private',
     participants: [
         { id: 'user', name: 'Você', avatarUrl: user.avatarUrl, role: 'owner' },
+        { id: 'partner', name: 'Parceiro(a)', avatarUrl: partner.avatarUrl, role: 'member' },
         { id: 'p1', name: 'Beatriz', avatarUrl: 'https://picsum.photos/seed/101/100', role: 'member' },
         { id: 'p2', name: 'Carlos', avatarUrl: 'https://picsum.photos/seed/102/100', role: 'member' },
-        { id: 'p3', name: 'Daniela', avatarUrl: 'https://picsum.photos/seed/103/100', role: 'member' },
-        { id: 'p4', name: 'Eduardo', avatarUrl: 'https://picsum.photos/seed/104/100', role: 'member' },
-        { id: 'p5', name: 'Fernanda', avatarUrl: 'https://picsum.photos/seed/105/100', role: 'member' },
-        { id: 'p6', name: 'Gabriel', avatarUrl: 'https://picsum.photos/seed/106/100', role: 'member' },
-        { id: 'p7', name: 'Heloísa', avatarUrl: 'https://picsum.photos/seed/107/100', role: 'member' },
-        { id: 'p8', name: 'Igor', avatarUrl: 'https://picsum.photos/seed/108/100', role: 'member' },
-        { id: 'p9', name: 'Juliana', avatarUrl: 'https://picsum.photos/seed/109/100', role: 'member' },
     ]
   },
   {
@@ -139,7 +132,13 @@ export const transactions: Transaction[] = [
     { id: '15', date: '2024-07-15', description: 'Depósito Caixinha Casamento', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal7', actor: 'user' },
     { id: '16', date: '2024-07-10', description: 'Compra Online (Roupas)', amount: 250, type: 'expense', category: 'Roupas', sourceAccountId: 'acc1', paymentMethod: 'pix', actor: 'user' },
     { id: '17', date: '2024-07-05', description: 'Mensalidade Academia', amount: 120, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card', actor: 'partner' },
-    
+    { id: 't-europa-2', date: '2024-07-01', description: 'Bônus de Férias', amount: 2000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
+    { id: 't-europa-3', date: '2024-06-15', description: 'Contribuição da viagem', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal1', actor: 'partner'},
+    { id: 't-europa-4', date: '2024-06-01', description: 'Economias do mês', amount: 1500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
+    { id: 't-europa-5', date: '2024-05-15', description: 'Venda de itens', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal1', actor: 'partner'},
+    { id: 't-europa-6', date: '2024-05-01', description: 'Primeiro depósito', amount: 2000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
+
+
     // June
     { id: '18', date: '2024-06-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actor: 'user' },
     { id: '19', date: '2024-06-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actor: 'partner' },
