@@ -1,10 +1,20 @@
+export type Account = {
+  id: string;
+  name: string;
+  bank: string;
+  type: 'checking' | 'savings' | 'investment' | 'other';
+};
+
 export type Transaction = {
   id: string;
   date: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'transfer';
   category: string;
+  paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash';
+  sourceAccountId?: string;
+  destinationAccountId?: string;
 };
 
 export type GoalParticipant = {

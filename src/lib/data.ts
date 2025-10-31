@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Partner, Invitation, Guest } from './definitions';
+import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const user: User = {
@@ -27,9 +27,15 @@ export const guests: Guest[] = [
     }
 ];
 
+export const accounts: Account[] = [
+  { id: 'acc1', name: 'Conta Principal', bank: 'Banco Digital', type: 'checking' },
+  { id: 'acc2', name: 'Poupança Conjunta', bank: 'Banco Tradicional', type: 'savings' },
+  { id: 'acc3', name: 'Carteira', bank: 'Dinheiro Físico', type: 'other' },
+];
+
 export const goals: Goal[] = [
   {
-    id: '1',
+    id: 'goal1',
     name: 'Viagem para a Europa',
     targetAmount: 20000,
     currentAmount: 7500,
@@ -49,7 +55,7 @@ export const goals: Goal[] = [
     ]
   },
   {
-    id: '2',
+    id: 'goal2',
     name: 'Apartamento Novo',
     targetAmount: 50000,
     currentAmount: 15000,
@@ -57,7 +63,7 @@ export const goals: Goal[] = [
     visibility: 'shared',
   },
   {
-    id: '3',
+    id: 'goal3',
     name: 'Fundo de Emergência',
     targetAmount: 10000,
     currentAmount: 9500,
@@ -65,7 +71,7 @@ export const goals: Goal[] = [
     visibility: 'private',
   },
   {
-    id: '4',
+    id: 'goal4',
     name: 'Videogame Novo',
     targetAmount: 3500,
     currentAmount: 3450,
@@ -73,7 +79,7 @@ export const goals: Goal[] = [
     visibility: 'private',
   },
   {
-    id: '5',
+    id: 'goal5',
     name: 'Carro Elétrico',
     targetAmount: 250000,
     currentAmount: 2500,
@@ -81,7 +87,7 @@ export const goals: Goal[] = [
     visibility: 'shared',
   },
   {
-    id: '6',
+    id: 'goal6',
     name: 'Presente Surpresa',
     targetAmount: 800,
     currentAmount: 800,
@@ -89,7 +95,7 @@ export const goals: Goal[] = [
     visibility: 'private',
   },
   {
-    id: '7',
+    id: 'goal7',
     name: 'Festa de Casamento',
     targetAmount: 30000,
     currentAmount: 12000,
@@ -98,15 +104,21 @@ export const goals: Goal[] = [
   },
 ];
 
+
 export const transactions: Transaction[] = [
-    { id: '1', date: '2024-07-25', description: 'Salário', amount: 3000, type: 'income', category: 'Salário' },
-    { id: '2', date: '2024-07-25', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário' },
-    { id: '3', date: '2024-07-24', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação' },
-    { id: '4', date: '2024-07-23', description: 'Conta de Luz', amount: 150.00, type: 'expense', category: 'Casa' },
-    { id: '5', date: '2024-07-22', description: 'Cinema', amount: 80.00, type: 'expense', category: 'Lazer' },
-    { id: '6', date: '2024-07-21', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte' },
-    { id: '7', date: '2024-07-20', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer' },
+    { id: '1', date: '2024-07-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1' },
+    { id: '2', date: '2024-07-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2' },
+    { id: '3', date: '2024-07-27', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'credit_card' },
+    { id: '4', date: '2024-07-26', description: 'Conta de Luz', amount: 150.00, type: 'expense', category: 'Casa', sourceAccountId: 'acc1', paymentMethod: 'boleto' },
+    { id: '5', date: '2024-07-25', description: 'Cinema', amount: 80.00, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'debit_card' },
+    { id: '6', date: '2024-07-24', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'pix' },
+    { id: '7', date: '2024-07-23', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
+    { id: '8', date: '2024-07-22', description: 'Depósito Caixinha Europa', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1' },
+    { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
+    { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Saques', sourceAccountId: 'acc1', paymentMethod: 'cash' },
+    { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1' },
 ];
+
 
 export const invitations: Invitation[] = [
   {

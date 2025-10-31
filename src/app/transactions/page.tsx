@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ListFilter } from 'lucide-react';
-import { transactions as allTransactions } from '@/lib/data';
+import { ArrowLeft, ListFilter, ArrowRight, ArrowDown, Banknote, Landmark, CreditCard, PiggyBank, Briefcase } from 'lucide-react';
+import { transactions as allTransactions, accounts, goals } from '@/lib/data';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { Transaction } from '@/lib/definitions';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -54,12 +56,39 @@ const months = [
     { value: '5', label: 'Maio' },
     { value: '6', label: 'Junho' },
     { value: '7', label: 'Julho' },
-    { value: '8', label: 'Agosto' },
+    { value: '8', 'label': 'Agosto' },
     { value: '9', label: 'Setembro' },
     { value: '10', label: 'Outubro' },
     { value: '11', label: 'Novembro' },
     { value: '12', label: 'Dezembro' },
 ];
+
+const paymentMethods: Record<string, { label: string, icon: React.ElementType }> = {
+    pix: { label: 'Pix', icon: ArrowRight },
+    credit_card: { label: 'Crédito', icon: CreditCard },
+    debit_card: { label: 'Débito', icon: CreditCard },
+    transfer: { label: 'Transferência', icon: ArrowRight },
+    boleto: { label: 'Boleto', icon: Banknote },
+    cash: { label: 'Dinheiro', icon: Banknote },
+}
+
+const getAccountName = (id: string) => {
+    if (id.startsWith('goal')) {
+        const goal = goals.find(g => g.id === id);
+        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
+    }
+    const account = accounts.find(a => a.id === id);
+    return account ? account.name : 'Conta desconhecida';
+}
+
+const getTypeDisplay = (type: Transaction['type']) => {
+    switch (type) {
+        case 'income': return { label: 'Entrada', icon: TrendingUp, color: 'text-green-500' };
+        case 'expense': return { label: 'Saída', icon: TrendingDown, color: 'text-red-500' };
+        case 'transfer': return { label: 'Transferência', icon: ArrowRight, color: 'text-blue-500' };
+    }
+}
+
 
 export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
@@ -93,7 +122,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-6xl">
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -163,6 +192,7 @@ export default function TransactionsPage() {
                     <SelectItem value="all">Todos os Tipos</SelectItem>
                     <SelectItem value="income">Entradas</SelectItem>
                     <SelectItem value="expense">Saídas</SelectItem>
+                    <SelectItem value="transfer">Transferências</SelectItem>
                   </SelectContent>
                 </Select>
                  <Select value={monthFilter} onValueChange={setMonthFilter}>
@@ -192,44 +222,72 @@ export default function TransactionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Data</TableHead>
+                  <TableHead>Transação</TableHead>
+                  <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                  <TableHead className="hidden lg:table-cell">Contas</TableHead>
+                  <TableHead className="hidden sm:table-cell">Data</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>
-                      <div className="font-medium">{transaction.description}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          transaction.type === 'income' ? 'secondary' : 'outline'
-                        }
-                      >
-                        {transaction.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(transaction.date)}</TableCell>
-                    <TableCell
-                      className={`text-right font-medium ${
-                        transaction.type === 'income'
-                          ? 'text-green-600'
-                          : 'text-foreground'
-                      }`}
-                    >
-                      {transaction.type === 'income' ? '+' : '-'}{' '}
-                      {formatCurrency(transaction.amount)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredTransactions.map((t) => {
+                    const typeInfo = getTypeDisplay(t.type);
+                    const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
+                    const isTransferToGoal = t.type === 'transfer' && t.destinationAccountId?.startsWith('goal');
+
+                    return (
+                        <TableRow key={t.id}>
+                            <TableCell>
+                                <div className='flex items-center gap-3'>
+                                    <div className={cn("p-2 rounded-full bg-muted", typeInfo.color)}>
+                                        <typeInfo.icon className="h-4 w-4 text-white"/>
+                                    </div>
+                                    <div className='flex-1'>
+                                        <p className="font-medium">{t.description}</p>
+                                        <div className='flex items-center gap-2 text-muted-foreground text-xs'>
+                                            {MethodIcon && (
+                                                <div className='flex items-center gap-1'>
+                                                    <MethodIcon className="h-3 w-3" />
+                                                    <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                                <Badge variant="outline">{t.category}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell text-xs">
+                                {t.sourceAccountId && (
+                                    <div className='flex items-center gap-1 text-muted-foreground'>
+                                        <Landmark className="h-3 w-3 text-red-500" />
+                                        <span>{getAccountName(t.sourceAccountId)}</span>
+                                    </div>
+                                )}
+                                {t.destinationAccountId && (
+                                     <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                                        {t.destinationAccountId.startsWith('goal') ? <PiggyBank className="h-3 w-3 text-green-500"/> : <Landmark className="h-3 w-3 text-green-500" />}
+                                        <span>{getAccountName(t.destinationAccountId)}</span>
+                                    </div>
+                                )}
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">{formatDate(t.date)}</TableCell>
+                            <TableCell className={cn("text-right font-medium", {
+                                'text-green-600': t.type === 'income',
+                                'text-foreground': t.type === 'expense',
+                                'text-muted-foreground': t.type === 'transfer'
+                            })}>
+                                {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                                {formatCurrency(t.amount)}
+                            </TableCell>
+                        </TableRow>
+                    )
+                })}
                 {filteredTransactions.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="py-8 text-center text-muted-foreground"
                     >
                       Nenhuma transação encontrada para os filtros selecionados.
