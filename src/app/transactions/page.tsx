@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ListFilter, ArrowRight, ArrowDown, Banknote, Landmark, CreditCard, PiggyBank, Briefcase, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { transactions as allTransactions, accounts, goals } from '@/lib/data';
 import { useMemo, useState } from 'react';
 
@@ -36,11 +36,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { TrendingDown, TrendingUp, Wallet, Landmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/lib/definitions';
 import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
+import { motion } from 'framer-motion';
+
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -127,6 +129,29 @@ export default function TransactionsPage() {
     const balance = income - expenses;
     return { income, expenses, balance };
   }, [filteredTransactions]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        ease: 'easeOut',
+        duration: 0.5,
+      },
+    },
+  };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -238,14 +263,17 @@ export default function TransactionsPage() {
                    <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <motion.tbody
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 {filteredTransactions.map((t) => {
                     const typeInfo = getTypeDisplay(t.type);
                     const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
-                    const isTransferToGoal = t.type === 'transfer' && t.destinationAccountId?.startsWith('goal');
 
                     return (
-                        <TableRow key={t.id}>
+                        <motion.tr variants={itemVariants} key={t.id}>
                             <TableCell>
                                 <div className='flex items-center gap-3'>
                                     <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
@@ -303,7 +331,7 @@ export default function TransactionsPage() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
-                        </TableRow>
+                        </motion.tr>
                     )
                 })}
                 {filteredTransactions.length === 0 && (
@@ -316,7 +344,7 @@ export default function TransactionsPage() {
                     </TableCell>
                   </TableRow>
                 )}
-              </TableBody>
+              </motion.tbody>
             </Table>
           </CardContent>
         </Card>
