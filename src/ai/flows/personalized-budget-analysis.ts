@@ -13,7 +13,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const PersonalizedBudgetAnalysisInputSchema = z.object({
-  income: z.number().describe('The user\u2019s monthly income.'),
+  income: z.number().describe('The user’s monthly income.'),
   expenses: z.record(z.string(), z.number()).describe('A record of the user\u2019s monthly expenses, with categories as keys and amounts as values.'),
   sharedGoals: z.array(z.object({
     name: z.string().describe('The name of the shared goal.'),
@@ -43,10 +43,7 @@ const budgetAnalysisPrompt = ai.definePrompt({
   Analyze the user's income, expenses, shared goals, and financial habits to provide actionable insights.
 
   Income: {{income}}
-  Expenses:
-  {{#each (toArray expenses)}}
-  - {{this.key}}: {{this.value}}
-  {{/each}}
+  Expenses: {{{JSON.stringify expenses}}}
   Shared Goals:
   {{#each sharedGoals}}
   - Name: {{name}}, Target Amount: {{targetAmount}}, Current Savings: {{currentSavings}}
@@ -58,7 +55,7 @@ const budgetAnalysisPrompt = ai.definePrompt({
   The analysis should include specific areas where they can cut expenses or increase savings.
 
   The suggestions should be practical and tailored to their financial situation and habits.
-  Consider that expenses is a key value pair of category and amount, and that sharedGoals is an array of objects containing the name, targetAmount and currentSavings.
+  The 'expenses' data is a JSON object where keys are categories and values are the amounts.
 `,
 });
 
