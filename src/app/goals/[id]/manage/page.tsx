@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Trash2, UserPlus, X } from 'lucide-react';
+import { ArrowLeft, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,12 +8,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from '@/components/ui/card';
 import { goals, user, partner } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
+import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 
 export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const goal = goals.find((g) => g.id === params.id);
@@ -74,10 +74,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
             <div>
                  <h3 className="font-semibold text-destructive">Zona de Perigo</h3>
                  <p className="text-sm text-muted-foreground mt-1 mb-4">Ações nesta seção são permanentes e não podem ser desfeitas.</p>
-                 <Button variant="destructive" className="w-full">
-                     <Trash2 className="mr-2 h-4 w-4" />
-                     Excluir Caixinha
-                </Button>
+                 <DeleteGoalDialog goalId={goal.id} goalName={goal.name} />
             </div>
 
           </CardContent>

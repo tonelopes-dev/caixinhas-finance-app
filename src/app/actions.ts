@@ -29,6 +29,10 @@ const goalTransactionSchema = z.object({
   goalId: z.string(),
 });
 
+const deleteGoalSchema = z.object({
+  id: z.string(),
+});
+
 
 export type AnalysisState = {
   message?: string | null;
@@ -203,4 +207,28 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
 
 
   return { message: 'Transação na caixinha realizada com sucesso!' };
+}
+
+export async function deleteGoal(formData: FormData) {
+  const validatedFields = deleteGoalSchema.safeParse({
+    id: formData.get('id'),
+  });
+
+  if (!validatedFields.success) {
+    // Handle error - maybe return a message
+    return {
+      message: 'ID da caixinha inválido.',
+    };
+  }
+
+  const { id } = validatedFields.data;
+  const index = goals.findIndex(g => g.id === id);
+
+  if (index > -1) {
+    goals.splice(index, 1);
+    console.log(`Goal with id ${id} deleted.`);
+  }
+
+  revalidatePath('/');
+  redirect('/');
 }
