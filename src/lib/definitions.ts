@@ -13,6 +13,7 @@ export type Goal = {
   targetAmount: number;
   currentAmount: number;
   emoji: string;
+  visibility: 'shared' | 'private';
 };
 
 export type User = {

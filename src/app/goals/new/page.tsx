@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, PiggyBank } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft, Lock, PiggyBank, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -31,6 +33,7 @@ export default function NewGoalPage() {
   const initialState: GoalState = {};
   const [state, dispatch] = useFormState(addGoal, initialState);
   const { toast } = useToast();
+  const [visibility, setVisibility] = useState('shared');
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -59,10 +62,10 @@ export default function NewGoalPage() {
                 Criar Nova Caixinha
               </CardTitle>
               <CardDescription>
-                Defina um novo objetivo para vocês economizarem juntos.
+                Defina um novo objetivo para vocês economizarem juntos ou um objetivo pessoal.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4">
+            <CardContent className="grid gap-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome do Sonho</Label>
                 <Input
@@ -93,6 +96,30 @@ export default function NewGoalPage() {
                 />
                 {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
               </div>
+
+               <div className="space-y-3">
+                <Label>Visibilidade</Label>
+                 <RadioGroup name="visibility" defaultValue="shared" className="grid grid-cols-2 gap-4" onValueChange={setVisibility}>
+                    <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground", visibility === 'shared' && "border-primary")}>
+                      <RadioGroupItem value="shared" id="shared" className="sr-only" />
+                      <Users className="mb-3 h-6 w-6" />
+                      Compartilhada
+                    </Label>
+                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground", visibility === 'private' && "border-primary")}>
+                      <RadioGroupItem value="private" id="private" className="sr-only" />
+                      <Lock className="mb-3 h-6 w-6" />
+                      Privada
+                    </Label>
+                </RadioGroup>
+                <p className="text-sm text-muted-foreground">
+                  {visibility === 'shared' 
+                    ? 'Todos os membros do cofre podem ver e contribuir.' 
+                    : 'Apenas você poderá ver e gerenciar esta caixinha.'}
+                </p>
+                 {state?.errors?.visibility && <p className="text-sm font-medium text-destructive">{state.errors.visibility[0]}</p>}
+              </div>
+
+
             </CardContent>
             <CardFooter>
               <SubmitButton />

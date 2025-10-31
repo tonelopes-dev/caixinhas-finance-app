@@ -21,6 +21,7 @@ const goalSchema = z.object({
   name: z.string().min(1, { message: 'O nome é obrigatório.' }),
   emoji: z.string().min(1, { message: 'O emoji é obrigatório.' }),
   targetAmount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
+  visibility: z.enum(['shared', 'private'], { required_error: 'A visibilidade é obrigatória.' }),
 });
 
 const goalTransactionSchema = z.object({
@@ -59,6 +60,7 @@ export type GoalState = {
     name?: string[];
     emoji?: string[];
     targetAmount?: string[];
+    visibility?: string[];
   };
 }
 
@@ -153,6 +155,7 @@ export async function addGoal(prevState: GoalState, formData: FormData): Promise
     name: formData.get('name'),
     emoji: formData.get('emoji'),
     targetAmount: formData.get('targetAmount'),
+    visibility: formData.get('visibility'),
   });
 
   if (!validatedFields.success) {

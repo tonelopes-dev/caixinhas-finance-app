@@ -34,6 +34,7 @@ export const goals: Goal[] = [
     targetAmount: 20000,
     currentAmount: 7500,
     emoji: '✈️',
+    visibility: 'shared',
   },
   {
     id: '2',
@@ -41,6 +42,7 @@ export const goals: Goal[] = [
     targetAmount: 50000,
     currentAmount: 15000,
     emoji: '🏡',
+    visibility: 'shared',
   },
   {
     id: '3',
@@ -48,6 +50,7 @@ export const goals: Goal[] = [
     targetAmount: 10000,
     currentAmount: 9500,
     emoji: '🛡️',
+    visibility: 'private',
   },
 ];
 
