@@ -73,9 +73,11 @@ export default function Header({ user, partner }: HeaderProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
-              Sair
+                Sair
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
