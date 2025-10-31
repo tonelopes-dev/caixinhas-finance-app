@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,8 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowLeft, Bell, Check, X } from 'lucide-react';
+import { ArrowLeft, Bell, Check } from 'lucide-react';
 import { invitations } from '@/lib/data';
+import { DeclineInvitationDialog } from '@/components/invitations/decline-invitation-dialog';
 
 export default function InvitationsPage() {
   return (
@@ -43,10 +46,7 @@ export default function InvitationsPage() {
                     <Check className="h-4 w-4" />
                     <span className="sr-only">Aceitar</span>
                   </Button>
-                  <Button variant="destructive" size="icon">
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Recusar</span>
-                  </Button>
+                  <DeclineInvitationDialog invitation={invitation} />
                 </div>
               </div>
             ))}
