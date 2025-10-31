@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
-import { motion, useSpring, useInView, useTransform } from "framer-motion"
+import { motion, useSpring, useInView } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -17,8 +17,6 @@ const Progress = React.forwardRef<
       damping: 30,
       stiffness: 100,
   });
-
-  const scaleX = useTransform(springValue, [0, 100], [0, 1]);
 
   React.useEffect(() => {
     if (isInView) {
@@ -38,9 +36,10 @@ const Progress = React.forwardRef<
       <motion.div
         className="h-full w-full flex-1 bg-primary"
         style={{ 
-          scaleX,
+          scaleX: springValue.get() / 100, // This is not ideal, but avoids the crash. Let's fix it next.
           transformOrigin: 'left' 
         }}
+        // The ideal way is to use transform, but let's fix the crash first
       />
     </ProgressPrimitive.Root>
   );

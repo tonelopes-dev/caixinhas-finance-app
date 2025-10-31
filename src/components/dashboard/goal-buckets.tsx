@@ -8,6 +8,7 @@ import { ArrowRight, PlusCircle } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
+import { AnimatedCounter } from '../ui/animated-counter';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -39,7 +40,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                       {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
                     </p>
                   </div>
-                   <p className="text-sm font-bold text-primary">{Math.round(progress)}%</p>
+                   <p className="text-sm font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} />%</p>
                 </div>
                 <Progress value={progress} className="h-3 mt-2" />
                 <div className="flex items-center gap-1 mt-2">

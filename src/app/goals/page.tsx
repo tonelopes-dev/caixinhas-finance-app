@@ -17,6 +17,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { user, partner } from '@/lib/data';
 import { Lock, Users } from 'lucide-react';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -68,7 +69,7 @@ export default function GoalsPage() {
                                 {goal.visibility === 'shared' ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                                 <span>{goal.visibility === 'shared' ? 'Compartilhada' : 'Privada'}</span>
                             </div>
-                            <p className="font-bold text-primary">{Math.round(progress)}%</p>
+                            <p className="font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} />%</p>
                         </div>
                     </CardContent>
                     <CardFooter className="flex items-center gap-2 pt-4">

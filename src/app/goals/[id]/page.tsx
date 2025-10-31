@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -18,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -72,7 +75,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             </div>
             <Progress value={progress} className="mt-4 h-4" />
             <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{Math.round(progress)}% completo</span>
+                <span className='flex items-center gap-1'><AnimatedCounter value={progress} />% completo</span>
                 <span>Faltam {formatCurrency(goal.targetAmount - goal.currentAmount)}</span>
             </div>
           </CardHeader>
