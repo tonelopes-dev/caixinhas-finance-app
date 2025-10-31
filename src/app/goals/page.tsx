@@ -16,7 +16,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { user, partner } from '@/lib/data';
-import { Badge } from '@/components/ui/badge';
 import { Lock, Users } from 'lucide-react';
 
 function formatCurrency(value: number) {

@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,12 +9,22 @@ import { AddTransactionSheet } from './add-transaction-sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ListFilter, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useMemo, useState } from 'react';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
 };
 
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
+    const [typeFilter, setTypeFilter] = useState('all');
+
+    const filteredTransactions = useMemo(() => {
+        if (typeFilter === 'all') {
+            return transactions;
+        }
+        return transactions.filter((transaction) => transaction.type === typeFilter);
+    }, [transactions, typeFilter]);
+
     const formatCurrency = (value: number) => {
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
@@ -29,7 +41,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
           <CardDescription>O dia a dia financeiro de vocês.</CardDescription>
         </div>
         <div className="flex items-center gap-2">
-            <Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-auto h-9">
                     <ListFilter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Filtrar" />
@@ -54,7 +66,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.slice(0, 5).map((transaction) => (
+            {filteredTransactions.slice(0, 5).map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
@@ -70,10 +82,10 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                 </TableCell>
               </TableRow>
             ))}
-             {transactions.length === 0 && (
+             {filteredTransactions.length === 0 && (
                 <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                        Nenhuma transação registrada.
+                        Nenhuma transação encontrada.
                     </TableCell>
                 </TableRow>
             )}

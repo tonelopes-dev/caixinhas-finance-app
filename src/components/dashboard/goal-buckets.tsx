@@ -44,10 +44,12 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                         <AvatarImage src={user.avatarUrl} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <Avatar className="h-6 w-6 border-2 -ml-3" style={{borderColor: 'hsl(var(--chart-2))'}}>
-                        <AvatarImage src={partner.avatarUrl} alt={partner.name} />
-                        <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    {goal.visibility === 'shared' && (
+                      <Avatar className="h-6 w-6 border-2 -ml-3" style={{borderColor: 'hsl(var(--chart-2))'}}>
+                          <AvatarImage src={partner.avatarUrl} alt={partner.name} />
+                          <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    )}
                 </div>
               </div>
             </Link>
@@ -57,14 +59,14 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
           <p className="text-center text-muted-foreground py-4">Nenhuma caixinha criada ainda. Que tal começar um novo sonho?</p>
         )}
       </CardContent>
-      <CardFooter className="flex-col items-stretch gap-2 border-t pt-6">
-        <Button variant="ghost" asChild>
+      <CardFooter className="flex-col items-stretch gap-2 border-t pt-6 md:flex-row">
+        <Button variant="ghost" asChild className="flex-1">
             <Link href="/goals">
                 Ver todas as caixinhas
                 <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
         </Button>
-        <Button variant="outline" className="w-full" asChild>
+        <Button variant="outline" className="w-full flex-1" asChild>
           <Link href="/goals/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             Criar Nova Caixinha
