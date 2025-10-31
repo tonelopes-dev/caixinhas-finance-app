@@ -7,7 +7,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { accounts } from '@/lib/data';
@@ -24,6 +23,69 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import type { Account } from '@/lib/definitions';
+
+function EditAccountDialog({ account }: { account: Account }) {
+    const [open, setOpen] = React.useState(false);
+    return (
+         <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-primary"
+                >
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Editar Conta</DialogTitle>
+                <DialogDescription>
+                    Atualize os detalhes da sua conta.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="account-name">Nome da Conta</Label>
+                    <Input
+                    id="account-name"
+                    defaultValue={account.name}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="bank-name">Nome do Banco</Label>
+                    <Input
+                    id="bank-name"
+                    defaultValue={account.bank}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="account-type">Tipo de Conta</Label>
+                    <Select name="account-type" defaultValue={account.type}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="checking">Conta Corrente</SelectItem>
+                            <SelectItem value="savings">Poupança</SelectItem>
+                            <SelectItem value="investment">Investimento</SelectItem>
+                            <SelectItem value="other">Outro</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button onClick={() => setOpen(false)}>
+                    Salvar Alterações
+                </Button>
+            </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 
 export function AccountsManagement() {
     const [open, setOpen] = React.useState(false);
@@ -106,14 +168,7 @@ export function AccountsManagement() {
                 </div>
               </div>
               <div className='flex gap-2'>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-primary"
-                >
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                </Button>
+                <EditAccountDialog account={account} />
                  <Button
                     variant="ghost"
                     size="icon"

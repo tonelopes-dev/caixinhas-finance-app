@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Edit, Tag } from 'lucide-react';
+import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,41 @@ import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 
 const expenseCategories = ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros'];
+
+function EditCategoryDialog({ category }: { category: string }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Edit className="h-3 w-3" />
+            </Button>
+        </DialogTrigger>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Editar Categoria</DialogTitle>
+                <DialogDescription>
+                    Altere o nome da sua categoria de despesa.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="category-name">Nome da Categoria</Label>
+                    <Input
+                        id="category-name"
+                        defaultValue={category}
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button onClick={() => setOpen(false)}>
+                    Salvar Alterações
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+  )
+}
 
 export function CategoriesManagement() {
     const [open, setOpen] = React.useState(false);
@@ -76,9 +111,7 @@ export function CategoriesManagement() {
                     {category}
                 </Badge>
                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <Edit className="h-3 w-3" />
-                    </Button>
+                    <EditCategoryDialog category={category} />
                     <Button variant="ghost" size="icon" className="h-6 w-6">
                         <Trash2 className="h-3 w-3" />
                     </Button>
