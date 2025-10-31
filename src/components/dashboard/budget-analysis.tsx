@@ -35,14 +35,14 @@ export default function BudgetAnalysis({ income, expenses, goals }: BudgetAnalys
   useEffect(() => {
     // This effect handles toasts for successful analysis or critical server errors.
     // Validation errors are handled inline, so we don't show a toast for them.
-    if (state.message) {
+    if (state.message && !state.errors) {
       if (state.analysis) {
         // Success case
         toast({
           title: "Análise Pronta!",
           description: "Sua análise de orçamento personalizada está pronta.",
         });
-      } else if (!state.errors) {
+      } else {
         // Critical error case (but not a validation error)
         toast({
           title: "Erro na Análise",
