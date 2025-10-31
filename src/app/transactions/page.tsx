@@ -91,9 +91,9 @@ const getAccountName = (id: string) => {
 
 const getTypeDisplay = (type: Transaction['type']) => {
     switch (type) {
-        case 'income': return { label: 'Entrada', icon: TrendingUp, color: 'text-green-500' };
-        case 'expense': return { label: 'Saída', icon: TrendingDown, color: 'text-red-500' };
-        case 'transfer': return { label: 'Transferência', icon: ArrowRight, color: 'text-blue-500' };
+        case 'income': return { label: 'Entrada', icon: TrendingUp, color: 'text-green-500', bgColor: 'bg-green-500/10' };
+        case 'expense': return { label: 'Saída', icon: TrendingDown, color: 'text-red-500', bgColor: 'bg-red-500/10' };
+        case 'transfer': return { label: 'Transferência', icon: ArrowRight, color: 'text-blue-500', bgColor: 'bg-blue-500/10' };
     }
 }
 
@@ -248,8 +248,8 @@ export default function TransactionsPage() {
                         <TableRow key={t.id}>
                             <TableCell>
                                 <div className='flex items-center gap-3'>
-                                    <div className={cn("p-2 rounded-full bg-muted", typeInfo.color)}>
-                                        <typeInfo.icon className="h-4 w-4 text-white"/>
+                                    <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
+                                        <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
                                     </div>
                                     <div className='flex-1'>
                                         <p className="font-medium">{t.description}</p>
