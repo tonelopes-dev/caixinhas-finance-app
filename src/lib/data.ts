@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Partner } from './definitions';
+import type { Transaction, Goal, User, Partner, Invitation } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const user: User = {
@@ -43,6 +43,21 @@ export const transactions: Transaction[] = [
     { id: '5', date: '2024-07-22', description: 'Cinema', amount: 80.00, type: 'expense', category: 'Lazer' },
     { id: '6', date: '2024-07-21', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte' },
     { id: '7', date: '2024-07-20', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer' },
+];
+
+export const invitations: Invitation[] = [
+  {
+    id: '1',
+    goalName: 'Carro Novo',
+    invitedBy: 'Maria',
+    status: 'pending',
+  },
+   {
+    id: '2',
+    goalName: 'Festa de Casamento',
+    invitedBy: 'João',
+    status: 'pending',
+  }
 ];
 
 export const totalIncome = transactions

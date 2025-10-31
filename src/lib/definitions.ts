@@ -24,3 +24,10 @@ export type Partner = {
   name: string;
   avatarUrl: string;
 };
+
+export type Invitation = {
+  id: string;
+  goalName: string;
+  invitedBy: string;
+  status: 'pending' | 'accepted' | 'declined';
+};

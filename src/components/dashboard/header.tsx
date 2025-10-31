@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Bell } from 'lucide-react';
 import type { User, Partner } from '@/lib/definitions';
 
 type HeaderProps = {
@@ -34,6 +34,12 @@ export default function Header({ user, partner }: HeaderProps) {
             <UserPlus className="mr-2 h-4 w-4" />
             Convidar
           </Link>
+        </Button>
+        <Button variant="ghost" size="icon" asChild>
+            <Link href="/invitations">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Convites</span>
+            </Link>
         </Button>
       </div>
     </header>
