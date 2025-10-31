@@ -4,6 +4,7 @@ import { personalizedBudgetAnalysis } from '@/ai/flows/personalized-budget-analy
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { transactions, goals } from '@/lib/data';
+import { redirect } from 'next/navigation';
 
 const analysisSchema = z.object({
   financialHabits: z.string().min(20, { message: 'Por favor, descreva seus hábitos financeiros com mais detalhes.' }),
@@ -16,6 +17,11 @@ const transactionSchema = z.object({
   category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
 });
 
+const goalSchema = z.object({
+  name: z.string().min(1, { message: 'O nome é obrigatório.' }),
+  emoji: z.string().min(1, { message: 'O emoji é obrigatório.' }),
+  targetAmount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
+});
 
 export type AnalysisState = {
   message?: string | null;
@@ -33,6 +39,15 @@ export type TransactionState = {
     amount?: string[];
     type?: string[];
     category?: string[];
+  };
+}
+
+export type GoalState = {
+  message?: string | null;
+  errors?: {
+    name?: string[];
+    emoji?: string[];
+    targetAmount?: string[];
   };
 }
 
@@ -108,4 +123,25 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   revalidatePath('/');
 
   return { message: 'Transação adicionada com sucesso!' };
+}
+
+export async function addGoal(prevState: GoalState, formData: FormData): Promise<GoalState> {
+  const validatedFields = goalSchema.safeParse({
+    name: formData.get('name'),
+    emoji: formData.get('emoji'),
+    targetAmount: formData.get('targetAmount'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+
+  // NOTE: This is mock data. In a real application, you would save this to a database.
+  console.log('New goal added:', validatedFields.data);
+  
+  revalidatePath('/');
+  redirect('/');
 }

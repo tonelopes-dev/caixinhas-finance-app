@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -43,9 +44,11 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
         )}
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/goals/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             Criar Nova Caixinha
+          </Link>
         </Button>
       </CardFooter>
     </Card>

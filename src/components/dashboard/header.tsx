@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,9 +29,11 @@ export default function Header({ user, partner }: HeaderProps) {
               <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
             </Avatar>
         </div>
-        <Button variant="outline" size="sm">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Convidar
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/invite">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Convidar
+          </Link>
         </Button>
       </div>
     </header>
