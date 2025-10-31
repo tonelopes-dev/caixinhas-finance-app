@@ -23,12 +23,12 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
         <CardTitle className="font-headline">Caixinhas de Sonhos</CardTitle>
         <CardDescription>Onde os planos de vocês ganham vida.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-6">
+      <CardContent className="grid gap-4">
         {goals.map((goal) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           return (
-            <div key={goal.id} className="flex items-center gap-4">
-              <div className="text-3xl">{goal.emoji}</div>
+            <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-muted/50">
+              <div className="text-3xl transition-transform group-hover:scale-110">{goal.emoji}</div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
@@ -44,8 +44,8 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                       </Avatar>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                     <p className="text-sm text-muted-foreground">{Math.round(progress)}%</p>
+                  <div className="flex items-center gap-0.5">
+                     <p className="text-sm font-medium text-muted-foreground">{Math.round(progress)}%</p>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -53,9 +53,11 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Users className="mr-2 h-4 w-4" />
-                          Gerenciar
+                        <DropdownMenuItem asChild>
+                          <Link href={`/goals/${goal.id}/manage`}>
+                            <Users className="mr-2 h-4 w-4" />
+                            Gerenciar
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                           <XCircle className="mr-2 h-4 w-4" />
@@ -70,7 +72,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                   {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
                 </p>
               </div>
-            </div>
+            </Link>
           );
         })}
          {goals.length === 0 && (
