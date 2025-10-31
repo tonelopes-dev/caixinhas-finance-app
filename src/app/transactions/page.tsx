@@ -201,153 +201,159 @@ export default function TransactionsPage() {
             </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <div>
-              <CardTitle className="font-headline text-2xl">
-                Histórico de Transações
-              </CardTitle>
-              <CardDescription>
-                Seu histórico financeiro completo e detalhado.
-              </CardDescription>
-            </div>
-            <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-center">
-              <div className='flex flex-1 items-center gap-2'>
-                <ListFilter className="h-5 w-5 text-muted-foreground" />
-                <span className='text-sm font-medium'>Filtros:</span>
-              </div>
-              <div className="flex flex-1 gap-2">
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-full md:w-auto">
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Tipos</SelectItem>
-                    <SelectItem value="income">Entradas</SelectItem>
-                    <SelectItem value="expense">Saídas</SelectItem>
-                    <SelectItem value="transfer">Transferências</SelectItem>
-                  </SelectContent>
-                </Select>
-                 <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger className="w-full md:w-auto">
-                    <SelectValue placeholder="Mês" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger className="w-full md:w-auto">
-                    <SelectValue placeholder="Ano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     <SelectItem value="all">Todos os Anos</SelectItem>
-                    {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end">
-                <AddTransactionSheet />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className='overflow-hidden'>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Transação</TableHead>
-                  <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                  <TableHead className="hidden lg:table-cell">Contas</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                   <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <motion.tbody
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {filteredTransactions.map((t) => {
-                    const typeInfo = getTypeDisplay(t.type);
-                    const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2, duration: 0.5 }}
+        >
+            <Card>
+            <CardHeader>
+                <div>
+                <CardTitle className="font-headline text-2xl">
+                    Histórico de Transações
+                </CardTitle>
+                <CardDescription>
+                    Seu histórico financeiro completo e detalhado.
+                </CardDescription>
+                </div>
+                <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-center">
+                <div className='flex flex-1 items-center gap-2'>
+                    <ListFilter className="h-5 w-5 text-muted-foreground" />
+                    <span className='text-sm font-medium'>Filtros:</span>
+                </div>
+                <div className="flex flex-1 gap-2">
+                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos os Tipos</SelectItem>
+                        <SelectItem value="income">Entradas</SelectItem>
+                        <SelectItem value="expense">Saídas</SelectItem>
+                        <SelectItem value="transfer">Transferências</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                    </SelectContent>
+                    </Select>
+                    <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos os Anos</SelectItem>
+                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex justify-end">
+                    <AddTransactionSheet />
+                </div>
+                </div>
+            </CardHeader>
+            <CardContent className='overflow-hidden'>
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Transação</TableHead>
+                    <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                    <TableHead className="hidden lg:table-cell">Contas</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <motion.tbody
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {filteredTransactions.map((t) => {
+                        const typeInfo = getTypeDisplay(t.type);
+                        const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
 
-                    return (
-                        <motion.tr variants={itemVariants} key={t.id}>
-                            <TableCell>
-                                <div className='flex items-center gap-3'>
-                                    <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
-                                        <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
-                                    </div>
-                                    <div className='flex-1'>
-                                        <p className="font-medium">{t.description}</p>
-                                        <div className='flex items-center gap-2 text-muted-foreground text-xs'>
-                                            {MethodIcon && (
-                                                <div className='flex items-center gap-1'>
-                                                    <MethodIcon className="h-3 w-3" />
-                                                    <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                                </div>
-                                            )}
+                        return (
+                            <motion.tr variants={itemVariants} key={t.id}>
+                                <TableCell>
+                                    <div className='flex items-center gap-3'>
+                                        <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
+                                            <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
+                                        </div>
+                                        <div className='flex-1'>
+                                            <p className="font-medium">{t.description}</p>
+                                            <div className='flex items-center gap-2 text-muted-foreground text-xs'>
+                                                {MethodIcon && (
+                                                    <div className='flex items-center gap-1'>
+                                                        <MethodIcon className="h-3 w-3" />
+                                                        <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                                <Badge variant="outline">{t.category}</Badge>
-                            </TableCell>
-                            <TableCell className="hidden lg:table-cell text-xs">
-                                {t.sourceAccountId && (
-                                    <div className='flex items-center gap-1 text-muted-foreground'>
-                                        <Landmark className="h-3 w-3 text-red-500" />
-                                        <span>{getAccountName(t.sourceAccountId)}</span>
-                                    </div>
-                                )}
-                                {t.destinationAccountId && (
-                                     <div className='flex items-center gap-1 text-muted-foreground mt-1'>
-                                        {t.destinationAccountId.startsWith('goal') ? <PiggyBank className="h-3 w-3 text-green-500"/> : <Landmark className="h-3 w-3 text-green-500" />}
-                                        <span>{getAccountName(t.destinationAccountId)}</span>
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell>{formatDate(t.date)}</TableCell>
-                            <TableCell className={cn("text-right font-medium", {
-                                'text-green-600': t.type === 'income',
-                                'text-foreground': t.type === 'expense',
-                                'text-muted-foreground': t.type === 'transfer'
-                            })}>
-                                {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
-                                {formatCurrency(t.amount)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <EditTransactionSheet transaction={t} />
-                                        <DeleteTransactionDialog transactionId={t.id} />
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
-                        </motion.tr>
-                    )
-                })}
-                {filteredTransactions.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="py-8 text-center text-muted-foreground"
-                    >
-                      Nenhuma transação encontrada para os filtros selecionados.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </motion.tbody>
-            </Table>
-          </CardContent>
-        </Card>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                    <Badge variant="outline">{t.category}</Badge>
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell text-xs">
+                                    {t.sourceAccountId && (
+                                        <div className='flex items-center gap-1 text-muted-foreground'>
+                                            <Landmark className="h-3 w-3 text-red-500" />
+                                            <span>{getAccountName(t.sourceAccountId)}</span>
+                                        </div>
+                                    )}
+                                    {t.destinationAccountId && (
+                                        <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                                            {t.destinationAccountId.startsWith('goal') ? <PiggyBank className="h-3 w-3 text-green-500"/> : <Landmark className="h-3 w-3 text-green-500" />}
+                                            <span>{getAccountName(t.destinationAccountId)}</span>
+                                        </div>
+                                    )}
+                                </TableCell>
+                                <TableCell>{formatDate(t.date)}</TableCell>
+                                <TableCell className={cn("text-right font-medium", {
+                                    'text-green-600': t.type === 'income',
+                                    'text-foreground': t.type === 'expense',
+                                    'text-muted-foreground': t.type === 'transfer'
+                                })}>
+                                    {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                                    {formatCurrency(t.amount)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <EditTransactionSheet transaction={t} />
+                                            <DeleteTransactionDialog transactionId={t.id} />
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </motion.tr>
+                        )
+                    })}
+                    {filteredTransactions.length === 0 && (
+                    <TableRow>
+                        <TableCell
+                        colSpan={6}
+                        className="py-8 text-center text-muted-foreground"
+                        >
+                        Nenhuma transação encontrada para os filtros selecionados.
+                        </TableCell>
+                    </TableRow>
+                    )}
+                </motion.tbody>
+                </Table>
+            </CardContent>
+            </Card>
+        </motion.div>
       </div>
     </div>
   );
