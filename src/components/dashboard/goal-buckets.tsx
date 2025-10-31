@@ -1,10 +1,11 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlusCircle } from 'lucide-react';
+import { ArrowRight, PlusCircle, Users, Lock } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
@@ -43,19 +44,25 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                    <p className="text-sm font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</p>
                 </div>
                 <Progress value={progress} className="h-3 mt-2" />
-                <div className="flex items-center gap-1 mt-2">
-                    <div className="flex -space-x-2 overflow-hidden">
-                        {participants.slice(0, 4).map((p, index) => (
-                             <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                                <AvatarImage src={p.avatarUrl} alt={p.name} />
-                                <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                        ))}
-                        {participants.length > 4 && (
-                            <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                                <AvatarFallback>+{participants.length - 4}</AvatarFallback>
-                            </Avatar>
-                        )}
+                <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1">
+                        <div className="flex -space-x-2 overflow-hidden">
+                            {participants.slice(0, 4).map((p, index) => (
+                                 <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                    <AvatarImage src={p.avatarUrl} alt={p.name} />
+                                    <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                            ))}
+                            {participants.length > 4 && (
+                                <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                    <AvatarFallback>+{participants.length - 4}</AvatarFallback>
+                                </Avatar>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {goal.visibility === 'shared' ? <Users className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                        <span>{goal.visibility === 'shared' ? 'Compartilhada' : 'Privada'}</span>
                     </div>
                 </div>
               </div>
