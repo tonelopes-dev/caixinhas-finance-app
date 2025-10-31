@@ -36,8 +36,8 @@ const ProcessedBudgetAnalysisInputSchema = z.object({
 });
 
 const PersonalizedBudgetAnalysisOutputSchema = z.object({
-  analysis: z.string().describe('A personalized analysis of the user\u2019s spending patterns and saving opportunities.'),
-  suggestions: z.array(z.string()).describe('A list of suggestions for optimizing savings towards shared goals.'),
+  analysis: z.string().describe('Uma análise personalizada dos padrões de gastos do usuário e oportunidades de economia.'),
+  suggestions: z.array(z.string()).describe('Uma lista de sugestões para otimizar a economia em direção às metas compartilhadas.'),
 });
 export type PersonalizedBudgetAnalysisOutput = z.infer<typeof PersonalizedBudgetAnalysisOutputSchema>;
 
@@ -49,24 +49,24 @@ const budgetAnalysisPrompt = ai.definePrompt({
   name: 'budgetAnalysisPrompt',
   input: {schema: ProcessedBudgetAnalysisInputSchema},
   output: {schema: PersonalizedBudgetAnalysisOutputSchema},
-  prompt: `You are a financial advisor providing personalized budget analysis and savings suggestions for couples.
+  prompt: `Você é um consultor financeiro fornecendo análises orçamentárias personalizadas e sugestões de economia para casais. Responda sempre em português do Brasil.
 
-  Analyze the user's income, expenses, shared goals, and financial habits to provide actionable insights.
+  Analise a renda, despesas, metas compartilhadas e hábitos financeiros do usuário para fornecer insights práticos.
 
-  Income: {{income}}
-  Expenses (as JSON): {{{expensesJSON}}}
-  Shared Goals:
+  Renda: {{income}}
+  Despesas (em JSON): {{{expensesJSON}}}
+  Metas Compartilhadas:
   {{#each sharedGoals}}
-  - Name: {{name}}, Target Amount: {{targetAmount}}, Current Savings: {{currentSavings}}
+  - Nome: {{name}}, Valor Alvo: {{targetAmount}}, Economia Atual: {{currentSavings}}
   {{/each}}
-  Financial Habits: {{financialHabits}}
+  Hábitos Financeiros: {{financialHabits}}
 
-  Provide a concise analysis of their spending patterns and suggest ways to optimize savings towards their shared goals.
+  Forneça uma análise concisa de seus padrões de gastos e sugira maneiras de otimizar a economia em direção às suas metas compartilhadas.
 
-  The analysis should include specific areas where they can cut expenses or increase savings.
+  A análise deve incluir áreas específicas onde eles podem cortar despesas ou aumentar a economia.
 
-  The suggestions should be practical and tailored to their financial situation and habits.
-  The 'expenses' data is a JSON object where keys are categories and values are the amounts.
+  As sugestões devem ser práticas e adaptadas à sua situação financeira e hábitos.
+  Os dados de 'despesas' são um objeto JSON onde as chaves são as categorias e os valores são os montantes.
 `,
 });
 
