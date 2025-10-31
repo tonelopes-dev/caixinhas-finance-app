@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import type { Transaction } from '@/lib/definitions';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ListFilter } from 'lucide-react';
+import { ListFilter, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 
 type RecentTransactionsProps = {
@@ -53,7 +54,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((transaction) => (
+            {transactions.slice(0, 5).map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
@@ -78,6 +79,14 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
             )}
           </TableBody>
         </Table>
+        <div className="flex justify-center mt-4">
+          <Button variant="ghost" asChild>
+            <Link href="/transactions">
+              Ver todas as transações
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
