@@ -52,6 +52,38 @@ export const goals: Goal[] = [
     emoji: '🛡️',
     visibility: 'private',
   },
+  {
+    id: '4',
+    name: 'Videogame Novo',
+    targetAmount: 3500,
+    currentAmount: 3450,
+    emoji: '🎮',
+    visibility: 'private',
+  },
+  {
+    id: '5',
+    name: 'Carro Elétrico',
+    targetAmount: 250000,
+    currentAmount: 2500,
+    emoji: '🚗',
+    visibility: 'shared',
+  },
+  {
+    id: '6',
+    name: 'Presente Surpresa',
+    targetAmount: 800,
+    currentAmount: 800,
+    emoji: '🎁',
+    visibility: 'private',
+  },
+  {
+    id: '7',
+    name: 'Festa de Casamento',
+    targetAmount: 30000,
+    currentAmount: 12000,
+    emoji: '💍',
+    visibility: 'shared',
+  },
 ];
 
 export const transactions: Transaction[] = [
