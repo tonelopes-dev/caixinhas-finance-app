@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from 'lucide-react';
+import { ThemeSwitcher } from '../theme-switcher';
 
 
 type HeaderProps = {
@@ -74,6 +75,7 @@ export default function Header({ user, partner }: HeaderProps) {
                     <span>Perfil</span>
                 </Link>
             </DropdownMenuItem>
+            <ThemeSwitcher />
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/login">
