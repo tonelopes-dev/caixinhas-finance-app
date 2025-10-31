@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { updateTransaction, type TransactionState } from '@/app/actions';
 import {
   Sheet,
@@ -53,7 +54,7 @@ const paymentMethods = [
 
 export function EditTransactionSheet({ transaction }: { transaction: Transaction }) {
   const initialState: TransactionState = {};
-  const [state, dispatch] = useFormState(updateTransaction, initialState);
+  const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);

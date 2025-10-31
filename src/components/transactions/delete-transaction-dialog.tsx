@@ -16,14 +16,14 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useRef, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useState } from 'react';
+import { useActionState } from 'react';
 
 
 export function DeleteTransactionDialog({ transactionId }: { transactionId: string }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [state, dispatch] = useFormState(deleteTransaction, { message: null });
+  const [state, dispatch] = useActionState(deleteTransaction, { message: null });
 
   useEffect(() => {
     if (state?.message) {

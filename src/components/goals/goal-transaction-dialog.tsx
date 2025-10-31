@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useEffect, useRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { goalTransaction, type GoalTransactionState } from '@/app/actions';
 import {
   Dialog,
@@ -36,7 +37,7 @@ type GoalTransactionDialogProps = {
 
 export function GoalTransactionDialog({ type, goalId }: GoalTransactionDialogProps) {
   const initialState: GoalTransactionState = {};
-  const [state, dispatch] = useFormState(goalTransaction, initialState);
+  const [state, dispatch] = useActionState(goalTransaction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = React.useState(false);

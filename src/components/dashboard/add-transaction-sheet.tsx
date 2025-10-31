@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { addTransaction, type TransactionState } from '@/app/actions';
 import {
   Sheet,
@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
+import { useFormStatus } from 'react-dom';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -51,7 +52,7 @@ const paymentMethods = [
 
 export function AddTransactionSheet() {
   const initialState: TransactionState = {};
-  const [state, dispatch] = useFormState(addTransaction, initialState);
+  const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);

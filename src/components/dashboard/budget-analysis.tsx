@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { analyzeBudget, type AnalysisState } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Sparkles, Lightbulb, CheckCircle } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
-import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 type BudgetAnalysisProps = {
@@ -29,7 +29,7 @@ function SubmitButton() {
 
 export default function BudgetAnalysis({ income, expenses, goals }: BudgetAnalysisProps) {
   const initialState: AnalysisState = {};
-  const [state, dispatch] = useFormState(analyzeBudget, initialState);
+  const [state, dispatch] = useActionState(analyzeBudget, initialState);
   const { toast } = useToast();
 
   useEffect(() => {

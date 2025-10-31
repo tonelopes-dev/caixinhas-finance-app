@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { addGoal, type GoalState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ function SubmitButton() {
 
 export default function NewGoalPage() {
   const initialState: GoalState = {};
-  const [state, dispatch] = useFormState(addGoal, initialState);
+  const [state, dispatch] = useActionState(addGoal, initialState);
   const { toast } = useToast();
   const [visibility, setVisibility] = useState('shared');
 
