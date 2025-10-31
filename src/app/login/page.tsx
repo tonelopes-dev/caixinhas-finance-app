@@ -7,6 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -87,6 +88,14 @@ export default function LoginPage() {
             </Button>
           </div>
         </CardContent>
+        <CardFooter className="justify-center text-sm">
+          <p>
+            Não tem uma conta?{' '}
+            <Link href="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Cadastre-se
+            </Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );
