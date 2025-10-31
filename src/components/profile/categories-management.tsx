@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
 
 const expenseCategories = ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros'];
 
@@ -142,13 +141,13 @@ export function CategoriesManagement() {
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {expenseCategories.map((category) => (
-            <Badge key={category} variant="outline" className="group relative items-center gap-2 py-1.5 pl-3 pr-1 text-sm">
+            <div key={category} className="group inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50">
                 <span>{category}</span>
-                <div className="ml-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
                     <EditCategoryDialog category={category} />
                     <DeleteCategoryDialog category={category} />
                 </div>
-            </Badge>
+            </div>
           ))}
         </div>
       </CardContent>
