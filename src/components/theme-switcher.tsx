@@ -52,35 +52,33 @@ export function ThemeSwitcher() {
   }
 
   return (
-    <DropdownMenuPortal>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          <Paintbrush className="mr-2 h-4 w-4" />
-          <span>Tema</span>
-        </DropdownMenuSubTrigger>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <Paintbrush className="mr-2 h-4 w-4" />
+        <span>Tema</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          <div className="p-1">
-            {themes.map((theme) => (
-              <DropdownMenuItem
-                key={theme.name}
-                onClick={() => handleThemeChange(theme.name)}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-4 w-4 rounded-full border"
-                    style={{
-                      background: `radial-gradient(circle at top left, hsl(${theme.secondary}), hsl(${theme.background}) 50%)`,
-                    }}
-                  />
-                  <span>{theme.name}</span>
-                </div>
-                {currentTheme === theme.name && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-            ))}
-          </div>
+          {themes.map((theme) => (
+            <DropdownMenuItem
+              key={theme.name}
+              onClick={() => handleThemeChange(theme.name)}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-4 w-4 rounded-full border"
+                  style={{
+                    background: `radial-gradient(circle at top left, hsl(${theme.secondary}), hsl(${theme.background}) 50%)`,
+                  }}
+                />
+                <span>{theme.name}</span>
+              </div>
+              {currentTheme === theme.name && <Check className="h-4 w-4" />}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    </DropdownMenuPortal>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   );
 }
