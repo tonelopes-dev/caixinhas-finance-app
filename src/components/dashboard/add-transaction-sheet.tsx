@@ -30,7 +30,7 @@ function SubmitButton() {
 }
 
 const categories = {
-    expense: ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Educação', 'Roupas', 'Utilidades', 'Outros'],
+    expense: ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros'],
     income: ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'],
     transfer: ['Caixinha', 'Transferência entre contas']
 }
