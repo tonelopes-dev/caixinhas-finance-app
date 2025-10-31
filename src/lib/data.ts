@@ -1,3 +1,4 @@
+
 import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -118,6 +119,7 @@ export const goals: Goal[] = [
 
 
 export const transactions: Transaction[] = [
+    // July
     { id: '1', date: '2024-07-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1' },
     { id: '2', date: '2024-07-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2' },
     { id: '3', date: '2024-07-27', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'credit_card' },
@@ -126,7 +128,7 @@ export const transactions: Transaction[] = [
     { id: '6', date: '2024-07-24', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'pix' },
     { id: '7', date: '2024-07-23', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
     { id: '8', date: '2024-07-22', description: 'Depósito Caixinha Europa', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1' },
-    { id: '9', date: '20_4-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
+    { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
     { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Outros', sourceAccountId: 'acc1', paymentMethod: 'cash' },
     { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1' },
     { id: '12', date: '2024-07-18', description: 'Rendimento Freelance', amount: 800, type: 'income', category: 'Freelance', destinationAccountId: 'acc1' },
@@ -135,9 +137,20 @@ export const transactions: Transaction[] = [
     { id: '15', date: '2024-07-15', description: 'Depósito Caixinha Casamento', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal7' },
     { id: '16', date: '2024-07-10', description: 'Compra Online (Roupas)', amount: 250, type: 'expense', category: 'Roupas', sourceAccountId: 'acc1', paymentMethod: 'pix' },
     { id: '17', date: '2024-07-05', description: 'Mensalidade Academia', amount: 120, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card' },
+    
+    // June
     { id: '18', date: '2024-06-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1' },
     { id: '19', date: '2024-06-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2' },
     { id: '20', date: '2024-06-25', description: 'Aluguel', amount: 1500, type: 'expense', category: 'Casa', sourceAccountId: 'acc2', paymentMethod: 'transfer' },
+    { id: '21', date: '2024-06-20', description: 'Supermercado', amount: 600, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
+    { id: '22', date: '2024-06-15', description: 'Presente Aniversário', amount: 150, type: 'expense', category: 'Presentes', sourceAccountId: 'acc1', paymentMethod: 'pix' },
+    { id: '23', date: '2024-06-10', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
+
+    // May
+    { id: '24', date: '2024-05-28', description: 'Salário', amount: 2900, type: 'income', category: 'Salário', destinationAccountId: 'acc1' },
+    { id: '25', date: '2024-05-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2' },
+    { id: '26', date: '2024-05-15', description: 'Viagem Fim de Semana', amount: 800, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
+    { id: '27', date: '2024-05-10', description: 'Manutenção Carro', amount: 450, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'debit_card' },
 ];
 
 
