@@ -251,7 +251,7 @@ export default function TransactionsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className='overflow-hidden'>
             <Table>
               <TableHeader>
                 <TableRow>
