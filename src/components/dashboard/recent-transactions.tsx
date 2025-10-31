@@ -18,12 +18,17 @@ type RecentTransactionsProps = {
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
     const [typeFilter, setTypeFilter] = useState('all');
 
+    const baseTransactions = useMemo(() => {
+        // Exclude transfers from the main dashboard view
+        return transactions.filter(t => t.type !== 'transfer');
+    }, [transactions]);
+
     const filteredTransactions = useMemo(() => {
         if (typeFilter === 'all') {
-            return transactions;
+            return baseTransactions;
         }
-        return transactions.filter((transaction) => transaction.type === typeFilter);
-    }, [transactions, typeFilter]);
+        return baseTransactions.filter((transaction) => transaction.type === typeFilter);
+    }, [baseTransactions, typeFilter]);
 
     const formatCurrency = (value: number) => {
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
