@@ -2,12 +2,14 @@ import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } fro
 import { PlaceHolderImages } from './placeholder-images';
 
 export const user: User = {
+  id: 'user',
   name: 'Você',
   email: 'seuemail@example.com',
   avatarUrl: PlaceHolderImages.find(img => img.id === 'user-avatar')?.imageUrl ?? '',
 };
 
 export const partner: Partner = {
+  id: 'partner',
   name: 'Parceiro(a)',
   avatarUrl: PlaceHolderImages.find(img => img.id === 'partner-avatar')?.imageUrl ?? '',
 };
@@ -115,7 +117,7 @@ export const transactions: Transaction[] = [
     { id: '7', date: '2024-07-23', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card' },
     { id: '8', date: '2024-07-22', description: 'Depósito Caixinha Europa', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1' },
     { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2' },
-    { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Saques', sourceAccountId: 'acc1', paymentMethod: 'cash' },
+    { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Outros', sourceAccountId: 'acc1', paymentMethod: 'cash' },
     { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1' },
 ];
 

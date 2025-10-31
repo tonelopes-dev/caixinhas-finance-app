@@ -35,12 +35,14 @@ export type Goal = {
 };
 
 export type User = {
+  id: string;
   name: string;
   email: string;
   avatarUrl: string;
 };
 
 export type Partner = {
+  id: string;
   name: string;
   avatarUrl: string;
 };
