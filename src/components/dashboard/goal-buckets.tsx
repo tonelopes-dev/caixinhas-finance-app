@@ -40,11 +40,11 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                 </div>
                 <Progress value={progress} className="h-3 mt-2" />
                 <div className="flex items-center gap-1 mt-2">
-                    <Avatar className="h-6 w-6 border-2 border-background">
+                    <Avatar className="h-6 w-6 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
                         <AvatarImage src={user.avatarUrl} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <Avatar className="h-6 w-6 border-2 border-background -ml-3">
+                    <Avatar className="h-6 w-6 border-2 -ml-3" style={{borderColor: 'hsl(var(--chart-2))'}}>
                         <AvatarImage src={partner.avatarUrl} alt={partner.name} />
                         <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
                     </Avatar>

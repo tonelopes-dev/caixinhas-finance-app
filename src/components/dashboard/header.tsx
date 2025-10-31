@@ -49,11 +49,12 @@ export default function Header({ user, partner }: HeaderProps) {
         </Button>
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+            <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-4">
                <Avatar className="h-9 w-9 border-2 border-background">
                 <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="woman portrait"/>
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
+              <span className="hidden md:inline font-medium text-sm">Olá, {user.name}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
