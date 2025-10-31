@@ -13,6 +13,7 @@ import {
 import { goals, user, partner } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
 
 export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const goal = goals.find((g) => g.id === params.id);
@@ -45,10 +46,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
           <CardContent>
             <div className="flex justify-between items-center mb-4">
                  <h3 className="font-semibold">Participantes</h3>
-                <Button variant="outline" size="sm">
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Convidar
-                </Button>
+                <InviteParticipantDialog goalName={goal.name} />
             </div>
             <div className="space-y-4">
               {participants.map((p, index) => (
