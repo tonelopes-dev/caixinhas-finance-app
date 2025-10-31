@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { goals, transactions, user } from '@/lib/data';
+import { goals, transactions, user, partner } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -89,15 +89,16 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             <div className="space-y-4">
                 {goalActivity.map(activity => {
                     const isDeposit = activity.destinationAccountId === goal.id;
+                    const actor = activity.actor === 'partner' ? partner : user;
                     return (
                         <div key={activity.id} className="flex items-center gap-4">
                             <Avatar className="h-9 w-9">
-                                <AvatarImage src={user.avatarUrl} alt={user.name} />
-                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={actor.avatarUrl} alt={actor.name} />
+                                <AvatarFallback>{actor.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
                                 <p className="text-sm">
-                                    <span className="font-semibold">{user.name}</span>
+                                    <span className="font-semibold">{actor.name}</span>
                                     {isDeposit ? ' guardou ' : ' retirou '}
                                     <span className={cn('font-bold', isDeposit ? 'text-green-600' : 'text-red-600')}>
                                         {formatCurrency(activity.amount)}

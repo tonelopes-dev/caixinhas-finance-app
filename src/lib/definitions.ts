@@ -16,6 +16,7 @@ export type Transaction = {
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash';
   sourceAccountId?: string;
   destinationAccountId?: string;
+  actor?: 'user' | 'partner';
 };
 
 export type GoalParticipant = {
