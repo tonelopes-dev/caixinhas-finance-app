@@ -40,7 +40,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
                       <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}
                     </p>
                   </div>
-                   <p className="text-sm font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} />%</p>
+                   <p className="text-sm font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</p>
                 </div>
                 <Progress value={progress} className="h-3 mt-2" />
                 <div className="flex items-center gap-1 mt-2">

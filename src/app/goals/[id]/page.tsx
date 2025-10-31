@@ -75,7 +75,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             </div>
             <Progress value={progress} className="mt-4 h-4" />
             <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span className='flex items-center gap-1'><AnimatedCounter value={progress} />% completo</span>
+                <span className='flex items-center gap-1'><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />% completo</span>
                 <span>Faltam {formatCurrency(goal.targetAmount - goal.currentAmount)}</span>
             </div>
           </CardHeader>

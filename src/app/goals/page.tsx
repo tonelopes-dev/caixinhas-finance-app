@@ -69,7 +69,7 @@ export default function GoalsPage() {
                                 {goal.visibility === 'shared' ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                                 <span>{goal.visibility === 'shared' ? 'Compartilhada' : 'Privada'}</span>
                             </div>
-                            <p className="font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} />%</p>
+                            <p className="font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</p>
                         </div>
                     </CardContent>
                     <CardFooter className="flex items-center gap-2 pt-4">
