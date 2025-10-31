@@ -163,43 +163,49 @@ export default function TransactionsPage() {
           </Link>
         </Button>
 
-        <Card className="mb-8">
-            <CardHeader>
-                <CardTitle className='font-headline'>Resumo do Período</CardTitle>
-                <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <div className="grid gap-4 md:grid-cols-3">
-                    <div className='flex items-center gap-4 rounded-lg border p-4'>
-                         <div className="rounded-full bg-primary/10 p-3">
-                            <Wallet className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Saldo Líquido</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
-                        </div>
-                    </div>
-                     <div className='flex items-center gap-4 rounded-lg border p-4'>
-                         <div className="rounded-full bg-green-500/10 p-3">
-                            <TrendingUp className="h-6 w-6 text-green-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Entradas</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
-                        </div>
-                    </div>
-                     <div className='flex items-center gap-4 rounded-lg border p-4'>
-                         <div className="rounded-full bg-red-500/10 p-3">
-                            <TrendingDown className="h-6 w-6 text-red-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Saídas</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="mb-8">
+              <CardHeader>
+                  <CardTitle className='font-headline'>Resumo do Período</CardTitle>
+                  <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                          <div className="rounded-full bg-primary/10 p-3">
+                              <Wallet className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                              <p className="text-sm text-muted-foreground">Saldo Líquido</p>
+                              <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
+                          </div>
+                      </div>
+                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                          <div className="rounded-full bg-green-500/10 p-3">
+                              <TrendingUp className="h-6 w-6 text-green-500" />
+                          </div>
+                          <div>
+                              <p className="text-sm text-muted-foreground">Entradas</p>
+                              <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
+                          </div>
+                      </div>
+                      <div className='flex items-center gap-4 rounded-lg border p-4'>
+                          <div className="rounded-full bg-red-500/10 p-3">
+                              <TrendingDown className="h-6 w-6 text-red-500" />
+                          </div>
+                          <div>
+                              <p className="text-sm text-muted-foreground">Saídas</p>
+                              <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
+                          </div>
+                      </div>
+                  </div>
+              </CardContent>
+          </Card>
+        </motion.div>
 
         <motion.div
             initial={{ opacity: 0, y: 20 }}
