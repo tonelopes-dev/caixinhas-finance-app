@@ -16,9 +16,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusCircle } from 'lucide-react';
+import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { accounts, goals } from '@/lib/data';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Calendar } from '../ui/calendar';
+import { ptBR } from 'date-fns/locale';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -51,6 +56,8 @@ export function AddTransactionSheet() {
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
+  const [date, setDate] = useState<Date>();
+
 
   useEffect(() => {
     if (state.message && !state.errors) {
@@ -60,6 +67,7 @@ export function AddTransactionSheet() {
       });
       formRef.current?.reset();
       setTransactionType('');
+      setDate(undefined);
       setOpen(false);
     } else if (state.message && state.errors) {
       toast({
@@ -117,6 +125,36 @@ export function AddTransactionSheet() {
                         <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 150,00" />
                         {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
                     </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="date">Data</Label>
+                         <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !date && "text-muted-foreground"
+                                )}
+                                >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={setDate}
+                                initialFocus
+                                locale={ptBR}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <input type="hidden" name="date" value={date?.toISOString()} />
+                         {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                    </div>
+
 
                     {(transactionType === 'expense' || transactionType === 'transfer') && (
                          <div className="space-y-2">

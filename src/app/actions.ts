@@ -15,6 +15,7 @@ const transactionSchema = z.object({
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
   category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
+  date: z.string().optional(),
   sourceAccountId: z.string().optional(),
   destinationAccountId: z.string().optional(),
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional(),
@@ -63,6 +64,7 @@ export type TransactionState = {
     amount?: string[];
     type?: string[];
     category?: string[];
+    date?: string[];
     sourceAccountId?: string[];
     destinationAccountId?: string[];
     paymentMethod?: string[];
@@ -143,6 +145,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     amount: formData.get('amount'),
     type: formData.get('type'),
     category: formData.get('category'),
+    date: formData.get('date'),
     sourceAccountId: formData.get('sourceAccountId'),
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
@@ -159,7 +162,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   // NOTE: This is mock data. In a real application, you would save this to a database.
   transactions.unshift({
     id: (transactions.length + 1).toString(),
-    date: new Date().toISOString().split('T')[0],
+    date: validatedFields.data.date || new Date().toISOString(),
     ...validatedFields.data
   })
   console.log('New transaction added:', validatedFields.data);
