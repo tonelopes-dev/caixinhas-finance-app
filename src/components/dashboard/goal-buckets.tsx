@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, PlusCircle, Users, XCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
@@ -27,50 +26,29 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
         {goals.map((goal) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           return (
-            <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-muted/50">
-              <div className="text-3xl transition-transform group-hover:scale-110">{goal.emoji}</div>
+            <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-3 -m-3 transition-colors hover:bg-muted/50">
+              <div className="text-4xl transition-transform group-hover:scale-110">{goal.emoji}</div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">{goal.name}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Avatar className="h-5 w-5 border-2 border-background">
+                    <p className="font-semibold">{goal.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
+                    </p>
+                  </div>
+                   <p className="text-sm font-bold text-primary">{Math.round(progress)}%</p>
+                </div>
+                <Progress value={progress} className="h-3 mt-2" />
+                <div className="flex items-center gap-1 mt-2">
+                    <Avatar className="h-6 w-6 border-2 border-background">
                         <AvatarImage src={user.avatarUrl} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <Avatar className="h-5 w-5 border-2 border-background -ml-2">
+                    </Avatar>
+                    <Avatar className="h-6 w-6 border-2 border-background -ml-3">
                         <AvatarImage src={partner.avatarUrl} alt={partner.name} />
                         <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-0.5">
-                     <p className="text-sm font-medium text-muted-foreground">{Math.round(progress)}%</p>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/goals/${goal.id}/manage`}>
-                            <Users className="mr-2 h-4 w-4" />
-                            Gerenciar
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <XCircle className="mr-2 h-4 w-4" />
-                          Sair da caixinha
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                    </Avatar>
                 </div>
-                <Progress value={progress} className="h-2 mt-2" />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
-                </p>
               </div>
             </Link>
           );
