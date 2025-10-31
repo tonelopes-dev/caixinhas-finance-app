@@ -13,6 +13,17 @@ import { Button } from '@/components/ui/button';
 import { accounts, bankLogos } from '@/lib/data';
 import { Landmark, PlusCircle, Trash2, Edit } from 'lucide-react';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -109,6 +120,36 @@ function EditAccountDialog({ account }: { account: Account }) {
     )
 }
 
+function DeleteAccountDialog({ accountName }: { accountName: string }) {
+    return (
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive"
+                >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Remover</span>
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta{' '}
+                        <span className="font-bold text-foreground">{accountName}</span>.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction>Excluir</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}
+
 
 export function AccountsManagement() {
     const [open, setOpen] = React.useState(false);
@@ -196,14 +237,7 @@ export function AccountsManagement() {
               </div>
               <div className='flex gap-2'>
                 <EditAccountDialog account={account} />
-                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive"
-                >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remover</span>
-                </Button>
+                <DeleteAccountDialog accountName={account.name} />
               </div>
             </div>
           ))}

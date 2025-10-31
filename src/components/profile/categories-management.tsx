@@ -11,6 +11,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -58,6 +69,31 @@ function EditCategoryDialog({ category }: { category: string }) {
         </DialogContent>
     </Dialog>
   )
+}
+
+function DeleteCategoryDialog({ category }: { category: string }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação não pode ser desfeita. Isso excluirá permanentemente a categoria{' '}
+            <span className="font-bold text-foreground">{category}</span>.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction>Excluir</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 export function CategoriesManagement() {
@@ -112,9 +148,7 @@ export function CategoriesManagement() {
                 </Badge>
                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <EditCategoryDialog category={category} />
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <DeleteCategoryDialog category={category} />
                 </div>
             </div>
           ))}

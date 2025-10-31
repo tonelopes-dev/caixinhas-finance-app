@@ -13,6 +13,17 @@ import { guests } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, X } from 'lucide-react';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -24,6 +35,37 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Send } from 'lucide-react';
+
+function DeleteGuestDialog({ guestName }: { guestName: string }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-destructive"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Remover</span>
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação não pode ser desfeita. Isso removerá{' '}
+            <span className="font-bold text-foreground">{guestName}</span> da sua lista de convidados.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction>Remover</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 
 export function GuestsManagement() {
     const [open, setOpen] = React.useState(false);
@@ -88,14 +130,7 @@ export function GuestsManagement() {
                   <p className="text-xs text-muted-foreground">{guest.email}</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Remover</span>
-              </Button>
+              <DeleteGuestDialog guestName={guest.name} />
             </div>
           ))}
         </div>
