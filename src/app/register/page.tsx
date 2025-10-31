@@ -26,7 +26,7 @@ export default function RegisterPage() {
                 <Image
                     src={landingImage?.imageUrl ?? 'https://picsum.photos/seed/3/800/1200'}
                     alt="Casal planejando suas finanças juntos"
-                    layout="fill"
+                    fill
                     objectFit="cover"
                     data-ai-hint="couple planning finances"
                 />
@@ -68,7 +68,7 @@ export default function RegisterPage() {
                     <CardFooter className="flex-col items-center justify-center text-sm px-0">
                         <p className="text-center text-muted-foreground">
                             Ao se cadastrar, você concorda com nossos{' '}
-                            <Link href="#" className="underline hover:text-primary">
+                            <Link href="/terms" className="underline hover:text-primary">
                                 Termos de Serviço
                             </Link>.
                         </p>
