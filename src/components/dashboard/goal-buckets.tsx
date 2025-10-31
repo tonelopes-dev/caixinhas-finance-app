@@ -56,26 +56,14 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
          {goals.length === 0 && (
           <p className="text-center text-muted-foreground py-4">Nenhuma caixinha criada ainda. Que tal começar um novo sonho?</p>
         )}
-        {goals.length > 3 && (
-            <div className="flex justify-center -mb-2">
-                <Button variant="ghost" asChild>
-                    <Link href="/goals">
-                    Ver todas as caixinhas
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-            </div>
-        )}
       </CardContent>
-      <CardFooter className="flex-col items-stretch gap-4 border-t pt-6">
-        {goals.length > 3 && (
-            <Button variant="ghost" asChild>
-                <Link href="/goals">
-                    Ver todas as caixinhas
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-            </Button>
-        )}
+      <CardFooter className="flex-col items-stretch gap-2 border-t pt-6">
+        <Button variant="ghost" asChild>
+            <Link href="/goals">
+                Ver todas as caixinhas
+                <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+        </Button>
         <Button variant="outline" className="w-full" asChild>
           <Link href="/goals/new">
             <PlusCircle className="mr-2 h-4 w-4" />
