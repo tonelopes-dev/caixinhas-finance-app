@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A mock email sending flow.
+ * @fileOverview An email sending flow using SendGrid.
  *
  * - sendEmail - A function that handles sending an email.
  * - SendEmailInput - The input type for the sendEmail function.
@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import sgMail from '@sendgrid/mail';
 
 const SendEmailInputSchema = z.object({
   to: z.string().email().describe('The recipient email address.'),
@@ -16,7 +17,7 @@ const SendEmailInputSchema = z.object({
 });
 export type SendEmailInput = z.infer<typeof SendEmailInputSchema>;
 
-export async function sendEmail(input: SendEmailInput): Promise<{ success: boolean }> {
+export async function sendEmail(input: SendEmailInput): Promise<{ success: boolean; error?: string }> {
   return sendEmailFlow(input);
 }
 
@@ -24,19 +25,34 @@ const sendEmailFlow = ai.defineFlow(
   {
     name: 'sendEmailFlow',
     inputSchema: SendEmailInputSchema,
-    outputSchema: z.object({ success: z.boolean() }),
+    outputSchema: z.object({ success: z.boolean(), error: z.string().optional() }),
   },
   async (input) => {
-    console.log('--- Mock Email Sent ---');
-    console.log(`To: ${input.to}`);
-    console.log(`Subject: ${input.subject}`);
-    console.log('Body:', input.body);
-    console.log('-----------------------');
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error('SENDGRID_API_KEY is not set.');
+      return { success: false, error: 'SendGrid API key is not configured.' };
+    }
 
-    // In a real application, you would integrate with an email service
-    // like SendGrid, Resend, or AWS SES here.
-    // For now, we just simulate a successful sending.
-    
-    return { success: true };
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const msg = {
+      to: input.to,
+      // IMPORTANT: This 'from' email must be a verified sender in your SendGrid account.
+      from: 'suporte@dreamvault.com', 
+      subject: input.subject,
+      html: input.body,
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`Email sent to ${input.to}`);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error sending email with SendGrid:', error);
+      if (error.response) {
+        console.error(error.response.body);
+      }
+      return { success: false, error: 'Failed to send email.' };
+    }
   }
 );
