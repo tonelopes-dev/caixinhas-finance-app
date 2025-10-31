@@ -5,8 +5,12 @@ import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
 import { goals, transactions, user, partner, totalIncome, totalExpenses } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
+import { PwaPrompt } from '@/components/pwa-prompt';
+import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 
 export default function Home() {
+  const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header user={user} partner={partner} />
@@ -22,6 +26,11 @@ export default function Home() {
               </p>
             </div>
           </AnimatedDiv>
+          {almostThereGoal && (
+            <AnimatedDiv transition={{ delay: 0.5 }}>
+              <MotivationalNudge goal={almostThereGoal} />
+            </AnimatedDiv>
+          )}
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="grid auto-rows-max items-start gap-8 lg:col-span-2">
               <AnimatedDiv transition={{ delay: 0.1 }}>
@@ -49,6 +58,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <PwaPrompt />
     </div>
   );
 }
