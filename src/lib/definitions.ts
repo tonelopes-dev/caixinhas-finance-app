@@ -17,6 +17,7 @@ export type Goal = {
 
 export type User = {
   name: string;
+  email: string;
   avatarUrl: string;
 };
 
@@ -31,3 +32,10 @@ export type Invitation = {
   invitedBy: string;
   status: 'pending' | 'accepted' | 'declined';
 };
+
+export type Guest = {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string;
+}

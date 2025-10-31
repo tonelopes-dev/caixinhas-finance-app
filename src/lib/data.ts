@@ -1,8 +1,9 @@
-import type { Transaction, Goal, User, Partner, Invitation } from './definitions';
+import type { Transaction, Goal, User, Partner, Invitation, Guest } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const user: User = {
   name: 'Você',
+  email: 'seuemail@example.com',
   avatarUrl: PlaceHolderImages.find(img => img.id === 'user-avatar')?.imageUrl ?? '',
 };
 
@@ -10,6 +11,21 @@ export const partner: Partner = {
   name: 'Parceiro(a)',
   avatarUrl: PlaceHolderImages.find(img => img.id === 'partner-avatar')?.imageUrl ?? '',
 };
+
+export const guests: Guest[] = [
+    {
+        id: '1',
+        name: 'Parceiro(a)',
+        email: 'parceiro@example.com',
+        avatarUrl: PlaceHolderImages.find(img => img.id === 'partner-avatar')?.imageUrl ?? '',
+    },
+    {
+        id: '2',
+        name: 'Maria Silva',
+        email: 'maria.silva@example.com',
+        avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1080',
+    }
+];
 
 export const goals: Goal[] = [
   {

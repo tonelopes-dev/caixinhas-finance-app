@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, Bell } from 'lucide-react';
 import type { User, Partner } from '@/lib/definitions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LogOut, User as UserIcon } from 'lucide-react';
+
 
 type HeaderProps = {
   user: User;
@@ -20,10 +30,6 @@ export default function Header({ user, partner }: HeaderProps) {
       </div>
       <div className="ml-auto flex items-center gap-4">
         <div className="flex -space-x-2">
-            <Avatar className="h-9 w-9 border-2 border-background">
-              <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="woman portrait"/>
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
             <Avatar className="h-9 w-9 border-2 border-background">
               <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
               <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
@@ -41,6 +47,38 @@ export default function Header({ user, partner }: HeaderProps) {
                 <span className="sr-only">Convites</span>
             </Link>
         </Button>
+         <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+               <Avatar className="h-9 w-9 border-2 border-background">
+                <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="woman portrait"/>
+                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+                <Link href="/profile">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Perfil</span>
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+                <LogOut className="mr-2 h-4 w-4" />
+              Sair
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
