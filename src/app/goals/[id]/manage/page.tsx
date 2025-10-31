@@ -29,8 +29,14 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   if (!goal) {
     notFound();
   }
+  
+  const defaultParticipants = [
+      { id: 'user', name: user.name, avatarUrl: user.avatarUrl, role: 'owner' as const },
+      { id: 'partner', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
+  ]
+  
+  const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
 
-  const participants = [user, partner];
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -104,7 +110,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
               <div className="space-y-4">
                 {participants.map((p, index) => (
                   <div
-                    key={index}
+                    key={p.id}
                     className="flex items-center justify-between rounded-lg border p-3"
                   >
                     <div className="flex items-center gap-4">
@@ -114,7 +120,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                       </Avatar>
                       <div>
                         <p className="font-medium">{p.name}</p>
-                        {index === 0 && (
+                        {p.role === 'owner' && (
                           <p className="text-xs text-muted-foreground">
                             Proprietário(a)
                           </p>
@@ -125,7 +131,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-destructive"
-                      disabled={index === 0}
+                      disabled={p.role === 'owner'}
                     >
                       <X className="h-4 w-4" />
                       <span className="sr-only">Remover</span>

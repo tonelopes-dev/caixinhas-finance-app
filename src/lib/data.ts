@@ -34,7 +34,19 @@ export const goals: Goal[] = [
     targetAmount: 20000,
     currentAmount: 7500,
     emoji: '✈️',
-    visibility: 'shared',
+    visibility: 'private',
+    participants: [
+        { id: 'user', name: 'Você', avatarUrl: user.avatarUrl, role: 'owner' },
+        { id: 'p1', name: 'Beatriz', avatarUrl: 'https://picsum.photos/seed/101/100', role: 'member' },
+        { id: 'p2', name: 'Carlos', avatarUrl: 'https://picsum.photos/seed/102/100', role: 'member' },
+        { id: 'p3', name: 'Daniela', avatarUrl: 'https://picsum.photos/seed/103/100', role: 'member' },
+        { id: 'p4', name: 'Eduardo', avatarUrl: 'https://picsum.photos/seed/104/100', role: 'member' },
+        { id: 'p5', name: 'Fernanda', avatarUrl: 'https://picsum.photos/seed/105/100', role: 'member' },
+        { id: 'p6', name: 'Gabriel', avatarUrl: 'https://picsum.photos/seed/106/100', role: 'member' },
+        { id: 'p7', name: 'Heloísa', avatarUrl: 'https://picsum.photos/seed/107/100', role: 'member' },
+        { id: 'p8', name: 'Igor', avatarUrl: 'https://picsum.photos/seed/108/100', role: 'member' },
+        { id: 'p9', name: 'Juliana', avatarUrl: 'https://picsum.photos/seed/109/100', role: 'member' },
+    ]
   },
   {
     id: '2',

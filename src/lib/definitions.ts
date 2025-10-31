@@ -7,6 +7,13 @@ export type Transaction = {
   category: string;
 };
 
+export type GoalParticipant = {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  role: 'owner' | 'member';
+}
+
 export type Goal = {
   id: string;
   name: string;
@@ -14,6 +21,7 @@ export type Goal = {
   currentAmount: number;
   emoji: string;
   visibility: 'shared' | 'private';
+  participants?: GoalParticipant[];
 };
 
 export type User = {
