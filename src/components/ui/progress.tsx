@@ -29,7 +29,7 @@ const Progress = React.forwardRef<
         }}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: isInView ? (value || 0) / 100 : 0 }}
-        transition={{ duration: 0.8, delay: 2, ease: "easeOut" }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
       />
     </ProgressPrimitive.Root>
   );
