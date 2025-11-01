@@ -54,39 +54,42 @@ const handleGoogleSignIn = () => {
 export default function LoginPage() {
   const router = useRouter();
   const { user, isUserLoading } = useUser();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isHandlingRedirect, setIsHandlingRedirect] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth();
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          // This is the signed-in user
-          const user = result.user;
-          // You can get the Google Access Token from the result.
-          // const credential = GoogleAuthProvider.credentialFromResult(result);
-          // const token = credential?.accessToken;
-          router.push('/');
-        } else {
-          setIsLoading(false);
-        }
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        console.error("Authentication error:", error);
-        setIsLoading(false);
-      });
-  }, [router]);
-
-  useEffect(() => {
-    // If user is already logged in (and not loading), redirect to dashboard
+    // If the user is already authenticated and no longer loading, redirect them.
     if (!isUserLoading && user) {
       router.push('/');
     }
   }, [user, isUserLoading, router]);
 
-  if (isUserLoading || isLoading || user) {
-    // Show a loading indicator while checking auth state or if user is already logged in
+  useEffect(() => {
+    // This effect specifically handles the redirect result from OAuth providers.
+    const auth = getAuth();
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          // User has successfully signed in.
+          // The `user` state from `useUser` will be updated by the onAuthStateChanged listener.
+          // The effect above will then handle the redirection.
+        }
+        // Whether there was a result or not, the redirect check is complete.
+        setIsHandlingRedirect(false);
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        console.error("Authentication redirect error:", error);
+        setIsHandlingRedirect(false);
+      });
+  }, []); // Run this check only once on component mount.
+
+
+  // Combine all loading states into one.
+  const isLoading = isUserLoading || isHandlingRedirect;
+  
+  if (isLoading || user) {
+     // Show a loading indicator while checking auth state or if user is already logged in.
+    // This prevents a flash of the login page.
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -94,6 +97,7 @@ export default function LoginPage() {
     );
   }
 
+  // Only render the login page if not loading and no user is authenticated.
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
