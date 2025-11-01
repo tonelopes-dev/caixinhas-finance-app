@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
-import { sendPasswordReset, type GenericState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,16 +8,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
-import { Separator } from '@/components/ui/separator';
-import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
-import { useFormStatus } from 'react-dom';
-import { getAuth, GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/firebase';
 
 function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -58,6 +52,48 @@ const handleGoogleSignIn = () => {
 
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { user, isUserLoading } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const auth = getAuth();
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          // This is the signed-in user
+          const user = result.user;
+          // You can get the Google Access Token from the result.
+          // const credential = GoogleAuthProvider.credentialFromResult(result);
+          // const token = credential?.accessToken;
+          router.push('/');
+        } else {
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        console.error("Authentication error:", error);
+        setIsLoading(false);
+      });
+  }, [router]);
+
+  useEffect(() => {
+    // If user is already logged in (and not loading), redirect to dashboard
+    if (!isUserLoading && user) {
+      router.push('/');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || isLoading || user) {
+    // Show a loading indicator while checking auth state or if user is already logged in
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
