@@ -1,3 +1,5 @@
+'use client';
+
 import Header from '@/components/dashboard/header';
 import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
@@ -7,8 +9,9 @@ import { goals, transactions, user, partner, totalIncome, totalExpenses } from '
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
+import withAuth from '@/components/auth/with-auth';
 
-export default function Home() {
+function HomePage() {
   const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
 
   return (
@@ -62,3 +65,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuth(HomePage);
