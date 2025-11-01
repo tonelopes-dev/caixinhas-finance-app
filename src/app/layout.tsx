@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { PwaPrompt } from '@/components/pwa-prompt';
+import { FirebaseClientProvider } from '@/firebase';
 
 const APP_NAME = "DreamVault";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -61,9 +62,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="font-body antialiased">
-        {children}
-        <Toaster />
-        <PwaPrompt />
+        <FirebaseClientProvider>
+          {children}
+          <Toaster />
+          <PwaPrompt />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

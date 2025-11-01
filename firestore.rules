@@ -25,123 +25,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Allows a user to read and write their own user document.
-     * @path /users/{userId}
-     * @allow (create, update, get, delete, list) if the user is signed in and the userId matches the authenticated user's ID.
-     *  e.g., request.auth.uid == 'user123' writing to /users/user123
-     * @deny (create, update, get, delete, list) if the user is not signed in or the userId does not match the authenticated user's ID.
-     *  e.g., request.auth.uid == 'user456' writing to /users/user123
-     * @principle Enforces document ownership based on the path.
-     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     match /users/{userId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return isSignedIn() && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && getAfter( ).data != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if false; // Listing users is not permitted.
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Allows read and write access to couple documents. Currently open to any signed-in user for prototyping, but eventually should be restricted to the involved users.
-     * @path /couples/{coupleId}
-     * @allow (create, update, get, delete, list) if the user is signed in.
-     * @deny (create, update, get, delete, list) if the user is not signed in.
-     * @principle Basic authentication required for any couple-related operation.
-     */
     match /couples/{coupleId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-       // For now, allow any signed-in user to create/modify couples.
-       // **IMPORTANT**: This is for prototyping only and MUST be updated
-       // to restrict access to the two users involved in the couple.
-       allow get, list, create, update, delete: if isSignedIn();
+      // For now, allow any signed-in user to read/write.
+      // This should be locked down to only the users in the couple.
+      allow read, write: if isSignedIn();
     }
 
-    /**
-     * @description Allows read and write access to transaction documents within a specific couple. Checks that the coupleId matches.
-     * @path /couples/{coupleId}/transactions/{transactionId}
-     * @allow (create, update, get, delete, list) if the user is signed in and the coupleId matches the document's coupleId.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/transactions/transaction789 where resource.data.coupleId == 'couple456'
-     * @deny (create, update, get, delete, list) if the user is not signed in or the coupleId does not match.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/transactions/transaction789 where resource.data.coupleId != 'couple456'
-     * @principle Enforces relationship-based access control.
-     */
     match /couples/{coupleId}/transactions/{transactionId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isExistingCoupleDocument(coupleId) {
-        return isSignedIn() && getAfter().data != null && getAfter().data.coupleId == coupleId;
-      }
-
-      allow get, list: if isSignedIn(); // For now, allow any signed-in user to read transactions.
-      allow create: if isSignedIn() && request.resource.data.coupleId == coupleId;
-      allow update: if isSignedIn() && request.resource.data.coupleId == coupleId && request.resource.data.coupleId == getAfter().data.coupleId;
-      allow delete: if isSignedIn() && getAfter().data.coupleId == coupleId;
+      // Users can only manage transactions if they are signed in.
+      allow read, write: if isSignedIn();
     }
 
-    /**
-     * @description Allows read and write access to category documents within a specific couple. Checks that the coupleId matches.
-     * @path /couples/{coupleId}/categories/{categoryId}
-     * @allow (create, update, get, delete, list) if the user is signed in and the coupleId matches the document's coupleId.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/categories/category789 where resource.data.coupleId == 'couple456'
-     * @deny (create, update, get, delete, list) if the user is not signed in or the coupleId does not match.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/categories/category789 where resource.data.coupleId != 'couple456'
-     * @principle Enforces relationship-based access control.
-     */
     match /couples/{coupleId}/categories/{categoryId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isExistingCoupleDocument(coupleId) {
-        return isSignedIn() && getAfter().data != null && getAfter().data.coupleId == coupleId;
-      }
-
-      allow get, list: if isSignedIn(); // For now, allow any signed-in user to read categories.
-      allow create: if isSignedIn() && request.resource.data.coupleId == coupleId;
-      allow update: if isSignedIn() && request.resource.data.coupleId == coupleId && request.resource.data.coupleId == getAfter().data.coupleId;
-      allow delete: if isSignedIn() && getAfter().data.coupleId == coupleId;
+      // Users can only manage categories if they are signed in.
+      allow read, write: if isSignedIn();
     }
 
-    /**
-     * @description Allows read and write access to goal bucket documents within a specific couple. Checks that the coupleId matches.
-     * @path /couples/{coupleId}/goalBuckets/{goalBucketId}
-     * @allow (create, update, get, delete, list) if the user is signed in and the coupleId matches the document's coupleId.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/goalBuckets/goalBucket789 where resource.data.coupleId == 'couple456'
-     * @deny (create, update, get, delete, list) if the user is not signed in or the coupleId does not match.
-     *  e.g., request.auth.uid == 'user123' writing to /couples/couple456/goalBuckets/goalBucket789 where resource.data.coupleId != 'couple456'
-     * @principle Enforces relationship-based access control.
-     */
     match /couples/{coupleId}/goalBuckets/{goalBucketId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isExistingCoupleDocument(coupleId) {
-        return isSignedIn() && getAfter().data != null && getAfter().data.coupleId == coupleId;
-      }
-
-      allow get, list: if isSignedIn(); // For now, allow any signed-in user to read goalBuckets.
-      allow create: if isSignedIn() && request.resource.data.coupleId == coupleId;
-      allow update: if isSignedIn() && request.resource.data.coupleId == coupleId && request.resource.data.coupleId == getAfter().data.coupleId;
-      allow delete: if isSignedIn() && getAfter().data.coupleId == coupleId;
+      // Users can only manage goal buckets if they are signed in.
+      allow read, write: if isSignedIn();
     }
   }
 }

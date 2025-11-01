@@ -16,67 +16,9 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useFormStatus } from 'react-dom';
-
-
-function ResetPasswordDialog() {
-    const initialState: GenericState = {};
-    const [state, dispatch] = useActionState(sendPasswordReset, initialState);
-    const { toast } = useToast();
-    const formRef = useRef<HTMLFormElement>(null);
-    const [open, setOpen] = useState(false);
-    const { pending } = useFormStatus();
-
-    useEffect(() => {
-        if(state.message) {
-            toast({ title: "Redefinição de Senha", description: state.message });
-            setOpen(false);
-            formRef.current?.reset();
-        }
-    }, [state, toast]);
-    
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                 <Link href="#" className="ml-auto inline-block text-sm underline">
-                    Esqueceu sua senha?
-                </Link>
-            </DialogTrigger>
-            <DialogContent>
-                <form action={dispatch} ref={formRef}>
-                    <DialogHeader>
-                        <DialogTitle>Redefinir Senha</DialogTitle>
-                        <DialogDescription>
-                            Digite seu e-mail para enviarmos um link de redefinição de senha.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email-reset">E-mail</Label>
-                            <Input
-                                id="email-reset"
-                                name="email"
-                                type="email"
-                                placeholder="nome@example.com"
-                                required
-                            />
-                            {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="ghost">Cancelar</Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={pending}>{pending ? 'Enviando...' : 'Enviar Link'}</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
-}
+import { getAuth, GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
 
 function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -108,6 +50,12 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     )
 }
 
+const handleGoogleSignIn = () => {
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+    signInWithRedirect(auth, provider);
+};
+
 
 export default function LoginPage() {
   return (
@@ -117,46 +65,21 @@ export default function LoginPage() {
           <div className="mx-auto mb-4">
             <Logo className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-headline">Bem-vindo(a) de volta!</CardTitle>
+          <CardTitle className="text-2xl font-headline">Bem-vindo(a)!</CardTitle>
           <CardDescription>
-            Entre na sua conta para continuar planejando seus sonhos.
+            Entre com sua conta Google para começar a planejar seus sonhos.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" placeholder="nome@example.com" required />
-          </div>
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Senha</Label>
-              <ResetPasswordDialog />
-            </div>
-            <Input id="password" type="password" required />
-          </div>
-          <Button type="submit" className="w-full">
-            Entrar
-          </Button>
-            <Separator className='my-2' />
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline">
+          <Button variant="outline" onClick={handleGoogleSignIn} className="w-full">
                 <GoogleIcon className="mr-2 h-4 w-4" />
-                Google
-            </Button>
-            <Button variant="outline">
+                Entrar com Google
+          </Button>
+          <Button variant="outline" className="w-full">
                 <AppleIcon className="mr-2 h-4 w-4" />
-                Apple
+                Entrar com Apple
             </Button>
-          </div>
         </CardContent>
-        <CardFooter className="justify-center text-sm">
-          <p>
-            Não tem uma conta?{' '}
-            <Link href="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
     </div>
   );
