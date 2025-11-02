@@ -15,10 +15,11 @@ type RecentTransactionsProps = {
   transactions: Transaction[];
   ownerId: string;
   ownerType: 'user' | 'vault';
+  typeFilter: 'all' | 'income' | 'expense';
+  onFilterChange: (filter: 'all' | 'income' | 'expense' | 'transfer') => void;
 };
 
-export default function RecentTransactions({ transactions, ownerId, ownerType }: RecentTransactionsProps) {
-    const [typeFilter, setTypeFilter] = useState('all');
+export default function RecentTransactions({ transactions, ownerId, ownerType, typeFilter, onFilterChange }: RecentTransactionsProps) {
 
     const baseTransactions = useMemo(() => {
         // Sort by most recent
@@ -48,7 +49,7 @@ export default function RecentTransactions({ transactions, ownerId, ownerType }:
           <CardDescription>O dia a dia financeiro deste espaço.</CardDescription>
         </div>
         <div className="flex items-center gap-2">
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={(value) => onFilterChange(value as any)}>
                 <SelectTrigger className="w-auto h-9">
                     <ListFilter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Filtrar" />

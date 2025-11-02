@@ -24,6 +24,7 @@ function HomePage() {
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [transactionFilter, setTransactionFilter] = useState<'all' | 'income' | 'expense'>('all');
   
   useEffect(() => {
     const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
@@ -133,10 +134,18 @@ function HomePage() {
                 <BalanceSummary
                   income={totalIncome}
                   expenses={totalExpenses}
+                  onFilterChange={setTransactionFilter}
+                  activeFilter={transactionFilter}
                 />
               </AnimatedDiv>
               <AnimatedDiv transition={{ delay: 0.2 }}>
-                <RecentTransactions transactions={transactions} ownerId={workspaceId} ownerType={workspaceId === currentUser.id ? 'user' : 'vault'} />
+                <RecentTransactions 
+                    transactions={transactions} 
+                    ownerId={workspaceId} 
+                    ownerType={workspaceId === currentUser.id ? 'user' : 'vault'} 
+                    typeFilter={transactionFilter}
+                    onFilterChange={setTransactionFilter}
+                />
               </AnimatedDiv>
             </div>
             <div className="grid auto-rows-max items-start gap-8">
