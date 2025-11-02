@@ -10,17 +10,52 @@ import { IncomeVsExpenseChart } from '@/components/dashboard/charts/income-vs-ex
 import { NetWorthChart } from '@/components/dashboard/charts/net-worth-chart';
 import { GoalProgressChart } from '@/components/dashboard/charts/goal-progress-chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMemo, useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { subDays, startOfMonth, startOfYear } from 'date-fns';
+
+type Period = 'this_month' | 'last_30_days' | 'this_year' | 'all_time';
 
 export default function DashboardPage() {
-    // Process data for charts
-    const expensesByCategory = transactions
+    const [period, setPeriod] = useState<Period>('this_month');
+
+    const filteredTransactions = useMemo(() => {
+        const now = new Date();
+        let startDate: Date;
+
+        switch (period) {
+            case 'this_month':
+                startDate = startOfMonth(now);
+                break;
+            case 'last_30_days':
+                startDate = subDays(now, 30);
+                break;
+            case 'this_year':
+                startDate = startOfYear(now);
+                break;
+            case 'all_time':
+                return transactions;
+        }
+
+        return transactions.filter(t => new Date(t.date) >= startDate);
+    }, [period]);
+    
+
+    // Process data for charts using filteredTransactions
+    const expensesByCategory = filteredTransactions
         .filter(t => t.type === 'expense')
         .reduce((acc, t) => {
             acc[t.category] = (acc[t.category] || 0) + t.amount;
             return acc;
         }, {} as Record<string, number>);
 
-    const incomeVsExpenseData = transactions.reduce((acc, t) => {
+    const incomeVsExpenseData = filteredTransactions.reduce((acc, t) => {
         const month = new Date(t.date).toLocaleString('default', { month: 'short', timeZone: 'UTC' });
         if (!acc[month]) {
             acc[month] = { month, income: 0, expenses: 0 };
@@ -48,9 +83,25 @@ export default function DashboardPage() {
             Voltar para o Painel
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground mb-8">
-            Dashboard Financeiro
-        </h1>
+        <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-8'>
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
+                Dashboard Financeiro
+            </h1>
+            <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <span className="text-sm text-muted-foreground">Período:</span>
+                <Select value={period} onValueChange={(value: Period) => setPeriod(value)}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Selecione o período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="this_month">Este Mês</SelectItem>
+                        <SelectItem value="last_30_days">Últimos 30 dias</SelectItem>
+                        <SelectItem value="this_year">Este Ano</SelectItem>
+                        <SelectItem value="all_time">Desde o início</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
              <AnimatedDiv className="lg:col-span-2">
@@ -63,7 +114,7 @@ export default function DashboardPage() {
                 <GoalProgressChart data={goals} />
             </AnimatedDiv>
             <AnimatedDiv className="lg:col-span-2">
-                <NetWorthChart data={transactions} initialBalance={50000} />
+                <NetWorthChart data={filteredTransactions} initialBalance={50000} />
             </AnimatedDiv>
              <AnimatedDiv className="md:col-span-2 lg:col-span-3">
                  <Card>
@@ -81,8 +132,8 @@ export default function DashboardPage() {
                             <p className="text-2xl font-bold">{goals.reduce((sum, g) => sum + g.currentAmount, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                         <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Transações no Mês</p>
-                            <p className="text-2xl font-bold">{transactions.filter(t => new Date(t.date).getMonth() === new Date().getMonth()).length}</p>
+                            <p className="text-sm text-muted-foreground">Transações no Período</p>
+                            <p className="text-2xl font-bold">{filteredTransactions.length}</p>
                         </div>
                         <div className="rounded-lg border p-4">
                             <p className="text-sm text-muted-foreground">Meta Mais Próxima</p>
