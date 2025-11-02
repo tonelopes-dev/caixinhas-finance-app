@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, Bell, BookOpen } from 'lucide-react';
+import { UserPlus, Bell, BookOpen, ArrowRightLeft } from 'lucide-react';
 import type { User, Partner } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { invitations } from '@/lib/data';
+import { useRouter } from 'next/navigation';
 
 
 type HeaderProps = {
@@ -25,7 +26,14 @@ type HeaderProps = {
 };
 
 export default function Header({ user, partner }: HeaderProps) {
+  const router = useRouter();
   const pendingInvitationsCount = invitations.filter(inv => inv.status === 'pending').length;
+
+  const handleLogout = () => {
+    localStorage.removeItem('DREAMVAULT_USER_ID');
+    sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
+    router.push('/login');
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -89,13 +97,17 @@ export default function Header({ user, partner }: HeaderProps) {
                     <span>Tutorial</span>
                 </Link>
             </DropdownMenuItem>
+             <DropdownMenuItem asChild>
+                <Link href="/vaults">
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    <span>Mudar de Cofre</span>
+                </Link>
+            </DropdownMenuItem>
             <ThemeSwitcher />
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/login">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Link>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
