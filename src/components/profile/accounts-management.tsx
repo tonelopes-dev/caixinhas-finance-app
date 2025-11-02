@@ -188,6 +188,7 @@ function DeleteAccountDialog({ accountName }: { accountName: string }) {
 export function AccountsManagement() {
     const [open, setOpen] = React.useState(false);
     const [accountType, setAccountType] = React.useState<Account['type'] | ''>('');
+    const [selectedLogo, setSelectedLogo] = React.useState<string | undefined>();
 
 
   return (
@@ -214,6 +215,23 @@ export function AccountsManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+               <div className="space-y-2">
+                    <Label>Logo do Banco</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {bankLogos.map((logo, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setSelectedLogo(logo)}
+                                className={cn(
+                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted p-1 transition-all",
+                                    selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
+                                )}
+                            >
+                                <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-8 w-8 object-contain" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
                <div className="space-y-2">
                 <Label htmlFor="account-type">Tipo</Label>
                  <Select name="account-type" onValueChange={(v) => setAccountType(v as Account['type'])}>
