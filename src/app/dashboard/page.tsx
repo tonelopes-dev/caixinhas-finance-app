@@ -10,7 +10,7 @@ import { IncomeVsExpenseChart } from '@/components/dashboard/charts/income-vs-ex
 import { NetWorthChart } from '@/components/dashboard/charts/net-worth-chart';
 import { GoalProgressChart } from '@/components/dashboard/charts/goal-progress-chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
