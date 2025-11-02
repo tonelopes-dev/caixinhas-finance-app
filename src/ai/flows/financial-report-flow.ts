@@ -43,8 +43,11 @@ const reportPrompt = ai.definePrompt({
   output: { schema: FinancialReportOutputSchema },
   prompt: `Você é um analista financeiro de elite, especializado em finanças para casais. Sua tarefa é criar um relatório de saúde financeira profissional, detalhado e encorajador para o mês de {{month}}, baseado nas transações fornecidas.
 
-Use o seguinte formato HTML para a sua resposta. Seja direto, informativo e use uma linguagem positiva.
+**Tarefa:**
+Gere uma análise completa usando **exclusivamente** o formato HTML especificado abaixo. Seja direto, informativo e use uma linguagem positiva.
 
+**Formato de Saída Obrigatório:**
+\`\`\`html
 <h3>Análise Financeira de {{month}}</h3>
 
 <h4>⭐ Resumo Executivo</h4>
@@ -68,13 +71,14 @@ Use o seguinte formato HTML para a sua resposta. Seja direto, informativo e use 
 <p>Analise as transferências para as caixinhas (transações com categoria 'Caixinha' ou tipo 'transfer' para uma meta). Comente se as contribuições foram consistentes e como isso impacta os objetivos.</p>
 
 <h4>🧠 Insights e Recomendações Práticas</h4>
-<p>Com base em <b>toda</b> a análise, forneça 2-3 insights práticos e acionáveis em uma lista ordenada (ol). As sugestões devem ser específicas e personalizadas.</p>
+<p>Com base em toda a análise, forneça 2-3 insights práticos e acionáveis em uma lista ordenada.</p>
 <ol>
     <li><b>Exemplo de Insight 1:</b> "Percebi que a categoria 'Lazer' representou 25% dos gastos. Que tal explorar programas gratuitos na cidade no próximo mês para acelerar a meta da 'Reforma da Cozinha'?"</li>
     <li><b>Exemplo de Insight 2:</b> "Sua taxa de poupança de 21% é fantástica! Para otimizar ainda mais, considerem automatizar uma pequena transferência para o 'Fundo de Emergência' logo no início do mês."</li>
 </ol>
+\`\`\`
 
-**Transações do Mês (JSON):**
+**Dados para Análise (Transações do Mês em JSON):**
 {{{transactions}}}
 `,
 });
