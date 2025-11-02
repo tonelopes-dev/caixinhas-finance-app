@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useTransition } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFormStatus, useFormState } from 'react-dom';
 import Link from 'next/link';
 import { ArrowLeft, Bot, FileText, Send, User as UserIcon } from 'lucide-react';
@@ -64,7 +64,7 @@ function ReportsPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState(false);
 
-  const [month, setMonth] = useState((new Date().getMonth()).toString());
+  const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
 
   const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
@@ -163,7 +163,7 @@ function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={generateReportAction} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
+            <form action={generateReportAction} className="flex flex-col md:flex-row items-end gap-4 rounded-lg border p-4 mb-6">
                 <input type="hidden" name="ownerId" value={workspaceId} />
                 <div className='flex-1 grid grid-cols-2 gap-4'>
                     <div className="space-y-2">
