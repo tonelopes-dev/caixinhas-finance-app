@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowLeft, Bell, Check, Circle, CircleDot, X } from 'lucide-react';
+import { ArrowLeft, Bell, Check, CircleDot, ClipboardCheck, Trash2 } from 'lucide-react';
 import { notifications as allNotifications, invitations } from '@/lib/data';
 import { useState } from 'react';
 import type { Notification } from '@/lib/definitions';
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DeclineInvitationDialog } from '@/components/invitations/decline-invitation-dialog';
+import { DeleteNotificationDialog } from '@/components/notifications/delete-notification-dialog';
 
 
 const getNotificationIcon = (type: Notification['type']) => {
@@ -53,6 +54,10 @@ export default function NotificationsPage() {
         setNotifications(notifications.map(n => ({...n, read: true})));
     }
     
+    const deleteNotification = (id: string) => {
+        setNotifications(notifications.filter(n => n.id !== id));
+    }
+
     const filteredNotifications = notifications.filter(n => {
         if (filter === 'all') return true;
         if (filter === 'read') return n.read;
@@ -112,7 +117,7 @@ export default function NotificationsPage() {
                           <p className="text-xs">{new Date(notification.timestamp).toLocaleString('pt-BR')}</p>
                       </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     {isInvite && inviteData ? (
                         <>
                             <Button variant="outline" size="icon" className='h-8 w-8'>
@@ -122,10 +127,17 @@ export default function NotificationsPage() {
                             <DeclineInvitationDialog invitation={inviteData} />
                         </>
                     ) : (
-                        <Button variant="ghost" size="icon" onClick={() => toggleRead(notification.id)} title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}>
-                            {notification.read ? <Circle className="h-5 w-5" /> : <CircleDot className="h-5 w-5 text-primary" />}
-                            <span className="sr-only">{notification.read ? 'Marcar como não lida' : 'Marcar como lida'}</span>
-                        </Button>
+                        <>
+                            <Button variant="ghost" size="icon" onClick={() => toggleRead(notification.id)} title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}>
+                                {notification.read ? <ClipboardCheck className="h-5 w-5" /> : <CircleDot className="h-5 w-5 text-primary" />}
+                                <span className="sr-only">{notification.read ? 'Marcar como não lida' : 'Marcar como lida'}</span>
+                            </Button>
+                            <DeleteNotificationDialog
+                                notificationId={notification.id}
+                                notificationText={notification.text}
+                                onDelete={deleteNotification}
+                            />
+                        </>
                     )}
                   </div>
                 </div>

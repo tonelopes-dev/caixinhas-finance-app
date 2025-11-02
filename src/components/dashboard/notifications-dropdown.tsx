@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Bell, Circle, CircleDot } from 'lucide-react';
+import { Bell, CircleDot, ClipboardCheck } from 'lucide-react';
 import { notifications as mockNotifications } from '@/lib/data';
 import type { Notification } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
@@ -87,7 +87,7 @@ export function NotificationsDropdown() {
                         onClick={(e) => toggleRead(notification.id, e)}
                         title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}
                     >
-                        {notification.read ? <Circle className="h-4 w-4" /> : <CircleDot className="h-4 w-4 text-primary" />}
+                        {notification.read ? <ClipboardCheck className="h-4 w-4" /> : <CircleDot className="h-4 w-4 text-primary" />}
                     </Button>
                 </Link>
             </DropdownMenuItem>
