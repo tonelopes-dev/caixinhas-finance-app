@@ -13,16 +13,16 @@ import { useMemo, useState } from 'react';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
+  ownerId: string;
+  ownerType: 'user' | 'vault';
 };
 
-export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions, ownerId, ownerType }: RecentTransactionsProps) {
     const [typeFilter, setTypeFilter] = useState('all');
 
     const baseTransactions = useMemo(() => {
-        // Exclude transfers from the main dashboard view, and sort by most recent
-        return transactions
-            .filter(t => t.type !== 'transfer')
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Sort by most recent
+        return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [transactions]);
 
     const filteredTransactions = useMemo(() => {
@@ -45,7 +45,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="font-headline">Transações Recentes</CardTitle>
-          <CardDescription>O dia a dia financeiro de vocês.</CardDescription>
+          <CardDescription>O dia a dia financeiro deste espaço.</CardDescription>
         </div>
         <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -57,6 +57,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                     <SelectItem value="all">Todas</SelectItem>
                     <SelectItem value="income">Entradas</SelectItem>
                     <SelectItem value="expense">Saídas</SelectItem>
+                    <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
             <AddTransactionSheet />

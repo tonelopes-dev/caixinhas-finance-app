@@ -38,10 +38,15 @@ function GoalPage() {
 
     useEffect(() => {
         const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+        if (!userId) {
+            router.push('/login');
+            return;
+        }
+
         const { userGoals, userVaults: vaultsForUser } = getMockDataForUser(userId);
         setAllGoals(userGoals);
         setUserVaults(vaultsForUser);
-    }, []);
+    }, [router]);
 
     const toggleFeatured = (goalId: string) => {
         setAllGoals(allGoals.map(g => g.id === goalId ? { ...g, isFeatured: !g.isFeatured } : g));
@@ -73,14 +78,23 @@ function GoalPage() {
               Todas as Suas Caixinhas
             </CardTitle>
             <CardDescription>
-              Acompanhe e gerencie o progresso de todos os seus sonhos, de todos os seus cofres.
+              Acompanhe e gerencie o progresso de todos os seus sonhos, pessoais e compartilhados.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 md:grid-cols-2">
             {allGoals.map((goal) => {
               const progress = (goal.currentAmount / goal.targetAmount) * 100;
-              const vault = vaults.find(v => v.id === goal.vaultId);
-              const canAccessVault = vault ? isUserMemberOfVault(vault.id) : false;
+              let ownerName = '';
+              let ownerContext: Vault | { id: string; name: string } | undefined;
+
+              if (goal.ownerType === 'vault') {
+                  ownerContext = vaults.find(v => v.id === goal.ownerId);
+                  ownerName = ownerContext?.name || 'Cofre';
+              } else {
+                  ownerName = 'Pessoal';
+              }
+
+              const canAccessVault = ownerContext ? isUserMemberOfVault(ownerContext.id) : false;
 
               return (
                   <Card key={goal.id} className="flex h-full flex-col transition-all hover:shadow-md">
@@ -143,15 +157,18 @@ function GoalPage() {
                                 {goal.participants && goal.participants.length > 1 ? `${goal.participants.length} participantes` : 'Apenas você'}
                             </span>
                         </div>
-                         {vault && canAccessVault && (
+                         {ownerContext && canAccessVault && (
                              <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)}>
-                                            <span className='text-xs'>{vault.name}</span>
+                                        <Button variant="ghost" size="sm" onClick={() => handleGoToVault(ownerContext!.id)}>
+                                            <span className='text-xs'>{ownerName}</span>
                                             <ChevronsRight className="ml-1 h-4 w-4" />
                                         </Button>
                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                        <p>Ir para o cofre {ownerName}</p>
+                                    </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
                          )}
@@ -175,5 +192,3 @@ function GoalPage() {
 }
 
 export default withAuth(GoalPage);
-
-    

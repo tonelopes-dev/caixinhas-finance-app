@@ -7,65 +7,76 @@ import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
-import { goals as allGoals, transactions as allTransactions, users, vaults, getMockDataForUser } from '@/lib/data';
+import { goals as allGoals, transactions as allTransactions, users, vaults, getMockDataForUser, accounts } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import withAuth from '@/components/auth/with-auth';
-import type { Goal, Transaction, Vault, User, Partner } from '@/lib/definitions';
+import type { Goal, Transaction, Vault, User } from '@/lib/definitions';
 
 function HomePage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentPartner, setCurrentPartner] = useState<Partner | null>(null);
-  const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
+  const [partner, setPartner] = useState<User | null>(null);
+  
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const [workspaceName, setWorkspaceName] = useState<string>('');
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   
   useEffect(() => {
-    const vaultId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
     
     if (!userId) {
         router.push('/login');
         return;
     }
-
-    const { currentUser: userFromMock, userVaults } = getMockDataForUser(userId);
-    
-    if (userFromMock) {
-        setCurrentUser(userFromMock);
-        const partnerUser = users.find(u => u.id !== userId && userVaults.some(uv => uv.members.some(m => m.id === u.id)));
-        if (partnerUser) {
-            setCurrentPartner(partnerUser);
-        }
+    if (!selectedWorkspaceId) {
+        router.push('/vaults');
+        return;
     }
 
-    if (!vaultId) {
-      router.push('/vaults');
-    } else {
-      const vault = vaults.find(v => v.id === vaultId);
-      if (vault) {
-        setSelectedVault(vault);
-        setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
-        
-        // Corrected goal filtering logic
-        const vaultGoals = allGoals.filter(g => g.vaultId === vaultId);
-        const accessibleGoals = vaultGoals.filter(g => {
-            if (g.visibility === 'shared') {
-                return true; // Visible to all vault members
-            }
-            if (g.visibility === 'private') {
-                // Only visible if the current user is a participant
-                return g.participants?.some(p => p.id === userId);
-            }
-            return false;
-        });
-        setGoals(accessibleGoals);
+    const { currentUser: userFromMock } = getMockDataForUser(userId);
+    if (userFromMock) {
+        setCurrentUser(userFromMock);
+    }
+    
+    setWorkspaceId(selectedWorkspaceId);
 
-      } else {
-        router.push('/vaults');
-      }
+    // Determine if workspace is a personal account or a vault
+    if (selectedWorkspaceId === userId) {
+        // It's the user's personal account
+        const { userTransactions, userGoals } = getMockDataForUser(userId);
+        setWorkspaceName("Minha Conta Pessoal");
+        setTransactions(userTransactions);
+        setGoals(userGoals.filter(g => g.ownerType === 'user'));
+        setPartner(null); // No specific partner in personal view
+
+    } else {
+        // It's a vault
+        const vault = vaults.find(v => v.id === selectedWorkspaceId);
+        if (vault) {
+            setWorkspaceName(vault.name);
+            setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === 'vault'));
+            
+            // Filter goals for the vault, respecting visibility
+            const vaultGoals = allGoals.filter(g => g.ownerId === selectedWorkspaceId && g.ownerType === 'vault');
+            setGoals(vaultGoals);
+
+            // Set partner if it's a shared vault
+            const otherMember = vault.members.find(m => m.id !== userId);
+            if (otherMember) {
+                setPartner(otherMember)
+            } else {
+                setPartner(null);
+            }
+
+        } else {
+            console.error("Vault not found, redirecting.");
+            router.push('/vaults'); // Redirect if vault ID is invalid
+        }
     }
   }, [router]);
 
@@ -85,7 +96,7 @@ function HomePage() {
 
   const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
 
-  if (!selectedVault || !currentUser || !currentPartner) {
+  if (!currentUser || !workspaceId) {
      return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -95,16 +106,19 @@ function HomePage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header user={currentUser} partner={currentPartner} />
+      <Header user={currentUser} partner={partner} />
       <main className="flex-1 p-4 md:p-8 lg:p-10">
         <div className="mx-auto grid w-full max-w-7xl gap-8">
           <AnimatedDiv>
             <div className="flex flex-col gap-2">
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-                Painel de Controle: <span className="text-primary">{selectedVault.name}</span>
+                Painel: <span className="text-primary">{workspaceName}</span>
               </h1>
               <p className="text-muted-foreground font-headline">
-                “Sonhar juntos é o primeiro passo para conquistar.”
+                {workspaceId === currentUser.id 
+                    ? "Seu centro de comando financeiro pessoal."
+                    : "“Sonhar juntos é o primeiro passo para conquistar.”"
+                }
               </p>
             </div>
           </AnimatedDiv>
@@ -122,7 +136,7 @@ function HomePage() {
                 />
               </AnimatedDiv>
               <AnimatedDiv transition={{ delay: 0.2 }}>
-                <RecentTransactions transactions={transactions} />
+                <RecentTransactions transactions={transactions} ownerId={workspaceId} ownerType={workspaceId === currentUser.id ? 'user' : 'vault'} />
               </AnimatedDiv>
             </div>
             <div className="grid auto-rows-max items-start gap-8">

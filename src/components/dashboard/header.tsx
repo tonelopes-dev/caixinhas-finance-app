@@ -5,7 +5,7 @@ import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, Bell, BookOpen, ArrowRightLeft } from 'lucide-react';
-import type { User, Partner } from '@/lib/definitions';
+import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 
 type HeaderProps = {
   user: User;
-  partner: Partner;
+  partner: User | null; // Partner can be null
 };
 
 export default function Header({ user, partner }: HeaderProps) {
@@ -37,17 +37,19 @@ export default function Header({ user, partner }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/vaults" className="flex items-center gap-2">
         <Logo className="h-8 w-8" />
         <h1 className="font-headline hidden sm:block text-xl font-bold text-foreground">DreamVault</h1>
       </Link>
       <div className="flex items-center gap-2 md:gap-4">
-        <div className="flex -space-x-2">
-            <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
-              <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
-              <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-        </div>
+        {partner && (
+            <div className="flex -space-x-2">
+                <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
+                <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
+                <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+            </div>
+        )}
         <Button variant="outline" size="sm" asChild>
           <Link href="/invite">
             <UserPlus className="h-4 w-4 md:mr-2" />
@@ -100,7 +102,7 @@ export default function Header({ user, partner }: HeaderProps) {
              <DropdownMenuItem asChild>
                 <Link href="/vaults">
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
-                    <span>Mudar de Cofre</span>
+                    <span>Mudar de Espaço</span>
                 </Link>
             </DropdownMenuItem>
             <ThemeSwitcher />

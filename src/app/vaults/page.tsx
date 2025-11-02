@@ -3,26 +3,26 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMockDataForUser, type User as UserType } from '@/lib/data';
+import { getMockDataForUser, type User as UserType, vaults as allVaults } from '@/lib/data';
 import type { Vault, VaultInvitation } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Mail, Plus, X } from 'lucide-react';
+import { Check, Mail, Plus, X, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Logo } from '@/components/logo';
 
-function VaultCard({ vault, onSelect }: { vault: Vault; onSelect: (id: string) => void }) {
+function WorkspaceCard({ id, name, imageUrl, members, onSelect }: { id: string; name: string; imageUrl: string; members: UserType[], onSelect: (id: string) => void }) {
   return (
     <Card
-      onClick={() => onSelect(vault.id)}
-      className="cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-xl"
+      onClick={() => onSelect(id)}
+      className="cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-xl group"
     >
       <CardHeader className="p-0">
         <div className="relative h-40 w-full">
           <Image
-            src={vault.imageUrl}
-            alt={vault.name}
+            src={imageUrl}
+            alt={name}
             fill
             className="object-cover rounded-t-lg"
           />
@@ -30,19 +30,22 @@ function VaultCard({ vault, onSelect }: { vault: Vault; onSelect: (id: string) =
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <CardTitle className="text-lg font-bold">{vault.name}</CardTitle>
-        <div className="flex -space-x-2 overflow-hidden mt-2">
-            {vault.members.map(member => (
-                 <Avatar key={member.id} className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                    <AvatarImage src={member.avatarUrl} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-            ))}
-        </div>
+        <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{name}</CardTitle>
+        {members && (
+            <div className="flex -space-x-2 overflow-hidden mt-2">
+                {members.map(member => (
+                    <Avatar key={member.id} className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                        <AvatarImage src={member.avatarUrl} alt={member.name} />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                ))}
+            </div>
+        )}
       </CardContent>
     </Card>
   );
 }
+
 
 function InvitationCard({ invitation }: { invitation: VaultInvitation }) {
   return (
@@ -85,8 +88,9 @@ export default function VaultSelectionPage() {
 
   }, [router]);
 
-  const handleSelectVault = (vaultId: string) => {
-    sessionStorage.setItem('DREAMVAULT_VAULT_ID', vaultId);
+  const handleSelectWorkspace = (workspaceId: string) => {
+    // workspaceId can be a userId or a vaultId
+    sessionStorage.setItem('DREAMVAULT_VAULT_ID', workspaceId);
     router.push('/');
   };
   
@@ -124,7 +128,7 @@ export default function VaultSelectionPage() {
         <main>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold font-headline tracking-tight">Bem-vindo(a), {currentUser.name.split(' ')[0]}!</h2>
-            <p className="text-muted-foreground mt-2">Escolha um cofre para começar a planejar ou aceite um convite.</p>
+            <p className="text-muted-foreground mt-2">Escolha um espaço de trabalho para começar a planejar.</p>
           </div>
 
           {userInvitations.length > 0 && (
@@ -137,28 +141,37 @@ export default function VaultSelectionPage() {
           )}
           
           <div>
-            <h3 className="text-xl font-semibold mb-4">Seus Cofres</h3>
-             {userVaults.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {userVaults.map(vault => (
-                        <VaultCard key={vault.id} vault={vault} onSelect={handleSelectVault} />
-                    ))}
-                     <Card className="flex flex-col items-center justify-center border-dashed border-2 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50">
-                        <CardContent className="p-6 text-center">
-                            <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                            <p className="font-semibold">Criar Novo Cofre</p>
-                        </CardContent>
-                    </Card>
-                </div>
-             ) : (
-                 <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground">Você ainda não tem nenhum cofre.</p>
-                    <Button className="mt-4">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Criar meu primeiro cofre
-                    </Button>
-                 </div>
-             )}
+            <h3 className="text-xl font-semibold mb-4">Seus Espaços</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {/* Personal Account Card */}
+                <WorkspaceCard 
+                    id={currentUser.id}
+                    name="Minha Conta Pessoal"
+                    imageUrl={currentUser.avatarUrl}
+                    members={[currentUser]}
+                    onSelect={handleSelectWorkspace}
+                />
+
+                {/* Vault Cards */}
+                {userVaults.map(vault => (
+                    <WorkspaceCard 
+                        key={vault.id} 
+                        id={vault.id}
+                        name={vault.name}
+                        imageUrl={vault.imageUrl}
+                        members={vault.members}
+                        onSelect={handleSelectWorkspace} 
+                    />
+                ))}
+                
+                {/* Create New Vault Card */}
+                <Card className="flex flex-col items-center justify-center border-dashed border-2 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50">
+                    <CardContent className="p-6 text-center">
+                        <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                        <p className="font-semibold">Criar Novo Cofre</p>
+                    </CardContent>
+                </Card>
+            </div>
           </div>
         </main>
       </div>

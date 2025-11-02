@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
-import { transactions as allTransactions, accounts, goals } from '@/lib/data';
-import { useMemo, useState } from 'react';
+import { transactions as allTransactions, accounts as allAccounts, goals as allGoals, users } from '@/lib/data';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -38,7 +39,7 @@ import {
 } from '@/components/ui/select';
 import { TrendingDown, TrendingUp, Wallet, Landmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Transaction } from '@/lib/definitions';
+import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
@@ -82,14 +83,6 @@ const paymentMethods: Record<string, { label: string, icon: React.ElementType }>
     cash: { label: 'Dinheiro', icon: Banknote },
 }
 
-const getAccountName = (id: string) => {
-    if (id.startsWith('goal')) {
-        const goal = goals.find(g => g.id === id);
-        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
-    }
-    const account = accounts.find(a => a.id === id);
-    return account ? account.name : 'Conta desconhecida';
-}
 
 const getTypeDisplay = (type: Transaction['type']) => {
     switch (type) {
@@ -101,12 +94,47 @@ const getTypeDisplay = (type: Transaction['type']) => {
 
 
 export default function TransactionsPage() {
+  const router = useRouter();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  
   const [typeFilter, setTypeFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+
+    if (!userId || !selectedWorkspaceId) {
+      router.push('/login');
+      return;
+    }
+    setWorkspaceId(selectedWorkspaceId);
+
+    const isPersonal = selectedWorkspaceId === userId;
+    const ownerType = isPersonal ? 'user' : 'vault';
+
+    setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === ownerType));
+    setAccounts(allAccounts);
+    setGoals(allGoals);
+
+  }, [router]);
+
+  const getAccountName = (id: string) => {
+    if (id.startsWith('goal')) {
+        const goal = goals.find(g => g.id === id);
+        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
+    }
+    const account = accounts.find(a => a.id === id);
+    return account ? account.name : 'Conta desconhecida';
+  }
+
 
   const filteredTransactions = useMemo(() => {
-    return allTransactions.filter((transaction) => {
+    return transactions.filter((transaction) => {
       const transactionDate = new Date(transaction.date);
       const typeMatch = typeFilter === 'all' || transaction.type === typeFilter;
       const monthMatch =
@@ -117,7 +145,7 @@ export default function TransactionsPage() {
         transactionDate.getFullYear() === parseInt(yearFilter);
       return typeMatch && monthMatch && yearMatch;
     });
-  }, [typeFilter, monthFilter, yearFilter]);
+  }, [transactions, typeFilter, monthFilter, yearFilter]);
 
   const summary = useMemo(() => {
     const income = filteredTransactions
@@ -165,6 +193,14 @@ export default function TransactionsPage() {
       },
     },
   });
+
+  if (!workspaceId) {
+     return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
 
   return (
