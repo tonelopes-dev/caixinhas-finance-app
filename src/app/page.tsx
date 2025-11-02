@@ -7,21 +7,42 @@ import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
-import { goals as allGoals, transactions as allTransactions, users, partner, vaults } from '@/lib/data';
+import { goals as allGoals, transactions as allTransactions, users, vaults, getMockDataForUser } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import withAuth from '@/components/auth/with-auth';
-import type { Goal, Transaction, Vault } from '@/lib/definitions';
+import type { Goal, Transaction, Vault, User, Partner } from '@/lib/definitions';
 
 function HomePage() {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentPartner, setCurrentPartner] = useState<Partner | null>(null);
   const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   
   useEffect(() => {
     const vaultId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+    
+    if (!userId) {
+        router.push('/login');
+        return;
+    }
+
+    const { currentUser: userFromMock, userVaults } = getMockDataForUser(userId);
+    
+    if (userFromMock) {
+        setCurrentUser(userFromMock);
+        // This is a simple mock logic to find the "partner"
+        // In a real app, this relationship would be stored in the database.
+        const partnerUser = users.find(u => u.id !== userId && userVaults.some(uv => uv.members.some(m => m.id === u.id)));
+        if (partnerUser) {
+            setCurrentPartner(partnerUser);
+        }
+    }
+
     if (!vaultId) {
       router.push('/vaults');
     } else {
@@ -31,13 +52,10 @@ function HomePage() {
         setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
         setGoals(allGoals.filter(g => g.vaultId === vaultId));
       } else {
-        // Vault not found, redirect back to selection
         router.push('/vaults');
       }
     }
   }, [router]);
-  
-  const user = users[0];
 
   const totalIncome = transactions
     .filter(t => t.type === 'income')
@@ -55,7 +73,7 @@ function HomePage() {
 
   const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
 
-  if (!selectedVault) {
+  if (!selectedVault || !currentUser || !currentPartner) {
      return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -65,7 +83,7 @@ function HomePage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header user={user} partner={partner} />
+      <Header user={currentUser} partner={currentPartner} />
       <main className="flex-1 p-4 md:p-8 lg:p-10">
         <div className="mx-auto grid w-full max-w-7xl gap-8">
           <AnimatedDiv>
