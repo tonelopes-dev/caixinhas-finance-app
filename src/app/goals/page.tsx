@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import withAuth from '@/components/auth/with-auth';
-import type { Goal } from '@/lib/definitions';
+import type { Goal, Vault } from '@/lib/definitions';
 import { useRouter } from 'next/navigation';
 
 function formatCurrency(value: number) {
@@ -34,11 +34,13 @@ function formatCurrency(value: number) {
 function GoalPage() {
     const router = useRouter();
     const [allGoals, setAllGoals] = useState<Goal[]>([]);
+    const [userVaults, setUserVaults] = useState<Vault[]>([]);
 
     useEffect(() => {
         const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-        const { userGoals } = getMockDataForUser(userId);
+        const { userGoals, userVaults: vaultsForUser } = getMockDataForUser(userId);
         setAllGoals(userGoals);
+        setUserVaults(vaultsForUser);
     }, []);
 
     const toggleFeatured = (goalId: string) => {
@@ -48,6 +50,10 @@ function GoalPage() {
     const handleGoToVault = (vaultId: string) => {
         sessionStorage.setItem('DREAMVAULT_VAULT_ID', vaultId);
         router.push('/');
+    }
+
+    const isUserMemberOfVault = (vaultId: string) => {
+        return userVaults.some(uv => uv.id === vaultId);
     }
 
 
@@ -74,6 +80,7 @@ function GoalPage() {
             {allGoals.map((goal) => {
               const progress = (goal.currentAmount / goal.targetAmount) * 100;
               const vault = vaults.find(v => v.id === goal.vaultId);
+              const canAccessVault = vault ? isUserMemberOfVault(vault.id) : false;
 
               return (
                   <Card key={goal.id} className="flex h-full flex-col transition-all hover:shadow-md">
@@ -137,10 +144,21 @@ function GoalPage() {
                             </span>
                         </div>
                          {vault && (
-                             <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)}>
-                                <span className='text-xs'>{vault.name}</span>
-                                <ChevronsRight className="ml-1 h-4 w-4" />
-                            </Button>
+                             <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)} disabled={!canAccessVault}>
+                                            <span className='text-xs'>{vault.name}</span>
+                                            <ChevronsRight className="ml-1 h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                     {!canAccessVault && (
+                                        <TooltipContent>
+                                            <p>Você não é membro deste cofre.</p>
+                                        </TooltipContent>
+                                     )}
+                                </Tooltip>
+                            </TooltipProvider>
                          )}
                     </CardFooter>
                   </Card>
@@ -162,3 +180,5 @@ function GoalPage() {
 }
 
 export default withAuth(GoalPage);
+
+    
