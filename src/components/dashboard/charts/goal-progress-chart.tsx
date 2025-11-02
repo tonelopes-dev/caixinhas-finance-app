@@ -15,6 +15,7 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltipContent,
+  ChartLegend,
   ChartLegendContent,
 } from '@/components/ui/chart';
 import type { Goal } from '@/lib/definitions';
@@ -44,9 +45,6 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
     return acc;
   }, {} as ChartConfig);
   
-  const legendPayload = chartData.map(item => ({ value: item.name, type: 'rect' as const, id: item.name, color: item.fill }));
-
-
   return (
     <Card className="flex flex-col">
        <CardHeader>
@@ -100,14 +98,17 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
             </Pie>
+             <ChartLegend
+                content={<ChartLegendContent nameKey="name" />}
+                className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-4 text-sm pt-4 border-t">
-         <div className="flex w-full items-center justify-center gap-2 font-medium leading-none">
-          Progresso Total: {totalProgress}%
+      <CardFooter className="flex-col gap-2 text-sm pt-4 border-t">
+         <div className="flex w-full items-center justify-center gap-1 font-medium leading-none">
+          Progresso Total: <span className="font-bold text-primary">{totalProgress}%</span>
         </div>
-        <ChartLegendContent payload={legendPayload} />
       </CardFooter>
     </Card>
   );

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Pie, PieChart, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ChartConfig, ChartContainer, ChartTooltipContent, ChartLegendContent } from '@/components/ui/chart';
+import { ChartConfig, ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { TrendingDown } from 'lucide-react';
 
 const chartColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -55,11 +55,17 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
                             <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                         ))}
                     </Pie>
+                    <ChartLegend
+                        content={<ChartLegendContent />}
+                        className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+                    />
                 </PieChart>
             </ChartContainer>
         </CardContent>
-         <CardFooter className="flex-col gap-2 border-t pt-4">
-            <ChartLegendContent payload={chartData.map(item => ({ value: item.name, type: 'rect', id: item.name, color: item.fill }))} />
+         <CardFooter className="flex-col gap-2 border-t pt-4 text-sm">
+            <div className="flex items-center gap-2 font-medium leading-none">
+                Total Gasto: {chartData.reduce((acc, curr) => acc + curr.value, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </div>
         </CardFooter>
     </Card>
   );
