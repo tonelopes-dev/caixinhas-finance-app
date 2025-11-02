@@ -85,6 +85,12 @@ export default function Header({ user, partner }: HeaderProps) {
                     <span>Painel</span>
                 </Link>
             </DropdownMenuItem>
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
                 <Link href="/profile">
                     <UserIcon className="mr-2 h-4 w-4" />
