@@ -41,29 +41,38 @@ const reportPrompt = ai.definePrompt({
   name: 'financialReportPrompt',
   input: { schema: FinancialReportInputSchema },
   output: { schema: FinancialReportOutputSchema },
-  prompt: `Você é um analista financeiro especialista. Sua tarefa é criar um relatório de saúde financeira profissional e detalhado para o mês de {{month}}, baseado nas transações fornecidas.
+  prompt: `Você é um analista financeiro de elite, especializado em finanças para casais. Sua tarefa é criar um relatório de saúde financeira profissional, detalhado e encorajador para o mês de {{month}}, baseado nas transações fornecidas.
 
-Use o seguinte formato HTML para a sua resposta. Seja direto e informativo.
+Use o seguinte formato HTML para a sua resposta. Seja direto, informativo e use uma linguagem positiva.
 
-### Análise de {{month}}
+<h3>Análise Financeira de {{month}}</h3>
 
-#### 💡 Resumo Geral
-- **Receita Total:** Calcule o total de receitas.
-- **Despesa Total:** Calcule o total de despesas.
-- **Saldo Líquido:** Calcule a diferença (Receita - Despesa).
-- **Taxa de Poupança:** Calcule a porcentagem da receita que foi economizada.
+<h4>⭐ Resumo Executivo</h4>
+<p>Faça um resumo conciso (2-3 frases) dos principais destaques do mês, como a taxa de poupança, o saldo líquido e se os gastos ficaram dentro do esperado. Mantenha um tom otimista.</p>
 
-#### 📈 Análise de Despesas
-Crie uma lista das 3 maiores categorias de despesa, com o valor e a porcentagem do total de despesas.
-- **Categoria 1:** R$ VALOR (X%)
-- **Categoria 2:** R$ VALOR (Y%)
-- **Categoria 3:** R$ VALOR (Z%)
+<h4>💰 Fluxo de Caixa Mensal</h4>
+<ul>
+    <li><b>Receita Total:</b> Calcule e exiba o total de receitas (transações do tipo 'income').</li>
+    <li><b>Despesa Total:</b> Calcule e exiba o total de despesas (transações do tipo 'expense').</li>
+    <li><b>Saldo Líquido:</b> Calcule e exiba a diferença (Receita - Despesa). Comente brevemente se o saldo foi positivo ou negativo.</li>
+    <li><b>Taxa de Poupança:</b> Calcule a porcentagem da receita que foi economizada (total de transferências para 'Caixinha' / Receita Total). Elogie se a taxa for boa (acima de 15%).</li>
+</ul>
 
-#### 🎯 Progresso das Metas
-Analise se as transferências para as caixinhas (metas) foram consistentes.
+<h4>📊 Detalhamento das Despesas</h4>
+<p>Abaixo está a distribuição completa dos seus gastos este mês. Use esta visão para entender para onde o dinheiro está indo.</p>
+<ul>
+    <li>Liste <b>TODAS</b> as categorias de despesa com seu valor total e a porcentagem que representam do total de despesas. Ex: <b>Alimentação:</b> R$ XXX,XX (YY%).</li>
+</ul>
 
-#### 🧠 Insights e Recomendações
-Com base na análise, forneça 2-3 insights práticos e acionáveis. Por exemplo, aponte uma categoria com gastos elevados e sugira uma estratégia para reduzir, ou elogie uma boa taxa de poupança.
+<h4>🎯 Progresso das Metas (Caixinhas)</h4>
+<p>Analise as transferências para as caixinhas (transações com categoria 'Caixinha' ou tipo 'transfer' para uma meta). Comente se as contribuições foram consistentes e como isso impacta os objetivos.</p>
+
+<h4>🧠 Insights e Recomendações Práticas</h4>
+<p>Com base em <b>toda</b> a análise, forneça 2-3 insights práticos e acionáveis em uma lista ordenada (ol). As sugestões devem ser específicas e personalizadas.</p>
+<ol>
+    <li><b>Exemplo de Insight 1:</b> "Percebi que a categoria 'Lazer' representou 25% dos gastos. Que tal explorar programas gratuitos na cidade no próximo mês para acelerar a meta da 'Reforma da Cozinha'?"</li>
+    <li><b>Exemplo de Insight 2:</b> "Sua taxa de poupança de 21% é fantástica! Para otimizar ainda mais, considerem automatizar uma pequena transferência para o 'Fundo de Emergência' logo no início do mês."</li>
+</ol>
 
 **Transações do Mês (JSON):**
 {{{transactions}}}
@@ -92,10 +101,12 @@ const chatPrompt = ai.definePrompt({
   name: 'chatWithReportPrompt',
   input: { schema: ChatWithReportInputSchema },
   output: { schema: ChatWithReportOutputSchema },
-  prompt: `Você é um assistente financeiro prestativo. Sua única função é responder perguntas sobre o relatório financeiro fornecido. Não responda a nenhuma pergunta que não esteja diretamente relacionada ao relatório.
+  prompt: `Você é um assistente financeiro prestativo e amigável. Sua única função é responder a perguntas sobre o relatório financeiro fornecido abaixo. Baseie-se exclusivamente nas informações do relatório e no histórico da conversa. Não responda a nenhuma pergunta que não esteja diretamente relacionada a estes dados.
 
-**Relatório Financeiro:**
+**Relatório Financeiro Analisado:**
+\`\`\`html
 {{{reportContext}}}
+\`\`\`
 
 **Histórico da Conversa (JSON):**
 {{{chatHistory}}}
@@ -103,7 +114,7 @@ const chatPrompt = ai.definePrompt({
 **Pergunta do Usuário:**
 {{question}}
 
-Responda à pergunta do usuário de forma concisa e amigável, usando apenas as informações do relatório.
+Responda à pergunta do usuário de forma clara, concisa e sempre com um tom positivo e encorajador.
 `,
 });
 
