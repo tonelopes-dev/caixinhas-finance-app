@@ -1,5 +1,6 @@
+
 import Link from 'next/link';
-import { ArrowLeft, PiggyBank, PlusCircle, UserPlus, Sparkles, Paintbrush, Edit, Wallet } from 'lucide-react';
+import { ArrowLeft, PiggyBank, PlusCircle, UserPlus, FileText, Paintbrush, Edit, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,33 +18,33 @@ import {
 
 const tutorialSteps = [
     {
-      trigger: "Como criar uma Caixinha de Sonhos?",
-      content: "Vá para o painel principal e clique em 'Criar Nova Caixinha'. Dê um nome, um emoji e uma meta. Decida se ela será compartilhada ou privada e comece a economizar!",
+      trigger: "O que é uma 'Caixinha'?",
+      content: "Imagine um cofrinho para cada sonho! Você cria uma 'Caixinha' para juntar dinheiro para uma viagem, um presente ou qualquer outra coisa que queira muito. É como dar um nome e um rosto para a sua economia!",
       icon: PiggyBank
     },
     {
-      trigger: "Como registrar uma nova transação?",
-      content: "No painel, na seção de 'Transações Recentes', clique em 'Adicionar'. Preencha os detalhes da sua despesa, receita ou transferência para manter tudo organizado.",
+      trigger: "Como coloco dinheiro na minha caixinha?",
+      content: "É fácil! Na tela inicial, clique em 'Adicionar' na parte de transações. Diga quanto dinheiro entrou ou saiu e de onde. Se o dinheiro foi para uma caixinha, ela vai crescer!",
       icon: PlusCircle
     },
     {
-      trigger: "Como convidar meu/minha parceiro(a)?",
-      content: "Clique em 'Convidar' no topo da página. Insira o e-mail do seu parceiro(a) para que vocês possam gerenciar o cofre juntos.",
+      trigger: "Posso chamar alguém para sonhar comigo?",
+      content: "Sim! Clique em 'Convidar' para chamar seu parceiro(a) ou amigos para o seu cofre. Assim, vocês podem juntar dinheiro e ver o progresso dos sonhos em conjunto.",
       icon: UserPlus
     },
     {
-      trigger: "Como usar a Análise Inteligente?",
-      content: "No painel, encontre o card 'Análise Inteligente'. Descreva seus hábitos financeiros e clique em 'Analisar com IA' para receber dicas personalizadas para economizar.",
-      icon: Sparkles
+      trigger: "Como vejo o resumo dos meus gastos?",
+      content: "Vá para a página de 'Relatórios'. Lá, nossa mágica acontece e transformamos seus números em um resumo fácil de entender, mostrando para onde seu dinheiro foi no mês.",
+      icon: FileText
     },
     {
-      trigger: "Como personalizar as cores do aplicativo?",
-      content: "Clique no seu avatar no canto superior direito para abrir o menu. Selecione 'Tema' para escolher suas cores de fundo e de destaque preferidas.",
+      trigger: "Posso deixar o app com a minha cor favorita?",
+      content: "Claro! Clique na sua foto de perfil para abrir o menu e procure por 'Tema'. Você pode escolher a cor de fundo e a cor de destaque que mais gostar.",
       icon: Paintbrush
     },
     {
-      trigger: "Como gerenciar minhas contas e categorias?",
-      content: "Acesse seu 'Perfil' através do menu do usuário. Lá você encontrará seções para gerenciar suas contas bancárias e personalizar as categorias de despesa.",
+      trigger: "Onde arrumo minhas contas e categorias?",
+      content: "No seu 'Perfil' (clicando na sua foto), você pode organizar suas contas do banco e também criar ou mudar os nomes das suas categorias de gastos, como 'Comida' ou 'Passeio'.",
       icon: Edit,
     },
   ];
@@ -61,10 +62,10 @@ export default function TutorialPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Bem-vindo(a) ao Tutorial do DreamVault!
+              Como o DreamVault funciona?
             </CardTitle>
             <CardDescription>
-              Aprenda a usar as principais funcionalidades para tirar o máximo proveito do seu cofre de sonhos.
+              Tudo o que você precisa saber para começar a realizar seus sonhos, explicado do jeito mais fácil!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -77,7 +78,7 @@ export default function TutorialPage() {
                                 <span className='text-left'>{step.trigger}</span>
                             </div>
                         </AccordionTrigger>
-                        <AccordionContent className='pl-11'>
+                        <AccordionContent className='pl-11 text-base'>
                         {step.content}
                         </AccordionContent>
                     </AccordionItem>
