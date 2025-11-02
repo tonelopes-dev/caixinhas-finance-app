@@ -75,19 +75,6 @@ function EditAccountDialog({ account }: { account: Account }) {
             </DialogHeader>
             <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                    <Label htmlFor="account-type">Tipo</Label>
-                    <Select name="account-type" defaultValue={account.type} onValueChange={(v) => setAccountType(v as Account['type'])}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(accountTypeLabels).map(([value, label]) => (
-                                <SelectItem key={value} value={value}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                 <div className="space-y-2">
                     <Label>Logo do Banco</Label>
                     <div className="flex flex-wrap gap-2">
                         {bankLogos.map((logo, index) => (
@@ -103,6 +90,19 @@ function EditAccountDialog({ account }: { account: Account }) {
                             </button>
                         ))}
                     </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="account-type">Tipo</Label>
+                    <Select name="account-type" defaultValue={account.type} onValueChange={(v) => setAccountType(v as Account['type'])}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(accountTypeLabels).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>{label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="account-name">Nome da Conta/Cartão</Label>
