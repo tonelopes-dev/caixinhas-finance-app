@@ -102,4 +102,5 @@ export type Notification = {
   timestamp: string;
   read: boolean;
   link?: string;
+  relatedId?: string; // e.g., the ID of the invitation or transaction
 }

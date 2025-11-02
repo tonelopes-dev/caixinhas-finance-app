@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification } from './definitions';
+import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation } from './definitions';
 
 // --- PERSONAS & USERS ---
 export const users: User[] = [
@@ -223,11 +223,31 @@ export const transactions: Transaction[] = [
     { id: 't-off-4', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-20', description: 'Aporte para Bioimpedância', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-office-1', actorId: 'user2' },
 ];
 
+// Mock goal invitations for the UI
+export const invitations: Invitation[] = [
+  {
+    id: 'inv1',
+    goalName: 'Viagem para a Praia',
+    invitedBy: 'Amigo do Dev',
+    status: 'pending' as const,
+    type: 'goal' as const,
+  },
+   {
+    id: 'inv2',
+    goalName: 'Cofre dos Formandos',
+    invitedBy: 'Colega da Nutri',
+    status: 'pending' as const,
+    type: 'vault' as const,
+  },
+];
+
+
 // --- NOTIFICAÇÕES ---
 export const notifications: Notification[] = [
     {
       id: 'n1',
       type: 'goal_invite',
+      relatedId: 'inv1',
       actor: users.find(u => u.id === 'user4'),
       text: '<b>Daniela</b> te convidou para a caixinha "Viagem de Fim de Ano".',
       timestamp: '2024-07-29T10:00:00Z',
@@ -237,6 +257,7 @@ export const notifications: Notification[] = [
      {
       id: 'n2',
       type: 'transaction_added',
+      relatedId: 't-fam-1',
       actor: nutri,
       text: '<b>Nutri</b> adicionou uma nova despesa de <b>R$ 1.800,00</b> em "Família DevNutri".',
       timestamp: '2024-07-27T15:30:00Z',
@@ -246,6 +267,7 @@ export const notifications: Notification[] = [
     {
       id: 'n3',
       type: 'goal_progress',
+      relatedId: 'goal-family-priv-dev',
       text: 'Parabéns! Vocês alcançaram <b>90%</b> da meta "Presente Surpresa Nutri".',
       timestamp: '2024-07-26T11:00:00Z',
       read: true,
@@ -254,6 +276,7 @@ export const notifications: Notification[] = [
      {
       id: 'n4',
       type: 'vault_invite',
+      relatedId: 'inv2',
       actor: users.find(u => u.id === 'user5'),
       text: '<b>Eduardo</b> te convidou para o cofre "Futebol de Quinta".',
       timestamp: '2024-07-25T09:00:00Z',
@@ -268,25 +291,6 @@ export const notifications: Notification[] = [
 // Mock user and partner data, kept for simplicity in some components
 export const user: User = users.find(u => u.id === 'user1')!;
 export const partner: User = users.find(u => u.id === 'user2')!;
-
-// Mock goal invitations for the UI
-export const invitations = [
-  {
-    id: '1',
-    goalName: 'Viagem para a Praia',
-    invitedBy: 'Amigo do Dev',
-    status: 'pending' as const,
-    type: 'goal' as const,
-  },
-   {
-    id: '2',
-    goalName: 'Cofre dos Formandos',
-    invitedBy: 'Colega da Nutri',
-    status: 'pending' as const,
-    type: 'vault' as const,
-  },
-];
-
 
 export const getMockDataForUser = (userId: string | null) => {
     if (!userId) {
