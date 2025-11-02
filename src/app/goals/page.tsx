@@ -143,20 +143,15 @@ function GoalPage() {
                                 {goal.participants && goal.participants.length > 1 ? `${goal.participants.length} participantes` : 'Apenas você'}
                             </span>
                         </div>
-                         {vault && (
+                         {vault && canAccessVault && (
                              <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)} disabled={!canAccessVault}>
+                                        <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)}>
                                             <span className='text-xs'>{vault.name}</span>
                                             <ChevronsRight className="ml-1 h-4 w-4" />
                                         </Button>
                                     </TooltipTrigger>
-                                     {!canAccessVault && (
-                                        <TooltipContent>
-                                            <p>Você não é membro deste cofre.</p>
-                                        </TooltipContent>
-                                     )}
                                 </Tooltip>
                             </TooltipProvider>
                          )}
