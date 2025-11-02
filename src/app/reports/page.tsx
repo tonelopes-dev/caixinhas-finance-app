@@ -70,7 +70,7 @@ function ReportsPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState(false);
 
-  const [month, setMonth] = useState((new Date().getMonth()).toString());
+  const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
 
   const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
