@@ -50,7 +50,6 @@ function ReportsPage() {
     if (selectedWorkspaceId) {
         setWorkspaceId(selectedWorkspaceId);
 
-        // Filter transactions for the current workspace
         const relevantTransactions = allTransactions.filter(t => t.ownerId === selectedWorkspaceId);
 
         if (relevantTransactions.length > 0) {
@@ -58,31 +57,44 @@ function ReportsPage() {
             const years = [...new Set(dates.map(d => d.getFullYear().toString()))].sort((a, b) => b.localeCompare(a));
             setAvailableYears(years);
 
-            const months = [...new Set(dates.map(d => ({ year: d.getFullYear(), month: d.getMonth() })))];
-            const monthLabels = months.map(m => ({
-                value: (m.month + 1).toString(),
-                label: new Date(m.year, m.month).toLocaleString('pt-BR', { month: 'long' })
-            }));
-            const uniqueMonths = Array.from(new Map(monthLabels.map(m => [m.label, m])).values())
-                                    .sort((a,b) => parseInt(a.value) - parseInt(b.value));
-            
-            setAvailableMonths(uniqueMonths);
+            const initialYear = years[0] || new Date().getFullYear().toString();
+            setYear(initialYear);
 
-            // Set default to the most recent transaction period
-            if (years.length > 0) setYear(years[0]);
-            if (uniqueMonths.length > 0) {
-                const mostRecentMonth = new Date(Math.max(...dates.map(date => date.getTime()))).getMonth() + 1;
-                setMonth(mostRecentMonth.toString());
-            }
-
+            const mostRecentMonth = new Date(Math.max(...dates.map(date => date.getTime()))).getMonth() + 1;
+            setMonth(mostRecentMonth.toString());
         } else {
-             // Handle case with no transactions
             const currentYearStr = new Date().getFullYear().toString();
             setAvailableYears([currentYearStr]);
             setAvailableMonths(Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }) })));
         }
     }
   }, []);
+
+  useEffect(() => {
+    if (!workspaceId || !year) return;
+
+    const relevantTransactions = allTransactions.filter(t => t.ownerId === workspaceId && new Date(t.date).getFullYear().toString() === year);
+
+    if (relevantTransactions.length > 0) {
+        const dates = relevantTransactions.map(t => new Date(t.date));
+        const monthsSet = new Set(dates.map(d => d.getMonth()));
+        const monthsForYear = Array.from(monthsSet).map(m => ({
+            value: (m + 1).toString(),
+            label: new Date(parseInt(year), m).toLocaleString('pt-BR', { month: 'long' })
+        })).sort((a, b) => parseInt(a.value) - parseInt(b.value));
+        
+        setAvailableMonths(monthsForYear);
+
+        // If current month is not available in the new year, update it
+        if (!monthsForYear.some(m => m.value === month)) {
+            setMonth(monthsForYear[0]?.value || (new Date().getMonth() + 1).toString());
+        }
+
+    } else {
+        setAvailableMonths([]);
+    }
+  }, [workspaceId, year, month]);
+
 
   // Effect to handle new report generation
   useEffect(() => {
