@@ -47,7 +47,12 @@ function GenerateReportButton() {
     const { pending } = useFormStatus();
     return (
         <Button type="submit" disabled={pending}>
-            {pending ? 'Gerando Relatório...' : 'Gerar Relatório'}
+            {pending ? (
+                <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    Gerando Relatório...
+                </>
+            ) : 'Gerar Relatório'}
         </Button>
     )
 }
@@ -163,9 +168,9 @@ function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={generateReportAction} className="flex flex-col md:flex-row items-end gap-4 rounded-lg border p-4 mb-6">
+            <form action={generateReportAction} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
                 <input type="hidden" name="ownerId" value={workspaceId} />
-                <div className='flex-1 grid grid-cols-2 gap-4'>
+                <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div className="space-y-2">
                         <label className='text-sm font-medium'>Mês</label>
                         <Select name="month" value={month} onValueChange={setMonth}>
@@ -189,25 +194,26 @@ function ReportsPage() {
                         </Select>
                     </div>
                 </div>
-                <GenerateReportButton />
+                <div className='self-end'>
+                    <GenerateReportButton />
+                </div>
             </form>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div ref={reportContainerRef} className='md:h-[600px] flex flex-col'>
                     <h3 className="font-headline text-lg font-bold mb-2">Relatório Gerado</h3>
                     <ScrollArea className="flex-1 rounded-md border p-4 bg-muted/20">
-                        {reportState.pending && (
+                        {reportState.pending ? (
                              <div className="flex h-full items-center justify-center gap-2 text-muted-foreground">
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                                 <span>Analisando dados e gerando relatório...</span>
                             </div>
-                        )}
-                        {!reportState.pending && reportHtml ? (
+                        ) : reportHtml ? (
                             <div
                                 className="prose prose-sm prose-p:leading-normal prose-headings:font-headline max-w-none text-foreground"
                                 dangerouslySetInnerHTML={{ __html: reportHtml }}
                             />
-                        ) : !reportState.pending && (
+                        ) : (
                              <div className="flex h-full items-center justify-center">
                                 <p className="text-center text-muted-foreground">Selecione um período e clique em "Gerar Relatório" para começar.</p>
                             </div>
