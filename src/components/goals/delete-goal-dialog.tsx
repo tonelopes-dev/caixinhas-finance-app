@@ -1,3 +1,4 @@
+
 'use client';
 
 import { deleteGoal } from '@/app/actions';
@@ -15,13 +16,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 
-export function DeleteGoalDialog({ goalId, goalName }: { goalId: string, goalName: string }) {
+export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: string, goalName: string, disabled?: boolean }) {
   const deleteGoalWithId = deleteGoal.bind(null);
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-full">
+        <Button variant="destructive" className="w-full" disabled={disabled}>
             <Trash2 className="mr-2 h-4 w-4" />
             Excluir Caixinha
        </Button>

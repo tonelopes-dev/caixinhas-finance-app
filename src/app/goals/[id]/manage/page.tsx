@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { goals, user, partner } from '@/lib/data';
+import { goals, user as mockUser, partner } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
@@ -31,10 +31,10 @@ import { updateGoal, type UpdateGoalState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending || disabled}>
       {pending ? 'Salvando...' : 'Salvar Alterações'}
     </Button>
   );
@@ -47,9 +47,15 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   
   const [visibility, setVisibility] = useState<Goal['visibility']>(goal?.visibility || 'shared');
   const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const initialState: UpdateGoalState = { message: null, errors: {} };
   const [state, formAction] = useActionState(updateGoal, initialState);
+  
+  useEffect(() => {
+    // In a real app, this would come from an auth context
+    setCurrentUserId(localStorage.getItem('DREAMVAULT_USER_ID'));
+  }, []);
 
   useEffect(() => {
     if (state?.message && !state.errors) {
@@ -66,11 +72,15 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   }
 
   const defaultParticipants = [
-      { id: 'user1', name: user.name, avatarUrl: user.avatarUrl, role: 'owner' as const },
+      { id: 'user1', name: mockUser.name, avatarUrl: mockUser.avatarUrl, role: 'owner' as const },
       { id: 'user2', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
   ]
 
   const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
+  
+  const currentUserRole = participants.find(p => p.id === currentUserId)?.role;
+  const isOwner = currentUserRole === 'owner';
+
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
     if (newVisibility !== visibility) {
@@ -114,17 +124,22 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-6">
+                <fieldset disabled={!isOwner} className="space-y-6 disabled:opacity-70">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
-                        <div className="space-y-2 md:col-span-3">
+                        <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="name">Nome da Caixinha</Label>
                             <Input id="name" name="name" defaultValue={goal.name} />
                              {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
                         </div>
-                        <div className="space-y-2">
+                         <div className="space-y-2 md:col-span-1">
                             <Label htmlFor="emoji">Ícone (Emoji)</Label>
                             <Input id="emoji" name="emoji" defaultValue={goal.emoji} maxLength={2} className="text-center text-2xl h-14" />
                             {state?.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
+                        </div>
+                        <div className="space-y-2 md:col-span-1">
+                            <Label htmlFor="targetAmount">Valor da Meta</Label>
+                            <Input id="targetAmount" name="targetAmount" type="number" step="0.01" defaultValue={goal.targetAmount} className="h-14"/>
+                            {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
                         </div>
                     </div>
                 
@@ -175,7 +190,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                             onCancel={cancelVisibilityChange}
                         />
                     </div>
-                </div>
+                </fieldset>
 
               <Separator className="my-8" />
 
@@ -208,7 +223,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                       participantName={p.name}
                       goalId={goal.id}
                       goalName={goal.name}
-                      disabled={p.role === 'owner'}
+                      disabled={p.role === 'owner' || !isOwner}
                     />
                   </div>
                 ))}
@@ -223,11 +238,12 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
                   Ações nesta seção são permanentes e não podem ser desfeitas.
                 </p>
-                <DeleteGoalDialog goalId={goal.id} goalName={goal.name} />
+                <DeleteGoalDialog goalId={goal.id} goalName={goal.name} disabled={!isOwner} />
               </div>
             </CardContent>
            <CardFooter className="border-t pt-6">
-                <SubmitButton />
+                <SubmitButton disabled={!isOwner} />
+                {!isOwner && <p className="text-sm text-muted-foreground ml-4">Apenas o proprietário da caixinha pode salvar as alterações.</p>}
             </CardFooter>
           </form>
         </Card>

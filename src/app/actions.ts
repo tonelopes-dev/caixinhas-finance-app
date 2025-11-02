@@ -432,7 +432,7 @@ export async function updateGoal(prevState: UpdateGoalState, formData: FormData)
         id: formData.get('id'),
         name: formData.get('name'),
         emoji: formData.get('emoji'),
-        // targetAmount is not editable for now, so we don't parse it
+        targetAmount: formData.get('targetAmount'),
         visibility: formData.get('visibility'),
     });
 
@@ -443,7 +443,7 @@ export async function updateGoal(prevState: UpdateGoalState, formData: FormData)
         };
     }
     
-    const { id, name, emoji, visibility } = validatedFields.data;
+    const { id, ...data } = validatedFields.data;
 
     const goalIndex = goals.findIndex(g => g.id === id);
     if (goalIndex === -1) {
@@ -453,9 +453,7 @@ export async function updateGoal(prevState: UpdateGoalState, formData: FormData)
     // Mock: update goal in memory
     goals[goalIndex] = {
         ...goals[goalIndex],
-        name,
-        emoji,
-        visibility,
+        ...data,
     };
     
     console.log(`Goal ${id} updated successfully.`);
