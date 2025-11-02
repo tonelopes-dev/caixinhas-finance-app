@@ -4,7 +4,9 @@ export type Account = {
   ownerType: 'user' | 'vault';
   name: string;
   bank: string;
-  type: 'checking' | 'savings' | 'investment' | 'other';
+  type: 'checking' | 'savings' | 'investment' | 'credit_card' | 'other';
+  balance: number;
+  creditLimit?: number;
   logoUrl?: string;
 };
 

@@ -70,14 +70,15 @@ export const bankLogos = [
 // As contas agora pertencem a um 'user' ou a um 'vault'
 export const accounts: Account[] = [
   // Contas Pessoais do Dev (user1)
-  { id: 'acc-dev-1', ownerId: 'user1', ownerType: 'user', name: 'Conta Pessoal', bank: 'Banco Digital', type: 'checking', logoUrl: bankLogos[0] },
-  { id: 'acc-dev-2', ownerId: 'user1', ownerType: 'user', name: 'Investimentos', bank: 'Corretora Ágil', type: 'investment', logoUrl: bankLogos[2] },
+  { id: 'acc-dev-1', ownerId: 'user1', ownerType: 'user', name: 'Conta Corrente', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0] },
+  { id: 'acc-dev-2', ownerId: 'user1', ownerType: 'user', name: 'Investimentos', bank: 'Corretora Ágil', type: 'investment', balance: 75000, logoUrl: bankLogos[2] },
+  { id: 'acc-dev-3', ownerId: 'user1', ownerType: 'user', name: 'Cartão Principal', bank: 'Banco Digital', type: 'credit_card', balance: 0, creditLimit: 15000, logoUrl: bankLogos[0] },
   
   // Contas Pessoais da Nutri (user2)
-  { id: 'acc-nutri-1', ownerId: 'user2', ownerType: 'user', name: 'Conta Pessoal', bank: 'Banco Verde', type: 'checking', logoUrl: bankLogos[1] },
+  { id: 'acc-nutri-1', ownerId: 'user2', ownerType: 'user', name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] },
   
   // Conta Conjunta do Cofre da Família (vault-family)
-  { id: 'acc-family', ownerId: 'vault-family', ownerType: 'vault', name: 'Conta Conjunta', bank: 'Banco Familiar', type: 'savings', logoUrl: bankLogos[4] },
+  { id: 'acc-family', ownerId: 'vault-family', ownerType: 'vault', name: 'Conta Conjunta', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
 ];
 
 // --- PARTICIPANTES DE METAS ---
@@ -198,7 +199,7 @@ export const goals: Goal[] = [
 export const transactions: Transaction[] = [
     // Transações Pessoais do Dev (user1)
     { id: 't-dev-1', ownerId: 'user1', ownerType: 'user', date: '2024-07-28', description: 'Salário', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1' },
-    { id: 't-dev-2', ownerId: 'user1', ownerType: 'user', date: '2024-07-25', description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-1', paymentMethod: 'credit_card', actorId: 'user1' },
+    { id: 't-dev-2', ownerId: 'user1', ownerType: 'user', date: '2024-07-25', description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1' },
     { id: 't-dev-3', ownerId: 'user1', ownerType: 'user', date: '2024-07-20', description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', destinationAccountId: 'goal-dev-1', actorId: 'user1' },
     { id: 't-dev-4', ownerId: 'user1', ownerType: 'user', date: '2024-07-15', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
     
@@ -212,8 +213,8 @@ export const transactions: Transaction[] = [
     { id: 't-fam-1', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-27', description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2' },
     { id: 't-fam-2', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-26', description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: 'acc-family', paymentMethod: 'boleto', actorId: 'user1' },
     { id: 't-fam-3', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Depósito Reforma Cozinha', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-family', destinationAccountId: 'goal-family-1', actorId: 'user2' },
-    { id: 't-fam-4', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Transferência do Dev', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
-    { id: 't-fam-5', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-16', description: 'Transferência da Nutri', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
+    { id: 't-fam-4', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Contribuição do Dev', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
+    { id: 't-fam-5', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-16', description: 'Contribuição da Nutri', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
 ];
 
 // --- LÓGICA DE SIMULAÇÃO ---
@@ -255,17 +256,28 @@ export const getMockDataForUser = (userId: string | null) => {
 
     const currentUser = users.find(u => u.id === userId) || null;
     
-    // Contas Pessoais do usuário
-    const userAccounts = accounts.filter(a => a.ownerId === userId && a.ownerType === 'user');
-    
-    // Transações Pessoais do usuário
-    const userTransactions = transactions.filter(t => t.ownerId === userId && t.ownerType === 'user');
-    
-    // Metas: Pessoais do usuário + caixinhas em que ele é participante (mesmo em outros cofres)
-    const userGoals = goals.filter(g => (g.ownerId === userId && g.ownerType === 'user') || g.participants?.some(p => p.id === userId));
-
-    // Cofres dos quais o usuário é membro
+    // Contas Pessoais do usuário e contas de cofres que ele participa
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
+    const userVaultIds = userVaults.map(v => v.id);
+    const userAccounts = accounts.filter(a => (a.ownerId === userId && a.ownerType === 'user') || (a.ownerType === 'vault' && userVaultIds.includes(a.ownerId)));
+    
+    // Transações Pessoais e de cofres
+    const userTransactions = transactions.filter(t => (t.ownerId === userId && t.ownerType === 'user') || (t.ownerType === 'vault' && userVaultIds.includes(t.ownerId)));
+    
+    // Metas: Pessoais do usuário + caixinhas de cofres que ele participa
+    const userGoals = goals.filter(g => {
+      // É uma meta pessoal do usuário
+      if (g.ownerId === userId && g.ownerType === 'user') {
+        return true;
+      }
+      // É uma meta de um cofre que o usuário participa
+      if (g.ownerType === 'vault' && userVaultIds.includes(g.ownerId)) {
+        // Se for pública no cofre, ele vê. Se for privada, ele precisa ser um participante.
+        return g.visibility === 'shared' || g.participants?.some(p => p.id === userId);
+      }
+      // Outros casos: meta pessoal de outro usuário que ele foi convidado
+      return g.participants?.some(p => p.id === userId);
+    });
     
     // Convites pendentes (lógica de exemplo)
     const userInvitations: VaultInvitation[] = [];
