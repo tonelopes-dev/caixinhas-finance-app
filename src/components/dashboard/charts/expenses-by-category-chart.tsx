@@ -42,7 +42,7 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
                 <PieChart>
                     <Tooltip
                         cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
+                        content={<ChartTooltipContent formatter={(value, name) => `${name}: ${Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`} />}
                     />
                     <Pie
                         data={chartData}

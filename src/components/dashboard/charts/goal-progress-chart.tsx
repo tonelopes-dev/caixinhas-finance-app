@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, Cell } from 'recharts';
+import { Pie, PieChart, Cell, Tooltip } from 'recharts';
 
 import {
   Card,
@@ -14,6 +14,7 @@ import {
 import {
   ChartConfig,
   ChartContainer,
+  ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { Goal } from '@/lib/definitions';
 import { PiggyBank } from 'lucide-react';
@@ -57,6 +58,10 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
           className="mx-auto aspect-square h-[250px]"
         >
           <PieChart>
+             <Tooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel formatter={(value, name) => `${name}: ${value}%`} />}
+             />
             <Pie
               data={[{ progress: 100 }]}
               dataKey="progress"
