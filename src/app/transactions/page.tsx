@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search } from 'lucide-react';
 import { transactions as allTransactions, accounts as allAccounts, goals as allGoals, users } from '@/lib/data';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,6 +43,7 @@ import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
 
 
 function formatCurrency(value: number) {
@@ -99,6 +100,7 @@ export default function TransactionsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   
+  const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
@@ -136,16 +138,24 @@ export default function TransactionsPage() {
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
       const transactionDate = new Date(transaction.date);
+      
+      const searchMatch = searchQuery === '' || 
+        transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.amount.toString().includes(searchQuery);
+
       const typeMatch = typeFilter === 'all' || transaction.type === typeFilter;
+      
       const monthMatch =
         monthFilter === 'all' ||
         transactionDate.getMonth() + 1 === parseInt(monthFilter);
+      
       const yearMatch =
         yearFilter === 'all' ||
         transactionDate.getFullYear() === parseInt(yearFilter);
-      return typeMatch && monthMatch && yearMatch;
+        
+      return searchMatch && typeMatch && monthMatch && yearMatch;
     });
-  }, [transactions, typeFilter, monthFilter, yearFilter]);
+  }, [transactions, searchQuery, typeFilter, monthFilter, yearFilter]);
 
   const summary = useMemo(() => {
     const income = filteredTransactions
@@ -273,43 +283,49 @@ export default function TransactionsPage() {
                 </CardDescription>
                 </div>
                 <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-center">
-                <div className='flex flex-1 items-center gap-2'>
+                  <div className='relative flex-1'>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Buscar por nome ou valor..."
+                      className="pl-10 w-full"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
                     <ListFilter className="h-5 w-5 text-muted-foreground" />
-                    <span className='text-sm font-medium'>Filtros:</span>
-                </div>
-                <div className="flex flex-1 gap-2">
+                    <span className='text-sm font-medium sr-only md:not-sr-only'>Filtros:</span>
+
                     <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os Tipos</SelectItem>
-                        <SelectItem value="income">Entradas</SelectItem>
-                        <SelectItem value="expense">Saídas</SelectItem>
-                        <SelectItem value="transfer">Transferências</SelectItem>
-                    </SelectContent>
+                      <SelectTrigger className="w-full md:w-auto">
+                          <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          <SelectItem value="income">Entradas</SelectItem>
+                          <SelectItem value="expense">Saídas</SelectItem>
+                          <SelectItem value="transfer">Transferências</SelectItem>
+                      </SelectContent>
                     </Select>
                     <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Mês" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                    </SelectContent>
+                      <SelectTrigger className="w-full md:w-auto">
+                          <SelectValue placeholder="Mês" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                      </SelectContent>
                     </Select>
                     <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os Anos</SelectItem>
-                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                    </SelectContent>
+                      <SelectTrigger className="w-full md:w-auto">
+                          <SelectValue placeholder="Ano" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="all">Todos os Anos</SelectItem>
+                          {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                      </SelectContent>
                     </Select>
-                </div>
-                <div className="flex justify-end">
-                    <AddTransactionSheet />
-                </div>
+                     <AddTransactionSheet />
+                  </div>
                 </div>
             </CardHeader>
             <CardContent className='overflow-hidden'>
