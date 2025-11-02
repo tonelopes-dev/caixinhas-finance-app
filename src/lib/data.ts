@@ -215,6 +215,12 @@ export const transactions: Transaction[] = [
     { id: 't-fam-3', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Depósito Reforma Cozinha', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-family', destinationAccountId: 'goal-family-1', actorId: 'user2' },
     { id: 't-fam-4', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Contribuição do Dev', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
     { id: 't-fam-5', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-16', description: 'Contribuição da Nutri', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
+
+    // Transações do Cofre do Consultório (vault-office)
+    { id: 't-off-1', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-28', description: 'Consulta Paciente A', amount: 350, type: 'income', category: 'Consultas', destinationAccountId: 'acc-nutri-1', paymentMethod: 'pix', actorId: 'user2' },
+    { id: 't-off-2', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-27', description: 'Aluguel do Consultório', amount: 1200, type: 'expense', category: 'Aluguel', sourceAccountId: 'acc-nutri-1', paymentMethod: 'boleto', actorId: 'user2' },
+    { id: 't-off-3', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-25', description: 'Compra de Suplementos', amount: 450, type: 'expense', category: 'Materiais', sourceAccountId: 'acc-nutri-1', paymentMethod: 'debit_card', actorId: 'user2' },
+    { id: 't-off-4', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-20', description: 'Aporte para Bioimpedância', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-office-1', actorId: 'user2' },
 ];
 
 // --- LÓGICA DE SIMULAÇÃO ---
