@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation } from './definitions';
+import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation, SavedReport } from './definitions';
 
 // --- PERSONAS & USERS ---
 export const users: User[] = [
@@ -348,6 +348,9 @@ export const notifications: Notification[] = [
       link: '/reports'
     },
 ];
+
+// --- Mock Cache for Reports ---
+export const savedReports: SavedReport[] = [];
 
 // --- LÓGICA DE SIMULAÇÃO ---
 

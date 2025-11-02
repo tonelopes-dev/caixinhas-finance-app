@@ -5,7 +5,7 @@ import { sendEmail } from '@/ai/flows/send-email-flow';
 import { chatWithReport, generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { transactions, goals, user } from '@/lib/data';
+import { transactions, goals, user, savedReports } from '@/lib/data';
 import { redirect } from 'next/navigation';
 
 const analysisSchema = z.object({
@@ -138,6 +138,7 @@ export type FinancialReportState = {
   chatResponse?: string | null;
   isNewReport?: boolean;
   error?: string | null;
+  message?: string | null;
 };
 
 
@@ -158,7 +159,17 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     const yearNum = parseInt(year, 10);
     const monthName = new Date(yearNum, monthIndex).toLocaleString('pt-BR', { month: 'long' });
     const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
-
+    const reportId = `${ownerId}-${yearNum}-${month}`;
+    
+    // 1. Check for cached report
+    const cachedReport = savedReports.find(r => r.id === reportId);
+    if (cachedReport) {
+        return {
+            reportHtml: cachedReport.analysisHtml,
+            isNewReport: true,
+            message: `Relatório para ${monthYear} carregado do cache.`
+        };
+    }
 
     const relevantTransactions = transactions.filter(t => {
         const transactionDate = new Date(t.date);
@@ -166,8 +177,9 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     });
 
     if (relevantTransactions.length === 0) {
+        const noDataHtml = `<div class="text-center py-10"><p class="text-muted-foreground">Nenhuma transação encontrada para ${monthYear}.</p></div>`;
         return {
-             reportHtml: `<div class="text-center py-10"><p class="text-muted-foreground">Nenhuma transação encontrada para ${monthYear}.</p></div>`,
+             reportHtml: noDataHtml,
              isNewReport: true
         };
     }
@@ -176,6 +188,14 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
         const result = await generateFinancialReport({
             month: monthYear,
             transactions: JSON.stringify(relevantTransactions, null, 2),
+        });
+
+        // 2. Save the new report to cache
+        savedReports.push({
+            id: reportId,
+            ownerId,
+            monthYear,
+            analysisHtml: result.analysisHtml
         });
 
         return {
@@ -280,6 +300,23 @@ export async function analyzeBudget(prevState: AnalysisState, formData: FormData
   }
 }
 
+
+function invalidateReportCache(date: string | undefined, ownerId: string | undefined) {
+    if (!date || !ownerId) return;
+
+    const transactionDate = new Date(date);
+    const month = transactionDate.getMonth() + 1;
+    const year = transactionDate.getFullYear();
+    const reportId = `${ownerId}-${year}-${month}`;
+    
+    const reportIndex = savedReports.findIndex(r => r.id === reportId);
+    if (reportIndex > -1) {
+        savedReports.splice(reportIndex, 1);
+        console.log(`Cache for report ${reportId} invalidated.`);
+    }
+}
+
+
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
   const validatedFields = transactionSchema.safeParse({
     description: formData.get('description'),
@@ -301,16 +338,23 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     };
   }
   
-  // NOTE: This is mock data. In a real application, you would save this to a database.
-  transactions.unshift({
+  const ownerId = sessionStorage.getItem('DREAMVAULT_VAULT_ID') || 'user1'; // Mock ownerId
+  const newTransaction = {
     id: (transactions.length + 1).toString(),
     date: validatedFields.data.date || new Date().toISOString(),
+    ownerId,
+    ownerType: ownerId.startsWith('vault-') ? 'vault' : 'user',
     ...validatedFields.data
-  })
-  console.log('New transaction added:', validatedFields.data);
+  };
+
+  transactions.unshift(newTransaction);
+  console.log('New transaction added:', newTransaction);
+  
+  invalidateReportCache(newTransaction.date, newTransaction.ownerId);
 
   revalidatePath('/');
   revalidatePath('/transactions');
+  revalidatePath('/reports');
 
 
   return { message: 'Transação adicionada com sucesso!' };
@@ -341,14 +385,23 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   const index = transactions.findIndex(t => t.id === id);
 
   if (index > -1) {
+    const originalTransaction = transactions[index];
     transactions[index] = {
-      ...transactions[index],
+      ...originalTransaction,
       ...data,
-      date: data.date || transactions[index].date,
+      date: data.date || originalTransaction.date,
     };
+    
+    // Invalidate cache for both old and new date if date changed
+    invalidateReportCache(originalTransaction.date, originalTransaction.ownerId);
+    if(originalTransaction.date !== transactions[index].date) {
+        invalidateReportCache(transactions[index].date, transactions[index].ownerId);
+    }
+    
     console.log(`Transaction with id ${id} updated.`);
     revalidatePath('/');
     revalidatePath('/transactions');
+    revalidatePath('/reports');
     return { message: 'Transação atualizada com sucesso!' };
   }
   
@@ -370,12 +423,15 @@ export async function deleteTransaction(formData: FormData) {
   const index = transactions.findIndex(t => t.id === id);
 
   if (index > -1) {
+    const deletedTransaction = transactions[index];
+    invalidateReportCache(deletedTransaction.date, deletedTransaction.ownerId);
     transactions.splice(index, 1);
     console.log(`Transaction with id ${id} deleted.`);
   }
 
   revalidatePath('/');
   revalidatePath('/transactions');
+  revalidatePath('/reports');
   return { message: 'Transação excluída com sucesso!' };
 }
 
@@ -428,17 +484,22 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
   const goal = goals.find(g => g.id === goalId);
 
   if (goal) {
+    const transactionDate = new Date().toISOString();
+    invalidateReportCache(transactionDate, goal.ownerId);
+
     if (type === 'deposit') {
       goal.currentAmount += amount;
       transactions.unshift({
         id: (transactions.length + 1).toString(),
-        date: new Date().toISOString(),
+        date: transactionDate,
         description: `Depósito na caixinha: ${goal.name}`,
         amount,
         type: 'transfer',
         category: 'Caixinha',
         sourceAccountId: 'acc1', // Mock: assuming it comes from the main account
         destinationAccountId: goalId,
+        ownerId: goal.ownerId,
+        ownerType: goal.ownerType
       })
 
     } else {
@@ -448,13 +509,15 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
 
       transactions.unshift({
         id: (transactions.length + 1).toString(),
-        date: new Date().toISOString(),
+        date: transactionDate,
         description: `Retirada da caixinha: ${goal.name}`,
         amount: withdrawnAmount,
         type: 'transfer',
         category: 'Caixinha',
         sourceAccountId: goalId, 
         destinationAccountId: 'acc1', // Mock: assuming it goes to the main account
+        ownerId: goal.ownerId,
+        ownerType: goal.ownerType
       })
     }
   }
@@ -462,6 +525,7 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
   revalidatePath(`/goals/${goalId}`);
   revalidatePath(`/`);
   revalidatePath('/transactions');
+  revalidatePath('/reports');
 
 
   return { message: 'Transação na caixinha realizada com sucesso!' };

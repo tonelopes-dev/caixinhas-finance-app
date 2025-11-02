@@ -104,3 +104,10 @@ export type Notification = {
   link?: string;
   relatedId?: string; // e.g., the ID of the invitation or transaction
 }
+
+export type SavedReport = {
+  id: string; // Composite key like `${ownerId}-${year}-${month}`
+  ownerId: string;
+  monthYear: string;
+  analysisHtml: string;
+};
