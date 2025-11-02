@@ -39,6 +39,7 @@ export function NotificationsDropdown() {
 
   const toggleRead = (id: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent the dropdown from closing
+    e.preventDefault(); // Prevent link navigation if it's a link
     setNotifications(
       notifications.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
     );
@@ -67,25 +68,28 @@ export function NotificationsDropdown() {
         <DropdownMenuSeparator />
         {recentUnreadNotifications.length > 0 ? (
           recentUnreadNotifications.map((notification) => (
-            <DropdownMenuItem key={notification.id} className={cn("flex items-start gap-3 p-3", !notification.read && 'font-semibold')}>
-              <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
-                {getNotificationIcon(notification.type)}
-                <AvatarFallback><Bell /></AvatarFallback>
-              </Avatar>
-              <div className="flex-1 whitespace-normal">
-                <p className="text-sm" dangerouslySetInnerHTML={{ __html: notification.text }} />
-                <p className="text-xs text-muted-foreground">
-                  {new Date(notification.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                </p>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8" 
-                onClick={(e) => toggleRead(notification.id, e)}
-              >
-                {notification.read ? <Circle className="h-4 w-4" /> : <CircleDot className="h-4 w-4 text-primary" />}
-              </Button>
+            <DropdownMenuItem key={notification.id} asChild>
+                <Link href={notification.link || '#'} className={cn("flex items-start gap-3 p-3", !notification.read && 'font-semibold')}>
+                    <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
+                        {getNotificationIcon(notification.type)}
+                        <AvatarFallback><Bell /></AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 whitespace-normal">
+                        <p className="text-sm" dangerouslySetInnerHTML={{ __html: notification.text }} />
+                        <p className="text-xs text-muted-foreground">
+                        {new Date(notification.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                        </p>
+                    </div>
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8" 
+                        onClick={(e) => toggleRead(notification.id, e)}
+                        title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}
+                    >
+                        {notification.read ? <Circle className="h-4 w-4" /> : <CircleDot className="h-4 w-4 text-primary" />}
+                    </Button>
+                </Link>
             </DropdownMenuItem>
           ))
         ) : (
