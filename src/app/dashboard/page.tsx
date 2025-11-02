@@ -3,7 +3,7 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { transactions, goals, accounts } from '@/lib/data';
+import { transactions as allTransactions, goals } from '@/lib/data';
 import { ExpensesByCategoryChart } from '@/components/dashboard/charts/expenses-by-category-chart';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { IncomeVsExpenseChart } from '@/components/dashboard/charts/income-vs-expense-chart';
@@ -18,38 +18,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { getMockDataForUser } from '@/lib/data';
+import { useRouter } from 'next/navigation';
+import type { Transaction } from '@/lib/definitions';
+import { subDays, startOfMonth, startOfYear, endOfDay } from 'date-fns';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-const months = [
-    { value: 'all', label: 'Todos os meses' },
-    { value: '1', label: 'Janeiro' },
-    { value: '2', label: 'Fevereiro' },
-    { value: '3', label: 'Março' },
-    { value: '4', label: 'Abril' },
-    { value: '5', label: 'Maio' },
-    { value: '6', label: 'Junho' },
-    { value: '7', label: 'Julho' },
-    { value: '8', 'label': 'Agosto' },
-    { value: '9', label: 'Setembro' },
-    { value: '10', label: 'Outubro' },
-    { value: '11', label: 'Novembro' },
-    { value: '12', label: 'Dezembro' },
+
+type Period = 'this_month' | 'this_year' | 'last_30_days' | 'last_90_days' | 'all_time';
+
+const periodOptions: { value: Period; label: string }[] = [
+    { value: 'last_30_days', label: 'Últimos 30 dias' },
+    { value: 'last_90_days', label: 'Últimos 90 dias' },
+    { value: 'all_time', label: 'Desde o início' },
 ];
 
 
 export default function DashboardPage() {
-    const [monthFilter, setMonthFilter] = useState((new Date().getMonth() + 1).toString());
-    const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
+    const router = useRouter();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [period, setPeriod] = useState<Period>('this_month');
+
+    useEffect(() => {
+        const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+        if (!userId) {
+            router.push('/login');
+            return;
+        }
+
+        const { userTransactions } = getMockDataForUser(userId);
+        setTransactions(userTransactions);
+    }, [router]);
+
 
     const filteredTransactions = useMemo(() => {
-        return transactions.filter(transaction => {
+        const now = new Date();
+        let startDate: Date;
+
+        switch (period) {
+            case 'this_month':
+                startDate = startOfMonth(now);
+                break;
+            case 'this_year':
+                startDate = startOfYear(now);
+                break;
+            case 'last_30_days':
+                startDate = subDays(now, 30);
+                break;
+            case 'last_90_days':
+                startDate = subDays(now, 90);
+                break;
+            case 'all_time':
+                return allTransactions;
+            default:
+                startDate = startOfMonth(now);
+        }
+
+        const endDate = endOfDay(now);
+
+        return allTransactions.filter(transaction => {
             const transactionDate = new Date(transaction.date);
-            const monthMatch = monthFilter === 'all' || transactionDate.getMonth() + 1 === parseInt(monthFilter);
-            const yearMatch = yearFilter === 'all' || transactionDate.getFullYear() === parseInt(yearFilter);
-            return monthMatch && yearMatch;
+            return transactionDate >= startDate && transactionDate <= endDate;
         });
-    }, [monthFilter, yearFilter]);
+    }, [period]);
     
 
     // Process data for charts using filteredTransactions
@@ -61,7 +92,7 @@ export default function DashboardPage() {
         }, {} as Record<string, number>);
 
     const incomeVsExpenseData = filteredTransactions.reduce((acc, t) => {
-        const month = new Date(t.date).toLocaleString('default', { month: 'short', timeZone: 'UTC' });
+        const month = new Date(t.date).toLocaleString('default', { month: 'short', year: '2-digit', timeZone: 'UTC' });
         if (!acc[month]) {
             acc[month] = { month, income: 0, expenses: 0 };
         }
@@ -73,11 +104,19 @@ export default function DashboardPage() {
         return acc;
     }, {} as Record<string, { month: string, income: number, expenses: number }>);
     
-    // Sort by month for charts
     const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const sortedIncomeVsExpense = Object.values(incomeVsExpenseData).sort((a,b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month));
+    const sortedIncomeVsExpense = Object.values(incomeVsExpenseData).sort((a,b) => {
+        const [aMonth, aYear] = a.month.split(' ');
+        const [bMonth, bYear] = b.month.split(' ');
+        if (aYear !== bYear) return parseInt(aYear) - parseInt(bYear);
+        return monthOrder.indexOf(aMonth) - monthOrder.indexOf(bMonth);
+    });
 
-    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalBalance = filteredTransactions.reduce((sum, t) => {
+        if (t.type === 'income') return sum + t.amount;
+        if (t.type === 'expense') return sum - t.amount;
+        return sum;
+    }, 0);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -93,22 +132,22 @@ export default function DashboardPage() {
                 Dashboard Financeiro
             </h1>
             <div className="flex items-center gap-2 mt-4 md:mt-0">
-                <span className="text-sm text-muted-foreground">Período:</span>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger className="w-[150px]">
-                        <SelectValue placeholder="Mês" />
+                <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
+                    <TabsList>
+                        <TabsTrigger value="this_month">Este Mês</TabsTrigger>
+                        <TabsTrigger value="this_year">Este Ano</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+                 <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Selecione o período" />
                     </SelectTrigger>
                     <SelectContent>
-                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="Ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os Anos</SelectItem>
-                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                        <SelectItem value="this_month">Este Mês</SelectItem>
+                        <SelectItem value="this_year">Este Ano</SelectItem>
+                        {periodOptions.map(option => (
+                             <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -135,7 +174,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                         <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Patrimônio Total</p>
+                            <p className="text-sm text-muted-foreground">Saldo do Período</p>
                             <p className="text-2xl font-bold">{totalBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                         <div className="rounded-lg border p-4">
