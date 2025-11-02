@@ -7,16 +7,16 @@ import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
-import { goals as allGoals, transactions as allTransactions, users, partner } from '@/lib/data';
+import { goals as allGoals, transactions as allTransactions, users, partner, vaults } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import withAuth from '@/components/auth/with-auth';
-import type { Goal, Transaction } from '@/lib/definitions';
+import type { Goal, Transaction, Vault } from '@/lib/definitions';
 
 function HomePage() {
   const router = useRouter();
-  const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null);
+  const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   
@@ -25,10 +25,15 @@ function HomePage() {
     if (!vaultId) {
       router.push('/vaults');
     } else {
-      setSelectedVaultId(vaultId);
-      // Filter data based on the selected vault
-      setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
-      setGoals(allGoals.filter(g => g.vaultId === vaultId));
+      const vault = vaults.find(v => v.id === vaultId);
+      if (vault) {
+        setSelectedVault(vault);
+        setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
+        setGoals(allGoals.filter(g => g.vaultId === vaultId));
+      } else {
+        // Vault not found, redirect back to selection
+        router.push('/vaults');
+      }
     }
   }, [router]);
   
@@ -50,7 +55,7 @@ function HomePage() {
 
   const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
 
-  if (!selectedVaultId) {
+  if (!selectedVault) {
      return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -66,7 +71,7 @@ function HomePage() {
           <AnimatedDiv>
             <div className="flex flex-col gap-2">
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-                Painel de Controle
+                Painel de Controle: <span className="text-primary">{selectedVault.name}</span>
               </h1>
               <p className="text-muted-foreground font-headline">
                 “Sonhar juntos é o primeiro passo para conquistar.”
