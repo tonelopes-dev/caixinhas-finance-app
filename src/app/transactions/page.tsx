@@ -209,6 +209,9 @@ export default function TransactionsPage() {
     },
   });
 
+  const cardBaseClasses = "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center gap-4 rounded-lg border p-4";
+  const activeClasses = "ring-2 ring-primary shadow-md scale-[1.02]";
+
   if (!workspaceId) {
      return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
@@ -240,7 +243,7 @@ export default function TransactionsPage() {
               </CardHeader>
               <CardContent>
                   <motion.div className="grid gap-4 md:grid-cols-3" initial="hidden" animate="visible" variants={containerVariants}>
-                      <motion.div variants={summaryItemVariants(0.5)} className='flex items-center gap-4 rounded-lg border p-4'>
+                      <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
                           <div className="rounded-full bg-primary/10 p-3">
                               <Wallet className="h-6 w-6 text-primary" />
                           </div>
@@ -249,7 +252,7 @@ export default function TransactionsPage() {
                               <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
                           </div>
                       </motion.div>
-                      <motion.div variants={summaryItemVariants(0.6)} className='flex items-center gap-4 rounded-lg border p-4'>
+                      <motion.div variants={summaryItemVariants(0.6)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
                           <div className="rounded-full bg-green-500/10 p-3">
                               <TrendingUp className="h-6 w-6 text-green-500" />
                           </div>
@@ -258,7 +261,7 @@ export default function TransactionsPage() {
                               <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
                           </div>
                       </motion.div>
-                      <motion.div variants={summaryItemVariants(0.7)} className='flex items-center gap-4 rounded-lg border p-4'>
+                      <motion.div variants={summaryItemVariants(0.7)} className={cn(cardBaseClasses, typeFilter === 'expense' && activeClasses)} onClick={() => setTypeFilter('expense')}>
                           <div className="rounded-full bg-red-500/10 p-3">
                               <TrendingDown className="h-6 w-6 text-red-500" />
                           </div>
