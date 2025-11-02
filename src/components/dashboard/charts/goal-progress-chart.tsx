@@ -57,7 +57,7 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square h-[250px]"
+          className="mx-auto aspect-square h-[300px]"
         >
           <PieChart>
              <Tooltip
@@ -98,6 +98,10 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
             </Pie>
+             <ChartLegend
+                content={<ChartLegendContent nameKey="name" />}
+                className="flex-col gap-2 [&>li]:w-auto [&>li>div]:justify-start"
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
@@ -105,7 +109,6 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
          <div className="flex w-full items-center justify-center gap-1 font-medium leading-none">
           Progresso Total: <span className="font-bold text-primary">{totalProgress}%</span>
         </div>
-        <ChartLegend content={<ChartLegendContent nameKey="name" />} />
       </CardFooter>
     </Card>
   );

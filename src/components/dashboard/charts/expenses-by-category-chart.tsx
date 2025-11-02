@@ -37,7 +37,7 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
         <CardContent className="flex-1 pb-0">
              <ChartContainer
                 config={chartConfig}
-                className="mx-auto aspect-square h-[250px]"
+                className="mx-auto aspect-square h-[300px]"
             >
                 <PieChart>
                     <Tooltip
@@ -55,6 +55,10 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
                             <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                         ))}
                     </Pie>
+                    <ChartLegend
+                        content={<ChartLegendContent nameKey="name" />}
+                        className="flex-col gap-2 [&>li]:w-auto [&>li>div]:justify-start"
+                    />
                 </PieChart>
             </ChartContainer>
         </CardContent>
@@ -62,7 +66,6 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
             <div className="flex items-center gap-2 font-medium leading-none">
                 Total Gasto: {chartData.reduce((acc, curr) => acc + curr.value, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
-            <ChartLegend content={<ChartLegendContent />} />
         </CardFooter>
     </Card>
   );
