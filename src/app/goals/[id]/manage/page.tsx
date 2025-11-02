@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { ArrowLeft, Lock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,15 +21,45 @@ import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useActionState, useEffect, useState, useTransition } from 'react';
+import { useFormStatus } from 'react-dom';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
 import type { Goal } from '@/lib/definitions';
+import { Input } from '@/components/ui/input';
+import { updateGoal, type UpdateGoalState } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Salvando...' : 'Salvar Alterações'}
+    </Button>
+  );
+}
 
 export default function ManageGoalPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const { toast } = useToast();
   const goal = goals.find((g) => g.id === params.id);
+  
   const [visibility, setVisibility] = useState<Goal['visibility']>(goal?.visibility || 'shared');
   const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
+
+  const initialState: UpdateGoalState = { message: null, errors: {} };
+  const [state, formAction] = useActionState(updateGoal, initialState);
+
+  useEffect(() => {
+    if (state?.message && !state.errors) {
+      toast({ title: "Sucesso!", description: state.message });
+      router.push(`/goals/${goal?.id}`);
+    } else if (state?.message && state.errors) {
+      toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast, router, goal?.id]);
+
 
   if (!goal) {
     notFound();
@@ -52,8 +82,6 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
     if (pendingVisibility) {
       setVisibility(pendingVisibility);
       setPendingVisibility(null);
-      // Aqui você chamaria a server action para salvar a visibilidade
-      console.log(`Visibilidade salva como: ${pendingVisibility}`);
     }
   };
 
@@ -73,65 +101,81 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
         </Button>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl">
-              Gerenciar Caixinha: {goal.name}
-            </CardTitle>
-            <CardDescription>
-              Ajuste as configurações de visibilidade, gerencie participantes e
-              outras opções.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form>
-              <div className="space-y-3 mb-8">
-                <Label className="font-semibold">Visibilidade da Caixinha</Label>
-                 <RadioGroup
-                  name="visibility"
-                  value={visibility}
-                  className="grid grid-cols-2 gap-4"
-                  onValueChange={(value) => handleVisibilityChange(value as Goal['visibility'])}
-                >
-                  <Label
-                    htmlFor="shared"
-                    className={cn(
-                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
-                      visibility === 'shared' && 'border-primary'
-                    )}
-                  >
-                    <RadioGroupItem
-                      value="shared"
-                      id="shared"
-                      className="sr-only"
-                    />
-                    <Users className="mb-3 h-6 w-6" />
-                    <span className="font-semibold">Compartilhada</span>
-                    <span className="text-xs text-center text-muted-foreground mt-1">Visível para todos no cofre.</span>
-                  </Label>
-                  <Label
-                    htmlFor="private"
-                    className={cn(
-                      'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
-                      visibility === 'private' && 'border-primary'
-                    )}
-                  >
-                    <RadioGroupItem
-                      value="private"
-                      id="private"
-                      className="sr-only"
-                    />
-                    <Lock className="mb-3 h-6 w-6" />
-                     <span className="font-semibold">Privada</span>
-                    <span className="text-xs text-center text-muted-foreground mt-1">Apenas para você e convidados.</span>
-                  </Label>
-                </RadioGroup>
-                 <VisibilityChangeDialog
-                    open={!!pendingVisibility}
-                    newVisibility={pendingVisibility}
-                    onConfirm={confirmVisibilityChange}
-                    onCancel={cancelVisibilityChange}
-                />
-              </div>
+          <form action={formAction}>
+             <input type="hidden" name="id" value={goal.id} />
+             <input type="hidden" name="visibility" value={visibility} />
+            <CardHeader>
+              <CardTitle className="font-headline text-2xl">
+                Gerenciar Caixinha
+              </CardTitle>
+              <CardDescription>
+                Ajuste o nome, ícone, visibilidade, participantes e
+                outras opções da sua caixinha.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                        <div className="space-y-2 md:col-span-3">
+                            <Label htmlFor="name">Nome da Caixinha</Label>
+                            <Input id="name" name="name" defaultValue={goal.name} />
+                             {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="emoji">Ícone (Emoji)</Label>
+                            <Input id="emoji" name="emoji" defaultValue={goal.emoji} maxLength={2} className="text-center text-2xl h-14" />
+                            {state?.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
+                        </div>
+                    </div>
+                
+                    <div className="space-y-3">
+                        <Label className="font-semibold">Visibilidade da Caixinha</Label>
+                        <RadioGroup
+                        defaultValue={visibility}
+                        className="grid grid-cols-2 gap-4"
+                        onValueChange={(value) => handleVisibilityChange(value as Goal['visibility'])}
+                        >
+                        <Label
+                            htmlFor="shared"
+                            className={cn(
+                            'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                            visibility === 'shared' && 'border-primary'
+                            )}
+                        >
+                            <RadioGroupItem
+                            value="shared"
+                            id="shared"
+                            className="sr-only"
+                            />
+                            <Users className="mb-3 h-6 w-6" />
+                            <span className="font-semibold">Compartilhada</span>
+                            <span className="text-xs text-center text-muted-foreground mt-1">Visível para todos no cofre.</span>
+                        </Label>
+                        <Label
+                            htmlFor="private"
+                            className={cn(
+                            'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                            visibility === 'private' && 'border-primary'
+                            )}
+                        >
+                            <RadioGroupItem
+                            value="private"
+                            id="private"
+                            className="sr-only"
+                            />
+                            <Lock className="mb-3 h-6 w-6" />
+                            <span className="font-semibold">Privada</span>
+                            <span className="text-xs text-center text-muted-foreground mt-1">Apenas para você e convidados.</span>
+                        </Label>
+                        </RadioGroup>
+                        <VisibilityChangeDialog
+                            open={!!pendingVisibility}
+                            newVisibility={pendingVisibility}
+                            onConfirm={confirmVisibilityChange}
+                            onCancel={cancelVisibilityChange}
+                        />
+                    </div>
+                </div>
 
               <Separator className="my-8" />
 
@@ -181,14 +225,13 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                 </p>
                 <DeleteGoalDialog goalId={goal.id} goalName={goal.name} />
               </div>
-            </form>
-          </CardContent>
+            </CardContent>
            <CardFooter className="border-t pt-6">
-                <Button>Salvar Alterações</Button>
+                <SubmitButton />
             </CardFooter>
+          </form>
         </Card>
       </div>
     </div>
   );
 }
-

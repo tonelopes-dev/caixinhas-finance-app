@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { sendEmail } from '@/ai/flows/send-email-flow';
@@ -35,6 +36,10 @@ const goalSchema = z.object({
   emoji: z.string().min(1, { message: 'O emoji é obrigatório.' }),
   targetAmount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   visibility: z.enum(['shared', 'private'], { required_error: 'A visibilidade é obrigatória.' }),
+});
+
+const updateGoalSchema = goalSchema.extend({
+    id: z.string(),
 });
 
 const goalTransactionSchema = z.object({
@@ -108,6 +113,17 @@ export type GoalState = {
     targetAmount?: string[];
     visibility?: string[];
   };
+}
+
+export type UpdateGoalState = {
+    message?: string | null;
+    errors?: {
+        id?: string[];
+        name?: string[];
+        emoji?: string[];
+        targetAmount?: string[];
+        visibility?: string[];
+    };
 }
 
 export type GoalTransactionState = {
@@ -409,6 +425,46 @@ export async function addGoal(prevState: GoalState, formData: FormData): Promise
   
   revalidatePath('/');
   redirect('/');
+}
+
+export async function updateGoal(prevState: UpdateGoalState, formData: FormData): Promise<UpdateGoalState> {
+    const validatedFields = updateGoalSchema.safeParse({
+        id: formData.get('id'),
+        name: formData.get('name'),
+        emoji: formData.get('emoji'),
+        // targetAmount is not editable for now, so we don't parse it
+        visibility: formData.get('visibility'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Falha na validação.',
+        };
+    }
+    
+    const { id, name, emoji, visibility } = validatedFields.data;
+
+    const goalIndex = goals.findIndex(g => g.id === id);
+    if (goalIndex === -1) {
+        return { message: "Caixinha não encontrada." };
+    }
+    
+    // Mock: update goal in memory
+    goals[goalIndex] = {
+        ...goals[goalIndex],
+        name,
+        emoji,
+        visibility,
+    };
+    
+    console.log(`Goal ${id} updated successfully.`);
+    revalidatePath('/');
+    revalidatePath(`/goals/${id}`);
+    revalidatePath(`/goals/${id}/manage`);
+    revalidatePath('/goals');
+
+    return { message: "Caixinha atualizada com sucesso!" };
 }
 
 export async function goalTransaction(prevState: GoalTransactionState, formData: FormData): Promise<GoalTransactionState> {
