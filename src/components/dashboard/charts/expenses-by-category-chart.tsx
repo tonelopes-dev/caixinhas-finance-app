@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, Cell, Tooltip, Legend } from 'recharts';
+import { Pie, PieChart, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltipContent, ChartLegendContent } from '@/components/ui/chart';
 import { TrendingDown } from 'lucide-react';
