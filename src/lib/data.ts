@@ -99,7 +99,7 @@ export const goals: Goal[] = [
     ownerType: 'user',
     name: 'Setup Novo',
     targetAmount: 15000,
-    currentAmount: 7500,
+    currentAmount: 7500, // This is now calculated dynamically
     emoji: '🖥️',
     visibility: 'private', 
     participants: [devParticipant],
@@ -113,7 +113,7 @@ export const goals: Goal[] = [
     ownerType: 'user',
     name: 'Viagem com Amigos',
     targetAmount: 5000,
-    currentAmount: 1200,
+    currentAmount: 1200, // This is now calculated dynamically
     emoji: '🏖️',
     visibility: 'shared',
     participants: friendsParticipants, 
@@ -127,7 +127,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Macbook M4 Pro',
     targetAmount: 25000,
-    currentAmount: 18000,
+    currentAmount: 18000, // This is now calculated dynamically
     emoji: '💻',
     visibility: 'shared',
     participants: [devParticipant],
@@ -140,7 +140,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Bioimpedância Nova',
     targetAmount: 40000,
-    currentAmount: 11000,
+    currentAmount: 11000, // This is now calculated dynamically
     emoji: '🔬',
     visibility: 'shared',
     participants: [nutriParticipant],
@@ -153,7 +153,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Reforma da Cozinha',
     targetAmount: 35000,
-    currentAmount: 8000,
+    currentAmount: 8000, // This is now calculated dynamically
     emoji: '🛠️',
     visibility: 'shared', // Todos no cofre podem ver
     participants: familyParticipants,
@@ -165,7 +165,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Fundo de Emergência',
     targetAmount: 50000,
-    currentAmount: 32000,
+    currentAmount: 32000, // This is now calculated dynamically
     emoji: '🛡️',
     visibility: 'shared',
     participants: familyParticipants,
@@ -176,7 +176,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Presente Surpresa Nutri',
     targetAmount: 2000,
-    currentAmount: 1500,
+    currentAmount: 1500, // This is now calculated dynamically
     emoji: '🎁',
     visibility: 'private', // Só o Dev pode ver
     participants: [devParticipant],
@@ -187,7 +187,7 @@ export const goals: Goal[] = [
     ownerType: 'vault',
     name: 'Curso de Culinária',
     targetAmount: 1500,
-    currentAmount: 950,
+    currentAmount: 950, // This is now calculated dynamically
     emoji: '🍳',
     visibility: 'private', // Só a Nutri pode ver
     participants: [nutriParticipant],
@@ -206,7 +206,11 @@ export const transactions: Transaction[] = [
     // Transações Pessoais da Nutri (user2)
     { id: 't-nutri-1', ownerId: 'user2', ownerType: 'user', date: '2024-07-29', description: 'Recebimento de Consultas', amount: 7000, type: 'income', category: 'Renda Principal', destinationAccountId: 'acc-nutri-1', actorId: 'user2' },
     { id: 't-nutri-2', ownerId: 'user2', ownerType: 'user', date: '2024-07-26', description: 'Jantar com amigos', amount: 120, type: 'expense', category: 'Lazer', sourceAccountId: 'acc-nutri-1', paymentMethod: 'credit_card', actorId: 'user2' },
-    { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Economia para Viagem', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user2' },
+    // CORREÇÃO: Adicionando transações para a meta "Viagem com Amigos" (goal-nutri-1)
+    { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-05-10', description: 'Economia para Viagem', amount: 400, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user2' },
+    { id: 't-nutri-3a', ownerId: 'user2', ownerType: 'user', date: '2024-06-12', description: 'Economia para Viagem', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user4' },
+    { id: 't-nutri-3b', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Economia para Viagem', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user1' },
+    
     { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2', isRecurring: true },
 
     // Transações do Cofre da Família (vault-family)
