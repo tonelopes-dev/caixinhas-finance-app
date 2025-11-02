@@ -2,9 +2,10 @@
 
 import { personalizedBudgetAnalysis } from '@/ai/flows/personalized-budget-analysis';
 import { sendEmail } from '@/ai/flows/send-email-flow';
+import { chatWithReport } from '@/ai/flows/financial-report-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { transactions, goals, user } from '@/lib/data';
+import { transactions, goals, user, financialReports } from '@/lib/data';
 import { redirect } from 'next/navigation';
 
 const analysisSchema = z.object({
@@ -68,6 +69,12 @@ const passwordResetSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
 });
 
+const financialReportSchema = z.object({
+    reportId: z.string(),
+    message: z.string(),
+    chatHistory: z.string().optional(),
+});
+
 
 export type AnalysisState = {
   message?: string | null;
@@ -118,6 +125,54 @@ export type GenericState = {
         name?: string[];
         password?: string[];
     }
+}
+
+export type FinancialReportState = {
+  reportId: string;
+  analysis?: string;
+  sender?: 'user' | 'assistant';
+  error?: string;
+};
+
+
+export async function getFinancialReport(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
+  const validatedFields = financialReportSchema.safeParse({
+    reportId: formData.get('reportId'),
+    message: formData.get('message'),
+    chatHistory: formData.get('chatHistory'),
+  });
+
+  if (!validatedFields.success) {
+    return { ...prevState, error: 'Dados inválidos.', sender: 'assistant' };
+  }
+
+  const { reportId, message, chatHistory } = validatedFields.data;
+  
+  const report = financialReports.find(r => r.id === reportId);
+  if (!report) {
+    return { ...prevState, error: 'Relatório não encontrado.', sender: 'assistant' };
+  }
+
+  try {
+    const result = await chatWithReport({
+        reportContext: report.analysisHtml,
+        question: message,
+        chatHistory: chatHistory || '[]',
+    });
+
+    return {
+        reportId: reportId,
+        analysis: result.answer,
+        sender: 'assistant'
+    };
+  } catch (error) {
+    console.error('Error calling GenAI flow:', error);
+    return {
+      ...prevState,
+      error: 'Ocorreu um erro ao conversar com o assistente. Tente novamente.',
+      sender: 'assistant'
+    };
+  }
 }
 
 

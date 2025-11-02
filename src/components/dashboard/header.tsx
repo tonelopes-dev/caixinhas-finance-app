@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, Bell, BookOpen, ArrowRightLeft, LayoutDashboard } from 'lucide-react';
+import { UserPlus, BookOpen, ArrowRightLeft, FileText } from 'lucide-react';
 import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
-import { notifications } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
 
@@ -80,9 +79,9 @@ export default function Header({ user, partner }: HeaderProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
              <DropdownMenuItem asChild>
-                <Link href="/">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Painel</span>
+                <Link href="/reports">
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Relatórios</span>
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

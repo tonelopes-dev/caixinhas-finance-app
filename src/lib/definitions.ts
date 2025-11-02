@@ -93,7 +93,7 @@ export type Guest = {
 
 export type Notification = {
   id: string;
-  type: 'vault_invite' | 'goal_invite' | 'transaction_added' | 'goal_progress';
+  type: 'vault_invite' | 'goal_invite' | 'transaction_added' | 'goal_progress' | 'report_ready';
   actor?: {
     name: string;
     avatarUrl: string;
@@ -103,4 +103,12 @@ export type Notification = {
   read: boolean;
   link?: string;
   relatedId?: string; // e.g., the ID of the invitation or transaction
+}
+
+
+export type FinancialReport = {
+    id: string;
+    month: string;
+    userId: string;
+    analysisHtml: string;
 }

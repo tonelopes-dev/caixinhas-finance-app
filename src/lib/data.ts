@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation } from './definitions';
+import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation, FinancialReport } from './definitions';
 
 // --- PERSONAS & USERS ---
 export const users: User[] = [
@@ -338,6 +338,62 @@ export const notifications: Notification[] = [
       timestamp: '2024-07-25T09:00:00Z',
       read: true,
       link: '/invitations'
+    },
+    {
+      id: 'n5',
+      type: 'report_ready',
+      text: 'Seu <b>relatório financeiro</b> de Julho está pronto para visualização!',
+      timestamp: '2024-08-01T09:00:00Z',
+      read: false,
+      link: '/reports'
+    },
+];
+
+// --- FINANCIAL REPORTS (MOCK) ---
+export const financialReports: FinancialReport[] = [
+    {
+        id: 'report-jul-2024',
+        month: 'Julho 2024',
+        userId: 'user1',
+        analysisHtml: `
+            <h3>Análise de Julho de 2024</h3>
+            <h4>💡 Resumo Geral</h4>
+            <ul>
+                <li><b>Receita Total:</b> R$ 12.000,00</li>
+                <li><b>Despesa Total:</b> R$ 80,00</li>
+                <li><b>Transferências:</b> R$ 2.500,00</li>
+                <li><b>Saldo Líquido (Receitas - Despesas):</b> R$ 11.920,00</li>
+                <li><b>Taxa de Poupança (Transferências / Receita):</b> 20.83%</li>
+            </ul>
+            <h4>📈 Análise de Despesas</h4>
+            <p>Sua única despesa registrada foi:</p>
+            <ul>
+                <li><b>Alimentação:</b> R$ 80,00 (100%)</li>
+            </ul>
+            <h4>🧠 Insights e Recomendações</h4>
+            <ol>
+                <li><b>Excelente Taxa de Poupança:</b> Você direcionou uma parte significativa da sua renda para seus objetivos. Manter essa disciplina é a chave para o sucesso a longo prazo.</li>
+                <li><b>Foco em Objetivos Claros:</b> A maior parte de suas transferências foi para a "Caixinha do Setup" e para o cofre da família, mostrando um bom alinhamento com seus planos.</li>
+            </ol>
+        `
+    },
+    {
+        id: 'report-jun-2024',
+        month: 'Junho 2024',
+        userId: 'user1',
+        analysisHtml: `<h3>Análise de Junho de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
+    },
+    {
+        id: 'report-mai-2024',
+        month: 'Maio 2024',
+        userId: 'user1',
+        analysisHtml: `<h3>Análise de Maio de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
+    },
+     {
+        id: 'report-abr-2024',
+        month: 'Abril 2024',
+        userId: 'user1',
+        analysisHtml: `<h3>Análise de Abril de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
     },
 ];
 
