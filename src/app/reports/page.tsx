@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFormStatus, useFormState } from 'react-dom';
 import Link from 'next/link';
 import { ArrowLeft, Bot, FileText, Send, User as UserIcon } from 'lucide-react';
@@ -11,7 +11,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from '@/components/ui/card';
 import {
   Tabs,
@@ -28,6 +27,11 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import withAuth from '@/components/auth/with-auth';
 
+type ChatMessage = {
+    role: 'user' | 'assistant';
+    content: string;
+};
+
 function ChatSubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -41,29 +45,54 @@ function ChatSubmitButton() {
 function ReportsPage() {
   const [currentReport, setCurrentReport] = useState<FinancialReport | null>(financialReports[0]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const initialState: FinancialReportState = { reportId: currentReport?.id ?? '' };
   const [state, dispatch] = useFormState(getFinancialReport, initialState);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const chatAreaRef = useRef<HTMLDivElement>(null);
+
 
   const handleTabChange = (reportId: string) => {
     const newReport = financialReports.find(r => r.id === reportId);
     setCurrentReport(newReport || null);
-    setChatHistory([]); // Reset chat when changing reports
+    setChatHistory([]); 
+    if (state) {
+        state.analysis = undefined;
+        state.error = undefined;
+    }
   }
   
   useEffect(() => {
-    if (state.analysis && state.sender === 'assistant') {
+    if (state?.analysis && state.sender === 'assistant' && chatHistory[chatHistory.length - 1]?.role !== 'assistant') {
         setChatHistory(prev => [...prev, { role: 'assistant', content: state.analysis! }]);
         setIsGenerating(false);
+        if (chatInputRef.current) {
+            chatInputRef.current.value = '';
+        }
+    } else if (state?.error) {
+        setIsGenerating(false);
     }
-  }, [state]);
+  }, [state, chatHistory]);
+
+  useEffect(() => {
+    if (chatAreaRef.current) {
+        chatAreaRef.current.scrollTo({
+            top: chatAreaRef.current.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+  }, [chatHistory])
 
   const handleFormSubmit = (formData: FormData) => {
     const userMessage = formData.get('message') as string;
-    if (!userMessage) return;
+    if (!userMessage.trim()) return;
 
     setChatHistory(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsGenerating(true);
+    
+    const historyString = JSON.stringify(chatHistory);
+    formData.set('chatHistory', historyString);
+
     dispatch(formData);
   };
 
@@ -96,7 +125,6 @@ function ReportsPage() {
               {financialReports.map(report => (
                 <TabsContent key={report.id} value={report.id}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        {/* Report Content */}
                         <div className='md:h-[600px] flex flex-col'>
                             <h3 className="font-headline text-lg font-bold mb-2">Análise de {report.month}</h3>
                             <ScrollArea className="flex-1 rounded-md border p-4 bg-muted/20">
@@ -107,13 +135,12 @@ function ReportsPage() {
                             </ScrollArea>
                         </div>
                         
-                        {/* Chat */}
                         <div className="flex flex-col rounded-lg border bg-card md:h-[600px]">
                             <div className="p-4 border-b">
                                 <h3 className="font-semibold flex items-center gap-2"><Bot className='h-5 w-5' /> Assistente Financeiro</h3>
                                 <p className='text-xs text-muted-foreground'>Tire dúvidas sobre seu relatório de {report.month}</p>
                             </div>
-                            <ScrollArea className="flex-1 p-4">
+                            <ScrollArea className="flex-1 p-4" ref={chatAreaRef}>
                                <div className="space-y-4">
                                 {chatHistory.length === 0 && (
                                     <div className="text-center text-sm text-muted-foreground py-8">
@@ -155,10 +182,12 @@ function ReportsPage() {
                             <form action={handleFormSubmit} className="flex items-center gap-2 border-t p-2">
                                 <input type="hidden" name="reportId" value={currentReport?.id ?? ''} />
                                 <Input
+                                    ref={chatInputRef}
                                     name="message"
                                     placeholder="Pergunte sobre seu relatório..."
                                     className="flex-1"
                                     disabled={isGenerating}
+                                    autoComplete="off"
                                 />
                                 <ChatSubmitButton />
                             </form>
