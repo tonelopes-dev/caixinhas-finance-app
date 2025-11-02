@@ -1,16 +1,11 @@
 "use server";
 
-import { personalizedBudgetAnalysis } from '@/ai/flows/personalized-budget-analysis';
 import { sendEmail } from '@/ai/flows/send-email-flow';
 import { chatWithReport, generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { transactions, goals, user, savedReports } from '@/lib/data';
 import { redirect } from 'next/navigation';
-
-const analysisSchema = z.object({
-  financialHabits: z.string().min(20, { message: 'Por favor, descreva seus hábitos financeiros com mais detalhes.' }),
-});
 
 const transactionSchema = z.object({
   id: z.string().optional(),
@@ -81,15 +76,6 @@ const generateReportSchema = z.object({
     ownerId: z.string(),
 });
 
-
-export type AnalysisState = {
-  message?: string | null;
-  analysis?: string;
-  suggestions?: string[];
-  errors?: {
-    financialHabits?: string[];
-  };
-};
 
 export type TransactionState = {
   message?: string | null;
@@ -244,58 +230,6 @@ export async function getFinancialReportChat(prevState: FinancialReportState, fo
       ...prevState,
       error: 'Ocorreu um erro ao conversar com o assistente. Tente novamente.',
       isNewReport: false,
-    };
-  }
-}
-
-
-export async function analyzeBudget(prevState: AnalysisState, formData: FormData): Promise<AnalysisState> {
-  const validatedFields = analysisSchema.safeParse({
-    financialHabits: formData.get('financialHabits'),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação. Por favor, verifique os campos.',
-    };
-  }
-
-  // In a real app, this data would come from a database based on the authenticated user.
-  // Here we use mock data for demonstration.
-  const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-
-  const expenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + t.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-  const sharedGoals = goals.map(g => ({
-    name: g.name,
-    targetAmount: g.targetAmount,
-    currentSavings: g.currentAmount,
-  }));
-
-  try {
-    const result = await personalizedBudgetAnalysis({
-      income,
-      expenses,
-      sharedGoals,
-      financialHabits: validatedFields.data.financialHabits,
-    });
-    
-    revalidatePath('/');
-    return {
-      message: 'Análise concluída!',
-      analysis: result.analysis,
-      suggestions: result.suggestions,
-    };
-  } catch (error) {
-    console.error('Error calling GenAI flow:', error);
-    return {
-      message: 'Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.',
     };
   }
 }

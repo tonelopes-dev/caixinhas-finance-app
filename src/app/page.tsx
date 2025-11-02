@@ -6,7 +6,6 @@ import Header from '@/components/dashboard/header';
 import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
-import BudgetAnalysis from '@/components/dashboard/budget-analysis';
 import { goals as allGoals, transactions as allTransactions, users, vaults, getMockDataForUser, accounts } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
@@ -163,13 +162,6 @@ function HomePage() {
             <div className="grid auto-rows-max items-start gap-8">
               <AnimatedDiv transition={{ delay: 0.3 }}>
                 <GoalBuckets goals={goals} />
-              </AnimatedDiv>
-              <AnimatedDiv transition={{ delay: 0.4 }}>
-                <BudgetAnalysis 
-                  goals={goals}
-                  income={totalIncome}
-                  expenses={expensesByCategory}
-                />
               </AnimatedDiv>
             </div>
           </div>
