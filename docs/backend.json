@@ -27,23 +27,11 @@
           "type": "string",
           "description": "URL to the user's profile picture.",
           "format": "uri"
-        },
-        "oauthProvider": {
-          "type": "string",
-          "description": "The OAuth provider used for authentication (e.g., 'Google', 'Facebook')."
-        },
-        "oauthId": {
-          "type": "string",
-          "description": "The user's ID from the OAuth provider."
         }
       },
       "required": [
         "id",
-        "email",
-        "firstName",
-        "lastName",
-        "oauthProvider",
-        "oauthId"
+        "email"
       ]
     },
     "Couple": {
@@ -202,9 +190,7 @@
     }
   },
   "auth": {
-    "providers": [
-      "google.com"
-    ]
+    "providers": []
   },
   "firestore": {
     "structure": [
@@ -301,6 +287,6 @@
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to support a collaborative finance management application for couples, focusing on shared goals and transactions. The core principle is Authorization Independence, achieved through denormalization. Each data entity is structured to facilitate simple and secure security rules. The structure also incorporates Structural Segregation to maintain a homogeneous security posture within each collection. The use of hierarchical paths reinforces clear ownership and relationships between entities. OAuth integration is supported through the `User` entity's `oauthProvider` and `oauthId` fields.\n\nAuthorization Independence:\n\n*   Transactions, Categories and GoalBuckets are stored under a `couples` collection. This requires duplicating the `coupleId` on the document itself and avoids the need for `get()` calls to parent documents during authorization.\n\nQAPs (Queries are not Filters):\n\n*   The segregation of data into collections based on entity type (Users, Couples, Transactions, Categories, GoalBuckets) allows for efficient and secure list operations. Queries can be scoped to specific collections, and security rules can be applied at the collection level without needing to filter based on document content.\n\nData Clarity and Predictability:\n\n*   Consistent naming conventions are used for fields (e.g., `coupleId`, `id`). This ensures clarity and predictability when writing security rules and application code."
+    "reasoning": "The Firestore data structure is designed to support a collaborative finance management application for couples, focusing on shared goals and transactions. The core principle is Authorization Independence, achieved through denormalization. Each data entity is structured to facilitate simple and secure security rules. The structure also incorporates Structural Segregation to maintain a homogeneous security posture within each collection. The use of hierarchical paths reinforces clear ownership and relationships between entities."
   }
 }

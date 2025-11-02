@@ -26,31 +26,12 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isSignedIn() {
-      return request.auth != null;
+      // In development, allow all access.
+      // In production, this should be: request.auth != null;
+      return true;
     }
 
-    match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-    }
-
-    match /couples/{coupleId} {
-      // For now, allow any signed-in user to read/write.
-      // This should be locked down to only the users in the couple.
-      allow read, write: if isSignedIn();
-    }
-
-    match /couples/{coupleId}/transactions/{transactionId} {
-      // Users can only manage transactions if they are signed in.
-      allow read, write: if isSignedIn();
-    }
-
-    match /couples/{coupleId}/categories/{categoryId} {
-      // Users can only manage categories if they are signed in.
-      allow read, write: if isSignedIn();
-    }
-
-    match /couples/{coupleId}/goalBuckets/{goalBucketId} {
-      // Users can only manage goal buckets if they are signed in.
+    match /{path=**} {
       allow read, write: if isSignedIn();
     }
   }
