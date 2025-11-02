@@ -1,32 +1,62 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/header';
 import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
-import { goals, transactions, users, partner, totalIncome, totalExpenses } from '@/lib/data';
+import { goals as allGoals, transactions as allTransactions, users, partner } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import withAuth from '@/components/auth/with-auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import type { Goal, Transaction } from '@/lib/definitions';
 
 function HomePage() {
-  const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
   const router = useRouter();
+  const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   
-  // In a real app, the selected vault would be in a global state.
-  // For now, we'll check if one is selected in sessionStorage.
   useEffect(() => {
-    const selectedVault = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
-    if (!selectedVault) {
+    const vaultId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    if (!vaultId) {
       router.push('/vaults');
+    } else {
+      setSelectedVaultId(vaultId);
+      // Filter data based on the selected vault
+      setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
+      setGoals(allGoals.filter(g => g.vaultId === vaultId));
     }
   }, [router]);
   
   const user = users[0];
+
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const expensesByCategory = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + t.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
+
+  if (!selectedVaultId) {
+     return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -68,7 +98,7 @@ function HomePage() {
                 <BudgetAnalysis 
                   goals={goals}
                   income={totalIncome}
-                  expenses={transactions.filter(t => t.type === 'expense').reduce((acc, t) => ({...acc, [t.category]: (acc[t.category] || 0) + t.amount}), {} as Record<string, number>)}
+                  expenses={expensesByCategory}
                 />
               </AnimatedDiv>
             </div>

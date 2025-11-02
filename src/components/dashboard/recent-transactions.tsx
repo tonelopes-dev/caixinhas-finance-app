@@ -19,8 +19,10 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
     const [typeFilter, setTypeFilter] = useState('all');
 
     const baseTransactions = useMemo(() => {
-        // Exclude transfers from the main dashboard view
-        return transactions.filter(t => t.type !== 'transfer');
+        // Exclude transfers from the main dashboard view, and sort by most recent
+        return transactions
+            .filter(t => t.type !== 'transfer')
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [transactions]);
 
     const filteredTransactions = useMemo(() => {
