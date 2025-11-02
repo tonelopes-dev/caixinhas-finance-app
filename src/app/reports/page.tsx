@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import withAuth from '@/components/auth/with-auth';
 import type { User } from '@/lib/definitions';
+import { ReportSkeleton } from '@/components/reports/report-skeleton';
 
 type ChatMessage = {
     role: 'user' | 'assistant';
@@ -69,7 +70,7 @@ function ReportsPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState(false);
 
-  const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
+  const [month, setMonth] = useState((new Date().getMonth()).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
 
   const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
@@ -141,6 +142,11 @@ function ReportsPage() {
     chatAction(formData);
   };
   
+  const handleGenerateReport = (formData: FormData) => {
+    setReportHtml(null); // Clear previous report before generating a new one
+    generateReportAction(formData);
+  }
+
 
   if (!currentUser || !workspaceId) {
     return <div className="flex min-h-screen w-full items-center justify-center bg-background">
@@ -168,7 +174,7 @@ function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={generateReportAction} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
+            <form action={handleGenerateReport} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
                 <input type="hidden" name="ownerId" value={workspaceId} />
                 <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div className="space-y-2">
@@ -204,10 +210,7 @@ function ReportsPage() {
                     <h3 className="font-headline text-lg font-bold mb-2">Relatório Gerado</h3>
                     <ScrollArea className="flex-1 rounded-md border p-4 bg-muted/20">
                         {reportState.pending ? (
-                             <div className="flex h-full items-center justify-center gap-2 text-muted-foreground">
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                <span>Analisando dados e gerando relatório...</span>
-                            </div>
+                             <ReportSkeleton />
                         ) : reportHtml ? (
                             <div
                                 className="prose prose-sm prose-p:leading-normal prose-headings:font-headline max-w-none text-foreground"
