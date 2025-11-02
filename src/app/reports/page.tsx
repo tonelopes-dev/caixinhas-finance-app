@@ -47,7 +47,7 @@ function ChatSubmitButton() {
 function GenerateReportButton() {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="w-full md:w-auto">
             {pending ? (
                 <>
                     <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
@@ -144,6 +144,8 @@ function ReportsPage() {
   
   const handleGenerateReport = (formData: FormData) => {
     setReportHtml(null); // Clear previous report before generating a new one
+    formData.set('month', month);
+    formData.set('year', year);
     generateReportAction(formData);
   }
 
@@ -176,6 +178,8 @@ function ReportsPage() {
           <CardContent>
             <form action={handleGenerateReport} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
                 <input type="hidden" name="ownerId" value={workspaceId} />
+                <input type="hidden" name="month" value={month} />
+                <input type="hidden" name="year" value={year} />
                 <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div className="space-y-2">
                         <label className='text-sm font-medium'>Mês</label>
@@ -200,7 +204,7 @@ function ReportsPage() {
                         </Select>
                     </div>
                 </div>
-                <div className='self-end'>
+                <div className='self-end md:self-center mt-4 md:mt-0'>
                     <GenerateReportButton />
                 </div>
             </form>
