@@ -38,9 +38,9 @@ function SubmitButton() {
 }
 
 const categories = {
-    expense: ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros'],
-    income: ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'],
-    transfer: ['Caixinha', 'Transferência entre contas']
+    expense: ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros', 'Aluguel', 'Materiais'],
+    income: ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros', 'Consultas', 'Contribuição Familiar'],
+    transfer: ['Caixinha', 'Transferência entre contas', 'Contribuição Familiar', 'Investimento']
 }
 
 const paymentMethods = [
@@ -97,7 +97,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
           <input type="hidden" name="id" value={transaction.id} />
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 overflow-y-auto pr-6 pl-1">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>
               <Select name="type" defaultValue={transaction.type} onValueChange={(value) => setTransactionType(value as any)}>
@@ -219,7 +219,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
             )}
 
           </div>
-          <SheetFooter>
+          <SheetFooter className="mt-auto">
             <SubmitButton />
           </SheetFooter>
         </form>
