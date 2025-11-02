@@ -123,6 +123,11 @@ export default function TransactionsPage() {
     setAccounts(allAccounts);
     setGoals(allGoals);
 
+    // Set filters to current month and year on initial load
+    setMonthFilter((new Date().getMonth() + 1).toString());
+    setYearFilter(new Date().getFullYear().toString());
+
+
   }, [router]);
 
   const getAccountName = (id: string) => {
@@ -431,3 +436,6 @@ export default function TransactionsPage() {
     </div>
   );
 }
+
+
+    
