@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation, FinancialReport } from './definitions';
+import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification, Invitation } from './definitions';
 
 // --- PERSONAS & USERS ---
 export const users: User[] = [
@@ -348,62 +348,6 @@ export const notifications: Notification[] = [
       link: '/reports'
     },
 ];
-
-// --- FINANCIAL REPORTS (MOCK) ---
-export const financialReports: FinancialReport[] = [
-    {
-        id: 'report-jul-2024',
-        month: 'Julho 2024',
-        userId: 'user1',
-        analysisHtml: `
-            <h3>Análise Financeira de Julho 2024</h3>
-            <h4>⭐ Resumo Executivo</h4>
-            <p>Julho foi um mês de excelente disciplina financeira. Vocês demonstraram um controle de gastos impressionante e uma forte capacidade de poupança, com uma taxa de poupança de <b>20,8%</b>. O foco principal foi direcionar recursos para suas metas de longo prazo, um sinal muito positivo para a saúde financeira do casal.</p>
-            
-            <h4>💰 Fluxo de Caixa Mensal</h4>
-            <ul>
-                <li><b>Receita Total:</b> R$ 12.000,00</li>
-                <li><b>Despesa Total:</b> R$ 80,00</li>
-                <li><b>Saldo Líquido:</b> <b style="color: green;">+R$ 11.920,00</b></li>
-                <li><b>Taxa de Poupança:</b> 20,8%</li>
-            </ul>
-
-            <h4>📊 Detalhamento das Despesas</h4>
-            <p>Os gastos do mês foram mínimos, refletindo um período de foco total em economia:</p>
-            <ul>
-                <li><b>Alimentação:</b> R$ 80,00 (100% das despesas)</li>
-            </ul>
-
-            <h4>🎯 Progresso das Metas (Caixinhas)</h4>
-            <p>Vocês fizeram contribuições significativas para seus objetivos. O aporte de <b>R$ 1.000,00</b> para o "Setup Novo" e a transferência de <b>R$ 1.500,00</b> para o cofre da família mostram comprometimento com as metas individuais e conjuntas.</p>
-
-            <h4>🧠 Insights e Recomendações Práticas</h4>
-            <ol>
-                <li><b>Manutenção do Foco:</b> A baixa despesa em "Alimentação" sugere que vocês cozinharam mais em casa. Que tal transformar isso em um desafio divertido? Tentem criar um "cardápio econômico" para o próximo mês e vejam o quanto conseguem economizar a mais.</li>
-                <li><b>Potencializar Investimentos:</b> Com um saldo líquido tão positivo, considerem aumentar a contribuição para o "Fundo de Emergência" ou iniciar um novo investimento de baixo risco. Isso acelera a conquista da segurança financeira.</li>
-            </ol>
-        `
-    },
-    {
-        id: 'report-jun-2024',
-        month: 'Junho 2024',
-        userId: 'user1',
-        analysisHtml: `<h3>Análise de Junho de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
-    },
-    {
-        id: 'report-mai-2024',
-        month: 'Maio 2024',
-        userId: 'user1',
-        analysisHtml: `<h3>Análise de Maio de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
-    },
-     {
-        id: 'report-abr-2024',
-        month: 'Abril 2024',
-        userId: 'user1',
-        analysisHtml: `<h3>Análise de Abril de 2024</h3><p>Nenhuma transação registrada para este mês.</p>`
-    },
-];
-
 
 // --- LÓGICA DE SIMULAÇÃO ---
 

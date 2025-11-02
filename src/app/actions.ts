@@ -2,10 +2,10 @@
 
 import { personalizedBudgetAnalysis } from '@/ai/flows/personalized-budget-analysis';
 import { sendEmail } from '@/ai/flows/send-email-flow';
-import { chatWithReport } from '@/ai/flows/financial-report-flow';
+import { chatWithReport, generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { transactions, goals, user, financialReports } from '@/lib/data';
+import { transactions, goals, user } from '@/lib/data';
 import { redirect } from 'next/navigation';
 
 const analysisSchema = z.object({
@@ -69,10 +69,16 @@ const passwordResetSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
 });
 
-const financialReportSchema = z.object({
-    reportId: z.string(),
+const financialReportChatSchema = z.object({
+    reportContext: z.string(),
     message: z.string(),
     chatHistory: z.string().optional(),
+});
+
+const generateReportSchema = z.object({
+    month: z.string(),
+    year: z.string(),
+    ownerId: z.string(),
 });
 
 
@@ -128,49 +134,96 @@ export type GenericState = {
 }
 
 export type FinancialReportState = {
-  reportId: string;
-  analysis?: string;
-  sender?: 'user' | 'assistant';
-  error?: string;
+  reportHtml?: string | null;
+  chatResponse?: string | null;
+  isNewReport?: boolean;
+  error?: string | null;
 };
 
 
-export async function getFinancialReport(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
-  const validatedFields = financialReportSchema.safeParse({
-    reportId: formData.get('reportId'),
+export async function generateNewFinancialReport(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
+    const validatedFields = generateReportSchema.safeParse({
+        month: formData.get('month'),
+        year: formData.get('year'),
+        ownerId: formData.get('ownerId'),
+    });
+
+    if (!validatedFields.success) {
+        return { error: 'Dados inválidos para gerar o relatório.' };
+    }
+
+    const { month, year, ownerId } = validatedFields.data;
+    
+    const monthIndex = parseInt(month, 10) - 1;
+    const yearNum = parseInt(year, 10);
+    const monthName = new Date(yearNum, monthIndex).toLocaleString('pt-BR', { month: 'long' });
+    const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
+
+
+    const relevantTransactions = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return t.ownerId === ownerId && transactionDate.getMonth() === monthIndex && transactionDate.getFullYear() === yearNum;
+    });
+
+    if (relevantTransactions.length === 0) {
+        return {
+             reportHtml: `<div class="text-center py-10"><p class="text-muted-foreground">Nenhuma transação encontrada para ${monthYear}.</p></div>`,
+             isNewReport: true
+        };
+    }
+
+    try {
+        const result = await generateFinancialReport({
+            month: monthYear,
+            transactions: JSON.stringify(relevantTransactions, null, 2),
+        });
+
+        return {
+            reportHtml: result.analysisHtml,
+            isNewReport: true, // Indica que um novo relatório foi gerado
+        };
+    } catch (error) {
+        console.error('Error generating financial report:', error);
+        return { error: 'Ocorreu um erro ao gerar o relatório. Tente novamente.' };
+    }
+}
+
+
+export async function getFinancialReportChat(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
+  const validatedFields = financialReportChatSchema.safeParse({
+    reportContext: formData.get('reportContext'),
     message: formData.get('message'),
     chatHistory: formData.get('chatHistory'),
   });
 
   if (!validatedFields.success) {
-    return { ...prevState, error: 'Dados inválidos.', sender: 'assistant' };
+    return { ...prevState, error: 'Dados de chat inválidos.', isNewReport: false };
   }
 
-  const { reportId, message, chatHistory } = validatedFields.data;
+  const { reportContext, message, chatHistory } = validatedFields.data;
   
-  const report = financialReports.find(r => r.id === reportId);
-  if (!report) {
-    return { ...prevState, error: 'Relatório não encontrado.', sender: 'assistant' };
+  if (!reportContext || !message) {
+      return { ...prevState, error: 'Contexto do relatório ou mensagem ausente.', isNewReport: false };
   }
-
+  
   try {
     const result = await chatWithReport({
-        reportContext: report.analysisHtml,
+        reportContext: reportContext,
         question: message,
         chatHistory: chatHistory || '[]',
     });
 
     return {
-        reportId: reportId,
-        analysis: result.answer,
-        sender: 'assistant'
+        ...prevState,
+        chatResponse: result.answer,
+        isNewReport: false, // Indica que é uma resposta de chat
     };
   } catch (error) {
-    console.error('Error calling GenAI flow:', error);
+    console.error('Error calling GenAI chat flow:', error);
     return {
       ...prevState,
       error: 'Ocorreu um erro ao conversar com o assistente. Tente novamente.',
-      sender: 'assistant'
+      isNewReport: false,
     };
   }
 }

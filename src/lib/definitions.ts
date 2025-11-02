@@ -104,11 +104,3 @@ export type Notification = {
   link?: string;
   relatedId?: string; // e.g., the ID of the invitation or transaction
 }
-
-
-export type FinancialReport = {
-    id: string;
-    month: string;
-    userId: string;
-    analysisHtml: string;
-}
