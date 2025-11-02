@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { guests } from '@/lib/data';
+import { users as guests } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, X } from 'lucide-react';
 import {
@@ -115,7 +115,7 @@ export function GuestsManagement() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {guests.map((guest) => (
+          {guests.slice(2, 5).map((guest) => (
             <div
               key={guest.id}
               className="flex items-center justify-between rounded-lg border p-3"
