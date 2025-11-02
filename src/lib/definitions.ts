@@ -90,3 +90,16 @@ export type Guest = {
     email: string;
     avatarUrl: string;
 }
+
+export type Notification = {
+  id: string;
+  type: 'vault_invite' | 'goal_invite' | 'transaction_added' | 'goal_progress';
+  actor?: {
+    name: string;
+    avatarUrl: string;
+  };
+  text: string;
+  timestamp: string;
+  read: boolean;
+  link?: string;
+}

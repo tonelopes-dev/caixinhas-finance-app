@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
-import { invitations } from '@/lib/data';
+import { notifications } from '@/lib/data';
 import { useRouter } from 'next/navigation';
+import { NotificationsDropdown } from './notifications-dropdown';
 
 
 type HeaderProps = {
@@ -27,8 +28,7 @@ type HeaderProps = {
 
 export default function Header({ user, partner }: HeaderProps) {
   const router = useRouter();
-  const pendingInvitationsCount = invitations.filter(inv => inv.status === 'pending').length;
-
+  
   const handleLogout = () => {
     localStorage.removeItem('DREAMVAULT_USER_ID');
     sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
@@ -56,17 +56,9 @@ export default function Header({ user, partner }: HeaderProps) {
             <span className="hidden md:inline">Convidar</span>
           </Link>
         </Button>
-        <Button variant="ghost" size="icon" asChild className="relative">
-            <Link href="/invitations">
-                <Bell className="h-5 w-5" />
-                {pendingInvitationsCount > 0 && (
-                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-                    {pendingInvitationsCount}
-                  </span>
-                )}
-                <span className="sr-only">Convites</span>
-            </Link>
-        </Button>
+        
+        <NotificationsDropdown />
+
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-2 md:pr-4">

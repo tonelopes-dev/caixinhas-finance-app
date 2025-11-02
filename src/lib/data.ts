@@ -1,4 +1,4 @@
-import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant } from './definitions';
+import type { Transaction, Goal, User, Account, Vault, VaultInvitation, GoalParticipant, Notification } from './definitions';
 
 // --- PERSONAS & USERS ---
 export const users: User[] = [
@@ -198,16 +198,16 @@ export const goals: Goal[] = [
 // --- TRANSAÇÕES (TRANSACTIONS) ---
 export const transactions: Transaction[] = [
     // Transações Pessoais do Dev (user1)
-    { id: 't-dev-1', ownerId: 'user1', ownerType: 'user', date: '2024-07-28', description: 'Salário', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1' },
+    { id: 't-dev-1', ownerId: 'user1', ownerType: 'user', date: '2024-07-28', description: 'Salário', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1', isRecurring: true },
     { id: 't-dev-2', ownerId: 'user1', ownerType: 'user', date: '2024-07-25', description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1' },
     { id: 't-dev-3', ownerId: 'user1', ownerType: 'user', date: '2024-07-20', description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', destinationAccountId: 'goal-dev-1', actorId: 'user1' },
-    { id: 't-dev-4', ownerId: 'user1', ownerType: 'user', date: '2024-07-15', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
+    { id: 't-dev-4', ownerId: 'user1', ownerType: 'user', date: '2024-07-15', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1', isRecurring: true },
     
     // Transações Pessoais da Nutri (user2)
     { id: 't-nutri-1', ownerId: 'user2', ownerType: 'user', date: '2024-07-29', description: 'Recebimento de Consultas', amount: 7000, type: 'income', category: 'Renda Principal', destinationAccountId: 'acc-nutri-1', actorId: 'user2' },
     { id: 't-nutri-2', ownerId: 'user2', ownerType: 'user', date: '2024-07-26', description: 'Jantar com amigos', amount: 120, type: 'expense', category: 'Lazer', sourceAccountId: 'acc-nutri-1', paymentMethod: 'credit_card', actorId: 'user2' },
     { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Economia para Viagem', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user2' },
-    { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
+    { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2', isRecurring: true },
 
     // Transações do Cofre da Família (vault-family)
     { id: 't-fam-1', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-27', description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2' },
@@ -218,10 +218,50 @@ export const transactions: Transaction[] = [
 
     // Transações do Cofre do Consultório (vault-office)
     { id: 't-off-1', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-28', description: 'Consulta Paciente A', amount: 350, type: 'income', category: 'Consultas', destinationAccountId: 'acc-nutri-1', paymentMethod: 'pix', actorId: 'user2' },
-    { id: 't-off-2', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-27', description: 'Aluguel do Consultório', amount: 1200, type: 'expense', category: 'Aluguel', sourceAccountId: 'acc-nutri-1', paymentMethod: 'boleto', actorId: 'user2' },
+    { id: 't-off-2', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-27', description: 'Aluguel do Consultório', amount: 1200, type: 'expense', category: 'Aluguel', sourceAccountId: 'acc-nutri-1', paymentMethod: 'boleto', actorId: 'user2', isRecurring: true },
     { id: 't-off-3', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-25', description: 'Compra de Suplementos', amount: 450, type: 'expense', category: 'Materiais', sourceAccountId: 'acc-nutri-1', paymentMethod: 'debit_card', actorId: 'user2' },
     { id: 't-off-4', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-20', description: 'Aporte para Bioimpedância', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-office-1', actorId: 'user2' },
 ];
+
+// --- NOTIFICAÇÕES ---
+export const notifications: Notification[] = [
+    {
+      id: 'n1',
+      type: 'goal_invite',
+      actor: users.find(u => u.id === 'user4'),
+      text: '<b>Daniela</b> te convidou para a caixinha "Viagem de Fim de Ano".',
+      timestamp: '2024-07-29T10:00:00Z',
+      read: false,
+      link: '/invitations'
+    },
+     {
+      id: 'n2',
+      type: 'transaction_added',
+      actor: nutri,
+      text: '<b>Nutri</b> adicionou uma nova despesa de <b>R$ 1.800,00</b> em "Família DevNutri".',
+      timestamp: '2024-07-27T15:30:00Z',
+      read: false,
+      link: '/transactions'
+    },
+    {
+      id: 'n3',
+      type: 'goal_progress',
+      text: 'Parabéns! Vocês alcançaram <b>90%</b> da meta "Presente Surpresa Nutri".',
+      timestamp: '2024-07-26T11:00:00Z',
+      read: true,
+      link: '/goals/goal-family-priv-dev'
+    },
+     {
+      id: 'n4',
+      type: 'vault_invite',
+      actor: users.find(u => u.id === 'user5'),
+      text: '<b>Eduardo</b> te convidou para o cofre "Futebol de Quinta".',
+      timestamp: '2024-07-25T09:00:00Z',
+      read: true,
+      link: '/invitations'
+    },
+];
+
 
 // --- LÓGICA DE SIMULAÇÃO ---
 
