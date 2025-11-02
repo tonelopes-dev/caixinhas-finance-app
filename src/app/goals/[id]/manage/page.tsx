@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -32,8 +33,8 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   }
   
   const defaultParticipants = [
-      { id: 'user', name: user.name, avatarUrl: user.avatarUrl, role: 'owner' as const },
-      { id: 'partner', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
+      { id: 'user1', name: user.name, avatarUrl: user.avatarUrl, role: 'owner' as const },
+      { id: 'user2', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
   ]
   
   const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
@@ -129,7 +130,9 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                       </div>
                     </div>
                     <RemoveParticipantDialog
+                      participantId={p.id}
                       participantName={p.name}
+                      goalId={goal.id}
                       goalName={goal.name}
                       disabled={p.role === 'owner'}
                     />

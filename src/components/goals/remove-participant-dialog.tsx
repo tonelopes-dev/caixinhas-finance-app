@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -12,23 +13,26 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { removeParticipantFromGoal } from '@/app/actions';
 import { X } from 'lucide-react';
 
 interface RemoveParticipantDialogProps {
+  participantId: string;
   participantName: string;
+  goalId: string;
   goalName: string;
   disabled?: boolean;
 }
 
 export function RemoveParticipantDialog({
+  participantId,
   participantName,
+  goalId,
   goalName,
   disabled = false,
 }: RemoveParticipantDialogProps) {
-  const handleRemove = () => {
-    // Em uma aplicação real, aqui você despacharia uma server action para remover o participante.
-    console.log(`Removendo ${participantName} da caixinha "${goalName}".`);
-  };
+  
+  const removeParticipantAction = removeParticipantFromGoal.bind(null);
 
   return (
     <AlertDialog>
@@ -44,21 +48,30 @@ export function RemoveParticipantDialog({
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Você irá remover{' '}
-            <span className="font-bold text-foreground">{participantName}</span>{' '}
-            da caixinha{' '}
-            <span className="font-bold text-foreground">{goalName}</span>.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleRemove} variant="destructive">
-            Remover
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        <form action={removeParticipantAction}>
+           <input type="hidden" name="goalId" value={goalId} />
+           <input type="hidden" name="participantId" value={participantId} />
+            <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+                <p>
+                Esta ação não pode ser desfeita. Você irá remover{' '}
+                <span className="font-bold text-foreground">{participantName}</span>{' '}
+                da caixinha{' '}
+                <span className="font-bold text-foreground">{goalName}</span>.
+                </p>
+                <p className="mt-2 text-destructive">
+                <strong>Atenção:</strong> Todas as transferências que este participante fez para a caixinha serão removidas e o saldo total será recalculado.
+                </p>
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction type="submit" variant="destructive">
+                Remover
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </form>
       </AlertDialogContent>
     </AlertDialog>
   );

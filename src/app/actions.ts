@@ -1,3 +1,4 @@
+
 "use server";
 
 import { sendEmail } from '@/ai/flows/send-email-flow';
@@ -45,6 +46,12 @@ const goalTransactionSchema = z.object({
 const deleteGoalSchema = z.object({
   id: z.string(),
 });
+
+const removeParticipantSchema = z.object({
+  goalId: z.string(),
+  participantId: z.string(),
+});
+
 
 const deleteTransactionSchema = z.object({
   id: z.string(),
@@ -289,7 +296,8 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   revalidatePath('/');
   revalidatePath('/transactions');
   revalidatePath('/reports');
-
+  revalidatePath(`/goals/${newTransaction.destinationAccountId}`);
+  revalidatePath(`/goals/${newTransaction.sourceAccountId}`);
 
   return { message: 'Transação adicionada com sucesso!' };
 }
@@ -336,6 +344,10 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
+    revalidatePath(`/goals/${originalTransaction.destinationAccountId}`);
+    revalidatePath(`/goals/${originalTransaction.sourceAccountId}`);
+    revalidatePath(`/goals/${transactions[index].destinationAccountId}`);
+    revalidatePath(`/goals/${transactions[index].sourceAccountId}`);
     return { message: 'Transação atualizada com sucesso!' };
   }
   
@@ -361,11 +373,13 @@ export async function deleteTransaction(formData: FormData) {
     invalidateReportCache(deletedTransaction.date, deletedTransaction.ownerId);
     transactions.splice(index, 1);
     console.log(`Transaction with id ${id} deleted.`);
+    revalidatePath('/');
+    revalidatePath('/transactions');
+    revalidatePath('/reports');
+    revalidatePath(`/goals/${deletedTransaction.destinationAccountId}`);
+    revalidatePath(`/goals/${deletedTransaction.sourceAccountId}`);
   }
 
-  revalidatePath('/');
-  revalidatePath('/transactions');
-  revalidatePath('/reports');
   return { message: 'Transação excluída com sucesso!' };
 }
 
@@ -488,6 +502,49 @@ export async function deleteGoal(formData: FormData) {
   revalidatePath('/');
   redirect('/');
 }
+
+export async function removeParticipantFromGoal(formData: FormData) {
+  const validatedFields = removeParticipantSchema.safeParse({
+    goalId: formData.get('goalId'),
+    participantId: formData.get('participantId'),
+  });
+
+  if (!validatedFields.success) {
+    return { message: 'Dados inválidos.' };
+  }
+
+  const { goalId, participantId } = validatedFields.data;
+
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal) {
+    return { message: 'Caixinha não encontrada.' };
+  }
+
+  // Remove o participante da meta
+  if (goal.participants) {
+    goal.participants = goal.participants.filter(p => p.id !== participantId);
+  }
+
+  // Remove as transações associadas
+  const transactionsToRemove = transactions.filter(t => 
+    (t.destinationAccountId === goalId || t.sourceAccountId === goalId) && t.actorId === participantId
+  );
+
+  transactionsToRemove.forEach(tToRemove => {
+    const index = transactions.findIndex(t => t.id === tToRemove.id);
+    if (index > -1) {
+      transactions.splice(index, 1);
+    }
+  });
+  
+  console.log(`Participant ${participantId} and their transactions removed from goal ${goalId}.`);
+  
+  revalidatePath(`/goals/${goalId}/manage`);
+  revalidatePath(`/goals/${goalId}`);
+  
+  return { message: 'Participante removido com sucesso.' };
+}
+
 
 export async function registerUser(prevState: GenericState, formData: FormData): Promise<GenericState> {
     const validatedFields = registerSchema.safeParse(Object.fromEntries(formData.entries()));
