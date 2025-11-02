@@ -1,10 +1,11 @@
 export type Account = {
   id: string;
+  ownerId: string; // Can be a userId or a vaultId
+  ownerType: 'user' | 'vault';
   name: string;
   bank: string;
   type: 'checking' | 'savings' | 'investment' | 'other';
   logoUrl?: string;
-  ownerId: string; // userId
 };
 
 export type Vault = {
@@ -26,7 +27,6 @@ export type VaultInvitation = {
 
 export type Transaction = {
   id: string;
-  // ownerId pode ser um userId ou um vaultId
   ownerId: string; 
   ownerType: 'user' | 'vault';
   date: string;
@@ -35,7 +35,6 @@ export type Transaction = {
   type: 'income' | 'expense' | 'transfer';
   category: string;
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash';
-  // Ids de Account
   sourceAccountId?: string;
   destinationAccountId?: string; 
   actorId?: string;
@@ -50,14 +49,12 @@ export type GoalParticipant = {
 
 export type Goal = {
   id:string;
-  // ownerId pode ser um userId ou um vaultId
   ownerId: string;
   ownerType: 'user' | 'vault';
   name: string;
   targetAmount: number;
   currentAmount: number;
   emoji: string;
-  // visibilidade dentro do seu contexto (pessoal ou cofre)
   visibility: 'private' | 'shared'; 
   participants?: GoalParticipant[];
   isFeatured?: boolean;

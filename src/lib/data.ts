@@ -25,7 +25,7 @@ export const users: User[] = [
 const dev = users.find(u => u.id === 'user1')!;
 const nutri = users.find(u => u.id === 'user2')!;
 
-// --- COFRES ---
+// --- COFRES (VAULTS) ---
 export const vaults: Vault[] = [
   {
     id: 'vault-family',
@@ -36,24 +36,27 @@ export const vaults: Vault[] = [
   },
   {
     id: 'vault-agency',
-    name: 'Agência Dev',
+    name: 'Agência de Software',
     ownerId: dev.id,
-    members: [dev],
+    members: [dev], // Apenas o Dev é membro
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1080'
   },
    {
     id: 'vault-office',
     name: 'Consultório Nutri',
     ownerId: nutri.id,
-    members: [nutri],
+    members: [nutri], // Apenas a Nutri é membro
     imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1080'
   }
 ];
 
-export const vaultInvitations: VaultInvitation[] = [];
+export const vaultInvitations: VaultInvitation[] = [
+  // Exemplo: Dev convidou a Nutri para o cofre da família.
+  // Em um app real, o status mudaria para 'accepted' e ela seria adicionada aos membros.
+];
 
 
-// --- DADOS BANCÁRIOS ---
+// --- DADOS BANCÁRIOS (ACCOUNTS) ---
 export const bankLogos = [
     'https://cdn.worldvectorlogo.com/logos/nubank-1.svg',
     'https://cdn.worldvectorlogo.com/logos/banco-inter.svg',
@@ -64,69 +67,85 @@ export const bankLogos = [
     'https://cdn.worldvectorlogo.com/logos/caixa-economica-federal.svg',
 ]
 
-// Cada usuário tem suas próprias contas
+// As contas agora pertencem a um 'user' ou a um 'vault'
 export const accounts: Account[] = [
-  // Contas do Dev
-  { id: 'acc-dev-1', ownerId: 'user1', name: 'Conta Pessoal Dev', bank: 'Banco Digital', type: 'checking', logoUrl: bankLogos[0] },
-  { id: 'acc-dev-2', ownerId: 'user1', name: 'Investimentos Dev', bank: 'Corretora', type: 'investment', logoUrl: bankLogos[2] },
+  // Contas Pessoais do Dev (user1)
+  { id: 'acc-dev-1', ownerId: 'user1', ownerType: 'user', name: 'Conta Pessoal', bank: 'Banco Digital', type: 'checking', logoUrl: bankLogos[0] },
+  { id: 'acc-dev-2', ownerId: 'user1', ownerType: 'user', name: 'Investimentos', bank: 'Corretora Ágil', type: 'investment', logoUrl: bankLogos[2] },
   
-  // Contas da Nutri
-  { id: 'acc-nutri-1', ownerId: 'user2', name: 'Conta Pessoal Nutri', bank: 'Banco Inter', type: 'checking', logoUrl: bankLogos[1] },
+  // Contas Pessoais da Nutri (user2)
+  { id: 'acc-nutri-1', ownerId: 'user2', ownerType: 'user', name: 'Conta Pessoal', bank: 'Banco Verde', type: 'checking', logoUrl: bankLogos[1] },
   
-  // Conta do Cofre da Família (Exemplo de conta conjunta)
-  { id: 'acc-family', ownerId: 'vault-family', name: 'Conta Conjunta Família', bank: 'Banco Tradicional', type: 'savings', logoUrl: bankLogos[4] },
+  // Conta Conjunta do Cofre da Família (vault-family)
+  { id: 'acc-family', ownerId: 'vault-family', ownerType: 'vault', name: 'Conta Conjunta', bank: 'Banco Familiar', type: 'savings', logoUrl: bankLogos[4] },
 ];
 
 // --- PARTICIPANTES DE METAS ---
 const devParticipant: GoalParticipant = { id: dev.id, name: dev.name, avatarUrl: dev.avatarUrl, role: 'owner' };
 const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'owner' };
+const familyParticipants: GoalParticipant[] = [devParticipant, nutriParticipant];
 const friendsParticipants: GoalParticipant[] = [
     nutriParticipant,
     ...users.slice(2, 5).map(u => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl, role: 'member' as const }))
 ];
 
-// --- METAS (CAIXINHAS) ---
+// --- METAS (CAIXINHAS / GOALS) ---
 export const goals: Goal[] = [
-  // == Metas do Dev (ownerId: user1) ==
+  // -- Metas Pessoais do Dev --
   {
-    id: 'goal-dev-personal-1',
+    id: 'goal-dev-1',
     ownerId: 'user1',
     ownerType: 'user',
-    name: 'Moto Nova',
-    targetAmount: 40000,
-    currentAmount: 15000,
-    emoji: '🏍️',
+    name: 'Setup Novo',
+    targetAmount: 15000,
+    currentAmount: 7500,
+    emoji: '🖥️',
     visibility: 'private', 
     participants: [devParticipant],
     isFeatured: true,
   },
 
-  // == Metas da Nutri (ownerId: user2) ==
+  // -- Metas Pessoais da Nutri --
   {
-    id: 'goal-nutri-personal-1',
+    id: 'goal-nutri-1',
     ownerId: 'user2',
     ownerType: 'user',
     name: 'Viagem com Amigos',
     targetAmount: 5000,
     currentAmount: 1200,
     emoji: '🏖️',
-    visibility: 'shared', // Compartilhada com amigos, não com o Dev
+    visibility: 'shared',
     participants: friendsParticipants, 
     isFeatured: true,
   },
+  
+  // -- Metas do Cofre da Agência (Apenas o Dev vê) --
   {
-    id: 'goal-nutri-personal-2',
-    ownerId: 'user2',
-    ownerType: 'user',
-    name: 'Pós-graduação',
-    targetAmount: 18000,
+    id: 'goal-agency-1',
+    ownerId: 'vault-agency',
+    ownerType: 'vault',
+    name: 'Macbook M4 Pro',
+    targetAmount: 25000,
+    currentAmount: 18000,
+    emoji: '💻',
+    visibility: 'shared',
+    participants: [devParticipant],
+  },
+
+  // -- Metas do Cofre do Consultório (Apenas a Nutri vê) --
+  {
+    id: 'goal-office-1',
+    ownerId: 'vault-office',
+    ownerType: 'vault',
+    name: 'Bioimpedância Nova',
+    targetAmount: 40000,
     currentAmount: 11000,
-    emoji: '🎓',
-    visibility: 'private',
+    emoji: '🔬',
+    visibility: 'shared',
     participants: [nutriParticipant],
   },
   
-  // == Metas do Cofre da Família (ownerId: vault-family) ==
+  // -- Metas do Cofre da Família --
   {
     id: 'goal-family-1',
     ownerId: 'vault-family',
@@ -136,43 +155,65 @@ export const goals: Goal[] = [
     currentAmount: 8000,
     emoji: '🛠️',
     visibility: 'shared', // Todos no cofre podem ver
-    participants: [devParticipant, nutriParticipant],
+    participants: familyParticipants,
     isFeatured: true,
   },
    {
     id: 'goal-family-2',
     ownerId: 'vault-family',
     ownerType: 'vault',
-    name: 'Fundo de Emergência Familiar',
+    name: 'Fundo de Emergência',
     targetAmount: 50000,
     currentAmount: 32000,
     emoji: '🛡️',
     visibility: 'shared',
-    participants: [devParticipant, nutriParticipant],
+    participants: familyParticipants,
+  },
+  {
+    id: 'goal-family-priv-dev',
+    ownerId: 'vault-family',
+    ownerType: 'vault',
+    name: 'Presente Surpresa Nutri',
+    targetAmount: 2000,
+    currentAmount: 1500,
+    emoji: '🎁',
+    visibility: 'private', // Só o Dev pode ver
+    participants: [devParticipant],
+  },
+  {
+    id: 'goal-family-priv-nutri',
+    ownerId: 'vault-family',
+    ownerType: 'vault',
+    name: 'Curso de Culinária',
+    targetAmount: 1500,
+    currentAmount: 950,
+    emoji: '🍳',
+    visibility: 'private', // Só a Nutri pode ver
+    participants: [nutriParticipant],
   },
 ];
 
 
-// --- TRANSAÇÕES ---
+// --- TRANSAÇÕES (TRANSACTIONS) ---
 export const transactions: Transaction[] = [
     // Transações Pessoais do Dev (user1)
-    { id: 't-dev-1', ownerId: 'user1', ownerType: 'user', date: '2024-07-28', description: 'Salário Agência', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1' },
-    { id: 't-dev-2', ownerId: 'user1', ownerType: 'user', date: '2024-07-25', description: 'Almoço', amount: 50, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-1', paymentMethod: 'debit_card', actorId: 'user1' },
-    { id: 't-dev-3', ownerId: 'user1', ownerType: 'user', date: '2024-07-20', description: 'Depósito para a Moto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', destinationAccountId: 'goal-dev-personal-1', actorId: 'user1' },
-    { id: 't-dev-4', ownerId: 'user1', ownerType: 'user', date: '2024-07-15', description: 'Contribuição para o Cofre da Família', amount: 1500, type: 'transfer', category: 'Transferência', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
+    { id: 't-dev-1', ownerId: 'user1', ownerType: 'user', date: '2024-07-28', description: 'Salário', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1' },
+    { id: 't-dev-2', ownerId: 'user1', ownerType: 'user', date: '2024-07-25', description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-1', paymentMethod: 'credit_card', actorId: 'user1' },
+    { id: 't-dev-3', ownerId: 'user1', ownerType: 'user', date: '2024-07-20', description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', destinationAccountId: 'goal-dev-1', actorId: 'user1' },
+    { id: 't-dev-4', ownerId: 'user1', ownerType: 'user', date: '2024-07-15', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
     
     // Transações Pessoais da Nutri (user2)
-    { id: 't-nutri-1', ownerId: 'user2', ownerType: 'user', date: '2024-07-29', description: 'Recebimento Consultório', amount: 7000, type: 'income', category: 'Salário', destinationAccountId: 'acc-nutri-1', actorId: 'user2' },
+    { id: 't-nutri-1', ownerId: 'user2', ownerType: 'user', date: '2024-07-29', description: 'Recebimento de Consultas', amount: 7000, type: 'income', category: 'Renda Principal', destinationAccountId: 'acc-nutri-1', actorId: 'user2' },
     { id: 't-nutri-2', ownerId: 'user2', ownerType: 'user', date: '2024-07-26', description: 'Jantar com amigos', amount: 120, type: 'expense', category: 'Lazer', sourceAccountId: 'acc-nutri-1', paymentMethod: 'credit_card', actorId: 'user2' },
-    { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Depósito Viagem Amigos', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-personal-1', actorId: 'user2' },
-    { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Contribuição para o Cofre da Família', amount: 1500, type: 'transfer', category: 'Transferência', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
+    { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Economia para Viagem', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user2' },
+    { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
 
     // Transações do Cofre da Família (vault-family)
     { id: 't-fam-1', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-27', description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2' },
     { id: 't-fam-2', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-26', description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: 'acc-family', paymentMethod: 'boleto', actorId: 'user1' },
     { id: 't-fam-3', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Depósito Reforma Cozinha', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-family', destinationAccountId: 'goal-family-1', actorId: 'user2' },
-    { id: 't-fam-4', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-28', description: 'Recebimento de Contribuição (Dev)', amount: 1500, type: 'income', category: 'Transferência', destinationAccountId: 'acc-family', actorId: 'user1' },
-    { id: 't-fam-5', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-28', description: 'Recebimento de Contribuição (Nutri)', amount: 1500, type: 'income', category: 'Transferência', destinationAccountId: 'acc-family', actorId: 'user2' },
+    { id: 't-fam-4', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-15', description: 'Transferência do Dev', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1' },
+    { id: 't-fam-5', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-16', description: 'Transferência da Nutri', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2' },
 ];
 
 // --- LÓGICA DE SIMULAÇÃO ---
@@ -214,15 +255,19 @@ export const getMockDataForUser = (userId: string | null) => {
 
     const currentUser = users.find(u => u.id === userId) || null;
     
-    // Data related to the user's personal account
-    const userAccounts = accounts.filter(a => a.ownerId === userId);
+    // Contas Pessoais do usuário
+    const userAccounts = accounts.filter(a => a.ownerId === userId && a.ownerType === 'user');
+    
+    // Transações Pessoais do usuário
     const userTransactions = transactions.filter(t => t.ownerId === userId && t.ownerType === 'user');
-    const userGoals = goals.filter(g => g.ownerId === userId && g.ownerType === 'user' || g.participants?.some(p => p.id === userId));
+    
+    // Metas: Pessoais do usuário + caixinhas em que ele é participante (mesmo em outros cofres)
+    const userGoals = goals.filter(g => (g.ownerId === userId && g.ownerType === 'user') || g.participants?.some(p => p.id === userId));
 
-    // Vaults the user is a member of
+    // Cofres dos quais o usuário é membro
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
     
-    // Could add invitation logic here
+    // Convites pendentes (lógica de exemplo)
     const userInvitations: VaultInvitation[] = [];
     
     return {
