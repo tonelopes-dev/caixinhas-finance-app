@@ -21,6 +21,7 @@ const transactionSchema = z.object({
   sourceAccountId: z.string().optional(),
   destinationAccountId: z.string().optional(),
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional(),
+  isRecurring: z.boolean().optional(),
 }).refine(data => {
     if (data.type === 'income') return !!data.destinationAccountId;
     if (data.type === 'expense') return !!data.sourceAccountId;
@@ -89,6 +90,7 @@ export type TransactionState = {
     sourceAccountId?: string[];
     destinationAccountId?: string[];
     paymentMethod?: string[];
+    isRecurring?: string[];
   };
 }
 
@@ -180,6 +182,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     sourceAccountId: formData.get('sourceAccountId'),
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
+    isRecurring: formData.get('isRecurring') === 'on',
   });
 
   if (!validatedFields.success) {
@@ -216,6 +219,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     sourceAccountId: formData.get('sourceAccountId'),
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
+    isRecurring: formData.get('isRecurring') === 'on',
   });
 
   if (!validatedFields.success) {

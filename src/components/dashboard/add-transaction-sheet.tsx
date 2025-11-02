@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, PlusCircle } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { accounts, goals } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
 import { useFormStatus } from 'react-dom';
+import { Switch } from '../ui/switch';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -98,7 +99,7 @@ export function AddTransactionSheet() {
           </SheetDescription>
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 overflow-y-auto pr-4">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>
               <Select name="type" onValueChange={(value) => setTransactionType(value as any)}>
@@ -216,11 +217,24 @@ export function AddTransactionSheet() {
                              {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                         </div>
                     )}
+
+                    {(transactionType === 'income' || transactionType === 'expense') && (
+                      <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
+                          <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
+                              <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
+                              <span className="text-xs font-normal leading-snug text-muted-foreground">
+                                Marque se esta transação se repete mensalmente.
+                              </span>
+                          </Label>
+                          <Switch id="isRecurring" name="isRecurring" />
+                      </div>
+                    )}
+
                 </>
             )}
 
           </div>
-          <SheetFooter>
+          <SheetFooter className='mt-auto'>
             <SubmitButton />
           </SheetFooter>
         </form>

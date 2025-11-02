@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Edit } from 'lucide-react';
+import { CalendarIcon, Edit, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { accounts, goals } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -27,6 +27,7 @@ import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
 import type { Transaction } from '@/lib/definitions';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
+import { Switch } from '../ui/switch';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -215,6 +216,19 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                              {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                         </div>
                     )}
+
+                    {(transactionType === 'income' || transactionType === 'expense') && (
+                      <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
+                          <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
+                              <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
+                              <span className="text-xs font-normal leading-snug text-muted-foreground">
+                                Marque se esta transação se repete mensalmente.
+                              </span>
+                          </Label>
+                          <Switch id="isRecurring" name="isRecurring" defaultChecked={transaction.isRecurring} />
+                      </div>
+                    )}
+
                 </>
             )}
 

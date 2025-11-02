@@ -40,6 +40,7 @@ export type Transaction = {
   sourceAccountId?: string;
   destinationAccountId?: string; 
   actorId?: string;
+  isRecurring?: boolean;
 };
 
 export type GoalParticipant = {
