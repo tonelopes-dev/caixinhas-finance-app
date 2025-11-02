@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { users, getMockDataForUser } from '@/lib/data';
-import type { Vault, VaultInvitation, User } from '@/lib/definitions';
+import { getMockDataForUser, type User as UserType } from '@/lib/data';
+import type { Vault, VaultInvitation } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -67,7 +67,7 @@ function InvitationCard({ invitation }: { invitation: VaultInvitation }) {
 
 export default function VaultSelectionPage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [userVaults, setUserVaults] = useState<Vault[]>([]);
   const [userInvitations, setUserInvitations] = useState<VaultInvitation[]>([]);
 
@@ -78,10 +78,8 @@ export default function VaultSelectionPage() {
       return;
     }
     
-    const user = users.find(u => u.id === userId);
-    setCurrentUser(user || null);
-
-    const { userVaults, userInvitations } = getMockDataForUser(userId);
+    const { currentUser, userVaults, userInvitations } = getMockDataForUser(userId);
+    setCurrentUser(currentUser || null);
     setUserVaults(userVaults);
     setUserInvitations(userInvitations);
 

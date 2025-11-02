@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, PlusCircle, Star } from 'lucide-react';
-import { goals as allGoals, user, partner } from '@/lib/data';
+import { ArrowLeft, PlusCircle, Star, ChevronsRight } from 'lucide-react';
+import { vaults, getMockDataForUser } from '@/lib/data';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,9 +17,12 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Lock, Users } from 'lucide-react';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import withAuth from '@/components/auth/with-auth';
+import type { Goal } from '@/lib/definitions';
+import { useRouter } from 'next/navigation';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -28,12 +31,23 @@ function formatCurrency(value: number) {
   });
 }
 
-export default function GoalsPage() {
-    // In a real app, this state would be managed via server actions and a database.
-    const [goals, setGoals] = useState(allGoals);
+function GoalPage() {
+    const router = useRouter();
+    const [allGoals, setAllGoals] = useState<Goal[]>([]);
+
+    useEffect(() => {
+        const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+        const { userGoals } = getMockDataForUser(userId);
+        setAllGoals(userGoals);
+    }, []);
 
     const toggleFeatured = (goalId: string) => {
-        setGoals(goals.map(g => g.id === goalId ? { ...g, isFeatured: !g.isFeatured } : g));
+        setAllGoals(allGoals.map(g => g.id === goalId ? { ...g, isFeatured: !g.isFeatured } : g));
+    }
+    
+    const handleGoToVault = (vaultId: string) => {
+        sessionStorage.setItem('DREAMVAULT_VAULT_ID', vaultId);
+        router.push('/');
     }
 
 
@@ -50,16 +64,17 @@ export default function GoalsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Todas as Caixinhas
+              Todas as Suas Caixinhas
             </CardTitle>
             <CardDescription>
-              Acompanhe e gerencie o progresso de todos os seus sonhos, grandes e pequenos.
+              Acompanhe e gerencie o progresso de todos os seus sonhos, de todos os seus cofres.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 md:grid-cols-2">
-            {goals.map((goal) => {
+            {allGoals.map((goal) => {
               const progress = (goal.currentAmount / goal.targetAmount) * 100;
-              const participants = goal.participants ?? (goal.visibility === 'shared' ? [user, partner] : [user]);
+              const vault = vaults.find(v => v.id === goal.vaultId);
+
               return (
                   <Card key={goal.id} className="flex h-full flex-col transition-all hover:shadow-md">
                     <CardHeader className="flex-row items-start gap-4">
@@ -102,25 +117,31 @@ export default function GoalsPage() {
                             </div>
                       </Link>
                     </CardContent>
-                    <CardFooter className="flex items-center gap-2 pt-4">
-                     <Link href={`/goals/${goal.id}`} className='flex-1 flex items-center gap-2'>
-                      <div className="flex -space-x-2 overflow-hidden">
-                        {participants.slice(0, 5).map((p, index) => (
-                           <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                             <AvatarImage src={p.avatarUrl} alt={p.name}/>
-                             <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                        ))}
-                        {participants.length > 5 && (
-                            <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                               <AvatarFallback>+{participants.length - 5}</AvatarFallback>
-                            </Avatar>
-                        )}
-                      </div>
-                      <span className='text-xs text-muted-foreground'>
-                        {participants.length > 1 ? `${participants.length} participantes` : 'Apenas você'}
-                      </span>
-                      </Link>
+                    <CardFooter className="flex items-center justify-between gap-2 pt-4">
+                        <div className="flex items-center gap-2">
+                             <div className="flex -space-x-2 overflow-hidden">
+                                {goal.participants?.slice(0, 5).map((p, index) => (
+                                <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                    <AvatarImage src={p.avatarUrl} alt={p.name}/>
+                                    <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                ))}
+                                {goal.participants && goal.participants.length > 5 && (
+                                    <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
+                                    <AvatarFallback>+{goal.participants.length - 5}</AvatarFallback>
+                                    </Avatar>
+                                )}
+                            </div>
+                            <span className='text-xs text-muted-foreground'>
+                                {goal.participants && goal.participants.length > 1 ? `${goal.participants.length} participantes` : 'Apenas você'}
+                            </span>
+                        </div>
+                         {vault && (
+                             <Button variant="ghost" size="sm" onClick={() => handleGoToVault(vault.id)}>
+                                <span className='text-xs'>{vault.name}</span>
+                                <ChevronsRight className="ml-1 h-4 w-4" />
+                            </Button>
+                         )}
                     </CardFooter>
                   </Card>
               );
@@ -139,3 +160,5 @@ export default function GoalsPage() {
     </div>
   );
 }
+
+export default withAuth(GoalPage);
