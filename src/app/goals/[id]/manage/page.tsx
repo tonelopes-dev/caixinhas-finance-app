@@ -23,21 +23,43 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
+import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
+import type { Goal } from '@/lib/definitions';
 
 export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const goal = goals.find((g) => g.id === params.id);
-  const [visibility, setVisibility] = useState(goal?.visibility || 'shared');
+  const [visibility, setVisibility] = useState<Goal['visibility']>(goal?.visibility || 'shared');
+  const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
 
   if (!goal) {
     notFound();
   }
-  
+
   const defaultParticipants = [
       { id: 'user1', name: user.name, avatarUrl: user.avatarUrl, role: 'owner' as const },
       { id: 'user2', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
   ]
-  
+
   const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
+
+  const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
+    if (newVisibility !== visibility) {
+      setPendingVisibility(newVisibility);
+    }
+  };
+
+  const confirmVisibilityChange = () => {
+    if (pendingVisibility) {
+      setVisibility(pendingVisibility);
+      setPendingVisibility(null);
+      // Aqui você chamaria a server action para salvar a visibilidade
+      console.log(`Visibilidade salva como: ${pendingVisibility}`);
+    }
+  };
+
+  const cancelVisibilityChange = () => {
+    setPendingVisibility(null);
+  };
 
 
   return (
@@ -64,13 +86,14 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
             <form>
               <div className="space-y-3 mb-8">
                 <Label className="font-semibold">Visibilidade da Caixinha</Label>
-                <RadioGroup
+                 <RadioGroup
                   name="visibility"
                   value={visibility}
                   className="grid grid-cols-2 gap-4"
-                  onValueChange={(value) => setVisibility(value as 'shared' | 'private')}
+                  onValueChange={(value) => handleVisibilityChange(value as Goal['visibility'])}
                 >
                   <Label
+                    htmlFor="shared"
                     className={cn(
                       'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                       visibility === 'shared' && 'border-primary'
@@ -86,6 +109,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                     <span className="text-xs text-center text-muted-foreground mt-1">Visível para todos no cofre.</span>
                   </Label>
                   <Label
+                    htmlFor="private"
                     className={cn(
                       'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                       visibility === 'private' && 'border-primary'
@@ -101,6 +125,12 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                     <span className="text-xs text-center text-muted-foreground mt-1">Apenas para você e convidados.</span>
                   </Label>
                 </RadioGroup>
+                 <VisibilityChangeDialog
+                    open={!!pendingVisibility}
+                    newVisibility={pendingVisibility}
+                    onConfirm={confirmVisibilityChange}
+                    onCancel={cancelVisibilityChange}
+                />
               </div>
 
               <Separator className="my-8" />
@@ -161,3 +191,4 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
