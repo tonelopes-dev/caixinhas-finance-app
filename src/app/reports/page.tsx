@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect }S from 'react';
+import { useState, useEffect } from 'react';
 import { useFormStatus, useFormState } from 'react-dom';
 import Link from 'next/link';
 import { ArrowLeft, Bot, FileText, Send, User as UserIcon } from 'lucide-react';
