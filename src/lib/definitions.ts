@@ -6,8 +6,26 @@ export type Account = {
   logoUrl?: string;
 };
 
+export type Vault = {
+  id: string;
+  name: string;
+  ownerId: string;
+  members: User[];
+  imageUrl: string;
+}
+
+export type VaultInvitation = {
+  id: string;
+  vaultId: string;
+  vaultName: string;
+  invitedBy: string;
+  status: 'pending' | 'accepted' | 'declined';
+}
+
+
 export type Transaction = {
   id: string;
+  vaultId: string;
   date: string;
   description: string;
   amount: number;
@@ -16,7 +34,7 @@ export type Transaction = {
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash';
   sourceAccountId?: string;
   destinationAccountId?: string;
-  actor?: 'user' | 'partner';
+  actorId?: string;
 };
 
 export type GoalParticipant = {
@@ -28,6 +46,7 @@ export type GoalParticipant = {
 
 export type Goal = {
   id: string;
+  vaultId: string;
   name: string;
   targetAmount: number;
   currentAmount: number;

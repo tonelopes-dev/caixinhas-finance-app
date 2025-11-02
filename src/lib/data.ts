@@ -1,6 +1,74 @@
 
-import type { Transaction, Goal, User, Partner, Invitation, Guest, Account } from './definitions';
+import type { Transaction, Goal, User, Partner, Invitation, Guest, Account, Vault, VaultInvitation } from './definitions';
 import { PlaceHolderImages } from './placeholder-images';
+
+// --- USERS ---
+export const users: User[] = [
+  {
+    id: 'user1',
+    name: 'Ana',
+    email: 'email01@conta.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1609505848912-b7c3b8b4beda?w=1080',
+  },
+  {
+    id: 'user2',
+    name: 'Bruno',
+    email: 'email02@conta.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=1080',
+  },
+   {
+    id: 'user3',
+    name: 'Carlos',
+    email: 'carlos@example.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080',
+  },
+  {
+    id: 'user4',
+    name: 'Daniela',
+    email: 'daniela@example.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1080',
+  },
+];
+
+
+// --- VAULTS ---
+export const vaults: Vault[] = [
+  {
+    id: 'vault1',
+    name: 'Nosso Apê',
+    ownerId: 'user1',
+    members: [users.find(u => u.id === 'user1')!, users.find(u => u.id === 'user3')!],
+    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080'
+  },
+  {
+    id: 'vault2',
+    name: 'Viagem em Família',
+    ownerId: 'user1',
+    members: [users.find(u => u.id === 'user1')!],
+    imageUrl: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1080'
+  },
+  {
+    id: 'vault3',
+    name: 'Projeto Freelance',
+    ownerId: 'user3',
+    members: [users.find(u => u.id === 'user3')!, users.find(u => u.id === 'user4')!],
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1080'
+  },
+   {
+    id: 'vault4',
+    name: 'Festa de Fim de Ano',
+    ownerId: 'user4',
+    members: [users.find(u => u.id === 'user4')!],
+    imageUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1080'
+  }
+];
+
+// --- INVITATIONS ---
+export const vaultInvitations: VaultInvitation[] = [
+    { id: 'invite1', vaultId: 'vault3', vaultName: 'Projeto Freelance', invitedBy: 'Carlos', status: 'pending' }, // For user1
+    { id: 'invite2', vaultId: 'vault4', vaultName: 'Festa de Fim de Ano', invitedBy: 'Daniela', status: 'pending' }, // For user2
+];
+
 
 export const user: User = {
   id: 'user',
@@ -49,6 +117,7 @@ export const accounts: Account[] = [
 export const goals: Goal[] = [
   {
     id: 'goal1',
+    vaultId: 'vault1',
     name: 'Viagem para a Europa',
     targetAmount: 20000,
     currentAmount: 7500,
@@ -63,6 +132,7 @@ export const goals: Goal[] = [
   },
   {
     id: 'goal2',
+    vaultId: 'vault1',
     name: 'Apartamento Novo',
     targetAmount: 50000,
     currentAmount: 15000,
@@ -72,6 +142,7 @@ export const goals: Goal[] = [
   },
   {
     id: 'goal3',
+    vaultId: 'vault2',
     name: 'Fundo de Emergência',
     targetAmount: 10000,
     currentAmount: 9500,
@@ -80,6 +151,7 @@ export const goals: Goal[] = [
   },
   {
     id: 'goal4',
+    vaultId: 'vault2',
     name: 'Videogame Novo',
     targetAmount: 3500,
     currentAmount: 3450,
@@ -88,70 +160,21 @@ export const goals: Goal[] = [
   },
   {
     id: 'goal5',
+    vaultId: 'vault3',
     name: 'Carro Elétrico',
     targetAmount: 250000,
     currentAmount: 2500,
     emoji: '🚗',
     visibility: 'shared',
   },
-  {
-    id: 'goal6',
-    name: 'Presente Surpresa',
-    targetAmount: 800,
-    currentAmount: 800,
-    emoji: '🎁',
-    visibility: 'private',
-  },
-  {
-    id: 'goal7',
-    name: 'Festa de Casamento',
-    targetAmount: 30000,
-    currentAmount: 12000,
-    emoji: '💍',
-    visibility: 'shared',
-  },
 ];
 
 
 export const transactions: Transaction[] = [
-    // July
-    { id: '1', date: '2024-07-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actor: 'user' },
-    { id: '2', date: '2024-07-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actor: 'partner' },
-    { id: '3', date: '2024-07-27', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'credit_card', actor: 'partner' },
-    { id: '4', date: '2024-07-26', description: 'Conta de Luz', amount: 150.00, type: 'expense', category: 'Casa', sourceAccountId: 'acc1', paymentMethod: 'boleto', actor: 'user' },
-    { id: '5', date: '2024-07-25', description: 'Cinema', amount: 80.00, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'debit_card', actor: 'user' },
-    { id: '6', date: '2024-07-24', description: 'Gasolina', amount: 120.00, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'pix', actor: 'partner' },
-    { id: '7', date: '2024-07-23', description: 'Jantar fora', amount: 200.50, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card', actor: 'user' },
-    { id: '8', date: '2024-07-22', description: 'Depósito Caixinha Europa', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user' },
-    { id: '9', date: '2024-07-21', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2', actor: 'partner' },
-    { id: '10', date: '2024-07-20', description: 'Saque', amount: 100, type: 'expense', category: 'Outros', sourceAccountId: 'acc1', paymentMethod: 'cash', actor: 'user' },
-    { id: '11', date: '2024-07-19', description: 'Retirada Caixinha Fundo Emergência', amount: 200, type: 'transfer', category: 'Caixinha', sourceAccountId: 'goal3', destinationAccountId: 'acc1', actor: 'user' },
-    { id: '12', date: '2024-07-18', description: 'Rendimento Freelance', amount: 800, type: 'income', category: 'Freelance', destinationAccountId: 'acc1', actor: 'user' },
-    { id: '13', date: '2024-07-17', description: 'Assinatura Streaming', amount: 45.90, type: 'expense', category: 'Utilidades', sourceAccountId: 'acc1', paymentMethod: 'credit_card', actor: 'user' },
-    { id: '14', date: '2024-07-16', description: 'Farmácia', amount: 75.20, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card', actor: 'partner' },
-    { id: '15', date: '2024-07-15', description: 'Depósito Caixinha Casamento', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal7', actor: 'user' },
-    { id: '16', date: '2024-07-10', description: 'Compra Online (Roupas)', amount: 250, type: 'expense', category: 'Roupas', sourceAccountId: 'acc1', paymentMethod: 'pix', actor: 'user' },
-    { id: '17', date: '2024-07-05', description: 'Mensalidade Academia', amount: 120, type: 'expense', category: 'Saúde', sourceAccountId: 'acc2', paymentMethod: 'debit_card', actor: 'partner' },
-    { id: 't-europa-2', date: '2024-07-01', description: 'Bônus de Férias', amount: 2000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
-    { id: 't-europa-3', date: '2024-06-15', description: 'Contribuição da viagem', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal1', actor: 'partner'},
-    { id: 't-europa-4', date: '2024-06-01', description: 'Economias do mês', amount: 1500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
-    { id: 't-europa-5', date: '2024-05-15', description: 'Venda de itens', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal1', actor: 'partner'},
-    { id: 't-europa-6', date: '2024-05-01', description: 'Primeiro depósito', amount: 2000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc1', destinationAccountId: 'goal1', actor: 'user'},
-
-
-    // June
-    { id: '18', date: '2024-06-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actor: 'user' },
-    { id: '19', date: '2024-06-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actor: 'partner' },
-    { id: '20', date: '2024-06-25', description: 'Aluguel', amount: 1500, type: 'expense', category: 'Casa', sourceAccountId: 'acc2', paymentMethod: 'transfer', actor: 'partner' },
-    { id: '21', date: '2024-06-20', description: 'Supermercado', amount: 600, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc1', paymentMethod: 'credit_card', actor: 'user' },
-    { id: '22', date: '2024-06-15', description: 'Presente Aniversário', amount: 150, type: 'expense', category: 'Presentes', sourceAccountId: 'acc1', paymentMethod: 'pix', actor: 'user' },
-    { id: '23', date: '2024-06-10', description: 'Depósito Caixinha Apto', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc2', destinationAccountId: 'goal2', actor: 'partner' },
-
-    // May
-    { id: '24', date: '2024-05-28', description: 'Salário', amount: 2900, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actor: 'user' },
-    { id: '25', date: '2024-05-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actor: 'partner' },
-    { id: '26', date: '2024-05-15', description: 'Viagem Fim de Semana', amount: 800, type: 'expense', category: 'Lazer', sourceAccountId: 'acc1', paymentMethod: 'credit_card', actor: 'user' },
-    { id: '27', date: '2024-05-10', description: 'Manutenção Carro', amount: 450, type: 'expense', category: 'Transporte', sourceAccountId: 'acc2', paymentMethod: 'debit_card', actor: 'partner' },
+    { id: '1', vaultId: 'vault1', date: '2024-07-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actorId: 'user1' },
+    { id: '2', vaultId: 'vault1', date: '2024-07-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actorId: 'user3' },
+    { id: '3', vaultId: 'vault1', date: '2024-07-27', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'credit_card', actorId: 'user3' },
+    { id: '4', vaultId: 'vault2', date: '2024-07-26', description: 'Conta de Luz', amount: 150.00, type: 'expense', category: 'Casa', sourceAccountId: 'acc1', paymentMethod: 'boleto', actorId: 'user1' },
 ];
 
 
@@ -190,3 +213,24 @@ export const totalIncome = transactions
 export const totalExpenses = transactions
   .filter(t => t.type === 'expense')
   .reduce((sum, t) => sum + t.amount, 0);
+
+// --- MOCK DATA LOGIC ---
+export const getMockDataForUser = (userId: string | null) => {
+    if (!userId) {
+        return { userVaults: [], userInvitations: [] };
+    }
+
+    const userVaults = vaults.filter(v => v.ownerId === userId || v.members.some(m => m.id === userId));
+
+    let userInvitations: VaultInvitation[] = [];
+    if (userId === 'user1') {
+        userInvitations = vaultInvitations.filter(i => i.id === 'invite1');
+    } else if (userId === 'user2') {
+        userInvitations = vaultInvitations.filter(i => i.id === 'invite2');
+    }
+    
+    return {
+        userVaults,
+        userInvitations,
+    };
+};

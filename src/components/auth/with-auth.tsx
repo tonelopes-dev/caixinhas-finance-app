@@ -1,27 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-// Mock user for development
-const mockUser = { uid: 'dev-user' };
 
 export default function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>
 ) {
   const WithAuthComponent = (props: P) => {
-    // In a real scenario, you'd use a hook like `useUser` from Firebase.
-    // For now, we simulate a logged-in user.
-    const user = mockUser;
-    const isUserLoading = false; 
+    const [user, setUser] = useState<string | null>(null);
+    const [isUserLoading, setIsUserLoading] = useState(true); 
     const router = useRouter();
 
     useEffect(() => {
-      // This check would be important in a real auth flow.
-      // For now, it's safe since we have a mock user.
-      if (!isUserLoading && !user) {
+      // In a real app, you'd use a hook like `useUser` from Firebase.
+      // For now, we simulate checking localStorage.
+      const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+      setUser(userId);
+      setIsUserLoading(false);
+      
+      if (!userId) {
         router.push('/login');
       }
-    }, [user, isUserLoading, router]);
+    }, [router]);
 
     // This would show a loader in a real auth flow.
     if (isUserLoading) {
@@ -31,8 +31,13 @@ export default function withAuth<P extends object>(
         </div>
       );
     }
+    
+    if (!user) {
+        // This case handles the moment after loading is false but before the redirect effect runs.
+        return null;
+    }
 
-    // If user is "logged in" (mocked), render the component.
+    // If user is "logged in", render the component.
     return <WrappedComponent {...props} />;
   };
 

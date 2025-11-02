@@ -5,14 +5,28 @@ import BalanceSummary from '@/components/dashboard/balance-summary';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import BudgetAnalysis from '@/components/dashboard/budget-analysis';
-import { goals, transactions, user, partner, totalIncome, totalExpenses } from '@/lib/data';
+import { goals, transactions, users, partner, totalIncome, totalExpenses } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import withAuth from '@/components/auth/with-auth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 function HomePage() {
   const almostThereGoal = goals.find(g => (g.currentAmount / g.targetAmount) >= 0.95 && (g.currentAmount / g.targetAmount) < 1);
+  const router = useRouter();
+  
+  // In a real app, the selected vault would be in a global state.
+  // For now, we'll check if one is selected in sessionStorage.
+  useEffect(() => {
+    const selectedVault = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    if (!selectedVault) {
+      router.push('/vaults');
+    }
+  }, [router]);
+  
+  const user = users[0];
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">

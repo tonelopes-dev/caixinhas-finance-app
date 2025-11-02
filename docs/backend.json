@@ -34,36 +34,29 @@
         "email"
       ]
     },
-    "Couple": {
+    "Vault": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Couple",
+      "title": "Vault",
       "type": "object",
-      "description": "Represents a couple in the DreamVault application, linking two users together.",
+      "description": "Represents a shared vault for finances and goals.",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Unique identifier for the Couple entity."
+          "type": "string"
         },
-        "user1Id": {
-          "type": "string",
-          "description": "Reference to User 1. (Relationship: User 1:1 Couple)"
+        "name": {
+          "type": "string"
         },
-        "user2Id": {
-          "type": "string",
-          "description": "Reference to User 2. (Relationship: User 1:1 Couple)"
+        "ownerId": {
+          "type": "string"
         },
-        "creationDate": {
-          "type": "string",
-          "description": "The date when the couple was created.",
-          "format": "date-time"
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/backend/entities/User"
+          }
         }
       },
-      "required": [
-        "id",
-        "user1Id",
-        "user2Id",
-        "creationDate"
-      ]
+      "required": ["id", "name", "ownerId"]
     },
     "Transaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -72,34 +65,28 @@
       "description": "Represents a financial transaction recorded in the application.",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Unique identifier for the Transaction entity."
+          "type": "string"
         },
-        "coupleId": {
-          "type": "string",
-          "description": "Reference to Couple. (Relationship: Couple 1:N Transaction)"
+        "vaultId": {
+          "type": "string"
         },
         "date": {
           "type": "string",
-          "description": "Date of the transaction.",
           "format": "date-time"
         },
         "amount": {
-          "type": "number",
-          "description": "Amount of the transaction."
+          "type": "number"
         },
         "description": {
-          "type": "string",
-          "description": "Description of the transaction."
+          "type": "string"
         },
         "categoryId": {
-          "type": "string",
-          "description": "Reference to Category. (Relationship: Category 1:N Transaction)"
+          "type": "string"
         }
       },
       "required": [
         "id",
-        "coupleId",
+        "vaultId",
         "date",
         "amount",
         "description",
@@ -113,25 +100,21 @@
       "description": "Represents a category for classifying financial transactions.",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Unique identifier for the Category entity."
+          "type": "string"
         },
-        "coupleId": {
-          "type": "string",
-          "description": "Reference to Couple. (Relationship: Couple 1:N Category)"
+        "vaultId": {
+          "type": "string"
         },
         "name": {
-          "type": "string",
-          "description": "Name of the category (e.g., 'Leisure', 'Home', 'Food')."
+          "type": "string"
         },
         "description": {
-          "type": "string",
-          "description": "Description of the category."
+          "type": "string"
         }
       },
       "required": [
         "id",
-        "coupleId",
+        "vaultId",
         "name",
         "description"
       ]
@@ -143,43 +126,35 @@
       "description": "Represents a shared goal bucket for a couple's dreams and projects.",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Unique identifier for the GoalBucket entity."
+          "type": "string"
         },
-        "coupleId": {
-          "type": "string",
-          "description": "Reference to Couple. (Relationship: Couple 1:N GoalBucket)"
+        "vaultId": {
+          "type": "string"
         },
         "name": {
-          "type": "string",
-          "description": "Name of the goal bucket (e.g., 'Our Trip', 'New Apartment')."
+          "type": "string"
         },
         "targetAmount": {
-          "type": "number",
-          "description": "Target amount for the goal."
+          "type": "number"
         },
         "currentAmount": {
-          "type": "number",
-          "description": "Current amount saved towards the goal."
+          "type": "number"
         },
         "description": {
-          "type": "string",
-          "description": "Description of the goal bucket."
+          "type": "string"
         },
         "startDate": {
           "type": "string",
-          "description": "Start date for the goal.",
           "format": "date-time"
         },
         "endDate": {
           "type": "string",
-          "description": "End date for the goal.",
           "format": "date-time"
         }
       },
       "required": [
         "id",
-        "coupleId",
+        "vaultId",
         "name",
         "targetAmount",
         "currentAmount",
@@ -201,92 +176,49 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile information. Path-based ownership ensures only the user can access their own data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "description": "Stores user profile information."
         }
       },
       {
-        "path": "/couples/{coupleId}",
+        "path": "/vaults/{vaultId}",
         "definition": {
-          "entityName": "Couple",
+          "entityName": "Vault",
           "schema": {
-            "$ref": "#/backend/entities/Couple"
+            "$ref": "#/backend/entities/Vault"
           },
-          "description": "Stores couple information, linking two users together.",
-          "params": [
-            {
-              "name": "coupleId",
-              "description": "The unique identifier of the couple."
-            }
-          ]
+          "description": "Stores vault information, linking multiple users together."
         }
       },
       {
-        "path": "/couples/{coupleId}/transactions/{transactionId}",
+        "path": "/vaults/{vaultId}/transactions/{transactionId}",
         "definition": {
           "entityName": "Transaction",
           "schema": {
             "$ref": "#/backend/entities/Transaction"
           },
-          "description": "Stores transaction data for a specific couple. Includes denormalized 'coupleId' for authorization independence.",
-          "params": [
-            {
-              "name": "coupleId",
-              "description": "The unique identifier of the couple."
-            },
-            {
-              "name": "transactionId",
-              "description": "The unique identifier of the transaction."
-            }
-          ]
+          "description": "Stores transaction data for a specific vault."
         }
       },
       {
-        "path": "/couples/{coupleId}/categories/{categoryId}",
+        "path": "/vaults/{vaultId}/categories/{categoryId}",
         "definition": {
           "entityName": "Category",
           "schema": {
             "$ref": "#/backend/entities/Category"
           },
-          "description": "Stores categories for transactions, specific to a couple. Includes denormalized 'coupleId' for authorization independence.",
-          "params": [
-            {
-              "name": "coupleId",
-              "description": "The unique identifier of the couple."
-            },
-            {
-              "name": "categoryId",
-              "description": "The unique identifier of the category."
-            }
-          ]
+          "description": "Stores categories for transactions, specific to a vault."
         }
       },
       {
-        "path": "/couples/{coupleId}/goalBuckets/{goalBucketId}",
+        "path": "/vaults/{vaultId}/goalBuckets/{goalBucketId}",
         "definition": {
           "entityName": "GoalBucket",
           "schema": {
             "$ref": "#/backend/entities/GoalBucket"
           },
-          "description": "Stores goal bucket data for a specific couple. Includes denormalized 'coupleId' for authorization independence.",
-          "params": [
-            {
-              "name": "coupleId",
-              "description": "The unique identifier of the couple."
-            },
-            {
-              "name": "goalBucketId",
-              "description": "The unique identifier of the goal bucket."
-            }
-          ]
+          "description": "Stores goal bucket data for a specific vault."
         }
       }
-    ],
-    "reasoning": "The Firestore data structure is designed to support a collaborative finance management application for couples, focusing on shared goals and transactions. The core principle is Authorization Independence, achieved through denormalization. Each data entity is structured to facilitate simple and secure security rules. The structure also incorporates Structural Segregation to maintain a homogeneous security posture within each collection. The use of hierarchical paths reinforces clear ownership and relationships between entities."
+    ]
   }
 }
