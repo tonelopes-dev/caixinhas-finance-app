@@ -12,10 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { users } from '@/lib/data';
+import { users, transactions as allTransactions } from '@/lib/data';
 import { generateNewFinancialReport, getFinancialReportChat, type FinancialReportState } from '@/app/actions';
 import withAuth from '@/components/auth/with-auth';
-import type { User } from '@/lib/definitions';
+import type { User, Transaction } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
 import { ReportChat } from '@/components/reports/report-chat';
@@ -31,6 +31,11 @@ function ReportsPage() {
   const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
 
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<{ value: string, label: string }[]>([]);
+
+
+  const viewportRef = useRef<HTMLDivElement>(null);
   const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
   const [reportState, generateReportAction] = useFormState(generateNewFinancialReport, initialState);
   const [chatState, chatAction] = useFormState(getFinancialReportChat, initialState);
@@ -39,10 +44,43 @@ function ReportsPage() {
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
     const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
     if (userId) {
-        setCurrentUser(users.find(u => u.id === userId) || null);
+        const user = users.find(u => u.id === userId) || null;
+        setCurrentUser(user);
     }
     if (selectedWorkspaceId) {
         setWorkspaceId(selectedWorkspaceId);
+
+        // Filter transactions for the current workspace
+        const relevantTransactions = allTransactions.filter(t => t.ownerId === selectedWorkspaceId);
+
+        if (relevantTransactions.length > 0) {
+            const dates = relevantTransactions.map(t => new Date(t.date));
+            const years = [...new Set(dates.map(d => d.getFullYear().toString()))].sort((a, b) => b.localeCompare(a));
+            setAvailableYears(years);
+
+            const months = [...new Set(dates.map(d => ({ year: d.getFullYear(), month: d.getMonth() })))];
+            const monthLabels = months.map(m => ({
+                value: (m.month + 1).toString(),
+                label: new Date(m.year, m.month).toLocaleString('pt-BR', { month: 'long' })
+            }));
+            const uniqueMonths = Array.from(new Map(monthLabels.map(m => [m.label, m])).values())
+                                    .sort((a,b) => parseInt(a.value) - parseInt(b.value));
+            
+            setAvailableMonths(uniqueMonths);
+
+            // Set default to the most recent transaction period
+            if (years.length > 0) setYear(years[0]);
+            if (uniqueMonths.length > 0) {
+                const mostRecentMonth = new Date(Math.max(...dates.map(date => date.getTime()))).getMonth() + 1;
+                setMonth(mostRecentMonth.toString());
+            }
+
+        } else {
+             // Handle case with no transactions
+            const currentYearStr = new Date().getFullYear().toString();
+            setAvailableYears([currentYearStr]);
+            setAvailableMonths(Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }) })));
+        }
     }
   }, []);
 
@@ -64,10 +102,18 @@ function ReportsPage() {
     }
   }, [chatState, chatHistory]);
 
+    // Effect to scroll chat
+  useEffect(() => {
+    if (viewportRef.current) {
+        viewportRef.current.scrollTo({
+            top: viewportRef.current.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+  }, [chatHistory]);
+
   const handleGenerateReport = (formData: FormData) => {
-    setReportHtml(null);
-    formData.set('month', month);
-    formData.set('year', year);
+    setReportHtml(null); // Clear previous report
     generateReportAction(formData);
   }
 
@@ -103,8 +149,9 @@ function ReportsPage() {
               setMonth={setMonth}
               year={year}
               setYear={setYear}
+              availableMonths={availableMonths}
+              availableYears={availableYears}
               handleGenerateReport={handleGenerateReport}
-              isPending={reportState.pending}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -121,6 +168,7 @@ function ReportsPage() {
                 chatAction={chatAction}
                 isChatPending={chatState.pending}
                 currentUser={currentUser}
+                viewportRef={viewportRef}
               />
             </div>
           </CardContent>
