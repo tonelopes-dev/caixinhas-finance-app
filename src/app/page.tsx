@@ -46,12 +46,23 @@ function HomePage() {
     
     setWorkspaceId(selectedWorkspaceId);
 
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const filterTransactionsByCurrentMonth = (trans: Transaction[]) => {
+        return trans.filter(t => {
+            const transactionDate = new Date(t.date);
+            return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+        });
+    }
+
     // Determine if workspace is a personal account or a vault
     if (selectedWorkspaceId === userId) {
         // It's the user's personal account
         const { userTransactions, userGoals } = getMockDataForUser(userId);
         setWorkspaceName("Minha Conta Pessoal");
-        setTransactions(userTransactions);
+        setTransactions(filterTransactionsByCurrentMonth(userTransactions));
         setGoals(userGoals.filter(g => g.ownerType === 'user'));
         setPartner(null); // No specific partner in personal view
 
@@ -60,7 +71,8 @@ function HomePage() {
         const vault = vaults.find(v => v.id === selectedWorkspaceId);
         if (vault) {
             setWorkspaceName(vault.name);
-            setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === 'vault'));
+            const vaultTransactions = allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === 'vault');
+            setTransactions(filterTransactionsByCurrentMonth(vaultTransactions));
             
             // Filter goals for the vault, respecting visibility
             const vaultGoals = allGoals.filter(g => g.ownerId === selectedWorkspaceId && g.ownerType === 'vault');
