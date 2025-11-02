@@ -49,7 +49,7 @@ function ReportsPage() {
   const initialState: FinancialReportState = { reportId: currentReport?.id ?? '' };
   const [state, dispatch] = useFormState(getFinancialReport, initialState);
   const chatInputRef = useRef<HTMLInputElement>(null);
-  const chatAreaRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
 
   const handleTabChange = (reportId: string) => {
@@ -75,9 +75,9 @@ function ReportsPage() {
   }, [state, chatHistory]);
 
   useEffect(() => {
-    if (chatAreaRef.current) {
-        chatAreaRef.current.scrollTo({
-            top: chatAreaRef.current.scrollHeight,
+    if (viewportRef.current) {
+        viewportRef.current.scrollTo({
+            top: viewportRef.current.scrollHeight,
             behavior: 'smooth'
         });
     }
@@ -140,7 +140,7 @@ function ReportsPage() {
                                 <h3 className="font-semibold flex items-center gap-2"><Bot className='h-5 w-5' /> Assistente Financeiro</h3>
                                 <p className='text-xs text-muted-foreground'>Tire dúvidas sobre seu relatório de {report.month}</p>
                             </div>
-                            <ScrollArea className="flex-1 p-4" ref={chatAreaRef}>
+                            <ScrollArea className="flex-1 p-4" viewportRef={viewportRef}>
                                <div className="space-y-4">
                                 {chatHistory.length === 0 && (
                                     <div className="text-center text-sm text-muted-foreground py-8">
