@@ -1,18 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, Cell, Tooltip } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartConfig, ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { Pie, PieChart, Cell, Tooltip, Legend } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { ChartConfig, ChartContainer, ChartTooltipContent, ChartLegendContent } from '@/components/ui/chart';
 import { TrendingDown } from 'lucide-react';
 
 const chartColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export function ExpensesByCategoryChart({ data }: { data: Record<string, number> }) {
-    const chartData = Object.entries(data).map(([category, value]) => ({
+    const chartData = Object.entries(data).map(([category, value], index) => ({
         name: category,
         value: value,
-        fill: chartColors[Object.keys(data).indexOf(category) % chartColors.length],
+        fill: chartColors[index % chartColors.length],
     }));
 
     const chartConfig = Object.fromEntries(
@@ -26,7 +26,7 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
     ) satisfies ChartConfig;
 
   return (
-    <Card>
+    <Card className="flex flex-col">
         <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
                 <TrendingDown />
@@ -34,7 +34,7 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
             </CardTitle>
             <CardDescription>Distribuição dos seus gastos no período.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 pb-0">
              <ChartContainer
                 config={chartConfig}
                 className="mx-auto aspect-square h-[250px]"
@@ -51,13 +51,16 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
                         innerRadius={60}
                         strokeWidth={5}
                     >
-                         {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                         {chartData.map((entry) => (
+                            <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                         ))}
                     </Pie>
                 </PieChart>
             </ChartContainer>
         </CardContent>
+         <CardFooter className="flex-col gap-2 border-t pt-4">
+            <ChartLegendContent payload={chartData.map(item => ({ value: item.name, type: 'rect', id: item.name, color: item.fill }))} />
+        </CardFooter>
     </Card>
   );
 }

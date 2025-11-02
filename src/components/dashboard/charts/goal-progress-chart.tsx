@@ -15,6 +15,7 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltipContent,
+  ChartLegendContent,
 } from '@/components/ui/chart';
 import type { Goal } from '@/lib/definitions';
 import { PiggyBank } from 'lucide-react';
@@ -42,6 +43,9 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
     };
     return acc;
   }, {} as ChartConfig);
+  
+  const legendPayload = chartData.map(item => ({ value: item.name, type: 'rect' as const, id: item.name, color: item.fill }));
+
 
   return (
     <Card className="flex flex-col">
@@ -99,13 +103,11 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm pt-4">
-         <div className="flex items-center gap-2 font-medium leading-none">
+      <CardFooter className="flex-col gap-4 text-sm pt-4 border-t">
+         <div className="flex w-full items-center justify-center gap-2 font-medium leading-none">
           Progresso Total: {totalProgress}%
         </div>
-        <div className="leading-none text-muted-foreground">
-          Soma de todas as suas metas ativas
-        </div>
+        <ChartLegendContent payload={legendPayload} />
       </CardFooter>
     </Card>
   );
