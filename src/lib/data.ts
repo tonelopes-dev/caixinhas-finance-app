@@ -35,17 +35,17 @@ export const users: User[] = [
 export const vaults: Vault[] = [
   {
     id: 'vault1',
-    name: 'Nosso Apê',
+    name: 'Minha Agência',
     ownerId: 'user1',
-    members: [users.find(u => u.id === 'user1')!, users.find(u => u.id === 'user3')!],
-    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080'
+    members: [users.find(u => u.id === 'user1')!],
+    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1080'
   },
   {
     id: 'vault2',
-    name: 'Viagem em Família',
+    name: 'Contas Família',
     ownerId: 'user1',
-    members: [users.find(u => u.id === 'user1')!],
-    imageUrl: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1080'
+    members: [users.find(u => u.id === 'user1')!, users.find(u => u.id === 'user2')!],
+    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080'
   },
   {
     id: 'vault3',
@@ -66,7 +66,7 @@ export const vaults: Vault[] = [
 // --- INVITATIONS ---
 export const vaultInvitations: VaultInvitation[] = [
     { id: 'invite1', vaultId: 'vault3', vaultName: 'Projeto Freelance', invitedBy: 'Carlos', status: 'pending' }, // For user1
-    { id: 'invite2', vaultId: 'vault4', vaultName: 'Festa de Fim de Ano', invitedBy: 'Daniela', status: 'pending' }, // For user2
+    { id: 'invite2', vaultId: 'vault4', vaultName: 'Festa de Fim de Ano', invitedBy: 'Daniela', status: 'pending' }, // For user1 (changed from user2 to user1 for test case)
 ];
 
 
@@ -115,49 +115,47 @@ export const accounts: Account[] = [
 ];
 
 export const goals: Goal[] = [
+  // Goals for "Minha Agência" (vault1)
   {
     id: 'goal1',
     vaultId: 'vault1',
-    name: 'Viagem para a Europa',
-    targetAmount: 20000,
+    name: 'Macbook Novo',
+    targetAmount: 15000,
     currentAmount: 7500,
-    emoji: '✈️',
+    emoji: '💻',
     visibility: 'private',
-    participants: [
-        { id: 'user', name: 'Você', avatarUrl: user.avatarUrl, role: 'owner' },
-        { id: 'partner', name: 'Parceiro(a)', avatarUrl: partner.avatarUrl, role: 'member' },
-        { id: 'p1', name: 'Beatriz', avatarUrl: 'https://picsum.photos/seed/101/100', role: 'member' },
-        { id: 'p2', name: 'Carlos', avatarUrl: 'https://picsum.photos/seed/102/100', role: 'member' },
-    ]
+    isFeatured: true,
   },
   {
     id: 'goal2',
     vaultId: 'vault1',
-    name: 'Apartamento Novo',
-    targetAmount: 50000,
-    currentAmount: 15000,
-    emoji: '🏡',
+    name: 'Cadeira Ergonômica',
+    targetAmount: 3000,
+    currentAmount: 1500,
+    emoji: '💺',
+    visibility: 'shared',
+  },
+  // Goals for "Contas Família" (vault2)
+  {
+    id: 'goal3',
+    vaultId: 'vault2',
+    name: 'Viagem para a Disney',
+    targetAmount: 25000,
+    currentAmount: 19500,
+    emoji: '✈️',
     visibility: 'shared',
     isFeatured: true,
   },
   {
-    id: 'goal3',
+    id: 'goal4',
     vaultId: 'vault2',
     name: 'Fundo de Emergência',
     targetAmount: 10000,
-    currentAmount: 9500,
+    currentAmount: 9800,
     emoji: '🛡️',
-    visibility: 'private',
+    visibility: 'shared',
   },
-  {
-    id: 'goal4',
-    vaultId: 'vault2',
-    name: 'Videogame Novo',
-    targetAmount: 3500,
-    currentAmount: 3450,
-    emoji: '🎮',
-    visibility: 'private',
-  },
+  // Other goals for other vaults
   {
     id: 'goal5',
     vaultId: 'vault3',
@@ -171,10 +169,17 @@ export const goals: Goal[] = [
 
 
 export const transactions: Transaction[] = [
-    { id: '1', vaultId: 'vault1', date: '2024-07-28', description: 'Salário', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc1', actorId: 'user1' },
-    { id: '2', vaultId: 'vault1', date: '2024-07-28', description: 'Salário Parceiro(a)', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actorId: 'user3' },
-    { id: '3', vaultId: 'vault1', date: '2024-07-27', description: 'Supermercado', amount: 450.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'credit_card', actorId: 'user3' },
-    { id: '4', vaultId: 'vault2', date: '2024-07-26', description: 'Conta de Luz', amount: 150.00, type: 'expense', category: 'Casa', sourceAccountId: 'acc1', paymentMethod: 'boleto', actorId: 'user1' },
+    // Transactions for "Minha Agência" (vault1)
+    { id: '1', vaultId: 'vault1', date: '2024-07-28', description: 'Pagto. Cliente A - Site', amount: 5000, type: 'income', category: 'Serviços', destinationAccountId: 'acc1', actorId: 'user1' },
+    { id: '2', vaultId: 'vault1', date: '2024-07-25', description: 'Pagto. Cliente B - Automação', amount: 3500, type: 'income', category: 'Serviços', destinationAccountId: 'acc1', actorId: 'user1' },
+    { id: '3', vaultId: 'vault1', date: '2024-07-22', description: 'Assinatura Software de Design', amount: 250.00, type: 'expense', category: 'Software', sourceAccountId: 'acc1', paymentMethod: 'credit_card', actorId: 'user1' },
+    { id: '4', vaultId: 'vault1', date: '2024-07-20', description: 'Anúncios Online', amount: 400.00, type: 'expense', category: 'Marketing', sourceAccountId: 'acc1', paymentMethod: 'boleto', actorId: 'user1' },
+
+    // Transactions for "Contas Família" (vault2)
+    { id: '5', vaultId: 'vault2', date: '2024-07-28', description: 'Salário Ana', amount: 3000, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actorId: 'user1' },
+    { id: '6', vaultId: 'vault2', date: '2024-07-28', description: 'Salário Bruno', amount: 2500, type: 'income', category: 'Salário', destinationAccountId: 'acc2', actorId: 'user2' },
+    { id: '7', vaultId: 'vault2', date: '2024-07-27', description: 'Supermercado do Mês', amount: 850.75, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc2', paymentMethod: 'debit_card', actorId: 'user1' },
+    { id: '8', vaultId: 'vault2', date: '2024-07-26', description: 'Aluguel', amount: 1800.00, type: 'expense', category: 'Casa', sourceAccountId: 'acc2', paymentMethod: 'transfer', actorId: 'user1' },
 ];
 
 
@@ -224,9 +229,11 @@ export const getMockDataForUser = (userId: string | null) => {
 
     let userInvitations: VaultInvitation[] = [];
     if (userId === 'user1') {
-        userInvitations = vaultInvitations.filter(i => i.id === 'invite1');
+        // User 1 is invited to vault3 and vault4
+        userInvitations = vaultInvitations;
     } else if (userId === 'user2') {
-        userInvitations = vaultInvitations.filter(i => i.id === 'invite2');
+        // User 2 has no invitations in this scenario
+        userInvitations = [];
     }
     
     return {
