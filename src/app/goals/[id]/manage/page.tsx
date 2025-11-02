@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Lock, Users, X } from 'lucide-react';
+import { ArrowLeft, Lock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 
 export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const goal = goals.find((g) => g.id === params.id);
@@ -127,15 +128,11 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                         )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
+                    <RemoveParticipantDialog
+                      participantName={p.name}
+                      goalName={goal.name}
                       disabled={p.role === 'owner'}
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Remover</span>
-                    </Button>
+                    />
                   </div>
                 ))}
               </div>
