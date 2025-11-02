@@ -35,8 +35,6 @@ function HomePage() {
     
     if (userFromMock) {
         setCurrentUser(userFromMock);
-        // This is a simple mock logic to find the "partner"
-        // In a real app, this relationship would be stored in the database.
         const partnerUser = users.find(u => u.id !== userId && userVaults.some(uv => uv.members.some(m => m.id === u.id)));
         if (partnerUser) {
             setCurrentPartner(partnerUser);
@@ -50,7 +48,21 @@ function HomePage() {
       if (vault) {
         setSelectedVault(vault);
         setTransactions(allTransactions.filter(t => t.vaultId === vaultId));
-        setGoals(allGoals.filter(g => g.vaultId === vaultId));
+        
+        // Corrected goal filtering logic
+        const vaultGoals = allGoals.filter(g => g.vaultId === vaultId);
+        const accessibleGoals = vaultGoals.filter(g => {
+            if (g.visibility === 'shared') {
+                return true; // Visible to all vault members
+            }
+            if (g.visibility === 'private') {
+                // Only visible if the current user is a participant
+                return g.participants?.some(p => p.id === userId);
+            }
+            return false;
+        });
+        setGoals(accessibleGoals);
+
       } else {
         router.push('/vaults');
       }
