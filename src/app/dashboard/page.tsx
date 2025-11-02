@@ -18,33 +18,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { subDays, startOfMonth, startOfYear } from 'date-fns';
 
-type Period = 'this_month' | 'last_30_days' | 'this_year' | 'all_time';
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+const months = [
+    { value: 'all', label: 'Todos os meses' },
+    { value: '1', label: 'Janeiro' },
+    { value: '2', label: 'Fevereiro' },
+    { value: '3', label: 'Março' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Maio' },
+    { value: '6', label: 'Junho' },
+    { value: '7', label: 'Julho' },
+    { value: '8', 'label': 'Agosto' },
+    { value: '9', label: 'Setembro' },
+    { value: '10', label: 'Outubro' },
+    { value: '11', label: 'Novembro' },
+    { value: '12', label: 'Dezembro' },
+];
+
 
 export default function DashboardPage() {
-    const [period, setPeriod] = useState<Period>('this_month');
+    const [monthFilter, setMonthFilter] = useState((new Date().getMonth() + 1).toString());
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
 
     const filteredTransactions = useMemo(() => {
-        const now = new Date();
-        let startDate: Date;
-
-        switch (period) {
-            case 'this_month':
-                startDate = startOfMonth(now);
-                break;
-            case 'last_30_days':
-                startDate = subDays(now, 30);
-                break;
-            case 'this_year':
-                startDate = startOfYear(now);
-                break;
-            case 'all_time':
-                return transactions;
-        }
-
-        return transactions.filter(t => new Date(t.date) >= startDate);
-    }, [period]);
+        return transactions.filter(transaction => {
+            const transactionDate = new Date(transaction.date);
+            const monthMatch = monthFilter === 'all' || transactionDate.getMonth() + 1 === parseInt(monthFilter);
+            const yearMatch = yearFilter === 'all' || transactionDate.getFullYear() === parseInt(yearFilter);
+            return monthMatch && yearMatch;
+        });
+    }, [monthFilter, yearFilter]);
     
 
     // Process data for charts using filteredTransactions
@@ -89,15 +94,21 @@ export default function DashboardPage() {
             </h1>
             <div className="flex items-center gap-2 mt-4 md:mt-0">
                 <span className="text-sm text-muted-foreground">Período:</span>
-                <Select value={period} onValueChange={(value: Period) => setPeriod(value)}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Selecione o período" />
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Mês" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="this_month">Este Mês</SelectItem>
-                        <SelectItem value="last_30_days">Últimos 30 dias</SelectItem>
-                        <SelectItem value="this_year">Este Ano</SelectItem>
-                        <SelectItem value="all_time">Desde o início</SelectItem>
+                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                 <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos os Anos</SelectItem>
+                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
@@ -137,7 +148,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="rounded-lg border p-4">
                             <p className="text-sm text-muted-foreground">Meta Mais Próxima</p>
-                            <p className="text-xl font-bold text-primary">{goals.sort((a,b) => (b.currentAmount/b.targetAmount) - (a.currentAmount/a.targetAmount))[0]?.name || 'N/A'}</p>
+                            <p className="text-xl font-bold text-primary">{[...goals].sort((a,b) => (b.currentAmount/b.targetAmount) - (a.currentAmount/a.targetAmount))[0]?.name || 'N/A'}</p>
                         </div>
                     </CardContent>
                 </Card>
