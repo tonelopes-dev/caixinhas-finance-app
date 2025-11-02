@@ -98,10 +98,6 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
             </Pie>
-             <ChartLegend
-                content={<ChartLegendContent nameKey="name" />}
-                className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
-            />
           </PieChart>
         </ChartContainer>
       </CardContent>
@@ -109,6 +105,7 @@ export function GoalProgressChart({ data }: { data: Goal[] }) {
          <div className="flex w-full items-center justify-center gap-1 font-medium leading-none">
           Progresso Total: <span className="font-bold text-primary">{totalProgress}%</span>
         </div>
+        <ChartLegend content={<ChartLegendContent nameKey="name" />} />
       </CardFooter>
     </Card>
   );

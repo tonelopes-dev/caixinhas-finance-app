@@ -261,12 +261,26 @@ const ChartLegend = React.forwardRef<
   React.ComponentProps<"div"> & {
     payload?: RechartsPrimitive.LegendProps["payload"]
     verticalAlign?: RechartsPrimitive.LegendProps["verticalAlign"]
+    content: React.ReactElement
   }
->(({ className, ...props }, ref) => {
+>(({ content, ...props }, ref) => {
   const { config } = useChart()
+  const payload = React.useMemo(
+    () =>
+      Object.entries(config).map(([key, value]) => ({
+        ...value,
+        dataKey: key,
+        type: "rect",
+        color: value.color,
+      })) as RechartsPrimitive.LegendProps["payload"],
+    [config]
+  )
+
   return (
-    <div ref={ref} className={className}>
-      <RechartsPrimitive.Legend {...props} />
+    <div ref={ref} {...props}>
+      {React.cloneElement(content, {
+        payload,
+      })}
     </div>
   )
 })

@@ -55,10 +55,6 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
                             <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                         ))}
                     </Pie>
-                    <ChartLegend
-                        content={<ChartLegendContent />}
-                        className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
-                    />
                 </PieChart>
             </ChartContainer>
         </CardContent>
@@ -66,6 +62,7 @@ export function ExpensesByCategoryChart({ data }: { data: Record<string, number>
             <div className="flex items-center gap-2 font-medium leading-none">
                 Total Gasto: {chartData.reduce((acc, curr) => acc + curr.value, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
+            <ChartLegend content={<ChartLegendContent />} />
         </CardFooter>
     </Card>
   );
