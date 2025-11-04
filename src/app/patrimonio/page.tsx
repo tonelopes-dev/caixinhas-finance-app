@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, PiggyBank, CreditCard, Wallet, TrendingUp } from 'lucide-react';
-import { getMockDataForUser, accounts as allAccounts, goals as allGoals, vaults } from '@/lib/data';
+import { getMockDataForUser } from '@/lib/data';
 import type { Account, Goal } from '@/lib/definitions';
 import withAuth from '@/components/auth/with-auth';
 import { useRouter } from 'next/navigation';
@@ -31,43 +31,20 @@ function PatrimonioPage() {
     const router = useRouter();
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [goals, setGoals] = useState<Goal[]>([]);
-    const [workspaceName, setWorkspaceName] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const id = localStorage.getItem('DREAMVAULT_USER_ID');
-        setUserId(id);
-        const workspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
-
-        if (!id || !workspaceId) {
+        if (!id) {
             router.push('/login');
             return;
         }
+        setUserId(id);
+        const { userAccounts, userGoals } = getMockDataForUser(id);
+        setAccounts(userAccounts);
+        setGoals(userGoals);
 
-        const isPersonalWorkspace = workspaceId === id;
-
-        if (isPersonalWorkspace) {
-            const { userAccounts, userGoals } = getMockDataForUser(id);
-            setWorkspaceName("Minha Conta Pessoal");
-            setAccounts(userAccounts.filter(a => a.ownerId === id && a.ownerType === 'user'));
-            setGoals(userGoals.filter(g => g.ownerId === id && g.ownerType === 'user'));
-        } else {
-            // It's a vault
-            const vault = vaults.find(v => v.id === workspaceId);
-            if (vault) {
-                setWorkspaceName(vault.name);
-                // Get all accounts belonging to this vault
-                setAccounts(allAccounts.filter(a => a.ownerId === workspaceId && a.ownerType === 'vault'));
-                // Get all goals belonging to this vault that the user can see
-                const { userGoals } = getMockDataForUser(id);
-                setGoals(userGoals.filter(g => g.ownerId === workspaceId && g.ownerType === 'vault'));
-
-            } else {
-                 router.push('/vaults');
-            }
-        }
-
-    }, [router, userId]);
+    }, [router]);
 
     const liquidAssets = accounts.filter(a => ['checking', 'savings'].includes(a.type));
     const investedAccounts = accounts.filter(a => a.type === 'investment');
@@ -90,10 +67,10 @@ function PatrimonioPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Patrimônio de <span className="text-primary">{workspaceName}</span>
+              Meu Patrimônio Total
             </CardTitle>
             <CardDescription>
-              Uma visão detalhada e organizada de todos os seus ativos financeiros e fontes de crédito.
+              Uma visão consolidada de todos os seus ativos, incluindo contas pessoais e participações em cofres.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-8">
