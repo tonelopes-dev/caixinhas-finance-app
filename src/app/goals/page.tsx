@@ -43,7 +43,7 @@ function GoalPage() {
             return;
         }
 
-        const { userGoals, userVaults: vaultsForUser } = getMockDataForUser(userId);
+        const { userGoals, userVaults: vaultsForUser } = getMockDataForUser(userId, null, true);
         setAllGoals(userGoals);
         setUserVaults(vaultsForUser);
     }, [router]);

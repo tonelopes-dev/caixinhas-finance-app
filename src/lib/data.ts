@@ -10,7 +10,7 @@ import { notifications } from '@/lib/mock-data/notifications';
 
 // --- LÓGICA DE SIMULAÇÃO ---
 
-export const getMockDataForUser = (userId: string | null, workspaceId: string | null) => {
+export const getMockDataForUser = (userId: string | null, workspaceId: string | null, fetchAllGoals: boolean = false) => {
     if (!userId) {
         return {
             currentUser: null,
@@ -55,19 +55,35 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
         return false;
     }) : [];
 
-    const goalsForWorkspace = workspaceId ? goals.filter(g => {
-        if (isPersonalWorkspace) {
-            // In personal space, show only personal goals.
-            return g.ownerType === 'user' && g.ownerId === userId;
-        } else {
-            // In a vault, show goals owned by that vault.
-            if (g.ownerType === 'vault' && g.ownerId === workspaceId) {
-                // Public goals are always visible. Private goals only to participants.
+    let goalsForUser: Goal[] = [];
+    if (fetchAllGoals) {
+        // Get all goals where the user is a participant or owner.
+        goalsForUser = goals.filter(g => {
+            // Personal goals
+            if (g.ownerType === 'user' && g.ownerId === userId) return true;
+            // Vault goals where user is a member and can see it
+            const vault = userVaults.find(uv => uv.id === g.ownerId);
+            if (g.ownerType === 'vault' && vault) {
                 return g.visibility === 'shared' || g.participants?.some(p => p.id === userId);
             }
-        }
-        return false;
-    }) : [];
+            return false;
+        });
+    } else if (workspaceId) {
+        goalsForUser = goals.filter(g => {
+            if (isPersonalWorkspace) {
+                // In personal space, show only personal goals.
+                return g.ownerType === 'user' && g.ownerId === userId;
+            } else {
+                // In a vault, show goals owned by that vault.
+                if (g.ownerType === 'vault' && g.ownerId === workspaceId) {
+                    // Public goals are always visible. Private goals only to participants.
+                    return g.visibility === 'shared' || g.participants?.some(p => p.id === userId);
+                }
+            }
+            return false;
+        });
+    }
+
 
     // Convites pendentes (lógica de exemplo)
     const userInvitations: VaultInvitation[] = [];
@@ -76,7 +92,7 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
         currentUser,
         userAccounts: accountsForWorkspace,
         userTransactions: workspaceId ? transactions.filter(t => t.ownerId === workspaceId) : [],
-        userGoals: goalsForWorkspace,
+        userGoals: goalsForUser,
         userVaults,
         userInvitations,
         currentVault,
