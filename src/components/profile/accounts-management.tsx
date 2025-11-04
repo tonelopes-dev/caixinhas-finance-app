@@ -68,7 +68,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
     const isOwner = account.ownerId === currentUserId;
 
-    const tooltipContent = "Você não tem permissão para editar esta conta neste espaço de trabalho.";
+    const tooltipContent = "Você não tem permissão para editar esta conta.";
 
     return (
          <Dialog open={open} onOpenChange={setOpen}>
@@ -102,7 +102,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     Atualize os detalhes da sua conta ou cartão.
                 </DialogDescription>
             </DialogHeader>
-            <fieldset disabled={disabled}>
+            <fieldset disabled={!isOwner}>
                 <div className="grid gap-4 py-4">
                      <div className="space-y-2">
                         <Label>Tipo de Conta</Label>
@@ -218,10 +218,10 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                 </div>
             </fieldset>
             <DialogFooter>
-                <Button onClick={() => setOpen(false)} disabled={disabled}>
+                <Button onClick={() => setOpen(false)} disabled={!isOwner}>
                     Salvar Alterações
                 </Button>
-                 {disabled && <p className="text-xs text-muted-foreground">Você não tem permissão para editar.</p>}
+                 {!isOwner && <p className="text-xs text-muted-foreground">Apenas o proprietário pode salvar alterações.</p>}
             </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -384,16 +384,11 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         <div className="space-y-4">
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
-            
-            const canEdit = 
-              (isPersonalWorkspace && isOwner && account.scope === 'personal') ||
-              (account.scope === workspaceId) ||
-              (account.scope === 'personal' && account.visibleIn?.includes(workspaceId)) ||
-              (account.allowFullAccess && !isPersonalWorkspace);
-
-            const canDelete = isOwner || (account.allowFullAccess && !isPersonalWorkspace);
+            const canEdit = isOwner || !!account.allowFullAccess;
+            const canDelete = isOwner || !!account.allowFullAccess;
 
             const owner = users.find(u => u.id === account.ownerId);
+            const tooltipText = `Apenas o proprietário (${owner?.name.split(' ')[0]}) ou alguém com acesso total pode realizar esta ação.`;
 
             return (
                 <div
@@ -437,7 +432,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                     <DeleteAccountDialog 
                         account={account} 
                         disabled={!canDelete} 
-                        tooltipContent={<p>Apenas o proprietário ({owner?.name.split(' ')[0]}) ou alguém com acesso total pode excluir.</p>}
+                        tooltipContent={<p>{tooltipText}</p>}
                     />
                 </div>
                 </div>
@@ -451,3 +446,5 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
+
+    
