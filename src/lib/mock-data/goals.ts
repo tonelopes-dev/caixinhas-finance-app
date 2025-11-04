@@ -39,6 +39,28 @@ export const goals: Goal[] = [
     participants: friendsParticipants, 
     isFeatured: true,
   },
+  {
+    id: 'goal-nutri-2',
+    ownerId: 'user2',
+    ownerType: 'user',
+    name: 'Consultório dos Sonhos',
+    targetAmount: 25000,
+    currentAmount: 3500,
+    emoji: '🛋️',
+    visibility: 'private',
+    participants: [nutriParticipant],
+  },
+    {
+    id: 'goal-nutri-3',
+    ownerId: 'user2',
+    ownerType: 'user',
+    name: 'Presente para o Dev',
+    targetAmount: 1000,
+    currentAmount: 980,
+    emoji: '🎁',
+    visibility: 'private',
+    participants: [nutriParticipant],
+  },
   
   // -- Metas do Cofre da Agência (Apenas o Dev vê) --
   {
@@ -62,6 +84,17 @@ export const goals: Goal[] = [
     targetAmount: 40000,
     currentAmount: 11000, // This is now calculated dynamically
     emoji: '🔬',
+    visibility: 'shared',
+    participants: [nutriParticipant],
+  },
+    {
+    id: 'goal-office-2',
+    ownerId: 'vault-office',
+    ownerType: 'vault',
+    name: 'Decoração da Recepção',
+    targetAmount: 7500,
+    currentAmount: 0,
+    emoji: '🖼️',
     visibility: 'shared',
     participants: [nutriParticipant],
   },

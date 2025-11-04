@@ -10,12 +10,12 @@ export const transactions: Transaction[] = [
     // Transações Pessoais da Nutri (user2)
     { id: 't-nutri-1', ownerId: 'user2', ownerType: 'user', date: '2024-07-29', description: 'Recebimento de Consultas', amount: 7000, type: 'income', category: 'Renda Principal', destinationAccountId: 'acc-nutri-1', actorId: 'user2' },
     { id: 't-nutri-2', ownerId: 'user2', ownerType: 'user', date: '2024-07-26', description: 'Jantar com amigos', amount: 120, type: 'expense', category: 'Lazer', sourceAccountId: 'acc-nutri-1', paymentMethod: 'credit_card', actorId: 'user2' },
-    // CORREÇÃO: Adicionando transações para a meta "Viagem com Amigos" (goal-nutri-1)
     { id: 't-nutri-3', ownerId: 'user2', ownerType: 'user', date: '2024-05-10', description: 'Economia para Viagem', amount: 400, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user2' },
     { id: 't-nutri-3a', ownerId: 'user2', ownerType: 'user', date: '2024-06-12', description: 'Economia para Viagem', amount: 500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user4' },
     { id: 't-nutri-3b', ownerId: 'user2', ownerType: 'user', date: '2024-07-18', description: 'Economia para Viagem', amount: 300, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-1', actorId: 'user1' },
-    
     { id: 't-nutri-4', ownerId: 'user2', ownerType: 'user', date: '2024-07-16', description: 'Transferência para Cofre Família', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'acc-family', actorId: 'user2', isRecurring: true },
+    { id: 't-nutri-5', ownerId: 'user2', ownerType: 'user', date: '2024-07-22', description: 'Poupança para Consultório', amount: 3500, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-2', actorId: 'user2' },
+    { id: 't-nutri-6', ownerId: 'user2', ownerType: 'user', date: '2024-07-28', description: 'Economia para Presente', amount: 980, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-nutri-3', actorId: 'user2' },
 
     // Transações do Cofre da Família (vault-family)
     { id: 't-fam-1', ownerId: 'vault-family', ownerType: 'vault', date: '2024-07-27', description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2' },
