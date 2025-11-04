@@ -67,19 +67,33 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     const [accountType, setAccountType] = React.useState<Account['type']>(account.type);
     const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
 
+    const tooltipContent = "Você não tem permissão para editar esta conta neste espaço de trabalho.";
+
     return (
          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-primary"
-                    disabled={disabled}
-                >
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                </Button>
-            </DialogTrigger>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <DialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-primary"
+                                disabled={disabled}
+                            >
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Editar</span>
+                            </Button>
+                        </DialogTrigger>
+                    </TooltipTrigger>
+                    {disabled && (
+                        <TooltipContent>
+                            <p>{tooltipContent}</p>
+                        </TooltipContent>
+                    )}
+                </Tooltip>
+            </TooltipProvider>
+
             <DialogContent>
             <DialogHeader>
                 <DialogTitle>Editar Conta</DialogTitle>
@@ -193,7 +207,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                 <Button onClick={() => setOpen(false)} disabled={disabled}>
                     Salvar Alterações
                 </Button>
-                 {disabled && <p className="text-xs text-muted-foreground">Apenas o proprietário pode editar.</p>}
+                 {disabled && <p className="text-xs text-muted-foreground">Você não tem permissão para editar.</p>}
             </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -218,9 +232,8 @@ function DeleteAccountDialog({ accountName, disabled, tooltipContent }: { accoun
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <AlertDialogTrigger asChild>
-                            {triggerButton}
-                        </AlertDialogTrigger>
+                        {/* The AlertDialogTrigger needs a direct child that can accept a ref, so we wrap the button */}
+                        <span>{triggerButton}</span>
                     </TooltipTrigger>
                     {disabled && (
                          <TooltipContent>
@@ -264,7 +277,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled={!isVaultOwner}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar
             </Button>
@@ -359,10 +372,9 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
       <CardContent>
         <div className="space-y-4">
           {accounts.map((account) => {
-            const isOwner = account.ownerId === currentUserId;
-            // Can edit if the account belongs to the current workspace (personal or vault)
+            const canDelete = account.ownerId === currentUserId;
+            // Can edit if it's a joint account in the current vault, or a personal account visible in it.
             const canEdit = account.scope === workspaceId || (account.scope === 'personal' && account.visibleIn?.includes(workspaceId));
-            const canDelete = isOwner; 
 
             const owner = users.find(u => u.id === account.ownerId);
 
@@ -383,7 +395,19 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                         <div className='flex items-center gap-2'>
                            <p className="font-medium">{account.name}</p>
                            {account.scope === 'personal' ? (
-                                <Badge variant="secondary">Pessoal</Badge>
+                               <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="secondary" className="cursor-default">
+                                      <Lock className="mr-1 h-3 w-3" />
+                                      Dono(a): {owner?.name.split(' ')[0]}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Esta é uma conta pessoal visível neste cofre.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                            ) : (
                                 <Badge>Compartilhada</Badge>
                            )}
