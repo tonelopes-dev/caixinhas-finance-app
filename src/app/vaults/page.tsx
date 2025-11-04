@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMockDataForUser, type User as UserType, vaults as allVaults } from '@/lib/data';
+import { getMockDataForUser, type User as UserType } from '@/lib/data';
 import type { Vault, VaultInvitation } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,21 +75,20 @@ export default function VaultSelectionPage() {
   const [userInvitations, setUserInvitations] = useState<VaultInvitation[]>([]);
 
   useEffect(() => {
-    // The middleware and withAuth component handle redirection.
-    // We just need to ensure we don't run this code if userId is not present.
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
     if (!userId) {
-      router.push('/login');
+      // This case is handled by withAuth, but it's a good safeguard.
       return;
     }
     
-    // The second argument to getMockDataForUser is optional, so we can omit it here.
-    const { currentUser, userVaults, userInvitations } = getMockDataForUser(userId, null);
+    // For the vaults page, we don't have a workspaceId yet.
+    // We pass the userId as the "workspace" to get the user's general data.
+    const { currentUser, userVaults, userInvitations } = getMockDataForUser(userId, userId);
     setCurrentUser(currentUser || null);
     setUserVaults(userVaults);
     setUserInvitations(userInvitations);
 
-  }, [router]);
+  }, []);
 
   const handleSelectWorkspace = (workspaceId: string) => {
     // workspaceId can be a userId or a vaultId

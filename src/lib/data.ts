@@ -367,7 +367,7 @@ export const user: User = users.find(u => u.id === 'user1')!;
 export const partner: User = users.find(u => u.id === 'user2')!;
 
 export const getMockDataForUser = (userId: string | null, workspaceId: string | null) => {
-    if (!userId || !workspaceId) {
+    if (!userId) {
         return { 
             currentUser: null, 
             userAccounts: [],
@@ -380,14 +380,25 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
     }
 
     const currentUser = users.find(u => u.id === userId) || null;
+    if (!currentUser) { // If user not found, return empty state
+         return { 
+            currentUser: null, 
+            userAccounts: [],
+            userTransactions: [],
+            userGoals: [],
+            userVaults: [],
+            userInvitations: [],
+            currentVault: null,
+        };
+    }
+
     const isPersonalWorkspace = workspaceId === userId;
     const currentVault = isPersonalWorkspace ? null : vaults.find(v => v.id === workspaceId) || null;
 
     // Vaults the user is a member of.
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
-    const userVaultIds = userVaults.map(v => v.id);
 
-    const accountsForWorkspace = accounts.filter(account => {
+    const accountsForWorkspace = workspaceId ? accounts.filter(account => {
         if (isPersonalWorkspace) {
             // In personal space, show only personal accounts.
             return account.scope === 'personal' && account.ownerId === userId;
@@ -398,9 +409,9 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
             if (account.scope === 'personal' && account.ownerId === userId && account.visibleIn?.includes(workspaceId)) return true;
         }
         return false;
-    });
+    }) : [];
 
-    const goalsForWorkspace = goals.filter(g => {
+    const goalsForWorkspace = workspaceId ? goals.filter(g => {
         if (isPersonalWorkspace) {
             // In personal space, show only personal goals.
             return g.ownerType === 'user' && g.ownerId === userId;
@@ -412,7 +423,7 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
             }
         }
         return false;
-    });
+    }) : [];
     
     // Convites pendentes (lógica de exemplo)
     const userInvitations: VaultInvitation[] = [];
@@ -420,7 +431,7 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
     return {
         currentUser,
         userAccounts: accountsForWorkspace,
-        userTransactions: transactions.filter(t => t.ownerId === workspaceId),
+        userTransactions: workspaceId ? transactions.filter(t => t.ownerId === workspaceId) : [],
         userGoals: goalsForWorkspace,
         userVaults,
         userInvitations,
