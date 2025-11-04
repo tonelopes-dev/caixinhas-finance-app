@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { bankLogos, users } from '@/lib/data';
-import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock } from 'lucide-react';
+import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock, AlertCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +66,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     const [selectedLogo, setSelectedLogo] = React.useState(account.logoUrl);
     const [accountType, setAccountType] = React.useState<Account['type']>(account.type);
     const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
+    const isOwner = account.ownerId === currentUserId;
 
     const tooltipContent = "Você não tem permissão para editar esta conta neste espaço de trabalho.";
 
@@ -201,6 +202,19 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                             />
                         </div>
                     )}
+
+                    {/* Full Access Switch - Only for account owner */}
+                    {isOwner && account.scope !== 'personal' && (
+                         <div className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-amber-500/10 border-amber-500/20">
+                            <Label htmlFor="full-access" className="flex flex-col space-y-1">
+                                <span className="font-medium flex items-center gap-2"><AlertCircle className="h-4 w-4 text-amber-600" /> Acesso Total dos Membros</span>
+                                <span className="text-xs font-normal leading-snug text-muted-foreground">
+                                    Permitir que todos os membros do cofre editem e excluam esta conta.
+                                </span>
+                            </Label>
+                            <Switch id="full-access" name="allowFullAccess" defaultChecked={account.allowFullAccess} />
+                        </div>
+                    )}
                 </div>
             </fieldset>
             <DialogFooter>
@@ -214,9 +228,9 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     )
 }
 
-function DeleteAccountDialog({ accountName, disabled, tooltipContent }: { accountName: string, disabled: boolean, tooltipContent: React.ReactNode }) {
+function DeleteAccountDialog({ account, disabled, tooltipContent }: { account: Account, disabled: boolean, tooltipContent: React.ReactNode }) {
     const triggerButton = (
-        <Button
+         <Button
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-destructive"
@@ -232,8 +246,7 @@ function DeleteAccountDialog({ accountName, disabled, tooltipContent }: { accoun
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        {/* The AlertDialogTrigger needs a direct child that can accept a ref, so we wrap the button */}
-                        <span>{triggerButton}</span>
+                         <div className={cn(disabled && "cursor-not-allowed")}>{triggerButton}</div>
                     </TooltipTrigger>
                     {disabled && (
                          <TooltipContent>
@@ -247,7 +260,7 @@ function DeleteAccountDialog({ accountName, disabled, tooltipContent }: { accoun
                     <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                     <AlertDialogDescription>
                         Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta{' '}
-                        <span className="font-bold text-foreground">{accountName}</span>.
+                        <span className="font-bold text-foreground">{account.name}</span>.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -277,7 +290,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" disabled={!isVaultOwner}>
+            <Button variant="outline" size="sm" disabled={!isVaultOwner && !isPersonalWorkspace}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar
             </Button>
@@ -372,14 +385,23 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
       <CardContent>
         <div className="space-y-4">
           {accounts.map((account) => {
-            const canDelete = account.ownerId === currentUserId;
+            const isOwner = account.ownerId === currentUserId;
+            
             // A user can edit if:
-            // 1. It's their personal workspace AND the account is personal and owned by them.
+            // 1. It's their personal workspace AND it's their personal account.
             // 2. They are in a vault, and the account's scope is that vault.
             // 3. They are in a vault, and it's their personal account made visible in that vault.
-            const canEdit = (isPersonalWorkspace && account.scope === 'personal' && account.ownerId === currentUserId) || 
-                            (account.scope === workspaceId) || 
-                            (account.scope === 'personal' && account.visibleIn?.includes(workspaceId));
+            // 4. The owner has granted full access to vault members.
+            const canEdit =
+                (isPersonalWorkspace && account.scope === 'personal' && isOwner) ||
+                (account.scope === workspaceId) ||
+                (account.scope === 'personal' && account.visibleIn?.includes(workspaceId)) ||
+                (account.allowFullAccess && account.scope !== 'personal');
+
+            // A user can delete if:
+            // 1. They are the owner.
+            // 2. The owner has granted full access and it's not a personal account.
+            const canDelete = isOwner || (account.allowFullAccess && account.scope !== 'personal');
 
             const owner = users.find(u => u.id === account.ownerId);
 
@@ -423,9 +445,9 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 <div className='flex gap-1 items-center'>
                     <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
                     <DeleteAccountDialog 
-                        accountName={account.name} 
+                        account={account} 
                         disabled={!canDelete} 
-                        tooltipContent={<p>Apenas o proprietário ({owner?.name}) pode excluir.</p>}
+                        tooltipContent={<p>Apenas o proprietário ({owner?.name.split(' ')[0]}) ou alguém com acesso total pode excluir.</p>}
                     />
                 </div>
                 </div>
@@ -439,5 +461,3 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
-
-    

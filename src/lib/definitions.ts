@@ -10,6 +10,7 @@ export type Account = {
   creditLimit?: number;
   logoUrl?: string;
   visibleIn?: string[]; // Array of vaultIds where a personal account is visible.
+  allowFullAccess?: boolean; // If true, all members of the vault can edit/delete.
 };
 
 export type Vault = {
