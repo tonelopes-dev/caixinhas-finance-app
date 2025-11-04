@@ -193,27 +193,42 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                 <Button onClick={() => setOpen(false)} disabled={disabled}>
                     Salvar Alterações
                 </Button>
-                 {disabled && <p className="text-xs text-muted-foreground">Apenas membros do cofre podem editar contas.</p>}
+                 {disabled && <p className="text-xs text-muted-foreground">Apenas o proprietário pode editar.</p>}
             </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
 
-function DeleteAccountDialog({ accountName, disabled }: { accountName: string, disabled: boolean }) {
+function DeleteAccountDialog({ accountName, disabled, tooltipContent }: { accountName: string, disabled: boolean, tooltipContent: React.ReactNode }) {
+    const triggerButton = (
+        <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-destructive"
+            disabled={disabled}
+        >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Remover</span>
+        </Button>
+    );
+
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive"
-                    disabled={disabled}
-                >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remover</span>
-                </Button>
-            </AlertDialogTrigger>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <AlertDialogTrigger asChild>
+                            {triggerButton}
+                        </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    {disabled && (
+                         <TooltipContent>
+                            {tooltipContent}
+                        </TooltipContent>
+                    )}
+                </Tooltip>
+            </TooltipProvider>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
@@ -249,7 +264,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" disabled={!isVaultOwner}>
+            <Button variant="outline" size="sm">
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar
             </Button>
@@ -345,11 +360,10 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         <div className="space-y-4">
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
-            // Can edit if it's a personal account (in personal space) OR a joint account in a vault.
-            const canEdit = isPersonalWorkspace || account.scope === workspaceId;
-            const canDelete = isOwner; // Only the owner can delete.
+            // Can edit if the account belongs to the current workspace (personal or vault)
+            const canEdit = account.scope === workspaceId || (account.scope === 'personal' && account.visibleIn?.includes(workspaceId));
+            const canDelete = isOwner; 
 
-            const isLocked = !isOwner;
             const owner = users.find(u => u.id === account.ownerId);
 
             return (
@@ -368,26 +382,22 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                     <div>
                         <div className='flex items-center gap-2'>
                            <p className="font-medium">{account.name}</p>
-                           {account.scope === 'personal' && <Badge variant="secondary">Pessoal</Badge>}
+                           {account.scope === 'personal' ? (
+                                <Badge variant="secondary">Pessoal</Badge>
+                           ) : (
+                                <Badge>Compartilhada</Badge>
+                           )}
                         </div>
                         <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
                     </div>
                 </div>
                 <div className='flex gap-1 items-center'>
-                    {isLocked && (
-                         <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Lock className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Apenas o proprietário ({owner?.name}) pode excluir.</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    )}
                     <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
-                    <DeleteAccountDialog accountName={account.name} disabled={!canDelete} />
+                    <DeleteAccountDialog 
+                        accountName={account.name} 
+                        disabled={!canDelete} 
+                        tooltipContent={<p>Apenas o proprietário ({owner?.name}) pode excluir.</p>}
+                    />
                 </div>
                 </div>
             )
@@ -400,3 +410,5 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
+
+    
