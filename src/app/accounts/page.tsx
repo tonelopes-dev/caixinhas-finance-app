@@ -6,8 +6,9 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { AccountsManagement } from '@/components/profile/accounts-management';
+import withAuth from '@/components/auth/with-auth';
 
-export default function AccountsPage() {
+function AccountsPage() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
       <div className="w-full max-w-2xl">
@@ -22,3 +23,5 @@ export default function AccountsPage() {
     </div>
   );
 }
+
+export default withAuth(AccountsPage);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -85,7 +86,7 @@ export default function Header({ user, partner }: HeaderProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <Link href="/accounts">
+                <Link href="/profile">
                     <Landmark className="mr-2 h-4 w-4" />
                     <span>Contas</span>
                 </Link>

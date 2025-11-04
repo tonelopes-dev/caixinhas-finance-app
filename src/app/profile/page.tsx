@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
@@ -8,8 +9,10 @@ import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
+import { AccountsManagement } from '@/components/profile/accounts-management';
+import withAuth from '@/components/auth/with-auth';
 
-export default function ProfilePage() {
+function ProfilePage() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
       <div className="w-full max-w-6xl">
@@ -28,6 +31,7 @@ export default function ProfilePage() {
           </div>
           <div className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2">
             <ProfileForm />
+            <AccountsManagement />
             <NotificationsManagement />
             <CategoriesManagement />
             <GuestsManagement />
@@ -37,3 +41,6 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+
+export default withAuth(ProfilePage);
