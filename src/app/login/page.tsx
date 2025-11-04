@@ -17,17 +17,14 @@ import { Logo } from '@/components/logo';
 import Link from 'next/link';
 
 // Mock authentication function
-const fakeAuth = (email: string, pass: string) => {
+const fakeAuth = (email: string, pass: string): string | null => {
     if (email === 'email01@conta.com' && pass === 'conta@teste') {
-        // Set cookie instead of localStorage for middleware compatibility
-        document.cookie = `DREAMVAULT_USER_ID=user1; path=/; max-age=86400`; // Expires in 1 day
-        return true;
+        return 'user1';
     }
     if (email === 'email02@conta.com' && pass === 'conta@teste') {
-        document.cookie = `DREAMVAULT_USER_ID=user2; path=/; max-age=86400`; // Expires in 1 day
-        return true;
+        return 'user2';
     }
-    return false;
+    return null;
 }
 
 export default function LoginPage() {
@@ -44,10 +41,17 @@ export default function LoginPage() {
 
     // Simulate network delay
     setTimeout(() => {
-      if (fakeAuth(email, password)) {
-        // Redirect to vaults after successful login. The middleware will handle private routes.
+      const userId = fakeAuth(email, password);
+      if (userId) {
+        // Set a persistent identifier on the client. 
+        // withAuth will use this to verify the session.
+        localStorage.setItem('DREAMVAULT_USER_ID', userId);
+        
+        // Also set a cookie for the middleware to read.
+        document.cookie = `DREAMVAULT_USER_ID=${userId}; path=/; max-age=86400`; // Expires in 1 day
+
+        // Redirect to the vaults page, which is the main entry point after login.
         router.push('/vaults');
-        router.refresh(); // Refresh to ensure middleware re-evaluates
       } else {
         setError('E-mail ou senha inválidos.');
         setIsLoading(false);
@@ -56,7 +60,9 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    // Clear user cookie on login page load
+    // Clear user identifiers on login page load to ensure a clean state.
+    localStorage.removeItem('DREAMVAULT_USER_ID');
+    sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
     document.cookie = 'DREAMVAULT_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }, []);
 

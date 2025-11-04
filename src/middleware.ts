@@ -19,6 +19,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  // If the user is logged in and at the root, ensure they go to vaults selection
+  if (userId && pathname === '/') {
+    return NextResponse.redirect(new URL('/vaults', request.url));
+  }
+
+
   // Otherwise, allow the request to proceed.
   return NextResponse.next();
 }
