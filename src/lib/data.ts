@@ -366,60 +366,52 @@ export const savedReports: SavedReport[] = [];
 export const user: User = users.find(u => u.id === 'user1')!;
 export const partner: User = users.find(u => u.id === 'user2')!;
 
-export const getMockDataForUser = (userId: string | null) => {
-    if (!userId) {
+export const getMockDataForUser = (userId: string | null, workspaceId: string | null) => {
+    if (!userId || !workspaceId) {
         return { 
             currentUser: null, 
             userAccounts: [],
             userTransactions: [],
             userGoals: [],
             userVaults: [],
-            userInvitations: []
+            userInvitations: [],
+            currentVault: null,
         };
     }
 
     const currentUser = users.find(u => u.id === userId) || null;
-    
-    // Contas Pessoais do usuário e contas de cofres que ele participa
+    const isPersonalWorkspace = workspaceId === userId;
+    const currentVault = isPersonalWorkspace ? null : vaults.find(v => v.id === workspaceId) || null;
+
+    // Vaults the user is a member of.
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
     const userVaultIds = userVaults.map(v => v.id);
 
-    const userAccounts = accounts.filter(account => {
-        // A conta é pessoal do usuário
-        if (account.scope === 'personal' && account.ownerId === userId) {
-            return true;
-        }
-        // A conta é conjunta de um cofre que o usuário participa
-        if (userVaultIds.includes(account.scope)) {
-            return true;
-        }
-        // A conta é pessoal de outro usuário, mas visível em um cofre que o usuário participa
-        if (account.scope === 'personal' && account.ownerId !== userId) {
-            // Check if there is an intersection between the vaults the account is visible in
-            // and the vaults the user is a member of.
-            return account.visibleIn?.some(visibleVaultId => userVaultIds.includes(visibleVaultId));
+    const accountsForWorkspace = accounts.filter(account => {
+        if (isPersonalWorkspace) {
+            // In personal space, show only personal accounts.
+            return account.scope === 'personal' && account.ownerId === userId;
+        } else {
+            // In a vault, show joint accounts for that vault...
+            if (account.scope === workspaceId) return true;
+            // ...and personal accounts of the current user made visible to this vault.
+            if (account.scope === 'personal' && account.ownerId === userId && account.visibleIn?.includes(workspaceId)) return true;
         }
         return false;
     });
 
-    const accountIds = userAccounts.map(a => a.id);
-    
-    // Transações Pessoais e de cofres
-    const userTransactions = transactions.filter(t => (t.ownerId === userId && t.ownerType === 'user') || (t.ownerType === 'vault' && userVaultIds.includes(t.ownerId)));
-    
-    // Metas: Pessoais do usuário + caixinhas de cofres que ele participa
-    const userGoals = goals.filter(g => {
-      // É uma meta pessoal do usuário
-      if (g.ownerId === userId && g.ownerType === 'user') {
-        return true;
-      }
-      // É uma meta de um cofre que o usuário participa
-      if (g.ownerType === 'vault' && userVaultIds.includes(g.ownerId)) {
-        // Se for pública no cofre, ele vê. Se for privada, ele precisa ser um participante.
-        return g.visibility === 'shared' || g.participants?.some(p => p.id === userId);
-      }
-      // Outros casos: meta pessoal de outro usuário que ele foi convidado
-      return g.participants?.some(p => p.id === userId);
+    const goalsForWorkspace = goals.filter(g => {
+        if (isPersonalWorkspace) {
+            // In personal space, show only personal goals.
+            return g.ownerType === 'user' && g.ownerId === userId;
+        } else {
+            // In a vault, show goals owned by that vault.
+            if (g.ownerType === 'vault' && g.ownerId === workspaceId) {
+                // Public goals are always visible. Private goals only to participants.
+                return g.visibility === 'shared' || g.participants?.some(p => p.id === userId);
+            }
+        }
+        return false;
     });
     
     // Convites pendentes (lógica de exemplo)
@@ -427,10 +419,11 @@ export const getMockDataForUser = (userId: string | null) => {
     
     return {
         currentUser,
-        userAccounts,
-        userTransactions,
-        userGoals,
+        userAccounts: accountsForWorkspace,
+        userTransactions: transactions.filter(t => t.ownerId === workspaceId),
+        userGoals: goalsForWorkspace,
         userVaults,
-        userInvitations
+        userInvitations,
+        currentVault,
     };
 };

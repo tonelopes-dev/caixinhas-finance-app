@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { accounts as allAccounts, bankLogos, vaults, getMockDataForUser, users } from '@/lib/data';
+import { bankLogos, users } from '@/lib/data';
 import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock } from 'lucide-react';
 import {
   AlertDialog,
@@ -36,7 +36,7 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import type { Account } from '@/lib/definitions';
+import type { Account, Vault } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Switch } from '../ui/switch';
@@ -51,14 +51,20 @@ const accountTypeLabels: Record<Account['type'], string> = {
     other: 'Outro',
 }
 
+interface AccountsManagementProps {
+  accounts: Account[];
+  currentUserId: string;
+  userVaults: Vault[];
+  workspaceId: string;
+  workspaceName: string;
+  isVaultOwner: boolean;
+}
+
 function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { account: Account, disabled: boolean, userVaults: any[], currentUserId: string | null }) {
     const [open, setOpen] = React.useState(false);
     const [selectedLogo, setSelectedLogo] = React.useState(account.logoUrl);
     const [accountType, setAccountType] = React.useState<Account['type']>(account.type);
     const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
-
-    const canDelete = account.ownerId === currentUserId;
-
 
     return (
          <Dialog open={open} onOpenChange={setOpen}>
@@ -224,62 +230,12 @@ function DeleteAccountDialog({ accountName, disabled }: { accountName: string, d
     );
 }
 
-export function AccountsManagement() {
-    const router = useRouter();
+export function AccountsManagement({ accounts, currentUserId, userVaults, workspaceId, workspaceName, isVaultOwner }: AccountsManagementProps) {
     const [open, setOpen] = React.useState(false);
     const [accountType, setAccountType] = React.useState<Account['type'] | ''>('');
     const [selectedLogo, setSelectedLogo] = React.useState<string | undefined>();
-    
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [workspaceId, setWorkspaceId] = useState<string | null>(null);
-    const [workspaceName, setWorkspaceName] = useState<string>('');
-    const [userVaults, setUserVaults] = useState<any[]>([]);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [isVaultOwner, setIsVaultOwner] = useState(false);
-    const [isPersonal, setIsPersonal] = React.useState(true);
+    const isPersonalWorkspace = workspaceId === currentUserId;
 
-
-    useEffect(() => {
-        const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-        const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
-
-        if (!userId || !selectedWorkspaceId) {
-            router.push('/login');
-            return;
-        }
-
-        setCurrentUserId(userId);
-        setWorkspaceId(selectedWorkspaceId);
-
-        const { userVaults: vaultsForUser } = getMockDataForUser(userId);
-        setUserVaults(vaultsForUser);
-        
-        const isPersonalWorkspace = selectedWorkspaceId === userId;
-        setIsPersonal(isPersonalWorkspace);
-
-        // Filter accounts based on the current workspace
-        const accountsForWorkspace = allAccounts.filter(acc => {
-            if(isPersonalWorkspace) {
-                // Show personal accounts in personal space
-                return acc.scope === 'personal' && acc.ownerId === userId;
-            } else {
-                // Show joint accounts in a vault
-                return acc.scope === selectedWorkspaceId;
-            }
-        });
-        setAccounts(accountsForWorkspace);
-        
-        if (isPersonalWorkspace) {
-            setWorkspaceName('sua conta pessoal');
-            setIsVaultOwner(true); // Owner of personal space
-        } else {
-            const vault = vaults.find(v => v.id === selectedWorkspaceId);
-            if (vault) {
-                setWorkspaceName(`cofre "${vault.name}"`);
-                setIsVaultOwner(vault.ownerId === userId);
-            }
-        }
-    }, [router]);
 
   return (
     <Card>
@@ -388,11 +344,11 @@ export function AccountsManagement() {
         <div className="space-y-4">
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
-            // Can edit if it's a personal account OR a joint account in a vault.
-            const canEdit = account.scope === 'personal' || vaults.some(v => v.id === account.scope);
+            // Can edit if it's a personal account (in personal space) OR a joint account in a vault.
+            const canEdit = isPersonalWorkspace || account.scope === workspaceId;
             const canDelete = isOwner; // Only the owner can delete.
 
-            const isLocked = !isOwner && account.scope !== 'personal';
+            const isLocked = !isOwner;
             const owner = users.find(u => u.id === account.ownerId);
 
             return (

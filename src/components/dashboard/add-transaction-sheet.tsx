@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { accounts, goals } from '@/lib/data';
+import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -26,6 +26,7 @@ import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
 import { useFormStatus } from 'react-dom';
 import { Switch } from '../ui/switch';
+import type { Account, Goal } from '@/lib/definitions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -59,6 +60,21 @@ export function AddTransactionSheet() {
   const [open, setOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
+
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+      const workspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+      if (userId && workspaceId) {
+        const { userAccounts, userGoals } = getMockDataForUser(userId, workspaceId);
+        setAccounts(userAccounts);
+        setGoals(userGoals);
+      }
+    }
+  }, [open]);
 
 
   useEffect(() => {
