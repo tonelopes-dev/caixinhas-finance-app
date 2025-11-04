@@ -34,7 +34,8 @@ function AccountsPage() {
       return;
     }
 
-    const { currentUser, userAccounts, userVaults, currentVault } = getMockDataForUser(userId, selectedWorkspaceId);
+    // O terceiro parâmetro 'true' força o fetch de TODAS as contas do usuário (pessoais e de cofres)
+    const { currentUser, userAccounts, userVaults, currentVault } = getMockDataForUser(userId, selectedWorkspaceId, true);
     
     setCurrentUser(currentUser);
     setAccounts(userAccounts);
