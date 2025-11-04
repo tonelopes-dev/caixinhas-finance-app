@@ -28,7 +28,6 @@ const fakeAuth = (email: string, pass: string): string | null => {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -44,14 +43,14 @@ export default function LoginPage() {
       const userId = fakeAuth(email, password);
       if (userId) {
         // Set a persistent identifier on the client. 
-        // withAuth will use this to verify the session.
         localStorage.setItem('DREAMVAULT_USER_ID', userId);
         
         // Also set a cookie for the middleware to read.
         document.cookie = `DREAMVAULT_USER_ID=${userId}; path=/; max-age=86400`; // Expires in 1 day
 
-        // Redirect to the vaults page, which is the main entry point after login.
-        router.push('/vaults');
+        // Redirect using window.location to ensure a full page refresh that the middleware can intercept
+        window.location.href = '/vaults';
+
       } else {
         setError('E-mail ou senha inválidos.');
         setIsLoading(false);
@@ -105,6 +104,11 @@ export default function LoginPage() {
                     Não tem uma conta?{' '}
                     <Link href="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
                         Cadastre-se
+                    </Link>
+                </p>
+                 <p className="mt-2">
+                    <Link href="/terms" className="text-xs text-muted-foreground hover:underline">
+                        Termos de Serviço
                     </Link>
                 </p>
             </CardFooter>
