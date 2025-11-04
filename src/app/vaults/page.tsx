@@ -75,8 +75,9 @@ export default function VaultSelectionPage() {
   const [userInvitations, setUserInvitations] = useState<VaultInvitation[]>([]);
 
   useEffect(() => {
+    // The middleware and withAuth component handle redirection.
+    // We just need to ensure we don't run this code if userId is not present.
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-    // The middleware handles redirection, so we just need to ensure we don't run this code if userId is not present.
     if (!userId) {
       return;
     }
@@ -87,7 +88,7 @@ export default function VaultSelectionPage() {
     setUserVaults(userVaults);
     setUserInvitations(userInvitations);
 
-  }, []); // Removed router from dependency array to prevent infinite loop
+  }, []);
 
   const handleSelectWorkspace = (workspaceId: string) => {
     // workspaceId can be a userId or a vaultId
@@ -98,6 +99,7 @@ export default function VaultSelectionPage() {
   const handleLogout = () => {
     localStorage.removeItem('DREAMVAULT_USER_ID');
     sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
+    document.cookie = 'DREAMVAULT_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
   }
 

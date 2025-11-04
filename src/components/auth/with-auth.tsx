@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -11,8 +12,7 @@ export default function withAuth<P extends object>(
     const router = useRouter();
 
     useEffect(() => {
-      // In a real app, this would be a more robust check (e.g., verifying a token).
-      // For this mock app, we check for the presence of the user ID cookie.
+      // For this mock app, we check for the presence of the user ID in localStorage.
       const userId = localStorage.getItem('DREAMVAULT_USER_ID');
       
       if (!userId) {
