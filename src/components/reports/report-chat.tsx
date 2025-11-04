@@ -33,6 +33,7 @@ interface ReportChatProps {
     chatAction: (payload: FormData) => void;
     isChatPending?: boolean;
     currentUser: User;
+    viewportRef: React.RefObject<HTMLDivElement>;
 }
 
 export function ReportChat({
@@ -42,20 +43,11 @@ export function ReportChat({
     setChatHistory,
     chatAction,
     isChatPending,
-    currentUser
+    currentUser,
+    viewportRef,
 }: ReportChatProps) {
     const chatInputRef = useRef<HTMLInputElement>(null);
-    const viewportRef = useRef<HTMLDivElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (viewportRef.current) {
-            viewportRef.current.scrollTo({
-                top: viewportRef.current.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-    }, [chatHistory]);
 
     useEffect(() => {
         if (!isChatPending) {
