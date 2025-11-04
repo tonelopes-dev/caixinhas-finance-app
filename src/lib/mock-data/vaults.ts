@@ -22,6 +22,13 @@ export const vaults: Vault[] = [
     ownerId: nutri.id,
     members: [nutri], // Apenas a Nutri é membro
     imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1080'
+  },
+  {
+    id: 'vault-trip',
+    name: 'Viagem para o Japão',
+    ownerId: dev.id,
+    members: [dev, nutri],
+    imageUrl: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=1080'
   }
 ];
 

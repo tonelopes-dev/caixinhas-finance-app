@@ -22,8 +22,12 @@ export const accounts: Account[] = [
   // --- Contas da Nutri (user2) ---
   // Pessoal, não visível em nenhum cofre
   { id: 'acc-nutri-1', ownerId: 'user2', scope: 'personal', visibleIn: [], name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] },
+  // Conta poupança pessoal da Nutri, mas visível no cofre da família
+  { id: 'acc-nutri-2', ownerId: 'user2', scope: 'personal', visibleIn: ['vault-family'], name: 'Poupança Pessoal', bank: 'PoupaBanco', type: 'savings', balance: 42000, logoUrl: bankLogos[6] },
   
   // --- Contas Conjuntas (scope = vaultId) ---
   // Conta conjunta do cofre da família, criada pelo Dev
   { id: 'acc-family', ownerId: 'user1', scope: 'vault-family', name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
+  // Conta conjunta do cofre de viagem, criada pelo Dev
+  { id: 'acc-trip', ownerId: 'user1', scope: 'vault-trip', name: 'Conta para Viagem', bank: 'Banco Internacional', type: 'checking', balance: 100, logoUrl: bankLogos[3] },
 ];
