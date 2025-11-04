@@ -9,23 +9,25 @@ export function middleware(request: NextRequest) {
   // Rotas públicas que não exigem autenticação
   const publicRoutes = ['/login', '/register', '/terms'];
 
+  const isPublicRoute = publicRoutes.includes(pathname);
+
   // Se o usuário está logado
   if (userId) {
-    // Se ele tentar acessar as rotas de login ou registro, redireciona para a seleção de cofres
-    if (publicRoutes.includes(pathname)) {
+    // E tenta acessar uma rota pública (login/registro), redireciona para a seleção de cofres
+    if (isPublicRoute) {
       return NextResponse.redirect(new URL('/vaults', request.url));
     }
   } 
   // Se o usuário NÃO está logado
   else {
-    // E tenta acessar qualquer rota que não seja pública
-    if (!publicRoutes.includes(pathname)) {
+    // E tenta acessar uma rota que NÃO é pública
+    if (!isPublicRoute) {
       // Redireciona para o login
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
-  // Permite o acesso se nenhuma das condições acima for atendida
+  // Permite o acesso se nenhuma das condições de redirecionamento acima for atendida
   return NextResponse.next();
 }
 
