@@ -373,8 +373,13 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         <div className="space-y-4">
           {accounts.map((account) => {
             const canDelete = account.ownerId === currentUserId;
-            // Can edit if it's a joint account in the current vault, or a personal account visible in it.
-            const canEdit = account.scope === workspaceId || (account.scope === 'personal' && account.visibleIn?.includes(workspaceId));
+            // A user can edit if:
+            // 1. It's their personal workspace AND the account is personal and owned by them.
+            // 2. They are in a vault, and the account's scope is that vault.
+            // 3. They are in a vault, and it's their personal account made visible in that vault.
+            const canEdit = (isPersonalWorkspace && account.scope === 'personal' && account.ownerId === currentUserId) || 
+                            (account.scope === workspaceId) || 
+                            (account.scope === 'personal' && account.visibleIn?.includes(workspaceId));
 
             const owner = users.find(u => u.id === account.ownerId);
 
