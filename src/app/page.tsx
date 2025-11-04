@@ -39,7 +39,7 @@ function HomePage() {
         return;
     }
 
-    const { currentUser: userFromMock, userAccounts } = getMockDataForUser(userId);
+    const { currentUser: userFromMock, userAccounts } = getMockDataForUser(userId, selectedWorkspaceId);
     if (userFromMock) {
         setCurrentUser(userFromMock);
     }
@@ -58,11 +58,11 @@ function HomePage() {
     }
 
     if (selectedWorkspaceId === userId) {
-        const { userTransactions, userGoals } = getMockDataForUser(userId);
+        const { userTransactions, userGoals } = getMockDataForUser(userId, selectedWorkspaceId);
         setWorkspaceName("Minha Conta Pessoal");
         setTransactions(filterTransactionsByCurrentMonth(userTransactions));
-        setGoals(userGoals.filter(g => g.ownerType === 'user'));
-        setAccounts(userAccounts.filter(a => a.ownerType === 'user'));
+        setGoals(userGoals);
+        setAccounts(userAccounts);
         setPartner(null);
 
     } else {
@@ -76,7 +76,7 @@ function HomePage() {
             setGoals(vaultGoals);
 
             const vaultAccounts = allAccounts.filter(a => a.ownerId === selectedWorkspaceId && a.ownerType === 'vault');
-            setAccounts(vaultAccounts);
+            setAccounts(userAccounts); // Use userAccounts from the top-level fetch
 
             const otherMember = vault.members.find(m => m.id !== userId);
             if (otherMember) {
