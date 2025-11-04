@@ -229,24 +229,22 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
 }
 
 function DeleteAccountDialog({ account, disabled, tooltipContent }: { account: Account, disabled: boolean, tooltipContent: React.ReactNode }) {
-    const triggerButton = (
-         <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-destructive"
-            disabled={disabled}
-        >
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Remover</span>
-        </Button>
-    );
-
     return (
         <AlertDialog>
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <div className={cn(disabled && "cursor-not-allowed")}>{triggerButton}</div>
+                         <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-destructive"
+                                disabled={disabled}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remover</span>
+                            </Button>
+                        </AlertDialogTrigger>
                     </TooltipTrigger>
                     {disabled && (
                          <TooltipContent>
@@ -387,21 +385,13 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
             
-            // A user can edit if:
-            // 1. It's their personal workspace AND it's their personal account.
-            // 2. They are in a vault, and the account's scope is that vault.
-            // 3. They are in a vault, and it's their personal account made visible in that vault.
-            // 4. The owner has granted full access to vault members.
-            const canEdit =
-                (isPersonalWorkspace && account.scope === 'personal' && isOwner) ||
-                (account.scope === workspaceId) ||
-                (account.scope === 'personal' && account.visibleIn?.includes(workspaceId)) ||
-                (account.allowFullAccess && account.scope !== 'personal');
+            const canEdit = 
+              (isPersonalWorkspace && isOwner && account.scope === 'personal') ||
+              (account.scope === workspaceId) ||
+              (account.scope === 'personal' && account.visibleIn?.includes(workspaceId)) ||
+              (account.allowFullAccess && !isPersonalWorkspace);
 
-            // A user can delete if:
-            // 1. They are the owner.
-            // 2. The owner has granted full access and it's not a personal account.
-            const canDelete = isOwner || (account.allowFullAccess && account.scope !== 'personal');
+            const canDelete = isOwner || (account.allowFullAccess && !isPersonalWorkspace);
 
             const owner = users.find(u => u.id === account.ownerId);
 
