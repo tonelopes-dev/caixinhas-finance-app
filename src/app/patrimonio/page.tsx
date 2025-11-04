@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Landmark, PiggyBank, CreditCard, Wallet, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Landmark, CreditCard, Wallet, TrendingUp } from 'lucide-react';
 import { getMockDataForUser } from '@/lib/data';
 import type { Account, Goal } from '@/lib/definitions';
 import withAuth from '@/components/auth/with-auth';
@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import Image from 'next/image';
 
@@ -40,7 +39,8 @@ function PatrimonioPage() {
             return;
         }
         setUserId(id);
-        const { userAccounts, userGoals } = getMockDataForUser(id);
+        // Fetch all goals and all accounts the user has access to, regardless of workspace.
+        const { userAccounts, userGoals } = getMockDataForUser(id, null, true);
         setAccounts(userAccounts);
         setGoals(userGoals);
 
@@ -53,6 +53,15 @@ function PatrimonioPage() {
     const totalLiquid = liquidAssets.reduce((sum, acc) => sum + acc.balance, 0);
     const totalInvestedAccounts = investedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
     const totalInGoals = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+    const totalInvested = totalInvestedAccounts + totalInGoals;
+
+  if (!userId) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -133,7 +142,7 @@ function PatrimonioPage() {
                 </Link>
               )) : <p className="text-muted-foreground text-sm px-3">Nenhuma caixinha criada neste espaço.</p>}
               <div className="flex justify-end font-bold text-lg mt-2 pr-3">
-                Total: <span className="ml-2 text-primary"><AnimatedCounter value={totalInvestedAccounts + totalInGoals} formatter={formatCurrency} /></span>
+                Total: <span className="ml-2 text-primary"><AnimatedCounter value={totalInvested} formatter={formatCurrency} /></span>
               </div>
             </section>
 
@@ -167,5 +176,3 @@ function PatrimonioPage() {
 }
 
 export default withAuth(PatrimonioPage);
-
-    
