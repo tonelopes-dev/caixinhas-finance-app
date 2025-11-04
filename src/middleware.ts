@@ -2,30 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const userId = request.cookies.get('DREAMVAULT_USER_ID')?.value;
-  const { pathname } = request.nextUrl;
-
-  const isPublicPath = pathname === '/login' || pathname === '/register' || pathname === '/terms';
-
-  // If the user is logged in and tries to access a public path like login/register,
-  // redirect them to the vaults page.
-  if (userId && isPublicPath) {
-    return NextResponse.redirect(new URL('/vaults', request.url));
-  }
-
-  // If the user is not logged in and is trying to access a private path,
-  // redirect them to the login page.
-  if (!userId && !isPublicPath) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // If the user is logged in and at the root, ensure they go to vaults selection
-  if (userId && pathname === '/') {
-    return NextResponse.redirect(new URL('/vaults', request.url));
-  }
-
-
-  // Otherwise, allow the request to proceed.
+  // A lógica do middleware foi temporariamente desativada para depuração.
   return NextResponse.next();
 }
 
