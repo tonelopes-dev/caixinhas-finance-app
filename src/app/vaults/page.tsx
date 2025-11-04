@@ -76,17 +76,18 @@ export default function VaultSelectionPage() {
 
   useEffect(() => {
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+    // The middleware handles redirection, so we just need to ensure we don't run this code if userId is not present.
     if (!userId) {
-      router.push('/login');
       return;
     }
     
-    const { currentUser, userVaults, userInvitations } = getMockDataForUser(userId);
+    // The second argument to getMockDataForUser is optional, so we can omit it here.
+    const { currentUser, userVaults, userInvitations } = getMockDataForUser(userId, null);
     setCurrentUser(currentUser || null);
     setUserVaults(userVaults);
     setUserInvitations(userInvitations);
 
-  }, [router]);
+  }, []); // Removed router from dependency array to prevent infinite loop
 
   const handleSelectWorkspace = (workspaceId: string) => {
     // workspaceId can be a userId or a vaultId
