@@ -19,11 +19,12 @@ import Link from 'next/link';
 // Mock authentication function
 const fakeAuth = (email: string, pass: string) => {
     if (email === 'email01@conta.com' && pass === 'conta@teste') {
-        localStorage.setItem('DREAMVAULT_USER_ID', 'user1');
+        // Set cookie instead of localStorage for middleware compatibility
+        document.cookie = `DREAMVAULT_USER_ID=user1; path=/; max-age=86400`; // Expires in 1 day
         return true;
     }
     if (email === 'email02@conta.com' && pass === 'conta@teste') {
-        localStorage.setItem('DREAMVAULT_USER_ID', 'user2');
+        document.cookie = `DREAMVAULT_USER_ID=user2; path=/; max-age=86400`; // Expires in 1 day
         return true;
     }
     return false;
@@ -39,15 +40,17 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     if (fakeAuth(email, password)) {
+      // Redirect to vaults after successful login. The middleware will handle private routes.
       router.push('/vaults');
+      router.refresh(); // Refresh to ensure middleware re-evaluates
     } else {
       setError('E-mail ou senha inválidos.');
     }
   };
 
   useEffect(() => {
-    // Clear user on login page load
-    localStorage.removeItem('DREAMVAULT_USER_ID');
+    // Clear user cookie on login page load
+    document.cookie = 'DREAMVAULT_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }, []);
 
   return (
