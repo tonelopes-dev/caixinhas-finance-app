@@ -11,14 +11,14 @@ export function middleware(request: NextRequest) {
 
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  // Se o usuário está logado
+  // Se o usuário está logado (tem o cookie)
   if (userId) {
     // E tenta acessar uma rota pública (login/registro), redireciona para a seleção de cofres
     if (isPublicRoute) {
       return NextResponse.redirect(new URL('/vaults', request.url));
     }
   } 
-  // Se o usuário NÃO está logado
+  // Se o usuário NÃO está logado (não tem o cookie)
   else {
     // E tenta acessar uma rota que NÃO é pública
     if (!isPublicRoute) {
