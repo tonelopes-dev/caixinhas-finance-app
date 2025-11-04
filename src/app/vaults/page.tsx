@@ -79,6 +79,7 @@ export default function VaultSelectionPage() {
     // We just need to ensure we don't run this code if userId is not present.
     const userId = localStorage.getItem('DREAMVAULT_USER_ID');
     if (!userId) {
+      router.push('/login');
       return;
     }
     
@@ -88,7 +89,7 @@ export default function VaultSelectionPage() {
     setUserVaults(userVaults);
     setUserInvitations(userInvitations);
 
-  }, []);
+  }, [router]);
 
   const handleSelectWorkspace = (workspaceId: string) => {
     // workspaceId can be a userId or a vaultId
