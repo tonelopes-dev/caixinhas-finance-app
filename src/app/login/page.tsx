@@ -35,17 +35,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (fakeAuth(email, password)) {
-      // Redirect to vaults after successful login. The middleware will handle private routes.
-      router.push('/vaults');
-      router.refresh(); // Refresh to ensure middleware re-evaluates
-    } else {
-      setError('E-mail ou senha inválidos.');
-    }
+    setIsLoading(true);
+
+    // Simulate network delay
+    setTimeout(() => {
+      if (fakeAuth(email, password)) {
+        // Redirect to vaults after successful login. The middleware will handle private routes.
+        router.push('/vaults');
+        router.refresh(); // Refresh to ensure middleware re-evaluates
+      } else {
+        setError('E-mail ou senha inválidos.');
+        setIsLoading(false);
+      }
+    }, 500); // 0.5 second delay
   };
 
   useEffect(() => {
@@ -69,14 +76,23 @@ export default function LoginPage() {
             <CardContent className="grid gap-4">
                 <div className="grid gap-2">
                     <Label htmlFor="email">E-mail</Label>
-                    <Input id="email" type="email" placeholder="email01@conta.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <Input id="email" type="email" placeholder="email01@conta.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="password">Senha</Label>
-                    <Input id="password" type="password" placeholder="conta@teste" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <Input id="password" type="password" placeholder="conta@teste" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
                 </div>
                  {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-                <Button className="w-full">Entrar</Button>
+                <Button className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                        <>
+                            <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                            Entrando...
+                        </>
+                    ) : (
+                        'Entrar'
+                    )}
+                </Button>
             </CardContent>
             <CardFooter className="flex-col items-center justify-center text-sm">
                 <p>
