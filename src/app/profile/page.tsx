@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
-import { AccountsManagement } from '@/components/profile/accounts-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 
@@ -30,7 +29,6 @@ export default function ProfilePage() {
           <div className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2">
             <ProfileForm />
             <NotificationsManagement />
-            <AccountsManagement />
             <CategoriesManagement />
             <GuestsManagement />
           </div>

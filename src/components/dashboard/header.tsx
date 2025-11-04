@@ -91,6 +91,12 @@ export default function Header({ user, partner }: HeaderProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
+                <Link href="/transactions">
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    <span>Transações</span>
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
                 <Link href="/profile">
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Perfil</span>
