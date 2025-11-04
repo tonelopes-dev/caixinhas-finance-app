@@ -10,7 +10,7 @@ import { notifications } from '@/lib/mock-data/notifications';
 
 // --- LÓGICA DE SIMULAÇÃO ---
 
-export const getMockDataForUser = (userId: string | null, workspaceId: string | null, fetchAllGoals: boolean = false) => {
+export const getMockDataForUser = (userId: string | null, workspaceId: string | null, fetchAll: boolean = false) => {
     if (!userId) {
         return {
             currentUser: null,
@@ -41,22 +41,37 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
 
     // Vaults the user is a member of.
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
+    
+    let accountsForUser: Account[] = [];
+    if (fetchAll) {
+        // Fetch all accounts the user has access to, across all vaults and personal.
+        accountsForUser = accounts.filter(account => {
+            // Is it their personal account?
+            if (account.ownerId === userId && account.scope === 'personal') return true;
+            // Is it a joint account in a vault they are part of?
+            const isMemberOfVault = userVaults.some(uv => uv.id === account.scope);
+            if (isMemberOfVault) return true;
+            return false;
+        });
+    } else if (workspaceId) {
+        // Fetch accounts for a specific workspace.
+        accountsForUser = accounts.filter(account => {
+            if (isPersonalWorkspace) {
+                // In personal space, show only personal accounts.
+                return account.scope === 'personal' && account.ownerId === userId;
+            } else {
+                // In a vault, show joint accounts for that vault...
+                if (account.scope === workspaceId) return true;
+                // ...and personal accounts of the current user made visible to this vault.
+                if (account.scope === 'personal' && account.ownerId === userId && account.visibleIn?.includes(workspaceId)) return true;
+            }
+            return false;
+        });
+    }
 
-    const accountsForWorkspace = workspaceId ? accounts.filter(account => {
-        if (isPersonalWorkspace) {
-            // In personal space, show only personal accounts.
-            return account.scope === 'personal' && account.ownerId === userId;
-        } else {
-            // In a vault, show joint accounts for that vault...
-            if (account.scope === workspaceId) return true;
-            // ...and personal accounts of the current user made visible to this vault.
-            if (account.scope === 'personal' && account.ownerId === userId && account.visibleIn?.includes(workspaceId)) return true;
-        }
-        return false;
-    }) : [];
 
     let goalsForUser: Goal[] = [];
-    if (fetchAllGoals) {
+    if (fetchAll) {
         // Get all goals where the user is a participant or owner.
         goalsForUser = goals.filter(g => {
             // Personal goals
@@ -90,7 +105,7 @@ export const getMockDataForUser = (userId: string | null, workspaceId: string | 
 
     return {
         currentUser,
-        userAccounts: accountsForWorkspace,
+        userAccounts: accountsForUser,
         userTransactions: workspaceId ? transactions.filter(t => t.ownerId === workspaceId) : [],
         userGoals: goalsForUser,
         userVaults,
