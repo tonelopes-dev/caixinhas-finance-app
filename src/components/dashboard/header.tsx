@@ -86,7 +86,7 @@ export default function Header({ user, partner }: HeaderProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <Link href="/profile">
+                <Link href="/accounts">
                     <Landmark className="mr-2 h-4 w-4" />
                     <span>Contas</span>
                 </Link>

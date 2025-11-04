@@ -9,7 +9,6 @@ import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
-import { AccountsManagement } from '@/components/profile/accounts-management';
 import withAuth from '@/components/auth/with-auth';
 
 function ProfilePage() {
@@ -31,7 +30,6 @@ function ProfilePage() {
           </div>
           <div className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2">
             <ProfileForm />
-            <AccountsManagement />
             <NotificationsManagement />
             <CategoriesManagement />
             <GuestsManagement />
