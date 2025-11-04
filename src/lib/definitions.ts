@@ -1,13 +1,15 @@
+
 export type Account = {
   id: string;
-  ownerId: string; // Can be a userId or a vaultId
-  ownerType: 'user' | 'vault';
+  ownerId: string; // The user who created and can delete the account.
+  scope: 'personal' | string; // 'personal' or a vaultId for joint accounts.
   name: string;
   bank: string;
   type: 'checking' | 'savings' | 'investment' | 'credit_card' | 'other';
   balance: number;
   creditLimit?: number;
   logoUrl?: string;
+  visibleIn?: string[]; // Array of vaultIds where a personal account is visible.
 };
 
 export type Vault = {

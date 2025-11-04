@@ -69,16 +69,20 @@ export const bankLogos = [
 
 // As contas agora pertencem a um 'user' ou a um 'vault'
 export const accounts: Account[] = [
-  // Contas Pessoais do Dev (user1)
-  { id: 'acc-dev-1', ownerId: 'user1', ownerType: 'user', name: 'Conta Corrente', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0] },
-  { id: 'acc-dev-2', ownerId: 'user1', ownerType: 'user', name: 'Investimentos', bank: 'Corretora Ágil', type: 'investment', balance: 75000, logoUrl: bankLogos[2] },
-  { id: 'acc-dev-3', ownerId: 'user1', ownerType: 'user', name: 'Cartão Principal', bank: 'Banco Digital', type: 'credit_card', balance: 0, creditLimit: 15000, logoUrl: bankLogos[0] },
+  // --- Contas do Dev (user1) ---
+  // Pessoal, mas visível no cofre da família
+  { id: 'acc-dev-1', ownerId: 'user1', scope: 'personal', visibleIn: ['vault-family'], name: 'Conta Corrente Pessoal', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0] },
+  // Pessoal, não visível em nenhum cofre
+  { id: 'acc-dev-2', ownerId: 'user1', scope: 'personal', visibleIn: [], name: 'Investimentos Pessoais', bank: 'Corretora Ágil', type: 'investment', balance: 75000, logoUrl: bankLogos[2] },
+  { id: 'acc-dev-3', ownerId: 'user1', scope: 'personal', visibleIn: [], name: 'Cartão Pessoal', bank: 'Banco Digital', type: 'credit_card', balance: 0, creditLimit: 15000, logoUrl: bankLogos[0] },
   
-  // Contas Pessoais da Nutri (user2)
-  { id: 'acc-nutri-1', ownerId: 'user2', ownerType: 'user', name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] },
+  // --- Contas da Nutri (user2) ---
+  // Pessoal, não visível em nenhum cofre
+  { id: 'acc-nutri-1', ownerId: 'user2', scope: 'personal', visibleIn: [], name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] },
   
-  // Conta Conjunta do Cofre da Família (vault-family)
-  { id: 'acc-family', ownerId: 'vault-family', ownerType: 'vault', name: 'Conta Conjunta', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
+  // --- Contas Conjuntas (scope = vaultId) ---
+  // Conta conjunta do cofre da família, criada pelo Dev
+  { id: 'acc-family', ownerId: 'user1', scope: 'vault-family', name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
 ];
 
 // --- PARTICIPANTES DE METAS ---
@@ -379,7 +383,26 @@ export const getMockDataForUser = (userId: string | null) => {
     // Contas Pessoais do usuário e contas de cofres que ele participa
     const userVaults = vaults.filter(v => v.members.some(m => m.id === userId));
     const userVaultIds = userVaults.map(v => v.id);
-    const userAccounts = accounts.filter(a => (a.ownerId === userId && a.ownerType === 'user') || (a.ownerType === 'vault' && userVaultIds.includes(a.ownerId)));
+
+    const userAccounts = accounts.filter(account => {
+        // A conta é pessoal do usuário
+        if (account.scope === 'personal' && account.ownerId === userId) {
+            return true;
+        }
+        // A conta é conjunta de um cofre que o usuário participa
+        if (userVaultIds.includes(account.scope)) {
+            return true;
+        }
+        // A conta é pessoal de outro usuário, mas visível em um cofre que o usuário participa
+        if (account.scope === 'personal' && account.ownerId !== userId) {
+            // Check if there is an intersection between the vaults the account is visible in
+            // and the vaults the user is a member of.
+            return account.visibleIn?.some(visibleVaultId => userVaultIds.includes(visibleVaultId));
+        }
+        return false;
+    });
+
+    const accountIds = userAccounts.map(a => a.id);
     
     // Transações Pessoais e de cofres
     const userTransactions = transactions.filter(t => (t.ownerId === userId && t.ownerType === 'user') || (t.ownerType === 'vault' && userVaultIds.includes(t.ownerId)));

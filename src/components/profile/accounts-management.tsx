@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { accounts as allAccounts, bankLogos, vaults, getMockDataForUser } from '@/lib/data';
+import { accounts as allAccounts, bankLogos, vaults, getMockDataForUser, users } from '@/lib/data';
 import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock } from 'lucide-react';
 import {
   AlertDialog,
@@ -39,6 +39,8 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { Account } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Switch } from '../ui/switch';
 
 
 const accountTypeLabels: Record<Account['type'], string> = {
@@ -49,10 +51,13 @@ const accountTypeLabels: Record<Account['type'], string> = {
     other: 'Outro',
 }
 
-function EditAccountDialog({ account, disabled }: { account: Account, disabled: boolean }) {
+function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { account: Account, disabled: boolean, userVaults: any[], currentUserId: string | null }) {
     const [open, setOpen] = React.useState(false);
     const [selectedLogo, setSelectedLogo] = React.useState(account.logoUrl);
     const [accountType, setAccountType] = React.useState<Account['type']>(account.type);
+    const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
+
+    const canDelete = account.ownerId === currentUserId;
 
 
     return (
@@ -77,6 +82,35 @@ function EditAccountDialog({ account, disabled }: { account: Account, disabled: 
             </DialogHeader>
             <fieldset disabled={disabled}>
                 <div className="grid gap-4 py-4">
+                     <div className="space-y-2">
+                        <Label>Tipo de Conta</Label>
+                        <Select name="scope" defaultValue={account.scope} onValueChange={(v) => setIsPersonal(v === 'personal')}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Pessoal ou Conjunta?" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="personal">Pessoal</SelectItem>
+                                {userVaults.map(vault => (
+                                     <SelectItem key={vault.id} value={vault.id}>Conjunta: {vault.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {isPersonal && (
+                        <div className="space-y-2 rounded-md border p-4">
+                            <Label>Visibilidade nos Cofres</Label>
+                            <p className='text-xs text-muted-foreground'>Marque em quais cofres esta conta pessoal deve ser visível.</p>
+                             {userVaults.map(vault => (
+                                 <div key={vault.id} className="flex items-center justify-between">
+                                    <Label htmlFor={`visible-${vault.id}`} className="font-normal">{vault.name}</Label>
+                                    <Switch id={`visible-${vault.id}`} defaultChecked={account.visibleIn?.includes(vault.id)} />
+                                 </div>
+                             ))}
+                        </div>
+                    )}
+
+
                     <div className="space-y-2">
                         <Label>Logo do Banco</Label>
                         <div className="flex flex-wrap gap-2">
@@ -152,7 +186,7 @@ function EditAccountDialog({ account, disabled }: { account: Account, disabled: 
                 <Button onClick={() => setOpen(false)} disabled={disabled}>
                     Salvar Alterações
                 </Button>
-                 {disabled && <p className="text-xs text-muted-foreground">Apenas o proprietário do cofre pode editar contas.</p>}
+                 {disabled && <p className="text-xs text-muted-foreground">Apenas membros do cofre podem editar contas.</p>}
             </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -199,8 +233,10 @@ export function AccountsManagement() {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [workspaceId, setWorkspaceId] = useState<string | null>(null);
     const [workspaceName, setWorkspaceName] = useState<string>('');
-    const [isOwner, setIsOwner] = useState(false);
+    const [userVaults, setUserVaults] = useState<any[]>([]);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [isVaultOwner, setIsVaultOwner] = useState(false);
+    const [isPersonal, setIsPersonal] = React.useState(true);
 
 
     useEffect(() => {
@@ -215,17 +251,32 @@ export function AccountsManagement() {
         setCurrentUserId(userId);
         setWorkspaceId(selectedWorkspaceId);
 
-        const isPersonal = selectedWorkspaceId === userId;
-        setAccounts(allAccounts.filter(a => a.ownerId === selectedWorkspaceId));
+        const { userVaults: vaultsForUser } = getMockDataForUser(userId);
+        setUserVaults(vaultsForUser);
         
-        if (isPersonal) {
-            setWorkspaceName('Sua Conta Pessoal');
-            setIsOwner(true);
+        const isPersonalWorkspace = selectedWorkspaceId === userId;
+        setIsPersonal(isPersonalWorkspace);
+
+        // Filter accounts based on the current workspace
+        const accountsForWorkspace = allAccounts.filter(acc => {
+            if(isPersonalWorkspace) {
+                // Show personal accounts in personal space
+                return acc.scope === 'personal' && acc.ownerId === userId;
+            } else {
+                // Show joint accounts in a vault
+                return acc.scope === selectedWorkspaceId;
+            }
+        });
+        setAccounts(accountsForWorkspace);
+        
+        if (isPersonalWorkspace) {
+            setWorkspaceName('sua conta pessoal');
+            setIsVaultOwner(true); // Owner of personal space
         } else {
             const vault = vaults.find(v => v.id === selectedWorkspaceId);
             if (vault) {
-                setWorkspaceName(vault.name);
-                setIsOwner(vault.ownerId === userId);
+                setWorkspaceName(`cofre "${vault.name}"`);
+                setIsVaultOwner(vault.ownerId === userId);
             }
         }
     }, [router]);
@@ -241,7 +292,7 @@ export function AccountsManagement() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" disabled={!isOwner}>
+            <Button variant="outline" size="sm" disabled={!isVaultOwner}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar
             </Button>
@@ -254,7 +305,7 @@ export function AccountsManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-               <div className="space-y-2">
+                 <div className="space-y-2">
                     <Label>Logo do Banco</Label>
                     <div className="flex flex-wrap gap-2">
                         {bankLogos.map((logo, index) => (
@@ -336,7 +387,14 @@ export function AccountsManagement() {
       <CardContent>
         <div className="space-y-4">
           {accounts.map((account) => {
-            const canEdit = isOwner;
+            const isOwner = account.ownerId === currentUserId;
+            // Can edit if it's a personal account OR a joint account in a vault.
+            const canEdit = account.scope === 'personal' || vaults.some(v => v.id === account.scope);
+            const canDelete = isOwner; // Only the owner can delete.
+
+            const isLocked = !isOwner && account.scope !== 'personal';
+            const owner = users.find(u => u.id === account.ownerId);
+
             return (
                 <div
                 key={account.id}
@@ -351,14 +409,28 @@ export function AccountsManagement() {
                         )}
                     </div>
                     <div>
-                    <p className="font-medium">{account.name}</p>
-                    <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
+                        <div className='flex items-center gap-2'>
+                           <p className="font-medium">{account.name}</p>
+                           {account.scope === 'personal' && <Badge variant="secondary">Pessoal</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
                     </div>
                 </div>
-                <div className='flex gap-2 items-center'>
-                    {!canEdit && <Lock className="h-4 w-4 text-muted-foreground" title="Apenas o proprietário do cofre pode gerenciar contas." />}
-                    <EditAccountDialog account={account} disabled={!canEdit} />
-                    <DeleteAccountDialog accountName={account.name} disabled={!canEdit} />
+                <div className='flex gap-1 items-center'>
+                    {isLocked && (
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Lock className="h-4 w-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Apenas o proprietário ({owner?.name}) pode excluir.</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                    <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
+                    <DeleteAccountDialog accountName={account.name} disabled={!canDelete} />
                 </div>
                 </div>
             )
