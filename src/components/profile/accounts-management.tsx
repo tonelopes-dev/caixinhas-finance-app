@@ -228,46 +228,49 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     )
 }
 
-function DeleteAccountDialog({ account, disabled, tooltipContent }: { account: Account, disabled: boolean, tooltipContent: React.ReactNode }) {
-    return (
-        <AlertDialog>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <AlertDialogTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-muted-foreground hover:text-destructive"
-                                disabled={disabled}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Remover</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                    </TooltipTrigger>
-                    {disabled && (
-                         <TooltipContent>
-                            {tooltipContent}
-                        </TooltipContent>
-                    )}
-                </Tooltip>
-            </TooltipProvider>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta{' '}
-                        <span className="font-bold text-foreground">{account.name}</span>.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction>Excluir</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+function DeleteAccountDialog({ account, disabled }: { account: Account, disabled: boolean }) {
+  const owner = users.find(u => u.id === account.ownerId);
+  const tooltipContent = `Apenas o proprietário (${owner?.name.split(' ')[0]}) ou alguém com acesso total pode realizar esta ação.`;
+
+  return (
+    <AlertDialog>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive"
+                disabled={disabled}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Remover</span>
+              </Button>
+            </AlertDialogTrigger>
+          </TooltipTrigger>
+          {disabled && (
+            <TooltipContent>
+              <p>{tooltipContent}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta{' '}
+            <span className="font-bold text-foreground">{account.name}</span>.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction variant="destructive">Excluir</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 export function AccountsManagement({ accounts, currentUserId, userVaults, workspaceId, workspaceName, isVaultOwner }: AccountsManagementProps) {
@@ -386,10 +389,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             const isOwner = account.ownerId === currentUserId;
             const canEdit = isOwner || !!account.allowFullAccess;
             const canDelete = isOwner || !!account.allowFullAccess;
-
-            const owner = users.find(u => u.id === account.ownerId);
-            const tooltipText = `Apenas o proprietário (${owner?.name.split(' ')[0]}) ou alguém com acesso total pode realizar esta ação.`;
-
+            
             return (
                 <div
                 key={account.id}
@@ -412,7 +412,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                                   <TooltipTrigger asChild>
                                     <Badge variant="secondary" className="cursor-default">
                                       <Lock className="mr-1 h-3 w-3" />
-                                      Dono(a): {owner?.name.split(' ')[0]}
+                                      Pessoal
                                     </Badge>
                                   </TooltipTrigger>
                                   <TooltipContent>
@@ -432,7 +432,6 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                     <DeleteAccountDialog 
                         account={account} 
                         disabled={!canDelete} 
-                        tooltipContent={<p>{tooltipText}</p>}
                     />
                 </div>
                 </div>
@@ -446,5 +445,3 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
-
-    

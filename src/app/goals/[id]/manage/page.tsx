@@ -78,8 +78,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
 
   const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
   
-  const currentUserRole = participants.find(p => p.id === currentUserId)?.role;
-  const isOwner = currentUserRole === 'owner';
+  const isOwner = goal.ownerId === currentUserId;
 
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
