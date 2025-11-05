@@ -96,7 +96,7 @@ export function AddTransactionSheet() {
     }
   }, [state, toast]);
   
-  const allDestinations = [...accounts.map(a => ({...a, type: 'account'})), ...goals.map(g => ({id: g.id, name: `Caixinha: ${g.name}`}))];
+  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
 
 
   return (
@@ -182,8 +182,7 @@ export function AddTransactionSheet() {
                                 <SelectValue placeholder="De onde saiu o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.bank})</SelectItem>)}
-                                    {transactionType === 'transfer' && goals.map(goal => <SelectItem key={goal.id} value={goal.id}>Caixinha: {goal.name}</SelectItem>)}
+                                    {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
@@ -198,8 +197,7 @@ export function AddTransactionSheet() {
                                 <SelectValue placeholder="Para onde foi o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                     {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.bank})</SelectItem>)}
-                                     {transactionType === 'transfer' && goals.map(goal => <SelectItem key={goal.id} value={goal.id}>Caixinha: {goal.name}</SelectItem>)}
+                                     {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                              {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
