@@ -30,7 +30,7 @@ export const accounts: Account[] = [
   // Conta conjunta do cofre da família, criada pelo Dev
   { id: 'acc-family', ownerId: 'user1', scope: 'vault-family', name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
   // Conta conjunta do cofre de viagem, criada pelo Dev
-  { id: 'acc-trip', ownerId: 'user1', scope: 'vault-trip', name: 'Conta para Viagem', bank: 'Banco Internacional', type: 'checking', balance: 100, logoUrl: bankLogos[3] },
+  { id: 'acc-trip', ownerId: 'user1', scope: 'vault-trip', name: 'Conta para Viagem', bank: 'Banco Internacional', type: 'checking', balance: 0, logoUrl: bankLogos[3] },
   // Conta da Agência de Software
   { id: 'acc-agency-1', ownerId: 'user1', scope: 'vault-agency', name: 'Conta PJ Agência', bank: 'Banco Empresarial', type: 'checking', balance: 25000, logoUrl: bankLogos[5] },
 ];
