@@ -4,7 +4,7 @@ import Image from 'next/image';
 export function Logo(props: Omit<React.ComponentProps<typeof Image>, 'src' | 'alt'>) {
   return (
     <Image 
-      src="/teste-logo-2.png"
+      src="/logo-teste.svg"
       alt="DreamVault Logo"
       width={128}
       height={128}
