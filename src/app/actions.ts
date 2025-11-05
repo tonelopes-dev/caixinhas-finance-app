@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 
 const transactionSchema = z.object({
   id: z.string().optional(),
+  ownerId: z.string(), // Adicionado para receber o ID do cofre
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
@@ -93,6 +94,7 @@ export type TransactionState = {
   message?: string | null;
   errors?: {
     id?: string[];
+    ownerId?: string[];
     description?: string[];
     amount?: string[];
     type?: string[];
@@ -276,6 +278,7 @@ function invalidateReportCache(date: string | undefined, ownerId: string | undef
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
   const validatedFields = transactionSchema.safeParse({
+    ownerId: formData.get('ownerId'),
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -295,13 +298,13 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     };
   }
   
-  const ownerId = sessionStorage.getItem('DREAMVAULT_VAULT_ID') || 'user1'; // Mock ownerId
+  const { ownerId, ...data } = validatedFields.data;
   const newTransaction = {
     id: (transactions.length + 1).toString(),
-    date: validatedFields.data.date || new Date().toISOString(),
-    ownerId,
+    date: data.date || new Date().toISOString(),
+    ownerId: ownerId,
     ownerType: ownerId.startsWith('vault-') ? 'vault' : 'user',
-    ...validatedFields.data
+    ...data
   };
 
   transactions.unshift(newTransaction);
@@ -319,7 +322,8 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const validatedFields = transactionSchema.safeParse({
+  // O ownerId não é editável, então não precisamos dele aqui.
+  const validatedFields = transactionSchema.omit({ ownerId: true }).safeParse({
     id: formData.get('id'),
     description: formData.get('description'),
     amount: formData.get('amount'),

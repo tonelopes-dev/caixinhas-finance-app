@@ -19,13 +19,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, Edit, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { accounts, goals } from '@/lib/data';
+import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
-import type { Transaction } from '@/lib/definitions';
+import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Switch } from '../ui/switch';
 
@@ -61,7 +61,20 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   const [open, setOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>(transaction.type);
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
+  useEffect(() => {
+    if (open) {
+      const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+      const workspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+      if (userId && workspaceId) {
+        const { userAccounts, userGoals } = getMockDataForUser(userId, workspaceId);
+        setAccounts(userAccounts);
+        setGoals(userGoals);
+      }
+    }
+  }, [open]);
 
   useEffect(() => {
     if (state.message && !state.errors) {
@@ -78,6 +91,8 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
       });
     }
   }, [state, toast]);
+
+  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
   
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -165,8 +180,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                                 <SelectValue placeholder="De onde saiu o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.bank})</SelectItem>)}
-                                    {transactionType === 'transfer' && goals.map(goal => <SelectItem key={goal.id} value={goal.id}>Caixinha: {goal.name}</SelectItem>)}
+                                    {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
@@ -181,8 +195,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                                 <SelectValue placeholder="Para onde foi o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                     {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.bank})</SelectItem>)}
-                                     {transactionType === 'transfer' && goals.map(goal => <SelectItem key={goal.id} value={goal.id}>Caixinha: {goal.name}</SelectItem>)}
+                                     {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                              {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}

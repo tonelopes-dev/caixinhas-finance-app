@@ -52,7 +52,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function AddTransactionSheet() {
+export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
   const initialState: TransactionState = {};
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -115,6 +115,7 @@ export function AddTransactionSheet() {
           </SheetDescription>
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
+          <input type="hidden" name="ownerId" value={ownerId} />
           <div className="grid gap-4 py-4 overflow-y-auto pr-4">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>

@@ -15,7 +15,7 @@ type RecentTransactionsProps = {
   transactions: Transaction[];
   ownerId: string;
   ownerType: 'user' | 'vault';
-  typeFilter: 'all' | 'income' | 'expense';
+  typeFilter: 'all' | 'income' | 'expense' | 'transfer';
   onFilterChange: (filter: 'all' | 'income' | 'expense' | 'transfer') => void;
 };
 
@@ -61,7 +61,7 @@ export default function RecentTransactions({ transactions, ownerId, ownerType, t
                     <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
-            <AddTransactionSheet />
+            <AddTransactionSheet ownerId={ownerId} />
         </div>
       </CardHeader>
       <CardContent>

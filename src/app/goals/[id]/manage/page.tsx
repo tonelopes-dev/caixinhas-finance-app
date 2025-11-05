@@ -195,7 +195,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
 
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold">Participantes</h3>
-                <InviteParticipantDialog goalName={goal.name} />
+                <InviteParticipantDialog goalName={goal.name} disabled={!isOwner} />
               </div>
               <div className="space-y-4">
                 {participants.map((p, index) => (

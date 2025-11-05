@@ -17,7 +17,7 @@ import React, { useEffect, useRef } from 'react';
 import { sendGoalInvite } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 
-export function InviteParticipantDialog({ goalName }: { goalName: string }) {
+export function InviteParticipantDialog({ goalName, disabled }: { goalName: string, disabled?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
   const formRef = useRef<HTMLFormElement>(null);
@@ -45,7 +45,7 @@ export function InviteParticipantDialog({ goalName }: { goalName: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled={disabled}>
           <UserPlus className="mr-2 h-4 w-4" />
           Convidar
         </Button>
