@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -37,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark } from 'lucide-react';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
@@ -101,7 +102,7 @@ export default function TransactionsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
   const [monthFilter, setMonthFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
@@ -169,8 +170,11 @@ export default function TransactionsPage() {
     const expenses = filteredTransactions
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
+    const transfers = filteredTransactions
+      .filter((t) => t.type === 'transfer')
+      .reduce((sum, t) => sum + t.amount, 0);
     const balance = income - expenses;
-    return { income, expenses, balance };
+    return { income, expenses, balance, transfers };
   }, [filteredTransactions]);
 
   const containerVariants = {
@@ -243,15 +247,27 @@ export default function TransactionsPage() {
               </CardHeader>
               <CardContent>
                   <motion.div className="grid gap-4 md:grid-cols-3" initial="hidden" animate="visible" variants={containerVariants}>
-                      <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
-                          <div className="rounded-full bg-primary/10 p-3">
-                              <Wallet className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                              <p className="text-sm text-muted-foreground">Saldo Líquido</p>
-                              <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
-                          </div>
-                      </motion.div>
+                      {typeFilter === 'transfer' ? (
+                         <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'transfer' && activeClasses)} onClick={() => setTypeFilter('transfer')}>
+                            <div className="rounded-full bg-blue-500/10 p-3">
+                                <ArrowRightLeft className="h-6 w-6 text-blue-500" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Movimentado</p>
+                                <p className="text-xl font-bold">{formatCurrency(summary.transfers)}</p>
+                            </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
+                            <div className="rounded-full bg-primary/10 p-3">
+                                <Wallet className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Saldo Líquido</p>
+                                <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
+                            </div>
+                        </motion.div>
+                      )}
                       <motion.div variants={summaryItemVariants(0.6)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
                           <div className="rounded-full bg-green-500/10 p-3">
                               <TrendingUp className="h-6 w-6 text-green-500" />
@@ -304,7 +320,7 @@ export default function TransactionsPage() {
                     <ListFilter className="h-5 w-5 text-muted-foreground" />
                     <span className='text-sm font-medium sr-only md:not-sr-only'>Filtros:</span>
 
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
                       <SelectTrigger className="w-full md:w-auto">
                           <SelectValue placeholder="Tipo" />
                       </SelectTrigger>
@@ -440,5 +456,7 @@ export default function TransactionsPage() {
   );
 }
 
+
+    
 
     

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark } from 'lucide-react';
+import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2 } from 'lucide-react';
 import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -117,7 +117,7 @@ export default function Header({ user, partner }: HeaderProps) {
             </DropdownMenuItem>
              <DropdownMenuItem asChild>
                 <Link href="/vaults">
-                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    <Building2 className="mr-2 h-4 w-4" />
                     <span>Mudar de Espaço</span>
                 </Link>
             </DropdownMenuItem>
@@ -133,3 +133,5 @@ export default function Header({ user, partner }: HeaderProps) {
     </header>
   );
 }
+
+    
