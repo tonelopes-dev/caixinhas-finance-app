@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Goal, Vault } from '@/lib/definitions';
@@ -22,7 +23,7 @@ export function GoalList({
         <GoalCard
           key={goal.id}
           goal={goal}
-          isUserMemberOfVault={(vaultId) => userVaults.some((uv) => uv.id === vaultId)}
+          userVaults={userVaults}
           onToggleFeatured={onToggleFeatured}
           onGoToVault={onGoToVault}
         />

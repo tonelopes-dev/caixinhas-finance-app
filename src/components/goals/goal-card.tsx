@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -34,32 +35,26 @@ function formatCurrency(value: number) {
 
 interface GoalCardProps {
   goal: Goal;
-  isUserMemberOfVault: (vaultId: string) => boolean;
+  userVaults: Vault[];
   onToggleFeatured: (goalId: string) => void;
   onGoToVault: (vaultId: string) => void;
 }
 
 export function GoalCard({
   goal,
-  isUserMemberOfVault,
+  userVaults,
   onToggleFeatured,
   onGoToVault,
 }: GoalCardProps) {
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
-  let ownerName = '';
-  let ownerContext: Vault | { id: string; name: string } | undefined;
+  let ownerName = 'Pessoal';
+  let ownerVault: Vault | undefined;
 
   if (goal.ownerType === 'vault') {
-    ownerContext = vaults.find((v) => v.id === goal.ownerId);
-    ownerName = ownerContext?.name || 'Cofre';
-  } else {
-    ownerName = 'Pessoal';
+    ownerVault = userVaults.find((v) => v.id === goal.ownerId);
+    ownerName = ownerVault?.name || 'Cofre Desconhecido';
   }
-
-  const canAccessVault = ownerContext
-    ? isUserMemberOfVault(ownerContext.id)
-    : false;
-
+  
   return (
     <Card
       key={goal.id}
@@ -152,14 +147,14 @@ export function GoalCard({
               : 'Apenas você'}
           </span>
         </div>
-        {ownerContext && canAccessVault && (
+        {ownerVault ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onGoToVault(ownerContext!.id)}
+                  onClick={() => onGoToVault(ownerVault!.id)}
                 >
                   <span className="text-xs">{ownerName}</span>
                   <ChevronsRight className="ml-1 h-4 w-4" />
@@ -170,6 +165,8 @@ export function GoalCard({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+        ) : (
+            <span className="text-xs text-muted-foreground">{ownerName}</span>
         )}
       </CardFooter>
     </Card>
