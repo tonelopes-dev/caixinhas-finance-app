@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/header';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
-import { goals as allGoals, transactions as allTransactions, users, vaults, getMockDataForUser, accounts as allAccounts } from '@/lib/data';
+import { getMockDataForUser } from '@/lib/data';
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
@@ -39,57 +39,50 @@ function HomePage() {
         return;
     }
 
-    const { currentUser: userFromMock, userAccounts } = getMockDataForUser(userId, selectedWorkspaceId);
-    if (userFromMock) {
-        setCurrentUser(userFromMock);
+    // Centralized data fetching
+    const { 
+      currentUser: user, 
+      userAccounts, 
+      userTransactions,
+      userGoals,
+      currentVault 
+    } = getMockDataForUser(userId, selectedWorkspaceId);
+
+    if (!user) {
+      console.error("User not found, redirecting.");
+      router.push('/login');
+      return;
     }
-    
+
+    setCurrentUser(user);
     setWorkspaceId(selectedWorkspaceId);
 
+    // Filter transactions for the current month
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
+    const monthlyTransactions = userTransactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+    });
 
-    const filterTransactionsByCurrentMonth = (trans: Transaction[]) => {
-        return trans.filter(t => {
-            const transactionDate = new Date(t.date);
-            return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
-        });
-    }
-
+    setTransactions(monthlyTransactions);
+    setAccounts(userAccounts);
+    setGoals(userGoals);
+    
+    // Set workspace name and partner
     if (selectedWorkspaceId === userId) {
-        const { userTransactions, userGoals } = getMockDataForUser(userId, selectedWorkspaceId);
         setWorkspaceName("Minha Conta Pessoal");
-        setTransactions(filterTransactionsByCurrentMonth(userTransactions));
-        setGoals(userGoals);
-        setAccounts(userAccounts);
         setPartner(null);
-
+    } else if (currentVault) {
+        setWorkspaceName(currentVault.name);
+        const otherMember = currentVault.members.find(m => m.id !== userId);
+        setPartner(otherMember || null);
     } else {
-        const vault = vaults.find(v => v.id === selectedWorkspaceId);
-        if (vault) {
-            setWorkspaceName(vault.name);
-            const vaultTransactions = allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === 'vault');
-            setTransactions(filterTransactionsByCurrentMonth(vaultTransactions));
-            
-            const vaultGoals = allGoals.filter(g => g.ownerId === selectedWorkspaceId && g.ownerType === 'vault');
-            setGoals(vaultGoals);
-
-            const vaultAccounts = allAccounts.filter(a => a.ownerId === selectedWorkspaceId && a.ownerType === 'vault');
-            setAccounts(userAccounts); // Use userAccounts from the top-level fetch
-
-            const otherMember = vault.members.find(m => m.id !== userId);
-            if (otherMember) {
-                setPartner(otherMember)
-            } else {
-                setPartner(null);
-            }
-
-        } else {
-            console.error("Vault not found, redirecting.");
-            router.push('/vaults');
-        }
+        console.error("Vault not found, redirecting.");
+        router.push('/vaults');
     }
+
   }, [router]);
   
   const liquidAssets = accounts
