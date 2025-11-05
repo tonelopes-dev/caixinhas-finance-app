@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getMockDataForUser } from '@/lib/data';
-import type { Account, Goal } from '@/lib/definitions';
+import type { Account, Goal, Vault } from '@/lib/definitions';
 import withAuth from '@/components/auth/with-auth';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +21,7 @@ function PatrimonioPage() {
     const router = useRouter();
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [goals, setGoals] = useState<Goal[]>([]);
+    const [vaults, setVaults] = useState<Vault[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,9 +32,10 @@ function PatrimonioPage() {
         }
         setUserId(id);
         // Fetch all goals and all accounts the user has access to, regardless of workspace.
-        const { userAccounts, userGoals } = getMockDataForUser(id, null, true);
+        const { userAccounts, userGoals, userVaults } = getMockDataForUser(id, null, true);
         setAccounts(userAccounts);
         setGoals(userGoals);
+        setVaults(userVaults);
 
     }, [router]);
 
@@ -92,7 +94,7 @@ function PatrimonioPage() {
 
                 <h4 className="font-semibold text-muted-foreground mt-4 mb-2 px-3">Caixinhas de Sonhos</h4>
                  {goals.length > 0 ? goals.map(goal => (
-                    <GoalRow key={goal.id} goal={goal} />
+                    <GoalRow key={goal.id} goal={goal} vaults={vaults} />
               )) : <p className="text-muted-foreground text-sm px-3">Nenhuma caixinha criada neste espaço.</p>}
             </PatrimonySection>
 
