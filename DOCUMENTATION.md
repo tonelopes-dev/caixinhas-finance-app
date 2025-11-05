@@ -1,13 +1,13 @@
-# Guia do Projeto: DreamVault
+# Guia do Projeto: Caixinhas
 
 **Versão:** 1.0
 **Última Atualização:** 30 de Julho de 2024
 
 ## 1. Visão Geral (Produto & Marketing)
 
-### 1.1. O que é o DreamVault?
+### 1.1. O que é o Caixinhas?
 
-**DreamVault** é um aplicativo de finanças colaborativo, projetado especificamente para casais que desejam planejar seu futuro financeiro juntos. Ele transforma o gerenciamento de dinheiro em uma jornada compartilhada, ajudando-os a organizar despesas, criar metas e, o mais importante, realizar seus sonhos em conjunto.
+**Caixinhas** é um aplicativo de finanças colaborativo, projetado especificamente para casais que desejam planejar seu futuro financeiro juntos. Ele transforma o gerenciamento de dinheiro em uma jornada compartilhada, ajudando-os a organizar despesas, criar metas e, o mais importante, realizar seus sonhos em conjunto.
 
 ### 1.2. Slogan
 
@@ -29,7 +29,7 @@ Casais em qualquer estágio do relacionamento (namorados, noivos, casados) que b
 
 ### 2.1. Brand Voice & Tom
 
-O tom do DreamVault é **encorajador, positivo, colaborativo e confiável**. A comunicação deve ser clara, evitando jargões financeiros complexos. Queremos que os casais se sintam empoderados e otimistas, nunca julgados.
+O tom do Caixinhas é **encorajador, positivo, colaborativo e confiável**. A comunicação deve ser clara, evitando jargões financeiros complexos. Queremos que os casais se sintam empoderados e otimistas, nunca julgados.
 
 ### 2.2. Logotipo
 
@@ -102,9 +102,9 @@ A paleta de cores transmite calor, otimismo e confiança.
 ### 4.3. Lógica de Autenticação e Sessão
 
 - A autenticação é gerenciada pelo Firebase Authentication.
-- No login, um cookie `DREAMVAULT_USER_ID` é definido para ser lido pelo `middleware`.
+- No login, um cookie `Caixinhas_USER_ID` é definido para ser lido pelo `middleware`.
 - O `middleware.ts` protege as rotas, redirecionando usuários não autenticados para `/login`.
-- O `sessionStorage` armazena o `DREAMVAULT_VAULT_ID`, que define o cofre ativo na sessão atual. Isso permite que o usuário navegue entre diferentes espaços de trabalho.
+- O `sessionStorage` armazena o `Caixinhas_VAULT_ID`, que define o cofre ativo na sessão atual. Isso permite que o usuário navegue entre diferentes espaços de trabalho.
 
 ---
 *Este documento deve ser mantido atualizado à medida que o projeto evolui.*
