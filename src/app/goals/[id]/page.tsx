@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { goals, transactions, users, partner } from '@/lib/data';
+import { goals, transactions, users } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
@@ -40,12 +41,6 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  const allParticipants = [
-    users.find((u) => u.id === 'user1'),
-    users.find((u) => u.id === 'user2'),
-    ...(goal.participants || []),
-  ].filter(Boolean);
-
   const goalActivity = transactions
     .filter(
       (t) =>
@@ -54,7 +49,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  // Dynamically calculate the current amount
+  // Dynamically calculate the current amount to ensure data consistency
   const currentAmount = goalActivity.reduce((acc, activity) => {
     if (activity.destinationAccountId === goal.id) {
       return acc + activity.amount;
@@ -65,6 +60,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
     return acc;
   }, 0);
 
+  // Use the dynamically calculated amount for progress
   const progress = (currentAmount / goal.targetAmount) * 100;
 
   return (
@@ -128,8 +124,8 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             <div className="space-y-4">
               {goalActivity.map((activity) => {
                 const isDeposit = activity.destinationAccountId === goal.id;
-                const actor =
-                  users.find((p) => p.id === activity.actorId) || users[0];
+                // Ensure actor is found from the global users list, providing a fallback.
+                const actor = users.find((p) => p.id === activity.actorId) || { name: 'Usuário', avatarUrl: ''};
                 return (
                   <div key={activity.id} className="flex items-center gap-4">
                     <Avatar className="h-9 w-9">
