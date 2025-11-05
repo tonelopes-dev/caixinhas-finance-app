@@ -6,7 +6,10 @@ import type { Goal } from '@/lib/definitions';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 
 function formatCurrency(value: number) {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 }
 
 interface GoalRowProps {
