@@ -14,9 +14,10 @@ import { AnimatedCounter } from '../ui/animated-counter';
 
 type GoalBucketsProps = {
   goals: Goal[];
+  workspaceName: string;
 };
 
-export default function GoalBuckets({ goals }: GoalBucketsProps) {
+export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) {
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
@@ -42,7 +43,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Caixinhas de Sonhos</CardTitle>
-        <CardDescription>Onde os planos de vocês ganham vida.</CardDescription>
+        <CardDescription>Metas e sonhos pertencentes a <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
         {goalsToShow.map((goal) => {
@@ -88,7 +89,7 @@ export default function GoalBuckets({ goals }: GoalBucketsProps) {
           );
         })}
          {goalsToShow.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">Nenhuma caixinha criada ainda. Que tal começar um novo sonho?</p>
+          <p className="text-center text-muted-foreground py-4">Nenhuma caixinha criada neste espaço. Que tal começar um novo sonho?</p>
         )}
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-2 border-t pt-6 md:flex-row">

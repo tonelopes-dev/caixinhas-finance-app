@@ -148,7 +148,7 @@ function HomePage() {
             </div>
             <div className="grid auto-rows-max items-start gap-8">
               <AnimatedDiv transition={{ delay: 0.3 }}>
-                <GoalBuckets goals={goals} />
+                <GoalBuckets goals={goals} workspaceName={workspaceName} />
               </AnimatedDiv>
             </div>
           </div>
