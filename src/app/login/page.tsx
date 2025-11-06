@@ -43,10 +43,10 @@ export default function LoginPage() {
       const userId = fakeAuth(email, password);
       if (userId) {
         // Set a persistent identifier on the client. 
-        localStorage.setItem('DREAMVAULT_USER_ID', userId);
+        localStorage.setItem('CAIXINHAS_USER_ID', userId);
         
         // Also set a cookie for the middleware to read.
-        document.cookie = `DREAMVAULT_USER_ID=${userId}; path=/; max-age=86400`; // Expires in 1 day
+        document.cookie = `CAIXINHAS_USER_ID=${userId}; path=/; max-age=86400`; // Expires in 1 day
 
         // Redirect using window.location to ensure a full page refresh that the middleware can intercept
         window.location.href = '/vaults';
@@ -60,9 +60,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     // Clear user identifiers on login page load to ensure a clean state.
-    localStorage.removeItem('DREAMVAULT_USER_ID');
-    sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
-    document.cookie = 'DREAMVAULT_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    localStorage.removeItem('CAIXINHAS_USER_ID');
+    sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    document.cookie = 'CAIXINHAS_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }, []);
 
   return (
@@ -70,8 +70,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
-                <Logo className="h-12 w-12" />
+            <div className="mx-auto mb-4 flex items-center justify-center">
+                <Logo className="h-16 w-16" />
             </div>
             <CardTitle className="text-2xl font-headline">Bem-vindo(a) de volta!</CardTitle>
             <CardDescription>
