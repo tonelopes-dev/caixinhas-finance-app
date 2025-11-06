@@ -20,6 +20,11 @@ import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 
+const commonEmojis = [
+  '✈️', '🏡', '🚗', '🎓', '💍', '👶',
+  '🛠️', '🎁', '🎮', '❤️', '💼', '💰'
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -34,6 +39,7 @@ export default function NewGoalPage() {
   const [state, dispatch] = useActionState(addGoal, initialState);
   const { toast } = useToast();
   const [visibility, setVisibility] = useState('shared');
+  const [selectedEmoji, setSelectedEmoji] = useState('');
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -44,6 +50,18 @@ export default function NewGoalPage() {
       });
     }
   }, [state, toast]);
+
+  const handleEmojiSelect = (emoji: string) => {
+    setSelectedEmoji(emoji);
+    const customEmojiInput = document.getElementById('emoji-custom') as HTMLInputElement;
+    if (customEmojiInput) {
+      customEmojiInput.value = '';
+    }
+  }
+
+  const handleCustomEmojiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedEmoji(e.target.value);
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
@@ -66,6 +84,7 @@ export default function NewGoalPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6">
+              <input type="hidden" name="emoji" value={selectedEmoji} />
               <div className="space-y-2">
                 <Label htmlFor="name">Nome do Sonho</Label>
                 <Input
@@ -75,16 +94,34 @@ export default function NewGoalPage() {
                 />
                 {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="emoji">Ícone (Emoji)</Label>
+                <Label>Ícone (Emoji)</Label>
+                <div className="grid grid-cols-6 gap-2">
+                  {commonEmojis.map(emoji => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => handleEmojiSelect(emoji)}
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-lg border-2 text-2xl transition-all",
+                        selectedEmoji === emoji ? "border-primary bg-primary/10" : "border-border bg-muted/50"
+                      )}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
                 <Input
-                  id="emoji"
-                  name="emoji"
-                  placeholder="Ex: ✈️"
+                  id="emoji-custom"
+                  placeholder="Ou digite um emoji aqui"
                   maxLength={2}
+                  className="mt-2 text-center"
+                  onChange={handleCustomEmojiChange}
                 />
                 {state?.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="targetAmount">Valor da Meta</Label>
                 <Input
@@ -100,12 +137,12 @@ export default function NewGoalPage() {
                <div className="space-y-3">
                 <Label>Visibilidade</Label>
                  <RadioGroup name="visibility" defaultValue="shared" className="grid grid-cols-2 gap-4" onValueChange={setVisibility}>
-                    <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground", visibility === 'shared' && "border-primary")}>
+                    <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", visibility === 'shared' && "border-primary")}>
                       <RadioGroupItem value="shared" id="shared" className="sr-only" />
                       <Users className="mb-3 h-6 w-6" />
                       Compartilhada
                     </Label>
-                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground", visibility === 'private' && "border-primary")}>
+                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", visibility === 'private' && "border-primary")}>
                       <RadioGroupItem value="private" id="private" className="sr-only" />
                       <Lock className="mb-3 h-6 w-6" />
                       Privada
