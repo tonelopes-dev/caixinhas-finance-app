@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Check, Mail, Plus, X, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Logo } from '@/components/logo';
+import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 
 function WorkspaceCard({ id, name, imageUrl, members, onSelect }: { id: string; name: string; imageUrl: string; members: UserType[], onSelect: (id: string) => void }) {
   return (
@@ -73,6 +74,8 @@ export default function VaultSelectionPage() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [userVaults, setUserVaults] = useState<Vault[]>([]);
   const [userInvitations, setUserInvitations] = useState<VaultInvitation[]>([]);
+  const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
+
 
   useEffect(() => {
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');
@@ -168,7 +171,10 @@ export default function VaultSelectionPage() {
                 ))}
                 
                 {/* Create New Vault Card */}
-                <Card className="flex flex-col items-center justify-center border-dashed border-2 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50">
+                <Card 
+                    onClick={() => setCreateVaultOpen(true)}
+                    className="flex flex-col items-center justify-center border-dashed border-2 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50"
+                >
                     <CardContent className="p-6 text-center">
                         <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                         <p className="font-semibold">Criar Novo Cofre</p>
@@ -177,6 +183,7 @@ export default function VaultSelectionPage() {
             </div>
           </div>
         </main>
+        <CreateVaultDialog open={isCreateVaultOpen} onOpenChange={setCreateVaultOpen} currentUser={currentUser} />
       </div>
     </div>
   );
