@@ -38,25 +38,20 @@ export function ThemeSwitcher() {
     setMounted(true);
     const storedBg = localStorage.getItem("app-theme-background") || "Padrão";
     const storedPrimary = localStorage.getItem("app-theme-primary") || "Padrão";
-    
-    handleThemeChange('background', storedBg, false);
-    handleThemeChange('primary', storedPrimary, false);
-
+    setCurrentBackground(storedBg);
+    setCurrentPrimary(storedPrimary);
   }, []);
 
   const applyTheme = (type: 'background' | 'primary', color: string) => {
-    const root = document.documentElement;
-    root.style.setProperty(`--${type}`, color);
+    document.documentElement.style.setProperty(`--${type}`, color);
   };
 
-  const handleThemeChange = (type: 'background' | 'primary', themeName: string, save = true) => {
+  const handleThemeChange = (type: 'background' | 'primary', themeName: string) => {
     const themeList = type === 'background' ? backgroundThemes : primaryThemes;
     const theme = themeList.find((t) => t.name === themeName);
     if (theme) {
       applyTheme(type, theme.color);
-      if (save) {
-        localStorage.setItem(`app-theme-${type}`, themeName);
-      }
+      localStorage.setItem(`app-theme-${type}`, themeName);
       if (type === 'background') {
         setCurrentBackground(themeName);
       } else {
