@@ -1,26 +1,20 @@
-import type { SVGProps } from 'react';
+import Image from 'next/image';
+import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
 
-export function Logo(props: SVGProps<SVGSVGElement>) {
+type ImageProps = ComponentProps<typeof Image>;
+
+export function Logo(props: Partial<ImageProps>) {
+  const { className, ...rest } = props;
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      {...props}
-    >
-      <title>DreamVault Logo</title>
-      <path
-        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09"
-        className="fill-primary stroke-primary"
-        strokeWidth="1"
-      />
-      <path
-        d="M12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3c-1.74 0-3.41.81-4.5 2.09"
-        className="fill-accent stroke-accent"
-        strokeWidth="1"
-      />
-    </svg>
+    <Image
+      src="/logo-caixinhas.png"
+      alt="Caixinhas Logo"
+      width={48}
+      height={48}
+      priority
+      className={cn('h-12 w-12', className)}
+      {...rest}
+    />
   );
 }
