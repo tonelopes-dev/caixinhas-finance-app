@@ -13,12 +13,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, X } from 'lucide-react';
+import { ExternalLink, Plus, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { users } from '@/lib/data';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/definitions';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Link from 'next/link';
 
 const coverImages = [
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -39,6 +41,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   const [vaultName, setVaultName] = React.useState('');
   const [members, setMembers] = React.useState<User[]>(currentUser ? [currentUser] : []);
   const [selectedImage, setSelectedImage] = React.useState(coverImages[0]);
+  const [customImageUrl, setCustomImageUrl] = React.useState('');
   const [email, setEmail] = React.useState('');
 
   const handleAddMember = (e: React.MouseEvent) => {
@@ -67,9 +70,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
         name: vaultName,
         ownerId: currentUser?.id,
         members,
-        imageUrl: selectedImage
+        imageUrl: customImageUrl || selectedImage
     });
     onOpenChange(false); // Fecha o modal após a submissão
+  }
+  
+  const handleImageSelection = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setCustomImageUrl('');
+  }
+
+  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomImageUrl(e.target.value);
+    setSelectedImage(e.target.value);
   }
 
   return (
@@ -124,13 +137,38 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                     </div>
                 </div>
                  <div className="space-y-2">
-                    <Label>Imagem de Capa</Label>
+                    <div className="flex items-center gap-2 mb-2">
+                        <Label>Imagem de Capa</Label>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                     <Button variant="outline" size="icon" className="h-6 w-6" asChild>
+                                        <Link href="https://unsplash.com/s/photos/house-saving" target="_blank">
+                                            <ExternalLink className="h-3 w-3" />
+                                        </Link>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Buscar no Unsplash</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
                        {coverImages.map(imgSrc => (
-                         <button type="button" key={imgSrc} onClick={() => setSelectedImage(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedImage === imgSrc ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
+                         <button type="button" key={imgSrc} onClick={() => handleImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedImage === imgSrc && !customImageUrl ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
                              <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
                          </button>
                        ))}
+                    </div>
+                    <div className="space-y-2 mt-2">
+                        <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
+                        <Input 
+                            id="custom-image-url"
+                            placeholder="https://example.com/sua-imagem.png"
+                            value={customImageUrl}
+                            onChange={handleCustomUrlChange}
+                        />
                     </div>
                 </div>
             </div>
