@@ -6,6 +6,7 @@ import Confetti from 'react-confetti';
 import {
   Dialog,
   DialogContent,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { PartyPopper } from 'lucide-react';
 import { useWindowSize } from '@/hooks/use-window-size';
@@ -44,6 +45,7 @@ export function VaultCreationSuccessDialog({ open, onOpenChange }: VaultCreation
       />
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md text-center p-8 flex flex-col items-center justify-center">
+            <DialogTitle className="sr-only">Cofre criado com sucesso</DialogTitle>
             <PartyPopper className="h-16 w-16 text-primary animate-in zoom-in-50" />
             <h2 className="text-2xl font-headline font-bold mt-4">Cofre criado com sucesso!</h2>
             <p className="text-muted-foreground mt-2">
