@@ -1,4 +1,4 @@
-# **App Name**: DreamVault
+# **App Name**: Caixinhas
 
 ## Core Features:
 

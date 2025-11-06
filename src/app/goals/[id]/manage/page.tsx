@@ -54,7 +54,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   
   useEffect(() => {
     // In a real app, this would come from an auth context
-    setCurrentUserId(localStorage.getItem('DREAMVAULT_USER_ID'));
+    setCurrentUserId(localStorage.getItem('CAIXINHAS_USER_ID'));
   }, []);
 
   useEffect(() => {

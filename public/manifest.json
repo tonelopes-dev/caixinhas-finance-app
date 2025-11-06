@@ -4,8 +4,8 @@
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "name": "DreamVault",
-  "short_name": "DreamVault",
+  "name": "Caixinhas",
+  "short_name": "Caixinhas",
   "description": "Sonhar juntos \u00e9 o primeiro passo para conquistar.",
   "icons": [
     {

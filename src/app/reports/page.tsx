@@ -41,8 +41,8 @@ function ReportsPage() {
   const [chatState, chatAction] = useFormState(getFinancialReportChat, initialState);
 
   useEffect(() => {
-    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-    const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
     if (userId) {
         const user = users.find(u => u.id === userId) || null;
         setCurrentUser(user);

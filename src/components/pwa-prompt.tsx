@@ -35,7 +35,7 @@ export function PwaPrompt() {
         setShowInstall(false);
         toast({
             title: "App Instalado!",
-            description: "O DreamVault agora está disponível na sua área de trabalho ou tela inicial."
+            description: "O Caixinhas agora está disponível na sua área de trabalho ou tela inicial."
         })
     });
 
@@ -113,7 +113,7 @@ export function PwaPrompt() {
     <div className="fixed bottom-4 right-4 z-50">
         {showInstall && !isAppInstalled && (
             <div className="bg-background border rounded-lg shadow-lg p-4 max-w-sm animate-in fade-in-50 slide-in-from-bottom-10">
-                <p className="text-sm font-medium">Instale o DreamVault no seu dispositivo para uma experiência melhor!</p>
+                <p className="text-sm font-medium">Instale o Caixinhas no seu dispositivo para uma experiência melhor!</p>
                 <div className="flex gap-2 mt-4">
                     <Button onClick={handleInstallClick} className="flex-1">
                         <ArrowDownToLine className="mr-2 h-4 w-4" />

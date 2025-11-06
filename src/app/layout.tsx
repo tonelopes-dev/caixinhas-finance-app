@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { FirebaseClientProvider } from '@/firebase';
 
-const APP_NAME = "DreamVault";
+const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
 
 export const metadata: Metadata = {

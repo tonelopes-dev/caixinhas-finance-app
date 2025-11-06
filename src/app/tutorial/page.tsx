@@ -72,7 +72,7 @@ export default function TutorialPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Como o DreamVault funciona?
+              Como o Caixinhas funciona?
             </CardTitle>
             <CardDescription>
               Tudo o que você precisa saber para começar a realizar seus sonhos, explicado do jeito mais fácil!

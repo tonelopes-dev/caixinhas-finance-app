@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 // Este middleware gerencia o acesso às rotas da aplicação.
 export function middleware(request: NextRequest) {
-  const userId = request.cookies.get('DREAMVAULT_USER_ID')?.value;
+  const userId = request.cookies.get('CAIXINHAS_USER_ID')?.value;
   const { pathname } = request.nextUrl;
 
   // Rotas públicas que não exigem autenticação

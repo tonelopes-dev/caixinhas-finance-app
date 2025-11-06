@@ -25,7 +25,7 @@ function GoalsPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
     if (!userId) {
       router.push('/login');
       return;
@@ -50,7 +50,7 @@ function GoalsPage() {
   };
 
   const handleGoToVault = (vaultId: string) => {
-    sessionStorage.setItem('DREAMVAULT_VAULT_ID', vaultId);
+    sessionStorage.setItem('CAIXINHAS_VAULT_ID', vaultId);
     router.push('/');
   };
 

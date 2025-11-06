@@ -30,8 +30,8 @@ export default function Header({ user, partner }: HeaderProps) {
   const router = useRouter();
   
   const handleLogout = () => {
-    localStorage.removeItem('DREAMVAULT_USER_ID');
-    sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
+    localStorage.removeItem('CAIXINHAS_USER_ID');
+    sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
     router.push('/login');
   }
 
@@ -39,7 +39,7 @@ export default function Header({ user, partner }: HeaderProps) {
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
       <Link href="/vaults" className="flex items-center gap-2">
         <Logo className="h-8 w-8" />
-        <h1 className="font-headline hidden sm:block text-xl font-bold text-foreground">DreamVault</h1>
+        <h1 className="font-headline hidden sm:block text-xl font-bold text-foreground">Caixinhas</h1>
       </Link>
       <div className="flex items-center gap-2 md:gap-4">
         {partner && (

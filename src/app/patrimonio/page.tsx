@@ -25,7 +25,7 @@ function PatrimonioPage() {
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        const id = localStorage.getItem('DREAMVAULT_USER_ID');
+        const id = localStorage.getItem('CAIXINHAS_USER_ID');
         if (!id) {
             router.push('/login');
             return;

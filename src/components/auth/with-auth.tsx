@@ -13,7 +13,7 @@ export default function withAuth<P extends object>(
 
     useEffect(() => {
       // For this mock app, we check for the presence of the user ID in localStorage.
-      const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
       
       if (!userId) {
         router.push('/login');

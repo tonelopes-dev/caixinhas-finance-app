@@ -22,8 +22,8 @@ function AccountsPage() {
   const [isVaultOwner, setIsVaultOwner] = useState(false);
 
   useEffect(() => {
-    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-    const selectedWorkspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
 
     if (!userId) {
       router.push('/login');

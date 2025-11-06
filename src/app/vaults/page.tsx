@@ -75,7 +75,7 @@ export default function VaultSelectionPage() {
   const [userInvitations, setUserInvitations] = useState<VaultInvitation[]>([]);
 
   useEffect(() => {
-    const userId = localStorage.getItem('DREAMVAULT_USER_ID');
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
     if (!userId) {
       // This case is handled by withAuth, but it's a good safeguard.
       return;
@@ -92,14 +92,14 @@ export default function VaultSelectionPage() {
 
   const handleSelectWorkspace = (workspaceId: string) => {
     // workspaceId can be a userId or a vaultId
-    sessionStorage.setItem('DREAMVAULT_VAULT_ID', workspaceId);
+    sessionStorage.setItem('CAIXINHAS_VAULT_ID', workspaceId);
     router.push('/');
   };
   
   const handleLogout = () => {
-    localStorage.removeItem('DREAMVAULT_USER_ID');
-    sessionStorage.removeItem('DREAMVAULT_VAULT_ID');
-    document.cookie = 'DREAMVAULT_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    localStorage.removeItem('CAIXINHAS_USER_ID');
+    sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    document.cookie = 'CAIXINHAS_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
   }
 
@@ -117,7 +117,7 @@ export default function VaultSelectionPage() {
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
             <Logo className="h-8 w-8" />
-            <h1 className="font-headline text-xl font-bold text-foreground">DreamVault</h1>
+            <h1 className="font-headline text-xl font-bold text-foreground">Caixinhas</h1>
           </div>
            <div className="flex items-center gap-4">
                 <div className='text-right'>

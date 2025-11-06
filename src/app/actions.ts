@@ -620,8 +620,8 @@ export async function registerUser(prevState: GenericState, formData: FormData):
     try {
         await sendEmail({
             to: validatedFields.data.email,
-            subject: 'Bem-vindo(a) ao DreamVault!',
-            body: `<h1>Olá, ${validatedFields.data.name}!</h1><p>Sua conta no DreamVault foi criada com sucesso. Comece a planejar seus sonhos hoje mesmo!</p>`
+            subject: 'Bem-vindo(a) ao Caixinhas!',
+            body: `<h1>Olá, ${validatedFields.data.name}!</h1><p>Sua conta no Caixinhas foi criada com sucesso. Comece a planejar seus sonhos hoje mesmo!</p>`
         });
     } catch (error) {
         console.error("Email sending failed:", error);
@@ -646,8 +646,8 @@ export async function sendPartnerInvite(prevState: GenericState, formData: FormD
     try {
         await sendEmail({
             to: validatedFields.data.email,
-            subject: `Você foi convidado(a) para o DreamVault por ${user.name}!`,
-            body: `<h1>Convite para o DreamVault</h1><p>${user.name} te convidou para planejarem seus sonhos juntos. Clique no link para aceitar: [link de convite aqui]</p>`
+            subject: `Você foi convidado(a) para o Caixinhas por ${user.name}!`,
+            body: `<h1>Convite para o Caixinhas</h1><p>${user.name} te convidou para planejarem seus sonhos juntos. Clique no link para aceitar: [link de convite aqui]</p>`
         });
         return { message: 'Convite enviado com sucesso!' };
     } catch (error) {
@@ -687,7 +687,7 @@ export async function sendPasswordReset(prevState: GenericState, formData: FormD
     try {
         await sendEmail({
             to: validatedFields.data.email,
-            subject: 'Redefinição de Senha - DreamVault',
+            subject: 'Redefinição de Senha - Caixinhas',
             body: `<h1>Redefinição de Senha</h1><p>Recebemos uma solicitação para redefinir sua senha. Clique no link para criar uma nova senha: [link de redefinição aqui]</p>`
         });
         return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };

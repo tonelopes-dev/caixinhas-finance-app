@@ -1,5 +1,5 @@
 /**
- * @fileoverview Firestore Security Rules for DreamVault.
+ * @fileoverview Firestore Security Rules for Caixinhas.
  *
  * Core Philosophy:
  * This ruleset enforces a strict authorization model based on path-based ownership and relationship-based access control. It leverages Authentication Independence by ensuring that each document contains the necessary fields for authorization decisions, avoiding costly and complex `get()` operations. OAuth integration is supported through the `User` entity's `oauthProvider` and `oauthId` fields.

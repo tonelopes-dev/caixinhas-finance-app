@@ -66,8 +66,8 @@ export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
 
   useEffect(() => {
     if (open) {
-      const userId = localStorage.getItem('DREAMVAULT_USER_ID');
-      const workspaceId = sessionStorage.getItem('DREAMVAULT_VAULT_ID');
+      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+      const workspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
       if (userId && workspaceId) {
         const { userAccounts, userGoals } = getMockDataForUser(userId, workspaceId);
         setAccounts(userAccounts);

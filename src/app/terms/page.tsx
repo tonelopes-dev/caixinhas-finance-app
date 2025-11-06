@@ -23,17 +23,17 @@ export default function TermsOfServicePage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Termos de Serviço do DreamVault
+              Termos de Serviço do Caixinhas
             </CardTitle>
             <CardDescription>
-              Última atualização: 29 de Julho de 2024
+              Última atualização: 11 de Novembro de 2025
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-96 pr-6">
               <div className="space-y-6 text-sm text-muted-foreground">
                 <p>
-                  Bem-vindo ao DreamVault! Estes Termos de Serviço ("Termos")
+                  Bem-vindo ao Caixinhas! Estes Termos de Serviço ("Termos")
                   regem seu acesso e uso de nosso aplicativo e serviços
                   ("Serviço"). Ao acessar ou usar o Serviço, você concorda em
                   cumprir estes Termos.
@@ -55,7 +55,7 @@ export default function TermsOfServicePage() {
                     2. Uso do Serviço
                   </h3>
                   <p>
-                    O DreamVault é uma plataforma projetada para ajudar casais a
+                    O Caixinhas é uma plataforma projetada para ajudar casais a
                     gerenciar suas finanças e planejar objetivos compartilhados.
                     Você concorda em usar o Serviço apenas para fins lícitos e
                     de acordo com estes Termos. Você é responsável por todas as
@@ -108,7 +108,7 @@ export default function TermsOfServicePage() {
                   </h3>
                   <p>
                     O Serviço é fornecido "como está", sem garantias de qualquer
-                    tipo. Em nenhuma circunstância o DreamVault será responsável
+                    tipo. Em nenhuma circunstância o Caixinhas será responsável
                     por quaisquer danos indiretos, incidentais, especiais,
                     consequenciais ou punitivos resultantes do seu acesso ou uso
                     do Serviço.
@@ -136,10 +136,10 @@ export default function TermsOfServicePage() {
                     Se você tiver alguma dúvida sobre estes Termos, entre em
                     contato conosco em{' '}
                     <a
-                      href="mailto:suporte@dreamvault.com"
+                      href="mailto:suporte@caixinhas.com"
                       className="text-primary underline"
                     >
-                      suporte@dreamvault.com
+                      suporte@Caixinhas.com
                     </a>
                     .
                   </p>
