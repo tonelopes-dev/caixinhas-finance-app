@@ -68,6 +68,8 @@ export function ThemeSwitcher() {
   if (!mounted) {
     return null; 
   }
+  
+  const preventClose = (e: Event) => e.preventDefault();
 
   return (
     <DropdownMenuSub>
@@ -82,6 +84,7 @@ export function ThemeSwitcher() {
                 <DropdownMenuItem
                 key={theme.name}
                 onClick={() => handleThemeChange('background', theme.name)}
+                onSelect={preventClose}
                 className="flex items-center justify-between"
                 >
                 <div className="flex items-center gap-2">
@@ -103,6 +106,7 @@ export function ThemeSwitcher() {
                 <DropdownMenuItem
                 key={theme.name}
                 onClick={() => handleThemeChange('primary', theme.name)}
+                onSelect={preventClose}
                 className="flex items-center justify-between"
                 >
                 <div className="flex items-center gap-2">
