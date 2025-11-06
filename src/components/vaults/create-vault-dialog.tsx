@@ -158,7 +158,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Buscar no Unsplash</p>
+                                    <p>Copie a URL de uma imagem do Unsplash. Apenas URLs do Unsplash são aceitas.</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
