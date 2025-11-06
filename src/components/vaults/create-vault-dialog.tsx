@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import type { User } from '@/lib/definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
+import { VaultCreationSuccessDialog } from './vault-creation-success-dialog';
 
 const coverImages = [
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -43,6 +44,8 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   const [selectedImage, setSelectedImage] = React.useState(coverImages[0]);
   const [customImageUrl, setCustomImageUrl] = React.useState('');
   const [email, setEmail] = React.useState('');
+  const [isSuccessModalOpen, setSuccessModalOpen] = React.useState(false);
+
 
   const handleAddMember = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,7 +75,8 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
         members,
         imageUrl: customImageUrl || selectedImage
     });
-    onOpenChange(false); // Fecha o modal após a submissão
+    onOpenChange(false); // Fecha o modal de criação
+    setSuccessModalOpen(true); // Abre o modal de sucesso
   }
   
   const handleImageSelection = (imageUrl: string) => {
@@ -86,106 +90,109 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
-        <form onSubmit={handleSubmit}>
-            <DialogHeader>
-            <DialogTitle className="font-headline text-xl">Criar Novo Cofre Compartilhado</DialogTitle>
-            <DialogDescription>
-                Comece um novo espaço para planejar e economizar em conjunto.
-            </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-4">
-                <div className="space-y-2">
-                    <Label htmlFor="vault-name">Nome do Cofre</Label>
-                    <Input
-                        id="vault-name"
-                        value={vaultName}
-                        onChange={(e) => setVaultName(e.target.value)}
-                        placeholder="Ex: Reforma da Casa"
-                        required
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label>Membros</Label>
-                    <div className='flex flex-wrap gap-2'>
-                        {members.map(member => (
-                            <div key={member.id} className="flex items-center gap-2 rounded-full border bg-muted px-2 py-1">
-                                <Avatar className="h-6 w-6">
-                                    <AvatarImage src={member.avatarUrl} />
-                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium">{member.name.split(' ')[0]}</span>
-                                {member.id !== currentUser?.id && (
-                                    <button onClick={() => handleRemoveMember(member.id)} className="text-muted-foreground hover:text-destructive">
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex gap-2">
+    <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[525px]">
+            <form onSubmit={handleSubmit}>
+                <DialogHeader>
+                <DialogTitle className="font-headline text-xl">Criar Novo Cofre Compartilhado</DialogTitle>
+                <DialogDescription>
+                    Comece um novo espaço para planejar e economizar em conjunto.
+                </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="vault-name">Nome do Cofre</Label>
                         <Input
-                            type="email"
-                            placeholder="Convidar por e-mail"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            id="vault-name"
+                            value={vaultName}
+                            onChange={(e) => setVaultName(e.target.value)}
+                            placeholder="Ex: Reforma da Casa"
+                            required
                         />
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" onClick={handleAddMember}>
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>O usuário receberá uma notificação no app ou um e-mail de convite.</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
                     </div>
-                </div>
-                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Label>Imagem de Capa</Label>
-                        <TooltipProvider>
+                    <div className="space-y-2">
+                        <Label>Membros</Label>
+                        <div className='flex flex-wrap gap-2'>
+                            {members.map(member => (
+                                <div key={member.id} className="flex items-center gap-2 rounded-full border bg-muted px-2 py-1">
+                                    <Avatar className="h-6 w-6">
+                                        <AvatarImage src={member.avatarUrl} />
+                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-medium">{member.name.split(' ')[0]}</span>
+                                    {member.id !== currentUser?.id && (
+                                        <button type="button" onClick={() => handleRemoveMember(member.id)} className="text-muted-foreground hover:text-destructive">
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            <Input
+                                type="email"
+                                placeholder="Convidar por e-mail"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                     <Button variant="outline" size="icon" className="h-6 w-6" asChild>
-                                        <Link href="https://unsplash.com/s/photos/house-saving" target="_blank">
-                                            <ExternalLink className="h-3 w-3" />
-                                        </Link>
-                                    </Button>
+                                <Button variant="outline" size="icon" type="button" onClick={handleAddMember}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Copie a URL de uma imagem do Unsplash. Apenas URLs do Unsplash são aceitas.</p>
+                                <p>O usuário receberá uma notificação no app ou um e-mail de convite.</p>
                                 </TooltipContent>
                             </Tooltip>
-                        </TooltipProvider>
+                            </TooltipProvider>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                       {coverImages.map(imgSrc => (
-                         <button type="button" key={imgSrc} onClick={() => handleImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedImage === imgSrc && !customImageUrl ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
-                             <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
-                         </button>
-                       ))}
-                    </div>
-                    <div className="space-y-2 mt-2">
-                        <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
-                        <Input 
-                            id="custom-image-url"
-                            placeholder="https://example.com/sua-imagem.png"
-                            value={customImageUrl}
-                            onChange={handleCustomUrlChange}
-                        />
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Label>Imagem de Capa</Label>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="outline" size="icon" className="h-6 w-6" asChild>
+                                            <Link href="https://unsplash.com" target="_blank">
+                                                <ExternalLink className="h-3 w-3" />
+                                            </Link>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Copie a URL de uma imagem do Unsplash. Apenas URLs do unsplash.com são aceitas.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                        {coverImages.map(imgSrc => (
+                            <button type="button" key={imgSrc} onClick={() => handleImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedImage === imgSrc && !customImageUrl ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
+                                <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
+                            </button>
+                        ))}
+                        </div>
+                        <div className="space-y-2 mt-2">
+                            <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
+                            <Input 
+                                id="custom-image-url"
+                                placeholder="https://images.unsplash.com/..."
+                                value={customImageUrl}
+                                onChange={handleCustomUrlChange}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <DialogFooter>
-            <Button type="submit">Criar Cofre</Button>
-            </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+                <DialogFooter>
+                <Button type="submit">Criar Cofre</Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+        </Dialog>
+        <VaultCreationSuccessDialog open={isSuccessModalOpen} onOpenChange={setSuccessModalOpen} />
+    </>
   );
 }
