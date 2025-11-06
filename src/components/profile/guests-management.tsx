@@ -123,7 +123,7 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId }: Guest
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {members.map((member) => {
+          {members && members.length > 0 ? members.map((member) => {
             const isOwner = member.id === vaultOwnerId;
             const isSelf = member.id === currentUserId;
             // Só o dono do cofre pode remover outros. Ninguém pode remover o dono.
@@ -147,7 +147,11 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId }: Guest
                 <DeleteGuestDialog guestName={member.name} disabled={!canBeRemoved} />
               </div>
             )
-          })}
+          }) : (
+             <p className="py-4 text-center text-sm text-muted-foreground">
+                Ainda não há outros membros neste cofre. Clique em "Adicionar" para convidar alguém.
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
