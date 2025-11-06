@@ -27,12 +27,8 @@ import { ptBR } from 'date-fns/locale';
 import { useFormStatus } from 'react-dom';
 import { Switch } from '../ui/switch';
 import type { Account, Goal } from '@/lib/definitions';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { AddAccountPromptDialog } from '../transactions/add-account-prompt-dialog';
+
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -64,6 +60,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
+  const [promptOpen, setPromptOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
 
@@ -71,6 +68,15 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   const [goals, setGoals] = useState<Goal[]>([]);
   
   const hasNoAccounts = workspaceAccounts.length === 0;
+
+  const handleTriggerClick = () => {
+    if (hasNoAccounts) {
+      setPromptOpen(true);
+    } else {
+      setOpen(true);
+    }
+  };
+
 
   useEffect(() => {
     if (open) {
@@ -106,178 +112,162 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   
   const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
 
-  const TriggerButton = (
-    <Button size="sm" disabled={hasNoAccounts}>
-        <PlusCircle className="mr-2 h-4 w-4" />
-        Adicionar
-    </Button>
-  );
-
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {hasNoAccounts ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span tabIndex={0}>{TriggerButton}</span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Adicione uma conta ou cartão antes de registrar uma transação.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-        ) : (
-          TriggerButton
-        )}
-      </SheetTrigger>
-      <SheetContent className="flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Adicionar Nova Transação</SheetTitle>
-          <SheetDescription>
-            Registre uma nova entrada, saída ou transferência para manter tudo organizado.
-          </SheetDescription>
-        </SheetHeader>
-        <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
-          <input type="hidden" name="ownerId" value={sessionStorage.getItem('CAIXINHAS_VAULT_ID') || ''} />
-          <div className="grid gap-4 py-4 overflow-y-auto pr-4">
-             <div className="space-y-2">
-              <Label htmlFor="type">Tipo</Label>
-              <Select name="type" onValueChange={(value) => setTransactionType(value as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="expense">Saída</SelectItem>
-                  <SelectItem value="income">Entrada</SelectItem>
-                  <SelectItem value="transfer">Transferência</SelectItem>
-                </SelectContent>
-              </Select>
-               {state?.errors?.type && <p className="text-sm font-medium text-destructive">{state.errors.type[0]}</p>}
-            </div>
-            
-            {transactionType && (
-                <>
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
-                        <Input id="description" name="description" placeholder="Ex: Jantar de aniversário" />
-                        {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="amount">Valor</Label>
-                        <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 150,00" />
-                        {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="date">Data</Label>
-                         <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !date && "text-muted-foreground"
-                                )}
-                                >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={setDate}
-                                initialFocus
-                                locale={ptBR}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                        <input type="hidden" name="date" value={date?.toISOString()} />
-                         {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
-                    </div>
-
-
-                    {(transactionType === 'expense' || transactionType === 'transfer') && (
-                         <div className="space-y-2">
-                            <Label htmlFor="sourceAccountId">Origem</Label>
-                            <Select name="sourceAccountId">
-                                <SelectTrigger>
-                                <SelectValue placeholder="De onde saiu o dinheiro?" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                            {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
-                        </div>
-                    )}
-                    
-                    {(transactionType === 'income' || transactionType === 'transfer') && (
-                        <div className="space-y-2">
-                            <Label htmlFor="destinationAccountId">Destino</Label>
-                            <Select name="destinationAccountId">
-                                <SelectTrigger>
-                                <SelectValue placeholder="Para onde foi o dinheiro?" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                     {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                             {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
-                        </div>
-                    )}
-                    
-                     <div className="space-y-2">
-                        <Label htmlFor="category">Categoria</Label>
-                        <Select name="category">
-                            <SelectTrigger>
-                            <SelectValue placeholder="Selecione a categoria" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {categories[transactionType]?.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
-                    </div>
-
-                    {transactionType === 'expense' && (
-                        <div className="space-y-2">
-                            <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                            <Select name="paymentMethod">
-                                <SelectTrigger>
-                                <SelectValue placeholder="Selecione o método" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                             {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
-                        </div>
-                    )}
-
-                    {(transactionType === 'income' || transactionType === 'expense') && (
-                      <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
-                          <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
-                              <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
-                              <span className="text-xs font-normal leading-snug text-muted-foreground">
-                                Marque se esta transação se repete mensalmente.
-                              </span>
-                          </Label>
-                          <Switch id="isRecurring" name="isRecurring" />
+    <>
+      <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
+      <Sheet open={open} onOpenChange={setOpen}>
+        <Button size="sm" onClick={handleTriggerClick}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Adicionar
+        </Button>
+        <SheetContent className="flex flex-col">
+          <SheetHeader>
+            <SheetTitle>Adicionar Nova Transação</SheetTitle>
+            <SheetDescription>
+              Registre uma nova entrada, saída ou transferência para manter tudo organizado.
+            </SheetDescription>
+          </SheetHeader>
+          <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
+            <input type="hidden" name="ownerId" value={sessionStorage.getItem('CAIXINHAS_VAULT_ID') || ''} />
+            <div className="grid gap-4 py-4 overflow-y-auto pr-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Tipo</Label>
+                <Select name="type" onValueChange={(value) => setTransactionType(value as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="expense">Saída</SelectItem>
+                    <SelectItem value="income">Entrada</SelectItem>
+                    <SelectItem value="transfer">Transferência</SelectItem>
+                  </SelectContent>
+                </Select>
+                {state?.errors?.type && <p className="text-sm font-medium text-destructive">{state.errors.type[0]}</p>}
+              </div>
+              
+              {transactionType && (
+                  <>
+                      <div className="space-y-2">
+                          <Label htmlFor="description">Descrição</Label>
+                          <Input id="description" name="description" placeholder="Ex: Jantar de aniversário" />
+                          {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
                       </div>
-                    )}
+                      <div className="space-y-2">
+                          <Label htmlFor="amount">Valor</Label>
+                          <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 150,00" />
+                          {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                      </div>
 
-                </>
-            )}
+                      <div className="space-y-2">
+                          <Label htmlFor="date">Data</Label>
+                          <Popover>
+                              <PopoverTrigger asChild>
+                                  <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                      "w-full justify-start text-left font-normal",
+                                      !date && "text-muted-foreground"
+                                  )}
+                                  >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
+                                  </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                  <Calendar
+                                  mode="single"
+                                  selected={date}
+                                  onSelect={setDate}
+                                  initialFocus
+                                  locale={ptBR}
+                                  />
+                              </PopoverContent>
+                          </Popover>
+                          <input type="hidden" name="date" value={date?.toISOString()} />
+                          {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                      </div>
 
-          </div>
-          <SheetFooter className='mt-auto'>
-            <SubmitButton />
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+
+                      {(transactionType === 'expense' || transactionType === 'transfer') && (
+                          <div className="space-y-2">
+                              <Label htmlFor="sourceAccountId">Origem</Label>
+                              <Select name="sourceAccountId">
+                                  <SelectTrigger>
+                                  <SelectValue placeholder="De onde saiu o dinheiro?" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                  </SelectContent>
+                              </Select>
+                              {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
+                          </div>
+                      )}
+                      
+                      {(transactionType === 'income' || transactionType === 'transfer') && (
+                          <div className="space-y-2">
+                              <Label htmlFor="destinationAccountId">Destino</Label>
+                              <Select name="destinationAccountId">
+                                  <SelectTrigger>
+                                  <SelectValue placeholder="Para onde foi o dinheiro?" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                  </SelectContent>
+                              </Select>
+                              {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
+                          </div>
+                      )}
+                      
+                      <div className="space-y-2">
+                          <Label htmlFor="category">Categoria</Label>
+                          <Select name="category">
+                              <SelectTrigger>
+                              <SelectValue placeholder="Selecione a categoria" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {categories[transactionType]?.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                              </SelectContent>
+                          </Select>
+                          {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
+                      </div>
+
+                      {transactionType === 'expense' && (
+                          <div className="space-y-2">
+                              <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+                              <Select name="paymentMethod">
+                                  <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o método" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}
+                                  </SelectContent>
+                              </Select>
+                              {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
+                          </div>
+                      )}
+
+                      {(transactionType === 'income' || transactionType === 'expense') && (
+                        <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
+                            <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
+                                <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
+                                <span className="text-xs font-normal leading-snug text-muted-foreground">
+                                  Marque se esta transação se repete mensalmente.
+                                </span>
+                            </Label>
+                            <Switch id="isRecurring" name="isRecurring" />
+                        </div>
+                      )}
+
+                  </>
+              )}
+
+            </div>
+            <SheetFooter className='mt-auto'>
+              <SubmitButton />
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }
