@@ -1,15 +1,9 @@
 import type { SVGProps } from 'react';
-import Image from 'next/image';
+import { PiggyBank } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function Logo(props: Omit<React.ComponentProps<typeof Image>, 'src' | 'alt'>) {
+export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
-    <Image 
-      src="/logo-teste.svg"
-      alt="DreamVault Logo"
-      width={128}
-      height={128}
-      priority
-      {...props}
-      />
+    <PiggyBank {...props} className={cn('text-primary', props.className)} />
   );
 }
