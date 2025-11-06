@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2 } from 'lucide-react';
+import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, PiggyBank } from 'lucide-react';
 import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -102,6 +102,12 @@ export default function Header({ user, partner }: HeaderProps) {
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
                     <span>Transações</span>
                 </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/goals">
+                <PiggyBank className="mr-2 h-4 w-4" />
+                <span>Caixinhas</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
                 <Link href="/profile">
