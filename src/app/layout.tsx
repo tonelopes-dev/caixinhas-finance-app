@@ -78,12 +78,16 @@ export default function RootLayout({
 }>) {
 
   useEffect(() => {
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    if (!userId) return; // Se não houver usuário, não faz nada
+
     const applyTheme = (type: 'background' | 'primary', color: string) => {
       document.documentElement.style.setProperty(`--${type}`, color);
     };
 
     const loadTheme = (type: 'background' | 'primary') => {
-      const themeName = localStorage.getItem(`app-theme-${type}`) || "Padrão";
+      const themeKey = `app-theme-${type}-${userId}`;
+      const themeName = localStorage.getItem(themeKey) || "Padrão";
       const themeList = type === 'background' ? backgroundThemes : primaryThemes;
       const theme = themeList.find((t) => t.name === themeName);
       if (theme) {

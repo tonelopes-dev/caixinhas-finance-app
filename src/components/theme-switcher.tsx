@@ -32,14 +32,19 @@ const primaryThemes = [
 export function ThemeSwitcher() {
   const [currentBackground, setCurrentBackground] = useState("Padrão");
   const [currentPrimary, setCurrentPrimary] = useState("Padrão");
+  const [userId, setUserId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const storedBg = localStorage.getItem("app-theme-background") || "Padrão";
-    const storedPrimary = localStorage.getItem("app-theme-primary") || "Padrão";
-    setCurrentBackground(storedBg);
-    setCurrentPrimary(storedPrimary);
+    const id = localStorage.getItem("CAIXINHAS_USER_ID");
+    setUserId(id);
+    if (id) {
+      const storedBg = localStorage.getItem(`app-theme-background-${id}`) || "Padrão";
+      const storedPrimary = localStorage.getItem(`app-theme-primary-${id}`) || "Padrão";
+      setCurrentBackground(storedBg);
+      setCurrentPrimary(storedPrimary);
+    }
   }, []);
 
   const applyTheme = (type: 'background' | 'primary', color: string) => {
@@ -47,11 +52,13 @@ export function ThemeSwitcher() {
   };
 
   const handleThemeChange = (type: 'background' | 'primary', themeName: string) => {
+    if (!userId) return; // Não faz nada se não houver usuário
     const themeList = type === 'background' ? backgroundThemes : primaryThemes;
     const theme = themeList.find((t) => t.name === themeName);
     if (theme) {
       applyTheme(type, theme.color);
-      localStorage.setItem(`app-theme-${type}`, themeName);
+      const themeKey = `app-theme-${type}-${userId}`;
+      localStorage.setItem(themeKey, themeName);
       if (type === 'background') {
         setCurrentBackground(themeName);
       } else {
@@ -60,8 +67,8 @@ export function ThemeSwitcher() {
     }
   };
   
-  if (!mounted) {
-    return null; 
+  if (!mounted || !userId) {
+    return null; // Não renderiza o componente se não estiver montado ou não houver usuário
   }
   
   const preventClose = (e: Event) => e.preventDefault();
