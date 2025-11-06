@@ -8,8 +8,8 @@ export function Logo(props: Partial<ImageProps>) {
   const { className, ...rest } = props;
   return (
     <Image
-      src="/logo.png"
-      alt="DreamVault Logo"
+      src="/logo-caixinhas.png"
+      alt="Caixinhas Logo"
       width={48}
       height={48}
       priority
