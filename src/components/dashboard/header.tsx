@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -19,6 +18,12 @@ import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { useRouter } from 'next/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 type HeaderProps = {
@@ -32,6 +37,7 @@ export default function Header({ user, partner }: HeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem('CAIXINHAS_USER_ID');
     sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    document.cookie = 'CAIXINHAS_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
   }
 
@@ -43,12 +49,21 @@ export default function Header({ user, partner }: HeaderProps) {
       </Link>
       <div className="flex items-center gap-2 md:gap-4">
         {partner && (
-            <div className="flex -space-x-2">
-                <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
-                <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
-                <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex -space-x-2">
+                      <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
+                      <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
+                      <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{partner.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
         )}
         <Button variant="outline" size="sm" asChild>
           <Link href="/invite">
@@ -139,5 +154,3 @@ export default function Header({ user, partner }: HeaderProps) {
     </header>
   );
 }
-
-    
