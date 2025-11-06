@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useFormState } from 'react-dom';
+import { useState, useEffect, useRef, useActionState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,8 +36,8 @@ function ReportsPage() {
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
-  const [reportState, generateReportAction] = useFormState(generateNewFinancialReport, initialState);
-  const [chatState, chatAction] = useFormState(getFinancialReportChat, initialState);
+  const [reportState, generateReportAction] = useActionState(generateNewFinancialReport, initialState);
+  const [chatState, chatAction] = useActionState(getFinancialReportChat, initialState);
 
   useEffect(() => {
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');

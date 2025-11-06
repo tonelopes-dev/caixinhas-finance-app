@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react';
-import { useActionState } from 'react';
+import React, { useEffect, useRef, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { goalTransaction, type GoalTransactionState } from '@/app/actions';
 import {
