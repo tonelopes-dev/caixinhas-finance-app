@@ -131,19 +131,19 @@ Gere um relatório completo e visualmente atraente usando **exclusivamente** o f
                 <span class="font-medium">Moradia</span>
                 <span class="font-bold">R$ 600,00 <span class="text-sm font-normal text-muted-foreground">(52.1%)</span></span>
             </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full" style="width: 52.1%"></div></div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full w-full" style="width: 52.1%"></div></div>
             
             <div class="flex justify-between items-center">
                 <span class="font-medium">Transporte</span>
                 <span class="font-bold">R$ 178,50 <span class="text-sm font-normal text-muted-foreground">(15.5%)</span></span>
             </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-orange-500 h-2.5 rounded-full" style="width: 15.5%"></div></div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-orange-500 h-2.5 rounded-full w-full" style="width: 15.5%"></div></div>
 
             <div class="flex justify-between items-center">
                 <span class="font-medium">Outros</span>
                 <span class="font-bold">R$ 115,00 <span class="text-sm font-normal text-muted-foreground">(10.0%)</span></span>
             </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 10.0%"></div></div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full w-full" style="width: 10.0%"></div></div>
         </div>
     </div>
 </div>
