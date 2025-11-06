@@ -34,10 +34,10 @@ const Progress = React.forwardRef<
         className="h-full w-full flex-1"
         style={{
           transformOrigin: 'left',
-          backgroundColor: color,
+          backgroundColor: value === undefined ? 'hsl(var(--muted))' : color,
         }}
         initial={{ scaleX: 0 }}
-        animate={{ scaleX: isInView ? (value || 0) / 100 : 0 }}
+        animate={{ scaleX: isInView ? (value === undefined ? 1 : (value || 0) / 100) : 0 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
       />
     </ProgressPrimitive.Root>

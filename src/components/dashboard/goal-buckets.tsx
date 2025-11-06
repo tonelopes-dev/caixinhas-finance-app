@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlusCircle, Users, Lock } from 'lucide-react';
+import { ArrowRight, PlusCircle, Users, Lock, Eye, EyeOff } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
 import { AnimatedCounter } from '../ui/animated-counter';
+import { useState } from 'react';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -18,6 +19,8 @@ type GoalBucketsProps = {
 };
 
 export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) {
+  const [isPrivate, setIsPrivate] = useState(true);
+  
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
@@ -37,13 +40,28 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
 
   // Show featured goals first, then other goals, up to a max of 3
   const goalsToShow = [...featuredGoals, ...otherGoals].slice(0, 3);
+  
+  const PrivacyBlur = ({ as: Component = 'span', className }: { as?: React.ElementType, className?: string }) => <Component className={className}>R$ ••••••</Component>;
+  const PrivacyBlurPercent = () => <span>••%</span>;
 
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Caixinhas de Sonhos</CardTitle>
-        <CardDescription>Metas e sonhos pertencentes a <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
+        <div className="flex items-start justify-between">
+            <div>
+                <CardTitle className="font-headline">Caixinhas de Sonhos</CardTitle>
+                <CardDescription>Metas e sonhos de <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
+            </div>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsPrivate(!isPrivate)}
+                aria-label={isPrivate ? 'Mostrar valores' : 'Ocultar valores'}
+            >
+                {isPrivate ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </Button>
+        </div>
       </CardHeader>
       <CardContent className="grid gap-4">
         {goalsToShow.map((goal) => {
@@ -56,13 +74,15 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold">{goal.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}
+                     <p className="text-sm text-muted-foreground">
+                        {isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
                     </p>
                   </div>
-                   <p className="text-sm font-bold text-primary flex items-center gap-1"><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</p>
+                   <p className="text-sm font-bold text-primary flex items-center gap-1">
+                        {isPrivate ? <PrivacyBlurPercent /> : <><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</>}
+                    </p>
                 </div>
-                <Progress value={progress} className="h-3 mt-2" />
+                <Progress value={isPrivate ? undefined : progress} className="h-3 mt-2" />
                 <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-1">
                         <div className="flex -space-x-2 overflow-hidden">
