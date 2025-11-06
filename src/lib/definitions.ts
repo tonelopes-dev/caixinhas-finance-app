@@ -74,6 +74,7 @@ export type User = {
   name: string;
   email: string;
   avatarUrl: string;
+  subscriptionStatus: 'active' | 'inactive' | 'trial';
 };
 
 export type Partner = {

@@ -13,10 +13,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, Send } from 'lucide-react';
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { sendPartnerInvite, type GenericState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { getMockDataForUser } from '@/lib/data';
 
 
 function SubmitButton() {
@@ -34,6 +35,20 @@ export default function InvitePage() {
   const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const [workspaceName, setWorkspaceName] = useState('');
+
+  useEffect(() => {
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
+    if (userId && vaultId) {
+        const { currentVault } = getMockDataForUser(userId, vaultId);
+        if (currentVault) {
+            setWorkspaceName(currentVault.name);
+        } else {
+            setWorkspaceName('seu cofre pessoal');
+        }
+    }
+  }, []);
 
   useEffect(() => {
     if(state.message && !state.errors) {
@@ -55,18 +70,19 @@ export default function InvitePage() {
         </Button>
         <Card>
             <form action={dispatch} ref={formRef}>
+                <input type="hidden" name="vaultName" value={workspaceName} />
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
                     <Mail className="h-6 w-6 text-primary" />
-                    Convidar Parceiro(a)
+                    Convidar para o Cofre
                     </CardTitle>
                     <CardDescription>
-                    Envie um convite para que vocês possam planejar seus sonhos juntos.
+                     Envie um convite para que outra pessoa possa participar do cofre <span className='font-bold text-primary'>{workspaceName}</span>.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
                     <div className="space-y-2">
-                    <Label htmlFor="email">E-mail do Parceiro(a)</Label>
+                    <Label htmlFor="email">E-mail do Convidado(a)</Label>
                     <Input
                         id="email"
                         name="email"

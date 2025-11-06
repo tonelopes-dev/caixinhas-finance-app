@@ -8,6 +8,10 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { transactions, goals, user, savedReports } from '@/lib/data';
 import { redirect } from 'next/navigation';
+import { welcomeEmailTemplate } from '@/app/_templates/emails/welcome-template';
+import { inviteEmailTemplate } from '@/app/_templates/emails/invite-template';
+import { passwordResetEmailTemplate } from '@/app/_templates/emails/password-reset-template';
+
 
 const transactionSchema = z.object({
   id: z.string().optional(),
@@ -71,6 +75,7 @@ const registerSchema = z.object({
 
 const inviteSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
+  vaultName: z.string(), // Adicionado para incluir o nome do cofre no convite
 });
 
 const passwordResetSchema = z.object({
@@ -135,6 +140,7 @@ export type GenericState = {
         email?: string[];
         name?: string[];
         password?: string[];
+        vaultName?: string[];
     }
 }
 
@@ -556,20 +562,28 @@ export async function registerUser(prevState: GenericState, formData: FormData):
             message: 'Falha na validação. Por favor, verifique os campos.',
         };
     }
-
-    console.log('New user registered:', validatedFields.data);
+    
+    const { name, email, password } = validatedFields.data;
+    
+    // Simula a criação do usuário e a ativação da assinatura
+    console.log(`Simulating user creation for ${email} with status 'active'.`);
 
     try {
         await sendEmail({
-            to: validatedFields.data.email,
+            to: email,
             subject: 'Bem-vindo(a) ao Caixinhas!',
-            body: `<h1>Olá, ${validatedFields.data.name}!</h1><p>Sua conta no Caixinhas foi criada com sucesso. Comece a planejar seus sonhos hoje mesmo!</p>`
+            body: welcomeEmailTemplate(name)
         });
     } catch (error) {
         console.error("Email sending failed:", error);
+        // Não bloqueia o fluxo, apenas loga o erro
     }
 
-    redirect('/login');
+    // Em um app real, aqui você criaria o usuário no banco de dados.
+    // Como estamos usando dados mock, o usuário já deve existir ou ser adicionado à lista.
+    
+    // Após o registro bem-sucedido via webhook simulado, o usuário é levado ao login.
+    redirect('/login?registered=true');
 }
 
 
@@ -583,11 +597,13 @@ export async function sendPartnerInvite(prevState: GenericState, formData: FormD
         };
     }
     
+    const { email, vaultName } = validatedFields.data;
+    
     try {
         await sendEmail({
-            to: validatedFields.data.email,
-            subject: `Você foi convidado(a) para o Caixinhas por ${user.name}!`,
-            body: `<h1>Convite para o Caixinhas</h1><p>${user.name} te convidou para planejarem seus sonhos juntos. Clique no link para aceitar: [link de convite aqui]</p>`
+            to: email,
+            subject: `Você foi convidado(a) para o cofre "${vaultName}" no Caixinhas!`,
+            body: inviteEmailTemplate(user.name, vaultName)
         });
         return { message: 'Convite enviado com sucesso!' };
     } catch (error) {
@@ -604,7 +620,7 @@ export async function sendGoalInvite(email: string, goalName: string): Promise<{
         await sendEmail({
             to: email,
             subject: `Você foi convidado(a) para a caixinha "${goalName}"`,
-            body: `<h1>Convite para Caixinha</h1><p>${user.name} te convidou para participar da caixinha "${goalName}".`
+            body: inviteEmailTemplate(user.name, goalName) // Reutilizando o template de convite de cofre por simplicidade
         });
         return { message: 'Convite enviado com sucesso!' };
     } catch (error) {
@@ -623,12 +639,14 @@ export async function sendPasswordReset(prevState: GenericState, formData: FormD
             message: 'Falha na validação.',
         };
     }
+    
+    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'}/password-reset?token=some-secure-token`;
 
     try {
         await sendEmail({
             to: validatedFields.data.email,
             subject: 'Redefinição de Senha - Caixinhas',
-            body: `<h1>Redefinição de Senha</h1><p>Recebemos uma solicitação para redefinir sua senha. Clique no link para criar uma nova senha: [link de redefinição aqui]</p>`
+            body: passwordResetEmailTemplate(resetLink)
         });
         return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
     } catch (error) {

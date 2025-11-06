@@ -27,11 +27,17 @@
           "type": "string",
           "description": "URL to the user's profile picture.",
           "format": "uri"
+        },
+        "subscriptionStatus": {
+          "type": "string",
+          "description": "The current status of the user's subscription.",
+          "enum": ["active", "inactive", "trial"]
         }
       },
       "required": [
         "id",
-        "email"
+        "email",
+        "subscriptionStatus"
       ]
     },
     "Vault": {
