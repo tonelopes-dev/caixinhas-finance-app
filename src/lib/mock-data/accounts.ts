@@ -31,4 +31,10 @@ export const accounts: Account[] = [
   { id: 'acc-family', ownerId: 'user1', scope: 'vault-family', name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] },
   // Conta da Agência de Software
   { id: 'acc-agency-1', ownerId: 'user1', scope: 'vault-agency', name: 'Conta PJ Agência', bank: 'Banco Empresarial', type: 'checking', balance: 25000, logoUrl: bankLogos[5] },
+  
+  // Contas para o Cofre Viagem para o Japão
+  { id: 'acc-trip-checking', ownerId: 'user1', scope: 'vault-trip', name: 'Conta Corrente Japão', bank: 'Banco Global', type: 'checking', balance: 2000, logoUrl: bankLogos[3] },
+  { id: 'acc-trip-savings', ownerId: 'user1', scope: 'vault-trip', name: 'Poupança Viagem Japão', bank: 'Banco Global', type: 'savings', balance: 8000, logoUrl: bankLogos[3] },
+  { id: 'acc-trip-investment', ownerId: 'user1', scope: 'vault-trip', name: 'Investimento para o Iene', bank: 'Corretora Mundo', type: 'investment', balance: 12000, logoUrl: bankLogos[2] },
+  { id: 'acc-trip-card', ownerId: 'user1', scope: 'vault-trip', name: 'Cartão para Viagem', bank: 'Banco Global', type: 'credit_card', balance: 0, creditLimit: 20000, logoUrl: bankLogos[3] },
 ];

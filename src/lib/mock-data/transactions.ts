@@ -31,7 +31,9 @@ export const transactions: Transaction[] = [
     { id: 't-off-4', ownerId: 'vault-office', ownerType: 'vault', date: '2024-07-20', description: 'Aporte para Bioimpedância', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-nutri-1', destinationAccountId: 'goal-office-1', actorId: 'user2' },
 
     // Transações do Cofre da Viagem (vault-trip)
-    { id: 't-trip-1', ownerId: 'vault-trip', ownerType: 'vault', date: '2024-07-10', description: 'Aporte inicial para viagem', amount: 100, type: 'income', category: 'Investimento', destinationAccountId: 'acc-trip', actorId: 'user1' },
+    { id: 't-trip-1', ownerId: 'vault-trip', ownerType: 'vault', date: '2024-07-10', description: 'Aporte inicial Dev', amount: 1000, type: 'income', category: 'Investimento', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-trip-savings', actorId: 'user1' },
+    { id: 't-trip-2', ownerId: 'vault-trip', ownerType: 'vault', date: '2024-07-11', description: 'Aporte inicial Nutri', amount: 1000, type: 'income', category: 'Investimento', sourceAccountId: 'acc-nutri-2', destinationAccountId: 'acc-trip-savings', actorId: 'user2' },
+    { id: 't-trip-3', ownerId: 'vault-trip', ownerType: 'vault', date: '2024-07-20', description: 'Reserva Hotel', amount: 3000, type: 'expense', category: 'Hospedagem', sourceAccountId: 'acc-trip-card', paymentMethod: 'credit_card', actorId: 'user1' },
   
     // DADOS ADICIONAIS 2025 para user2
     // JANEIRO 2025
