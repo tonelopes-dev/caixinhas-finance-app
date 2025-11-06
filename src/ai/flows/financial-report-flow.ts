@@ -39,7 +39,7 @@ Gere um relatório completo e visualmente atraente usando **exclusivamente** o f
 
 **Formato de Saída HTML Obrigatório (Use este template como base):**
 \`\`\`html
-<div class="space-y-8">
+<div class="space-y-6">
     <!-- Seção Saúde Financeira -->
     <div class="p-6 rounded-lg bg-card border flex justify-between items-center">
         <div>
