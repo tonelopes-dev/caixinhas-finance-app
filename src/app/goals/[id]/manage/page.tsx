@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { goals, user as mockUser, partner } from '@/lib/data';
+import { goals, user as mockUser, partner, getMockDataForUser } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
@@ -25,7 +25,7 @@ import { useActionState, useEffect, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
-import type { Goal } from '@/lib/definitions';
+import type { Goal, Vault, User } from '@/lib/definitions';
 import { Input } from '@/components/ui/input';
 import { updateGoal, type UpdateGoalState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -48,19 +48,27 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const [visibility, setVisibility] = useState<Goal['visibility']>(goal?.visibility || 'shared');
   const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentVault, setCurrentVault] = useState<Vault | null>(null);
 
   const initialState: UpdateGoalState = { message: null, errors: {} };
   const [state, formAction] = useActionState(updateGoal, initialState);
   
   useEffect(() => {
-    // In a real app, this would come from an auth context
-    setCurrentUserId(localStorage.getItem('CAIXINHAS_USER_ID'));
-  }, []);
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    const vaultId = goal?.ownerType === 'vault' ? goal.ownerId : userId;
+    setCurrentUserId(userId);
+    
+    if (userId && vaultId) {
+        const { currentVault: vaultData } = getMockDataForUser(userId, vaultId);
+        setCurrentVault(vaultData);
+    }
+  }, [goal]);
 
   useEffect(() => {
     if (state?.message && !state.errors) {
       toast({ title: "Sucesso!", description: state.message });
-      router.push(`/goals/${goal?.id}`);
+      // We don't redirect automatically anymore, just revalidate the data.
+      // The user can stay on the page.
     } else if (state?.message && state.errors) {
       toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
     }
@@ -71,14 +79,27 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  const defaultParticipants = [
-      { id: 'user1', name: mockUser.name, avatarUrl: mockUser.avatarUrl, role: 'owner' as const },
-      { id: 'user2', name: partner.name, avatarUrl: partner.avatarUrl, role: 'member' as const },
-  ]
-
-  const participants = goal.participants ?? (goal.visibility === 'shared' ? defaultParticipants : [defaultParticipants[0]]);
+  // Define um participante padrão caso não exista
+  const getSafeParticipants = (g: Goal): Array<{id: string, name: string, avatarUrl: string, role: 'owner' | 'member'}> => {
+     if (g.participants && g.participants.length > 0) return g.participants;
+     if (g.ownerType === 'user') {
+        const owner = mockUser.id === g.ownerId ? mockUser : partner;
+        return [{ id: owner.id, name: owner.name, avatarUrl: owner.avatarUrl, role: 'owner' }];
+     }
+     return [];
+  }
   
-  const isOwner = goal.ownerId === currentUserId;
+  const participants = getSafeParticipants(goal);
+
+  // Lógica de permissão:
+  // - Se a caixinha é pessoal (ownerType 'user'), o dono é o `ownerId` da caixinha.
+  // - Se a caixinha é de um cofre (ownerType 'vault'), o dono do *cofre* tem permissão.
+  let isOwner = false;
+  if (goal.ownerType === 'user') {
+      isOwner = goal.ownerId === currentUserId;
+  } else if (goal.ownerType === 'vault' && currentVault) {
+      isOwner = currentVault.ownerId === currentUserId;
+  }
 
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
@@ -198,7 +219,7 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
                 <InviteParticipantDialog goalName={goal.name} disabled={!isOwner} />
               </div>
               <div className="space-y-4">
-                {participants.map((p, index) => (
+                {participants.map((p) => (
                   <div
                     key={p.id}
                     className="flex items-center justify-between rounded-lg border p-3"

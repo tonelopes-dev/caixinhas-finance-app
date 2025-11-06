@@ -3,10 +3,10 @@ import { users, dev, nutri } from './users';
 
 // --- PARTICIPANTES DE METAS ---
 const devParticipant: GoalParticipant = { id: dev.id, name: dev.name, avatarUrl: dev.avatarUrl, role: 'owner' };
-const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'owner' };
+const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'member' };
 const familyParticipants: GoalParticipant[] = [devParticipant, nutriParticipant];
 const friendsParticipants: GoalParticipant[] = [
-    nutriParticipant,
+    { ...nutriParticipant, role: 'owner' }, // Nutri is the owner of this goal
     ...users.slice(2, 5).map(u => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl, role: 'member' as const }))
 ];
 
@@ -48,7 +48,7 @@ export const goals: Goal[] = [
     currentAmount: 3500,
     emoji: '🛋️',
     visibility: 'private',
-    participants: [nutriParticipant],
+    participants: [{ ...nutriParticipant, role: 'owner' }],
   },
     {
     id: 'goal-nutri-3',
@@ -59,7 +59,7 @@ export const goals: Goal[] = [
     currentAmount: 980,
     emoji: '🎁',
     visibility: 'private',
-    participants: [nutriParticipant],
+    participants: [{ ...nutriParticipant, role: 'owner' }],
   },
   
   // -- Metas do Cofre da Agência (Apenas o Dev vê) --
@@ -85,7 +85,7 @@ export const goals: Goal[] = [
     currentAmount: 11000, // This is now calculated dynamically
     emoji: '🔬',
     visibility: 'shared',
-    participants: [nutriParticipant],
+    participants: [{ ...nutriParticipant, role: 'owner' }],
   },
     {
     id: 'goal-office-2',
@@ -96,7 +96,7 @@ export const goals: Goal[] = [
     currentAmount: 0,
     emoji: '🖼️',
     visibility: 'shared',
-    participants: [nutriParticipant],
+    participants: [{ ...nutriParticipant, role: 'owner' }],
   },
   
   // -- Metas do Cofre da Família --
