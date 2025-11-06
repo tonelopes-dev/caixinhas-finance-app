@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -26,6 +27,12 @@ import { ptBR } from 'date-fns/locale';
 import { useFormStatus } from 'react-dom';
 import { Switch } from '../ui/switch';
 import type { Account, Goal } from '@/lib/definitions';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -51,7 +58,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
+export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts: Account[] }) {
   const initialState: TransactionState = {};
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -62,6 +69,8 @@ export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  
+  const hasNoAccounts = workspaceAccounts.length === 0;
 
   useEffect(() => {
     if (open) {
@@ -97,14 +106,30 @@ export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
   
   const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
 
+  const TriggerButton = (
+    <Button size="sm" disabled={hasNoAccounts}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Adicionar
+    </Button>
+  );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button size="sm">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar
-        </Button>
+        {hasNoAccounts ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>{TriggerButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Adicione uma conta ou cartão antes de registrar uma transação.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+        ) : (
+          TriggerButton
+        )}
       </SheetTrigger>
       <SheetContent className="flex flex-col">
         <SheetHeader>
@@ -114,7 +139,7 @@ export function AddTransactionSheet({ ownerId }: { ownerId: string }) {
           </SheetDescription>
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
-          <input type="hidden" name="ownerId" value={ownerId} />
+          <input type="hidden" name="ownerId" value={sessionStorage.getItem('CAIXINHAS_VAULT_ID') || ''} />
           <div className="grid gap-4 py-4 overflow-y-auto pr-4">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>

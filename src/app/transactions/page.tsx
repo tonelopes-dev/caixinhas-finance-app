@@ -45,6 +45,12 @@ import { EditTransactionSheet } from '@/components/transactions/edit-transaction
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 function formatCurrency(value: number) {
@@ -121,6 +127,8 @@ export default function TransactionsPage() {
     const ownerType = isPersonal ? 'user' : 'vault';
 
     setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === ownerType));
+    
+    // Na página de transações, precisamos de TODAS as contas e metas para resolver os nomes
     setAccounts(allAccounts);
     setGoals(allGoals);
 
@@ -348,7 +356,7 @@ export default function TransactionsPage() {
                           {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                     <AddTransactionSheet />
+                    <AddTransactionSheet accounts={accounts} />
                   </div>
                 </div>
             </CardHeader>

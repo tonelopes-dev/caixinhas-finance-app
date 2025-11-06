@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -139,6 +140,7 @@ function HomePage() {
               <AnimatedDiv transition={{ delay: 0.2 }}>
                 <RecentTransactions 
                     transactions={transactions} 
+                    accounts={accounts}
                     ownerId={workspaceId} 
                     ownerType={workspaceId === currentUser.id ? 'user' : 'vault'} 
                     typeFilter={transactionFilter}

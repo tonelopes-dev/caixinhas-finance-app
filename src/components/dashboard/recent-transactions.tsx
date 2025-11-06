@@ -1,10 +1,11 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import type { Transaction } from '@/lib/definitions';
+import type { Transaction, Account } from '@/lib/definitions';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ListFilter, ArrowRight } from 'lucide-react';
@@ -13,13 +14,14 @@ import { useMemo, useState } from 'react';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
+  accounts: Account[];
   ownerId: string;
   ownerType: 'user' | 'vault';
   typeFilter: 'all' | 'income' | 'expense' | 'transfer';
   onFilterChange: (filter: 'all' | 'income' | 'expense' | 'transfer') => void;
 };
 
-export default function RecentTransactions({ transactions, ownerId, ownerType, typeFilter, onFilterChange }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions, accounts, ownerId, ownerType, typeFilter, onFilterChange }: RecentTransactionsProps) {
 
     const baseTransactions = useMemo(() => {
         // Sort by most recent
@@ -61,7 +63,7 @@ export default function RecentTransactions({ transactions, ownerId, ownerType, t
                     <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
-            <AddTransactionSheet ownerId={ownerId} />
+            <AddTransactionSheet accounts={accounts} />
         </div>
       </CardHeader>
       <CardContent>
