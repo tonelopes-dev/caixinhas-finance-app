@@ -131,9 +131,18 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <Button variant="outline" size="icon" onClick={handleAddMember}>
-                            <Plus className="h-4 w-4" />
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" onClick={handleAddMember}>
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>O usuário receberá uma notificação no app ou um e-mail de convite.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </div>
                  <div className="space-y-2">
@@ -180,4 +189,3 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
     </Dialog>
   );
 }
-
