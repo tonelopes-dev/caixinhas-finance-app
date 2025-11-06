@@ -23,7 +23,7 @@ export function VaultCreationSuccessDialog({ open, onOpenChange }: VaultCreation
     if (open) {
       const timer = setTimeout(() => {
         onOpenChange(false);
-      }, 5000); // Fecha o modal após 5 segundos
+      }, 12000); // Fecha o modal após 12 segundos
 
       return () => clearTimeout(timer);
     }
@@ -58,7 +58,7 @@ export function VaultCreationSuccessDialog({ open, onOpenChange }: VaultCreation
                     to { width: 0%; }
                 }
                 .animate-progress-bar {
-                    animation: progress-bar-animation 5s linear forwards;
+                    animation: progress-bar-animation 12s linear forwards;
                 }
             `}</style>
         </DialogContent>
