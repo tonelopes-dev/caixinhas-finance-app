@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -75,9 +74,9 @@ export function GuestsManagement() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Gerenciar Convidados</CardTitle>
+          <CardTitle>Gerenciar Membros do Cofre</CardTitle>
           <CardDescription>
-            Adicione ou remova pessoas das suas caixinhas.
+            Adicione ou remova pessoas do seu cofre compartilhado.
           </CardDescription>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -89,9 +88,9 @@ export function GuestsManagement() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Convidar Nova Pessoa</DialogTitle>
+              <DialogTitle>Convidar Novo Membro</DialogTitle>
               <DialogDescription>
-                Envie um convite para alguém participar das suas caixinhas.
+                Envie um convite para alguém participar do seu cofre.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
