@@ -2,12 +2,12 @@ import type { Goal, GoalParticipant } from '../definitions';
 import { users, dev, nutri } from './users';
 
 // --- PARTICIPANTES DE METAS ---
-const devParticipant: GoalParticipant = { id: dev.id, name: dev.name, avatarUrl: dev.avatarUrl, role: 'owner' };
-const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'member' };
+const devParticipant: GoalParticipant = { id: dev.id, name: dev.name, avatarUrl: dev.avatarUrl, role: 'owner', contributionContextId: 'user1' };
+const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'member', contributionContextId: 'user2' };
 const familyParticipants: GoalParticipant[] = [devParticipant, nutriParticipant];
 const friendsParticipants: GoalParticipant[] = [
-    { ...nutriParticipant, role: 'owner' }, // Nutri is the owner of this goal
-    ...users.slice(2, 5).map(u => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl, role: 'member' as const }))
+    { ...nutriParticipant, role: 'owner', contributionContextId: 'user2' }, // Nutri is the owner of this goal
+    ...users.slice(2, 5).map(u => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl, role: 'member' as const, contributionContextId: u.id }))
 ];
 
 // --- METAS (CAIXINHAS / GOALS) ---
@@ -109,7 +109,7 @@ export const goals: Goal[] = [
     currentAmount: 8000, // This is now calculated dynamically
     emoji: '🛠️',
     visibility: 'shared', // Todos no cofre podem ver
-    participants: familyParticipants,
+    participants: familyParticipants.map(p => ({ ...p, contributionContextId: 'vault-family' })),
     isFeatured: true,
   },
    {
@@ -121,7 +121,7 @@ export const goals: Goal[] = [
     currentAmount: 32000, // This is now calculated dynamically
     emoji: '🛡️',
     visibility: 'shared',
-    participants: familyParticipants,
+    participants: familyParticipants.map(p => ({ ...p, contributionContextId: 'vault-family' })),
   },
   {
     id: 'goal-family-priv-dev',
@@ -132,7 +132,7 @@ export const goals: Goal[] = [
     currentAmount: 1500, // This is now calculated dynamically
     emoji: '🎁',
     visibility: 'private', // Só o Dev pode ver
-    participants: [devParticipant],
+    participants: [devParticipant].map(p => ({ ...p, contributionContextId: 'vault-family' })),
   },
   {
     id: 'goal-family-priv-nutri',
@@ -143,6 +143,6 @@ export const goals: Goal[] = [
     currentAmount: 950, // This is now calculated dynamically
     emoji: '🍳',
     visibility: 'private', // Só a Nutri pode ver
-    participants: [nutriParticipant],
+    participants: [nutriParticipant].map(p => ({ ...p, contributionContextId: 'vault-family' })),
   },
 ];

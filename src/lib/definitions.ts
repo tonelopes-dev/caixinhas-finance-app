@@ -51,6 +51,9 @@ export type GoalParticipant = {
   name: string;
   avatarUrl: string;
   role: 'owner' | 'member';
+  // Opcional: Especifica de qual cofre/conta o dinheiro deste participante virá.
+  // Isso prepara o app para colaboração entre diferentes cofres no futuro.
+  contributionContextId?: string; 
 }
 
 export type Goal = {
