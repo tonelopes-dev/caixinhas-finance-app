@@ -1,38 +1,24 @@
 'use server';
 /**
- * @fileOverview This file defines Genkit flows for financial analysis.
+ * @fileOverview This file defines a Genkit flow for financial analysis.
  *
  * It includes:
  * - `generateFinancialReport`: An async function that creates a detailed monthly financial report.
- * - `chatWithReport`: An async function that allows a user to ask questions about their report.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// --- Esquema de Análise de Relatório ---
 const FinancialReportInputSchema = z.object({
   month: z.string().describe('O mês do relatório (ex: "Julho de 2024").'),
   transactions: z.string().describe('Uma lista de transações em formato JSON.'),
 });
 
 const FinancialReportOutputSchema = z.object({
-  analysisHtml: z.string().describe('Uma análise financeira detalhada em formato HTML. Use títulos (h3, h4), parágrafos, listas (ul, li) e negrito (b) para formatar.'),
-});
-
-// --- Esquema de Chat com Relatório ---
-const ChatWithReportInputSchema = z.object({
-  reportContext: z.string().describe('O conteúdo do relatório financeiro em HTML para fornecer contexto.'),
-  question: z.string().describe('A pergunta do usuário sobre o relatório.'),
-  chatHistory: z.string().describe('O histórico da conversa em formato JSON.'),
-});
-
-const ChatWithReportOutputSchema = z.object({
-  answer: z.string().describe('A resposta para a pergunta do usuário, baseada no relatório e no histórico do chat.'),
+  analysisHtml: z.string().describe('Uma análise financeira detalhada em formato HTML, seguindo estritamente o layout e componentes fornecidos.'),
 });
 
 
-// --- Fluxo para Gerar o Relatório ---
 export async function generateFinancialReport(input: z.infer<typeof FinancialReportInputSchema>): Promise<z.infer<typeof FinancialReportOutputSchema>> {
   return generateReportFlow(input);
 }
@@ -41,45 +27,127 @@ const reportPrompt = ai.definePrompt({
   name: 'financialReportPrompt',
   input: { schema: FinancialReportInputSchema },
   output: { schema: FinancialReportOutputSchema },
-  prompt: `Você é um analista financeiro de elite, especializado em finanças para casais. Sua tarefa é criar um relatório de saúde financeira profissional, detalhado e encorajador para o mês de {{month}}, baseado nas transações fornecidas.
+  prompt: `Você é um analista financeiro de elite, especialista em finanças para casais, com um toque de coach motivacional. Sua tarefa é criar um relatório de saúde financeira para o mês de {{month}}, baseado nas transações fornecidas.
 
 **Tarefa:**
-Gere uma análise completa usando **exclusivamente** o formato HTML especificado abaixo. Seja direto, informativo e use uma linguagem positiva.
-
-**Formato de Saída Obrigatório:**
-\`\`\`html
-<h3>Análise Financeira de {{month}}</h3>
-
-<h4>⭐ Resumo Executivo</h4>
-<p>Faça um resumo conciso (2-3 frases) dos principais destaques do mês, como a taxa de poupança, o saldo líquido e se os gastos ficaram dentro do esperado. Mantenha um tom otimista.</p>
-
-<h4>💰 Fluxo de Caixa Mensal</h4>
-<ul>
-    <li><b>Receita Total:</b> Calcule e exiba o total de receitas (transações do tipo 'income').</li>
-    <li><b>Despesa Total:</b> Calcule e exiba o total de despesas (transações do tipo 'expense').</li>
-    <li><b>Saldo Líquido:</b> Calcule e exiba a diferença (Receita - Despesa). Comente brevemente se o saldo foi positivo ou negativo.</li>
-    <li><b>Taxa de Poupança:</b> Calcule a porcentagem da receita que foi economizada (total de transferências para 'Caixinha' / Receita Total). Elogie se a taxa for boa (acima de 15%).</li>
-</ul>
-
-<h4>📊 Detalhamento das Despesas</h4>
-<p>Abaixo está a distribuição completa dos seus gastos este mês. Use esta visão para entender para onde o dinheiro está indo.</p>
-<ul>
-    <li>Liste <b>TODAS</b> as categorias de despesa com seu valor total e a porcentagem que representam do total de despesas. Ex: <b>Alimentação:</b> R$ XXX,XX (YY%).</li>
-</ul>
-
-<h4>🎯 Progresso das Metas (Caixinhas)</h4>
-<p>Analise as transferências para as caixinhas (transações com categoria 'Caixinha' ou tipo 'transfer' para uma meta). Comente se as contribuições foram consistentes e como isso impacta os objetivos.</p>
-
-<h4>🧠 Insights e Recomendações Práticas</h4>
-<p>Com base em toda a análise, forneça 2-3 insights práticos e acionáveis em uma lista ordenada.</p>
-<ol>
-    <li><b>Exemplo de Insight 1:</b> "Percebi que a categoria 'Lazer' representou 25% dos gastos. Que tal explorar programas gratuitos na cidade no próximo mês para acelerar a meta da 'Reforma da Cozinha'?"</li>
-    <li><b>Exemplo de Insight 2:</b> "Sua taxa de poupança de 21% é fantástica! Para otimizar ainda mais, considerem automatizar uma pequena transferência para o 'Fundo de Emergência' logo no início do mês."</li>
-</ol>
-\`\`\`
+Gere um relatório completo e visualmente atraente usando **exclusivamente** o formato HTML especificado abaixo. Use classes do Tailwind CSS para estilização, conforme os exemplos. O tom deve ser encorajador, profissional e direto.
 
 **Dados para Análise (Transações do Mês em JSON):**
 {{{transactions}}}
+
+---
+
+**Formato de Saída HTML Obrigatório (Use este template como base):**
+\`\`\`html
+<div class="space-y-8">
+    <!-- Seção Saúde Financeira -->
+    <div class="p-6 rounded-lg bg-card border flex justify-between items-center">
+        <div>
+            <h3 class="font-headline text-xl font-bold">Saúde Financeira: 80/100</h3>
+            <p class="text-muted-foreground mt-1">Seu saldo positivo, investimentos regulares e controle de despesas são indicativos de uma boa saúde financeira, mas ainda há espaço para otimização.</p>
+        </div>
+        <div class="text-5xl font-bold text-green-500">80</div>
+    </div>
+
+    <!-- Seção Visão Geral -->
+    <div class="p-6 rounded-lg bg-card border">
+        <h3 class="font-headline text-lg font-bold mb-2">Visão Geral</h3>
+        <p class="text-muted-foreground">Novembro foi um mês de conquistas! Com uma receita total de R$ 1800, você está mostrando um ótimo controle financeiro, mantendo suas despesas abaixo do esperado e ainda conseguindo investir. Parabéns pela disciplina!</p>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div class="p-4 rounded-lg bg-card border">
+            <p class="text-sm text-muted-foreground">Receitas</p>
+            <p class="text-2xl font-bold text-green-500">R$ 1.800,00</p>
+        </div>
+        <div class="p-4 rounded-lg bg-card border">
+            <p class="text-sm text-muted-foreground">Despesas</p>
+            <p class="text-2xl font-bold text-red-500">R$ 1.152,50</p>
+        </div>
+        <div class="p-4 rounded-lg bg-card border">
+            <p class="text-sm text-muted-foreground">Investimentos</p>
+            <p class="text-2xl font-bold text-blue-500">R$ 400,00</p>
+        </div>
+        <div class="p-4 rounded-lg bg-card border">
+            <p class="text-sm text-muted-foreground">Saldo</p>
+            <p class="text-2xl font-bold text-primary">R$ 247,50</p>
+            <p class="text-xs text-muted-foreground">Taxa de poupança: 13.8%</p>
+        </div>
+    </div>
+    
+    <!-- Seções Pontos Positivos e de Atenção -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-6 rounded-lg bg-card border">
+            <h3 class="font-headline text-lg font-bold mb-4">✅ Pontos Positivos</h3>
+            <ul class="space-y-3 text-muted-foreground">
+                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Você gerou uma receita sólida de R$ 1800, o que demonstra um bom planejamento financeiro.</span></li>
+                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Seu saldo final de R$ 247,50 é um excelente resultado, mostrando que você está vivendo dentro de suas possibilidades.</span></li>
+                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Investir R$ 400,00 é uma atitude muito positiva que contribuirá para o seu futuro financeiro.</span></li>
+            </ul>
+        </div>
+        <div class="p-6 rounded-lg bg-card border">
+            <h3 class="font-headline text-lg font-bold mb-4">⚠️ Pontos de Atenção</h3>
+            <ul class="space-y-3 text-muted-foreground">
+                <li class="flex items-start"><span class="mr-2 mt-1">👉</span><span>A categoria de moradia representa 52.1% das suas despesas. Considere revisar se há opções mais econômicas.</span></li>
+                <li class="flex items-start"><span class="mr-2 mt-1">👉</span><span>A despesa de transporte com gasolina foi de R$ 150,50, que pode ser uma área para explorar alternativas mais baratas.</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Dicas Personalizadas -->
+    <div>
+        <h3 class="font-headline text-xl font-bold mb-4">Dicas Personalizadas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div class="p-4 rounded-lg bg-card border">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold">Revisão de Aluguel</h4>
+                    <span class="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded-full">ALTA</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Considere negociar o aluguel ou buscar opções mais acessíveis para reduzir significativamente suas despesas mensais.</p>
+            </div>
+            <div class="p-4 rounded-lg bg-card border">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold">Transporte Alternativo</h4>
+                     <span class="text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full">MÉDIA</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Use transporte público ou caronas para economizar na gasolina, o que pode reduzir gastos em até 30%.</p>
+            </div>
+             <div class="p-4 rounded-lg bg-card border">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold">Fundo de Emergência</h4>
+                    <span class="text-xs font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-full">BAIXA</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Destine uma parte do saldo final para um fundo de emergência para garantir sua segurança financeira.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gastos por Categoria -->
+    <div>
+        <h3 class="font-headline text-xl font-bold mb-4">Gastos por Categoria</h3>
+        <div class="p-4 rounded-lg bg-card border space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="font-medium">Moradia</span>
+                <span class="font-bold">R$ 600,00 <span class="text-sm font-normal text-muted-foreground">(52.1%)</span></span>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full" style="width: 52.1%"></div></div>
+            
+            <div class="flex justify-between items-center">
+                <span class="font-medium">Transporte</span>
+                <span class="font-bold">R$ 178,50 <span class="text-sm font-normal text-muted-foreground">(15.5%)</span></span>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-orange-500 h-2.5 rounded-full" style="width: 15.5%"></div></div>
+
+            <div class="flex justify-between items-center">
+                <span class="font-medium">Outros</span>
+                <span class="font-bold">R$ 115,00 <span class="text-sm font-normal text-muted-foreground">(10.0%)</span></span>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 10.0%"></div></div>
+        </div>
+    </div>
+</div>
+\`\`\`
 `,
 });
 
@@ -91,47 +159,6 @@ const generateReportFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await reportPrompt(input);
-    return output!;
-  }
-);
-
-
-// --- Fluxo para Conversar sobre o Relatório ---
-export async function chatWithReport(input: z.infer<typeof ChatWithReportInputSchema>): Promise<z.infer<typeof ChatWithReportOutputSchema>> {
-  return chatWithReportFlow(input);
-}
-
-const chatPrompt = ai.definePrompt({
-  name: 'chatWithReportPrompt',
-  input: { schema: ChatWithReportInputSchema },
-  output: { schema: ChatWithReportOutputSchema },
-  prompt: `Você é um assistente financeiro prestativo e amigável. Sua única função é responder a perguntas sobre o relatório financeiro fornecido abaixo. Baseie-se exclusivamente nas informações do relatório e no histórico da conversa. 
-
-Se o usuário perguntar sobre qualquer outro assunto, recuse educadamente, explicando que sua função é apenas discutir os dados do relatório financeiro apresentado.
-
-**Relatório Financeiro Analisado:**
-\`\`\`html
-{{{reportContext}}}
-\`\`\`
-
-**Histórico da Conversa (JSON):**
-{{{chatHistory}}}
-
-**Pergunta do Usuário:**
-{{question}}
-
-Responda à pergunta do usuário de forma clara, concisa e sempre com um tom positivo e encorajador.
-`,
-});
-
-const chatWithReportFlow = ai.defineFlow(
-  {
-    name: 'chatWithReportFlow',
-    inputSchema: ChatWithReportInputSchema,
-    outputSchema: ChatWithReportOutputSchema,
-  },
-  async (input) => {
-    const { output } = await chatPrompt(input);
     return output!;
   }
 );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useActionState } from 'react';
+import { useState, useEffect, useActionState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,20 +12,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { users, transactions as allTransactions } from '@/lib/data';
-import { generateNewFinancialReport, getFinancialReportChat, type FinancialReportState } from '@/app/actions';
+import { generateNewFinancialReport, type FinancialReportState } from '@/app/actions';
 import withAuth from '@/components/auth/with-auth';
-import type { User, Transaction } from '@/lib/definitions';
+import type { User } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
-import { ReportChat } from '@/components/reports/report-chat';
-import type { ChatMessage } from '@/components/reports/report-chat';
 
 
 function ReportsPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [reportHtml, setReportHtml] = useState<string | null>(null);
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   
   const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
@@ -34,10 +31,8 @@ function ReportsPage() {
   const [availableMonths, setAvailableMonths] = useState<{ value: string, label: string }[]>([]);
 
 
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const initialState: FinancialReportState = { reportHtml: null, chatResponse: null, error: null };
+  const initialState: FinancialReportState = { reportHtml: null, error: null };
   const [reportState, generateReportAction] = useActionState(generateNewFinancialReport, initialState);
-  const [chatState, chatAction] = useActionState(getFinancialReportChat, initialState);
 
   useEffect(() => {
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');
@@ -84,7 +79,6 @@ function ReportsPage() {
         
         setAvailableMonths(monthsForYear);
 
-        // If current month is not available in the new year, update it
         if (!monthsForYear.some(m => m.value === month)) {
             setMonth(monthsForYear[0]?.value || (new Date().getMonth() + 1).toString());
         }
@@ -94,34 +88,14 @@ function ReportsPage() {
     }
   }, [workspaceId, year, month]);
 
-
-  // Effect to handle new report generation
   useEffect(() => {
     if (reportState?.isNewReport) {
         setReportHtml(reportState.reportHtml ?? null);
-        setChatHistory([]); // Clear chat history for new report
     }
     if (reportState?.error) {
         console.error(reportState.error);
     }
   }, [reportState]);
-
-  // Effect to handle new chat messages
-  useEffect(() => {
-    if (chatState?.chatResponse && !chatState.isNewReport && chatHistory[chatHistory.length - 1]?.role !== 'assistant') {
-        setChatHistory(prev => [...prev, { role: 'assistant', content: chatState.chatResponse! }]);
-    }
-  }, [chatState, chatHistory]);
-
-    // Effect to scroll chat
-  useEffect(() => {
-    if (viewportRef.current) {
-        viewportRef.current.scrollTo({
-            top: viewportRef.current.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
-  }, [chatHistory]);
 
   const handleGenerateReport = (formData: FormData) => {
     setReportHtml(null); // Clear previous report
@@ -165,23 +139,10 @@ function ReportsPage() {
               handleGenerateReport={handleGenerateReport}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <ReportDisplay
-                reportHtml={reportHtml}
-                isLoading={reportState.pending}
-              />
-              
-              <ReportChat
-                reportHtml={reportHtml}
-                isReportLoading={reportState.pending}
-                chatHistory={chatHistory}
-                setChatHistory={setChatHistory}
-                chatAction={chatAction}
-                isChatPending={chatState.pending}
-                currentUser={currentUser}
-                viewportRef={viewportRef}
-              />
-            </div>
+            <ReportDisplay
+              reportHtml={reportHtml}
+              isLoading={reportState.pending}
+            />
           </CardContent>
         </Card>
       </div>

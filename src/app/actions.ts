@@ -3,7 +3,7 @@
 "use server";
 
 import { sendEmail } from '@/ai/flows/send-email-flow';
-import { chatWithReport, generateFinancialReport } from '@/ai/flows/financial-report-flow';
+import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { transactions, goals, user, savedReports } from '@/lib/data';
@@ -77,12 +77,6 @@ const passwordResetSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
 });
 
-const financialReportChatSchema = z.object({
-    reportContext: z.string(),
-    message: z.string(),
-    chatHistory: z.string().optional(),
-});
-
 const generateReportSchema = z.object({
     month: z.string(),
     year: z.string(),
@@ -146,7 +140,6 @@ export type GenericState = {
 
 export type FinancialReportState = {
   reportHtml?: string | null;
-  chatResponse?: string | null;
   isNewReport?: boolean;
   error?: string | null;
   message?: string | null;
@@ -172,7 +165,6 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
     const reportId = `${ownerId}-${yearNum}-${month}`;
     
-    // 1. Check for cached report
     const cachedReport = savedReports.find(r => r.id === reportId);
     if (cachedReport) {
         return {
@@ -201,7 +193,6 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
             transactions: JSON.stringify(relevantTransactions, null, 2),
         });
 
-        // 2. Save the new report to cache
         savedReports.push({
             id: reportId,
             ownerId,
@@ -211,52 +202,12 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
 
         return {
             reportHtml: result.analysisHtml,
-            isNewReport: true, // Indica que um novo relatório foi gerado
+            isNewReport: true,
         };
     } catch (error) {
         console.error('Error generating financial report:', error);
         return { error: 'Ocorreu um erro ao gerar o relatório. Tente novamente.' };
     }
-}
-
-
-export async function getFinancialReportChat(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
-  const validatedFields = financialReportChatSchema.safeParse({
-    reportContext: formData.get('reportContext'),
-    message: formData.get('message'),
-    chatHistory: formData.get('chatHistory'),
-  });
-
-  if (!validatedFields.success) {
-    return { ...prevState, error: 'Dados de chat inválidos.', isNewReport: false };
-  }
-
-  const { reportContext, message, chatHistory } = validatedFields.data;
-  
-  if (!reportContext || !message) {
-      return { ...prevState, error: 'Contexto do relatório ou mensagem ausente.', isNewReport: false };
-  }
-  
-  try {
-    const result = await chatWithReport({
-        reportContext: reportContext,
-        question: message,
-        chatHistory: chatHistory || '[]',
-    });
-
-    return {
-        ...prevState,
-        chatResponse: result.answer,
-        isNewReport: false, // Indica que é uma resposta de chat
-    };
-  } catch (error) {
-    console.error('Error calling GenAI chat flow:', error);
-    return {
-      ...prevState,
-      error: 'Ocorreu um erro ao conversar com o assistente. Tente novamente.',
-      isNewReport: false,
-    };
-  }
 }
 
 
@@ -322,7 +273,6 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  // O ownerId não é editável, então não precisamos dele aqui.
   const validatedFields = transactionSchema.omit({ ownerId: true }).safeParse({
     id: formData.get('id'),
     description: formData.get('description'),
@@ -354,7 +304,6 @@ export async function updateTransaction(prevState: TransactionState, formData: F
       date: data.date || originalTransaction.date,
     };
     
-    // Invalidate cache for both old and new date if date changed
     invalidateReportCache(originalTransaction.date, originalTransaction.ownerId);
     if(originalTransaction.date !== transactions[index].date) {
         invalidateReportCache(transactions[index].date, transactions[index].ownerId);
@@ -419,7 +368,6 @@ export async function addGoal(prevState: GoalState, formData: FormData): Promise
     };
   }
 
-  // NOTE: This is mock data. In a real application, you would save this to a database.
   goals.push({
     id: `goal${goals.length + 1}`,
     currentAmount: 0,
@@ -454,7 +402,6 @@ export async function updateGoal(prevState: UpdateGoalState, formData: FormData)
         return { message: "Caixinha não encontrada." };
     }
     
-    // Mock: update goal in memory
     goals[goalIndex] = {
         ...goals[goalIndex],
         ...data,
@@ -483,7 +430,6 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
     };
   }
   
-  // NOTE: This is mock data. In a real application, you would save this to a database.
   console.log('Goal transaction:', validatedFields.data);
   const { amount, type, goalId } = validatedFields.data;
 
@@ -502,7 +448,7 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
         amount,
         type: 'transfer',
         category: 'Caixinha',
-        sourceAccountId: 'acc1', // Mock: assuming it comes from the main account
+        sourceAccountId: 'acc1', 
         destinationAccountId: goalId,
         ownerId: goal.ownerId,
         ownerType: goal.ownerType
@@ -521,7 +467,7 @@ export async function goalTransaction(prevState: GoalTransactionState, formData:
         type: 'transfer',
         category: 'Caixinha',
         sourceAccountId: goalId, 
-        destinationAccountId: 'acc1', // Mock: assuming it goes to the main account
+        destinationAccountId: 'acc1', 
         ownerId: goal.ownerId,
         ownerType: goal.ownerType
       })
@@ -543,7 +489,6 @@ export async function deleteGoal(formData: FormData) {
   });
 
   if (!validatedFields.success) {
-    // Handle error - maybe return a message
     return {
       message: 'ID da caixinha inválido.',
     };
@@ -578,12 +523,10 @@ export async function removeParticipantFromGoal(formData: FormData) {
     return { message: 'Caixinha não encontrada.' };
   }
 
-  // Remove o participante da meta
   if (goal.participants) {
     goal.participants = goal.participants.filter(p => p.id !== participantId);
   }
 
-  // Remove as transações associadas
   const transactionsToRemove = transactions.filter(t => 
     (t.destinationAccountId === goalId || t.sourceAccountId === goalId) && t.actorId === participantId
   );
@@ -614,7 +557,6 @@ export async function registerUser(prevState: GenericState, formData: FormData):
         };
     }
 
-    // In a real app, you'd save the user to the database here.
     console.log('New user registered:', validatedFields.data);
 
     try {
@@ -625,10 +567,8 @@ export async function registerUser(prevState: GenericState, formData: FormData):
         });
     } catch (error) {
         console.error("Email sending failed:", error);
-        // We don't block registration if email fails, but we could log it.
     }
 
-    // This would typically redirect to the login page or the dashboard
     redirect('/login');
 }
 
@@ -693,7 +633,6 @@ export async function sendPasswordReset(prevState: GenericState, formData: FormD
         return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
     } catch (error) {
         console.error("Email sending failed:", error);
-        // Don't reveal if the email exists or not
         return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
     }
 }
