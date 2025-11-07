@@ -246,8 +246,9 @@ export default function TransactionsPage() {
           initial="hidden"
           animate="visible"
           variants={containerVariants}
+          className="hidden md:block mb-8"
         >
-          <Card className="mb-8">
+          <Card>
               <CardHeader>
                   <CardTitle className='font-headline'>Resumo do Período</CardTitle>
                   <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
@@ -324,7 +325,6 @@ export default function TransactionsPage() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <ListFilter className="h-5 w-5 text-muted-foreground" />
                     <span className='text-sm font-medium sr-only md:not-sr-only'>Filtros:</span>
 
                     <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
@@ -332,7 +332,7 @@ export default function TransactionsPage() {
                           <SelectValue placeholder="Tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          <SelectItem value="all">Todos</SelectItem>
                           <SelectItem value="income">Entradas</SelectItem>
                           <SelectItem value="expense">Saídas</SelectItem>
                           <SelectItem value="transfer">Transferências</SelectItem>
@@ -351,20 +351,68 @@ export default function TransactionsPage() {
                           <SelectValue placeholder="Ano" />
                       </SelectTrigger>
                       <SelectContent>
-                          <SelectItem value="all">Todos os Anos</SelectItem>
+                          <SelectItem value="all">Todos</SelectItem>
                           {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <AddTransactionSheet accounts={accounts} />
+                    <div className="hidden md:block">
+                        <AddTransactionSheet accounts={accounts} />
+                    </div>
                   </div>
                 </div>
             </CardHeader>
-            <CardContent className='overflow-hidden'>
-                <Table>
+            <CardContent className='overflow-hidden p-0 md:p-6'>
+                {/* Mobile View */}
+                <motion.div className="space-y-4 md:hidden p-4" variants={containerVariants} initial="hidden" animate="visible">
+                    {filteredTransactions.map(t => {
+                        const typeInfo = getTypeDisplay(t.type);
+                        const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
+                        return (
+                            <motion.div variants={itemVariants} key={t.id} className="flex items-center gap-3 border-b pb-3 last:border-b-0">
+                                <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
+                                    <typeInfo.icon className={cn("h-5 w-5", typeInfo.color)}/>
+                                </div>
+                                <div className="flex-1 space-y-0.5">
+                                    <div className="flex justify-between">
+                                        <p className="font-medium">{t.description}</p>
+                                        <p className={cn("font-medium", {'text-green-600': t.type === 'income','text-foreground': t.type === 'expense','text-muted-foreground': t.type === 'transfer'})}>
+                                            {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                                            {formatCurrency(t.amount)}
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-muted-foreground">
+                                        <span>{formatDate(t.date)}</span>
+                                        {MethodIcon && (
+                                            <div className='flex items-center gap-1'>
+                                                <MethodIcon className="h-3 w-3" />
+                                                <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <EditTransactionSheet transaction={t} />
+                                        <DeleteTransactionDialog transactionId={t.id} />
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </motion.div>
+                        );
+                    })}
+                </motion.div>
+
+
+                {/* Desktop View */}
+                <Table className="hidden md:table">
                 <TableHeader>
                     <TableRow>
                     <TableHead>Transação</TableHead>
-                    <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                    <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                     <TableHead className="hidden lg:table-cell">Contas</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
@@ -400,7 +448,7 @@ export default function TransactionsPage() {
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden lg:table-cell">
                                     <Badge variant="outline">{t.category}</Badge>
                                 </TableCell>
                                 <TableCell className="hidden lg:table-cell text-xs">
@@ -443,28 +491,21 @@ export default function TransactionsPage() {
                             </motion.tr>
                         )
                     })}
-                    {filteredTransactions.length === 0 && (
-                    <TableRow>
-                        <TableCell
-                        colSpan={6}
-                        className="py-8 text-center text-muted-foreground"
-                        >
-                        Nenhuma transação encontrada para os filtros selecionados.
-                        </TableCell>
-                    </TableRow>
-                    )}
                 </motion.tbody>
                 </Table>
+
+                 {filteredTransactions.length === 0 && (
+                    <div className="py-12 text-center text-muted-foreground">
+                        Nenhuma transação encontrada para os filtros selecionados.
+                    </div>
+                )}
             </CardContent>
             </Card>
         </motion.div>
+        <div className="fixed bottom-6 right-6 md:hidden">
+            <AddTransactionSheet accounts={accounts} />
+        </div>
       </div>
     </div>
   );
 }
-
-
-    
-
-    
-
