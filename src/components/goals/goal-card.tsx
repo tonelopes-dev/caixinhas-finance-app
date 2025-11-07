@@ -69,7 +69,7 @@ export function GoalCard({
           <div className="flex-1">
             <CardTitle>{goal.name}</CardTitle>
             <CardDescription>
-              {formatCurrency(goal.currentAmount)} de{' '}
+              <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de{' '}
               {formatCurrency(goal.targetAmount)}
             </CardDescription>
           </div>
