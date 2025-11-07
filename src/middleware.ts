@@ -6,29 +6,32 @@ export function middleware(request: NextRequest) {
   const userId = request.cookies.get('CAIXINHAS_USER_ID')?.value;
   const { pathname } = request.nextUrl;
 
-  // Rotas públicas que não exigem autenticação
-  const publicRoutes = ['/login', '/register', '/terms', '/landing'];
+  // Rotas que não devem ser acessadas por usuários logados (ex: login, registro)
+  const authRoutes = ['/login', '/register'];
 
+  // Rotas públicas que podem ser acessadas por todos
+  const publicRoutes = ['/login', '/register', '/terms', '/landing'];
+  
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   
-  // A rota raiz (/) também é tratada como pública para permitir o redirecionamento inicial.
+  // A rota raiz (/) é um caso especial
   if (pathname === '/') {
     if (!userId) {
+      // Se não estiver logado, vai para a landing page
       return NextResponse.redirect(new URL('/landing', request.url));
     }
-    // Se estiver logado, deixa passar para a lógica da HomePage que redirecionará para /vaults ou /dashboard
+    // Se estiver logado, deixa passar para a lógica da HomePage que decidirá o próximo passo (/vaults ou /dashboard)
     return NextResponse.next();
   }
 
-
-  // Se o usuário está logado (tem o cookie)
+  // Se o usuário está logado
   if (userId) {
-    // E tenta acessar uma rota pública (login/registro), redireciona para a seleção de cofres
-    if (publicRoutes.includes(pathname)) {
+    // E tenta acessar uma rota de autenticação (login/registro), redireciona para a seleção de cofres
+    if (authRoutes.includes(pathname)) {
       return NextResponse.redirect(new URL('/vaults', request.url));
     }
   } 
-  // Se o usuário NÃO está logado (não tem o cookie)
+  // Se o usuário NÃO está logado
   else {
     // E tenta acessar uma rota que NÃO é pública
     if (!isPublicRoute) {
