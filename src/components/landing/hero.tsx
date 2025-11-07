@@ -9,8 +9,8 @@ export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-phones');
 
   return (
-    <section id="hero" className="container grid lg:grid-cols-2 place-items-center py-20 md:py-32 gap-10">
-      <div className="text-center lg:text-start space-y-6">
+    <section id="hero" className="container flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32">
+      <div className="text-center lg:text-start space-y-6 lg:w-1/2">
           <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
             Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' /></span> Financeiras
           </h1>

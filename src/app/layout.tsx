@@ -40,58 +40,43 @@ export default function RootLayout({
 
   useEffect(() => {
     const root = document.documentElement;
-    if (pathname.startsWith('/landing')) {
-        root.style.setProperty('--background', '0 0% 100%');
-        root.style.setProperty('--foreground', '0 0% 3.9%');
-        root.style.setProperty('--card', '0 0% 100%');
-        root.style.setProperty('--card-foreground', '0 0% 3.9%');
-        root.style.setProperty('--popover', '0 0% 100%');
-        root.style.setProperty('--popover-foreground', '0 0% 3.9%');
-        root.style.setProperty('--primary', '348 92% 52%'); // Um vermelho-rosado vibrante
-        root.style.setProperty('--primary-foreground', '0 0% 98%');
-        root.style.setProperty('--secondary', '0 0% 96.1%');
-        root.style.setProperty('--secondary-foreground', '0 0% 9%');
-        root.style.setProperty('--muted', '0 0% 96.1%');
-        root.style.setProperty('--muted-foreground', '0 0% 45.1%');
-        root.style.setProperty('--accent', '0 0% 96.1%');
-        root.style.setProperty('--accent-foreground', '0 0% 9%');
-        root.style.setProperty('--destructive', '0 84.2% 60.2%');
-        root.style.setProperty('--destructive-foreground', '0 0% 98%');
-        root.style.setProperty('--border', '0 0% 89.8%');
-        root.style.setProperty('--input', '0 0% 89.8%');
-        root.style.setProperty('--ring', '0 0% 3.9%');
-    } else {
-      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-      if (!userId) return;
+    // Sempre carrega o tema do usuário ou o padrão, garantindo consistência
+    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+    
+    const loadTheme = (type: 'background' | 'primary') => {
+      const themeKey = userId ? `app-theme-${type}-${userId}` : null;
+      const themeName = themeKey ? localStorage.getItem(themeKey) || "Padrão" : "Padrão";
+      const themeList = type === 'background' ? backgroundThemes : primaryThemes;
+      const theme = themeList.find((t) => t.name === themeName);
+      if (theme) {
+        root.style.setProperty(`--${type}`, theme.color);
+      }
+    };
 
-      const loadTheme = (type: 'background' | 'primary') => {
-        const themeKey = `app-theme-${type}-${userId}`;
-        const themeName = localStorage.getItem(themeKey) || "Padrão";
-        const themeList = type === 'background' ? backgroundThemes : primaryThemes;
-        const theme = themeList.find((t) => t.name === themeName);
-        if (theme) {
-          root.style.setProperty(`--${type}`, theme.color);
-        }
-      };
+    loadTheme('background');
+    loadTheme('primary');
 
-      loadTheme('background');
-      loadTheme('primary');
-       // Reset other colors to default theme if needed
-        root.style.setProperty('--foreground', '26 29% 20%');
-        root.style.setProperty('--card', '60 50% 96%');
-        root.style.setProperty('--card-foreground', '26 29% 20%');
-        root.style.setProperty('--popover', '60 50% 96%');
-        root.style.setProperty('--popover-foreground', '26 29% 20%');
-        root.style.setProperty('--secondary', '60 30% 88%');
-        root.style.setProperty('--secondary-foreground', '26 29% 20%');
-        root.style.setProperty('--muted', '60 30% 88%');
-        root.style.setProperty('--muted-foreground', '26 29% 40%');
-        root.style.setProperty('--accent', '26 29% 50%');
-        root.style.setProperty('--accent-foreground', '26 29% 98%');
-        root.style.setProperty('--border', '60 30% 85%');
-        root.style.setProperty('--input', '60 30% 85%');
-        root.style.setProperty('--ring', '45 65% 52%');
-    }
+    // Restaurar outras cores para o tema padrão do app
+    root.style.setProperty('--background', '60 56% 91%');
+    root.style.setProperty('--foreground', '26 29% 20%');
+    root.style.setProperty('--card', '60 50% 96%');
+    root.style.setProperty('--card-foreground', '26 29% 20%');
+    root.style.setProperty('--popover', '60 50% 96%');
+    root.style.setProperty('--popover-foreground', '26 29% 20%');
+    root.style.setProperty('--primary', '45 65% 52%');
+    root.style.setProperty('--primary-foreground', '45 65% 10%');
+    root.style.setProperty('--secondary', '60 30% 88%');
+    root.style.setProperty('--secondary-foreground', '26 29% 20%');
+    root.style.setProperty('--muted', '60 30% 88%');
+    root.style.setProperty('--muted-foreground', '26 29% 40%');
+    root.style.setProperty('--accent', '26 29% 50%');
+    root.style.setProperty('--accent-foreground', '26 29% 98%');
+    root.style.setProperty('--destructive', '0 84.2% 60.2%');
+    root.style.setProperty('--destructive-foreground', '0 0% 98%');
+    root.style.setProperty('--border', '60 30% 85%');
+    root.style.setProperty('--input', '60 30% 85%');
+    root.style.setProperty('--ring', '45 65% 52%');
+
   }, [pathname]);
 
   return (
@@ -107,8 +92,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={cn(
-        "antialiased",
-        pathname.startsWith('/landing') ? 'font-sans' : 'font-body app-body'
+        "antialiased app-body", // app-body aplica o gradiente em todas as páginas
+        pathname.startsWith('/landing') ? 'font-sans' : 'font-body'
       )}>
         <FirebaseClientProvider>
           {children}
