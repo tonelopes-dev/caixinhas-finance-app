@@ -7,14 +7,24 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rotas públicas que não exigem autenticação
-  const publicRoutes = ['/login', '/register', '/terms'];
+  const publicRoutes = ['/login', '/register', '/terms', '/landing'];
 
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  
+  // A rota raiz (/) também é tratada como pública para permitir o redirecionamento inicial.
+  if (pathname === '/') {
+    if (!userId) {
+      return NextResponse.redirect(new URL('/landing', request.url));
+    }
+    // Se estiver logado, deixa passar para a lógica da HomePage que redirecionará para /vaults ou /dashboard
+    return NextResponse.next();
+  }
+
 
   // Se o usuário está logado (tem o cookie)
   if (userId) {
     // E tenta acessar uma rota pública (login/registro), redireciona para a seleção de cofres
-    if (isPublicRoute) {
+    if (publicRoutes.includes(pathname)) {
       return NextResponse.redirect(new URL('/vaults', request.url));
     }
   } 

@@ -17,11 +17,14 @@ function HomePage() {
       setIsAuthenticated(true);
       const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
       if (vaultId) {
+        // Usuário logado e com cofre selecionado, vai para o dashboard
         router.replace('/dashboard');
       } else {
+        // Usuário logado mas sem cofre, vai para a seleção de cofres
         router.replace('/vaults');
       }
     } else {
+       // Usuário não logado, vai para a nova landing page
        router.replace('/landing');
     }
   }, [router]);
