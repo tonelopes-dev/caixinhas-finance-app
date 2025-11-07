@@ -60,11 +60,11 @@ export default function RootLayout({
       loadTheme('background');
       loadTheme('primary');
     } else {
-        document.documentElement.style.setProperty('--background', '0 0% 100%');
-        document.documentElement.style.setProperty('--foreground', '0 0% 0%');
-        document.documentElement.style.setProperty('--primary', '348 92% 52%');
-        document.documentElement.style.setProperty('--primary-foreground', '0 0% 100%');
-        document.documentElement.style.setProperty('--muted-foreground', '0 0% 45%');
+        document.documentElement.style.setProperty('--background', 'hsl(0 0% 100%)');
+        document.documentElement.style.setProperty('--foreground', 'hsl(0 0% 0%)');
+        document.documentElement.style.setProperty('--primary', 'hsl(348 92% 52%)');
+        document.documentElement.style.setProperty('--primary-foreground', 'hsl(0 0% 100%)');
+        document.documentElement.style.setProperty('--muted-foreground', 'hsl(0 0% 45%)');
     }
   }, [pathname]);
 
