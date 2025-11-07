@@ -9,21 +9,25 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { name: 'Início', href: '#hero' },
-  { name: 'Funcionalidades', href: '#features' },
-  { name: 'Depoimentos', href: '#testimonials' },
-  { name: 'FAQ', href: '#faq' },
+  { name: 'Home', href: '#hero' },
+  { name: 'Sobre Nós', href: '#features' },
+  { name: 'Preços', href: '#' },
+  { name: 'Funcionalidades', href: '#faq' },
 ];
 
 export function Header() {
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center gap-2">
           <Logo className="h-8 w-auto" />
-          <span className="hidden font-bold sm:inline-block">Caixinhas</span>
+          <span className="hidden font-bold sm:inline-block text-xl">Caixinhas</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm md:flex">
@@ -31,7 +35,10 @@ export function Header() {
             <Link
               key={link.name}
               href={link.href}
-              className="font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className={cn(
+                "font-medium text-foreground transition-colors hover:text-primary",
+                link.name === 'Home' && 'text-primary font-bold'
+                )}
             >
               {link.name}
             </Link>
@@ -39,11 +46,8 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Entrar</Link>
-          </Button>
           <Button asChild>
-            <Link href="/register">Começar Gratuitamente</Link>
+            <Link href="/register">Download</Link>
           </Button>
 
           <Sheet>

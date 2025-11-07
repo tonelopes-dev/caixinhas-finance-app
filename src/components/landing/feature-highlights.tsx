@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Star } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const features = [
@@ -23,29 +23,7 @@ export function FeatureHighlights() {
 
   return (
     <section className="container grid items-center gap-12 py-20 md:grid-cols-2 lg:py-32">
-      <div className="space-y-8">
-        <div className="space-y-2">
-            <p className="font-bold uppercase text-primary">Vantagens</p>
-            <h2 className="font-headline text-4xl font-bold">
-                Tudo o que vocês precisam para prosperar
-            </h2>
-            <p className="text-lg text-muted-foreground">
-                O Caixinhas une ferramentas poderosas a um design simples para que o planejamento financeiro seja uma jornada prazerosa, não uma tarefa.
-            </p>
-        </div>
-        <ul className="space-y-6">
-            {features.map((feature) => (
-                <li key={feature.title} className="flex items-start gap-4">
-                    <CheckCircle2 className="mt-1 h-6 w-6 flex-shrink-0 text-primary" />
-                    <div>
-                        <h3 className="font-semibold text-lg">{feature.title}</h3>
-                        <p className="text-muted-foreground">{feature.description}</p>
-                    </div>
-                </li>
-            ))}
-        </ul>
-      </div>
-      <div className="relative mx-auto h-[550px] w-[280px]">
+       <div className="relative mx-auto h-[550px] w-[280px]">
         {featureImage && (
             <Image
                 src={featureImage.imageUrl}
@@ -55,6 +33,27 @@ export function FeatureHighlights() {
                 data-ai-hint={featureImage.imageHint}
             />
         )}
+      </div>
+      <div className="space-y-8">
+        <div className="space-y-2">
+            <p className="font-bold uppercase text-primary">Vantagens</p>
+            <h2 className="font-sans text-4xl font-bold tracking-tighter">
+                Por que escolher o Caixinhas?
+            </h2>
+        </div>
+        <ul className="space-y-6">
+            {features.map((feature) => (
+                <li key={feature.title} className="flex items-start gap-4">
+                    <div className='flex items-center justify-center bg-primary/10 text-primary rounded-full h-8 w-8 flex-shrink-0'>
+                        <Star className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-lg">{feature.title}</h3>
+                        <p className="text-muted-foreground">{feature.description}</p>
+                    </div>
+                </li>
+            ))}
+        </ul>
       </div>
     </section>
   );

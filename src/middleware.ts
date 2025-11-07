@@ -51,7 +51,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - icons (PWA icons)
      * - manifest.json (PWA manifest)
+     * - gradient-underline.svg (image file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|icons|manifest.json).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icons|manifest.json|gradient-underline.svg).*)',
   ],
 };

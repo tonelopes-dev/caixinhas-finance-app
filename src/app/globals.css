@@ -42,39 +42,27 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
-    --background: 26 29% 10%;
-    --foreground: 60 56% 91%;
-    --card: 26 29% 12%;
-    --card-foreground: 60 56% 91%;
-    --popover: 26 29% 10%;
-    --popover-foreground: 60 56% 91%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 45 65% 52%;
     --primary-foreground: 45 65% 10%;
-    --secondary: 26 29% 18%;
-    --secondary-foreground: 60 56% 91%;
-    --muted: 26 29% 18%;
-    --muted-foreground: 60 30% 70%;
-    --accent: 26 29% 50%;
-    --accent-foreground: 26 29% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 26 29% 20%;
-    --input: 26 29% 20%;
-    --ring: 45 65% 52%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 346.8 77.2% 49.8%;
   }
 }
 
@@ -84,10 +72,13 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at top left, hsl(var(--secondary)), hsl(var(--background)) 50%);
   }
 
-  .dark body {
+  .app-body {
+     background-image: radial-gradient(circle at top left, hsl(var(--secondary)), hsl(var(--background)) 50%);
+  }
+
+  .dark .app-body {
     background-image: radial-gradient(circle at top left, hsl(var(--secondary)), hsl(var(--background)) 50%);
   }
 }

@@ -7,52 +7,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { FirebaseClientProvider } from '@/firebase';
 import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
 
-// Metadata and viewport can't be exported from a client component, but we'll keep the logic
-// and apply it dynamically if needed, or assume this file might switch back and forth.
-/*
-export const metadata: Metadata = {
-  applicationName: APP_NAME,
-  title: {
-    default: APP_NAME,
-    template: `%s - ${APP_NAME}`,
-  },
-  description: APP_DESCRIPTION,
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: APP_NAME,
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    siteName: APP_NAME,
-    title: {
-      default: APP_NAME,
-      template: `%s - ${APP_NAME}`,
-    },
-    description: APP_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary",
-    title: {
-      default: APP_NAME,
-      template: `%s - ${APP_NAME}`,
-    },
-    description: APP_DESCRIPTION,
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
-};
-*/
 
 const backgroundThemes = [
   { name: "Padrão", color: "60 56% 91%" },
@@ -76,10 +36,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
 
   useEffect(() => {
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-    if (!userId) return; // Se não houver usuário, não faz nada
+    if (!userId) return; 
 
     const applyTheme = (type: 'background' | 'primary', color: string) => {
       document.documentElement.style.setProperty(`--${type}`, color);
@@ -95,9 +56,17 @@ export default function RootLayout({
       }
     };
     
-    loadTheme('background');
-    loadTheme('primary');
-  }, []);
+    if(!pathname.startsWith('/landing')) {
+      loadTheme('background');
+      loadTheme('primary');
+    } else {
+        document.documentElement.style.setProperty('--background', '0 0% 100%');
+        document.documentElement.style.setProperty('--foreground', '0 0% 0%');
+        document.documentElement.style.setProperty('--primary', '348 92% 52%');
+        document.documentElement.style.setProperty('--primary-foreground', '0 0% 100%');
+        document.documentElement.style.setProperty('--muted-foreground', '0 0% 45%');
+    }
+  }, [pathname]);
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
@@ -106,12 +75,15 @@ export default function RootLayout({
         <meta name="description" content="Sonhar juntos é o primeiro passo para conquistar." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel='icon' href='/favicon.ico' sizes='any' />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className="font-body antialiased">
+      <body className={cn(
+        "antialiased",
+        pathname.startsWith('/landing') ? 'font-sans' : 'font-body app-body'
+      )}>
         <FirebaseClientProvider>
           {children}
           <Toaster />

@@ -8,15 +8,17 @@ import { Faq } from '@/components/landing/faq';
 import { Cta } from '@/components/landing/cta';
 import { Footer } from '@/components/landing/footer';
 import { FeatureHighlights } from '@/components/landing/feature-highlights';
+import { FullyCustomizable } from '@/components/landing/fully-customizable';
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-dvh w-full flex-col bg-background">
+    <div className="flex min-h-dvh w-full flex-col bg-background text-foreground">
       <Header />
       <main className="flex-1">
         <Hero />
-        <Features />
         <FeatureHighlights />
+        <Features />
+        <FullyCustomizable />
         <Testimonials />
         <Faq />
         <Cta />
