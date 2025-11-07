@@ -9,9 +9,8 @@ export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-phones');
 
   return (
-    <section id="hero" className="container py-20 lg:py-24">
-      <div className="flex flex-col items-center gap-12 lg:flex-row">
-        <div className="flex-1 space-y-6 text-center lg:text-left">
+    <section id="hero" className="container grid lg:grid-cols-2 place-items-center py-20 md:py-32 gap-10">
+      <div className="text-center lg:text-start space-y-6">
           <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
             Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' /></span> Financeiras
           </h1>
@@ -32,7 +31,7 @@ export function Hero() {
                   </Link>
               </Button>
           </div>
-          <div className='flex items-center justify-center gap-4 lg:justify-start'>
+          <div className='flex items-center justify-center gap-4 lg:justify-start pt-4'>
               <div className='flex -space-x-2'>
                   <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" />
                   <Image src="https://randomuser.me/api/portraits/women/32.jpg" alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" />
@@ -62,7 +61,6 @@ export function Hero() {
               />
           )}
         </div>
-      </div>
     </section>
   );
 }

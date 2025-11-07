@@ -43,7 +43,7 @@ export function Testimonials() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center mt-12">
             <div className="relative hidden items-center justify-center lg:flex h-96">
                 <div className='absolute h-40 w-40 bg-primary/20 rounded-full blur-3xl animate-blob' />
-                <div className='absolute top-10 left-20 h-40 w-40 bg-red-500/20 rounded-full blur-3xl animate-blob animation-delay-2000' />
+                <div className='absolute top-10 left-20 h-40 w-40 bg-destructive/20 rounded-full blur-3xl animate-blob animation-delay-2000' />
                 <div className='absolute bottom-10 right-20 h-40 w-40 bg-yellow-500/20 rounded-full blur-3xl animate-blob animation-delay-4000' />
                 
                 {testimonialImage && (

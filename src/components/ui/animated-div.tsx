@@ -16,7 +16,7 @@ export function AnimatedDiv({ children, ...props }: AnimatedDivProps) {
       initial="hidden"
       animate="visible"
       variants={variants}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       {...props}
     >
       {children}

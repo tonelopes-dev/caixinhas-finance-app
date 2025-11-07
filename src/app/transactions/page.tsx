@@ -190,8 +190,7 @@ export default function TransactionsPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 1.5,
+        staggerChildren: 0.05,
       },
     },
   };
@@ -203,7 +202,7 @@ export default function TransactionsPage() {
       opacity: 1,
       transition: {
         ease: 'easeOut',
-        duration: 0.5,
+        duration: 0.3,
       },
     },
   };
@@ -256,7 +255,7 @@ export default function TransactionsPage() {
               <CardContent>
                   <motion.div className="grid gap-4 md:grid-cols-3" initial="hidden" animate="visible" variants={containerVariants}>
                       {typeFilter === 'transfer' ? (
-                         <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'transfer' && activeClasses)} onClick={() => setTypeFilter('transfer')}>
+                         <motion.div variants={summaryItemVariants(0.1)} className={cn(cardBaseClasses, typeFilter === 'transfer' && activeClasses)} onClick={() => setTypeFilter('transfer')}>
                             <div className="rounded-full bg-blue-500/10 p-3">
                                 <ArrowRightLeft className="h-6 w-6 text-blue-500" />
                             </div>
@@ -266,7 +265,7 @@ export default function TransactionsPage() {
                             </div>
                         </motion.div>
                       ) : (
-                        <motion.div variants={summaryItemVariants(0.5)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
+                        <motion.div variants={summaryItemVariants(0.1)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
                             <div className="rounded-full bg-primary/10 p-3">
                                 <Wallet className="h-6 w-6 text-primary" />
                             </div>
@@ -276,7 +275,7 @@ export default function TransactionsPage() {
                             </div>
                         </motion.div>
                       )}
-                      <motion.div variants={summaryItemVariants(0.6)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
+                      <motion.div variants={summaryItemVariants(0.2)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
                           <div className="rounded-full bg-green-500/10 p-3">
                               <TrendingUp className="h-6 w-6 text-green-500" />
                           </div>
@@ -285,7 +284,7 @@ export default function TransactionsPage() {
                               <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
                           </div>
                       </motion.div>
-                      <motion.div variants={summaryItemVariants(0.7)} className={cn(cardBaseClasses, typeFilter === 'expense' && activeClasses)} onClick={() => setTypeFilter('expense')}>
+                      <motion.div variants={summaryItemVariants(0.3)} className={cn(cardBaseClasses, typeFilter === 'expense' && activeClasses)} onClick={() => setTypeFilter('expense')}>
                           <div className="rounded-full bg-red-500/10 p-3">
                               <TrendingDown className="h-6 w-6 text-red-500" />
                           </div>
@@ -302,7 +301,7 @@ export default function TransactionsPage() {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.5 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
         >
             <Card>
             <CardHeader>
