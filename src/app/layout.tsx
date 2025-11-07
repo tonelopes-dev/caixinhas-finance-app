@@ -39,32 +39,58 @@ export default function RootLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-    if (!userId) return; 
+    const root = document.documentElement;
+    if (pathname.startsWith('/landing')) {
+        root.style.setProperty('--background', '0 0% 100%');
+        root.style.setProperty('--foreground', '0 0% 3.9%');
+        root.style.setProperty('--card', '0 0% 100%');
+        root.style.setProperty('--card-foreground', '0 0% 3.9%');
+        root.style.setProperty('--popover', '0 0% 100%');
+        root.style.setProperty('--popover-foreground', '0 0% 3.9%');
+        root.style.setProperty('--primary', '348 92% 52%'); // Um vermelho-rosado vibrante
+        root.style.setProperty('--primary-foreground', '0 0% 98%');
+        root.style.setProperty('--secondary', '0 0% 96.1%');
+        root.style.setProperty('--secondary-foreground', '0 0% 9%');
+        root.style.setProperty('--muted', '0 0% 96.1%');
+        root.style.setProperty('--muted-foreground', '0 0% 45.1%');
+        root.style.setProperty('--accent', '0 0% 96.1%');
+        root.style.setProperty('--accent-foreground', '0 0% 9%');
+        root.style.setProperty('--destructive', '0 84.2% 60.2%');
+        root.style.setProperty('--destructive-foreground', '0 0% 98%');
+        root.style.setProperty('--border', '0 0% 89.8%');
+        root.style.setProperty('--input', '0 0% 89.8%');
+        root.style.setProperty('--ring', '0 0% 3.9%');
+    } else {
+      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
+      if (!userId) return;
 
-    const applyTheme = (type: 'background' | 'primary', color: string) => {
-      document.documentElement.style.setProperty(`--${type}`, color);
-    };
+      const loadTheme = (type: 'background' | 'primary') => {
+        const themeKey = `app-theme-${type}-${userId}`;
+        const themeName = localStorage.getItem(themeKey) || "Padrão";
+        const themeList = type === 'background' ? backgroundThemes : primaryThemes;
+        const theme = themeList.find((t) => t.name === themeName);
+        if (theme) {
+          root.style.setProperty(`--${type}`, theme.color);
+        }
+      };
 
-    const loadTheme = (type: 'background' | 'primary') => {
-      const themeKey = `app-theme-${type}-${userId}`;
-      const themeName = localStorage.getItem(themeKey) || "Padrão";
-      const themeList = type === 'background' ? backgroundThemes : primaryThemes;
-      const theme = themeList.find((t) => t.name === themeName);
-      if (theme) {
-        applyTheme(type, theme.color);
-      }
-    };
-    
-    if(!pathname.startsWith('/landing')) {
       loadTheme('background');
       loadTheme('primary');
-    } else {
-        document.documentElement.style.setProperty('--background', 'hsl(0 0% 100%)');
-        document.documentElement.style.setProperty('--foreground', 'hsl(0 0% 0%)');
-        document.documentElement.style.setProperty('--primary', 'hsl(348 92% 52%)');
-        document.documentElement.style.setProperty('--primary-foreground', 'hsl(0 0% 100%)');
-        document.documentElement.style.setProperty('--muted-foreground', 'hsl(0 0% 45%)');
+       // Reset other colors to default theme if needed
+        root.style.setProperty('--foreground', '26 29% 20%');
+        root.style.setProperty('--card', '60 50% 96%');
+        root.style.setProperty('--card-foreground', '26 29% 20%');
+        root.style.setProperty('--popover', '60 50% 96%');
+        root.style.setProperty('--popover-foreground', '26 29% 20%');
+        root.style.setProperty('--secondary', '60 30% 88%');
+        root.style.setProperty('--secondary-foreground', '26 29% 20%');
+        root.style.setProperty('--muted', '60 30% 88%');
+        root.style.setProperty('--muted-foreground', '26 29% 40%');
+        root.style.setProperty('--accent', '26 29% 50%');
+        root.style.setProperty('--accent-foreground', '26 29% 98%');
+        root.style.setProperty('--border', '60 30% 85%');
+        root.style.setProperty('--input', '60 30% 85%');
+        root.style.setProperty('--ring', '45 65% 52%');
     }
   }, [pathname]);
 
