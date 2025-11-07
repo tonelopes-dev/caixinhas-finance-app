@@ -10,7 +10,7 @@ export const users: User[] = [
   },
   {
     id: 'user2',
-    name: 'Nutri',
+    name: 'Anna',
     email: 'email02@conta.com',
     avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=1080',
     subscriptionStatus: 'active',
@@ -27,4 +27,4 @@ export const user: User = users.find(u => u.id === 'user1')!;
 export const partner: User = users.find(u => u.id === 'user2')!;
 
 export const dev = users.find(u => u.id === 'user1')!;
-export const nutri = users.find(u => u.id === 'user2')!;
+export const anna = users.find(u => u.id === 'user2')!;

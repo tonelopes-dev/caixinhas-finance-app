@@ -1,5 +1,5 @@
 import type { Notification, Invitation } from '../definitions';
-import { users, nutri } from './users';
+import { users, anna } from './users';
 
 export const invitations: Invitation[] = [
   {
@@ -12,7 +12,7 @@ export const invitations: Invitation[] = [
    {
     id: 'inv2',
     goalName: 'Cofre dos Formandos',
-    invitedBy: 'Colega da Nutri',
+    invitedBy: 'Colega da Anna',
     status: 'pending' as const,
     type: 'vault' as const,
   },
@@ -34,8 +34,8 @@ export const notifications: Notification[] = [
       id: 'n2',
       type: 'transaction_added',
       relatedId: 't-fam-1',
-      actor: nutri,
-      text: '<b>Nutri</b> adicionou uma nova despesa de <b>R$ 1.800,00</b> em "Família DevNutri".',
+      actor: anna,
+      text: '<b>Anna</b> adicionou uma nova despesa de <b>R$ 1.800,00</b> em "Família DevAnna".',
       timestamp: '2024-07-27T15:30:00Z',
       read: false,
       link: '/transactions'
@@ -44,7 +44,7 @@ export const notifications: Notification[] = [
       id: 'n3',
       type: 'goal_progress',
       relatedId: 'goal-family-priv-dev',
-      text: 'Parabéns! Vocês alcançaram <b>90%</b> da meta "Presente Surpresa Nutri".',
+      text: 'Parabéns! Vocês alcançaram <b>90%</b> da meta "Presente Surpresa Anna".',
       timestamp: '2024-07-26T11:00:00Z',
       read: true,
       link: '/goals/goal-family-priv-dev'

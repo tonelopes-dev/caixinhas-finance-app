@@ -1,12 +1,12 @@
 import type { Vault, VaultInvitation } from '../definitions';
-import { dev, nutri } from './users';
+import { dev, anna } from './users';
 
 export const vaults: Vault[] = [
   {
     id: 'vault-family',
-    name: 'Família DevNutri',
+    name: 'Família DevAnna',
     ownerId: dev.id,
-    members: [dev, nutri],
+    members: [dev, anna],
     imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080'
   },
   {
@@ -18,21 +18,21 @@ export const vaults: Vault[] = [
   },
    {
     id: 'vault-office',
-    name: 'Consultório Nutri',
-    ownerId: nutri.id,
-    members: [nutri], // Apenas a Nutri é membro
+    name: 'Consultório Anna',
+    ownerId: anna.id,
+    members: [anna], // Apenas a Anna é membro
     imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1080'
   },
   {
     id: 'vault-trip',
     name: 'Viagem para o Japão',
     ownerId: dev.id,
-    members: [dev, nutri],
+    members: [dev, anna],
     imageUrl: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=1080'
   }
 ];
 
 export const vaultInvitations: VaultInvitation[] = [
-  // Exemplo: Dev convidou a Nutri para o cofre da família.
+  // Exemplo: Dev convidou a Anna para o cofre da família.
   // Em um app real, o status mudaria para 'accepted' e ela seria adicionada aos membros.
 ];

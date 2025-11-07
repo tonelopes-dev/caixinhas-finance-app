@@ -1,12 +1,12 @@
 import type { Goal, GoalParticipant } from '../definitions';
-import { users, dev, nutri } from './users';
+import { users, dev, anna } from './users';
 
 // --- PARTICIPANTES DE METAS ---
 const devParticipant: GoalParticipant = { id: dev.id, name: dev.name, avatarUrl: dev.avatarUrl, role: 'owner', contributionContextId: 'user1' };
-const nutriParticipant: GoalParticipant = { id: nutri.id, name: nutri.name, avatarUrl: nutri.avatarUrl, role: 'member', contributionContextId: 'user2' };
-const familyParticipants: GoalParticipant[] = [devParticipant, nutriParticipant];
+const annaParticipant: GoalParticipant = { id: anna.id, name: anna.name, avatarUrl: anna.avatarUrl, role: 'member', contributionContextId: 'user2' };
+const familyParticipants: GoalParticipant[] = [devParticipant, annaParticipant];
 const friendsParticipants: GoalParticipant[] = [
-    { ...nutriParticipant, role: 'owner', contributionContextId: 'user2' }, // Nutri is the owner of this goal
+    { ...annaParticipant, role: 'owner', contributionContextId: 'user2' }, // Anna is the owner of this goal
     ...users.slice(2, 5).map(u => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl, role: 'member' as const, contributionContextId: u.id }))
 ];
 
@@ -26,9 +26,9 @@ export const goals: Goal[] = [
     isFeatured: true,
   },
 
-  // -- Metas Pessoais da Nutri --
+  // -- Metas Pessoais da Anna --
   {
-    id: 'goal-nutri-1',
+    id: 'goal-anna-1',
     ownerId: 'user2',
     ownerType: 'user',
     name: 'Viagem com Amigos',
@@ -40,7 +40,7 @@ export const goals: Goal[] = [
     isFeatured: true,
   },
   {
-    id: 'goal-nutri-2',
+    id: 'goal-anna-2',
     ownerId: 'user2',
     ownerType: 'user',
     name: 'Consultório dos Sonhos',
@@ -48,10 +48,10 @@ export const goals: Goal[] = [
     currentAmount: 3500,
     emoji: '🛋️',
     visibility: 'private',
-    participants: [{ ...nutriParticipant, role: 'owner' }],
+    participants: [{ ...annaParticipant, role: 'owner' }],
   },
     {
-    id: 'goal-nutri-3',
+    id: 'goal-anna-3',
     ownerId: 'user2',
     ownerType: 'user',
     name: 'Presente para o Dev',
@@ -59,7 +59,7 @@ export const goals: Goal[] = [
     currentAmount: 980,
     emoji: '🎁',
     visibility: 'private',
-    participants: [{ ...nutriParticipant, role: 'owner' }],
+    participants: [{ ...annaParticipant, role: 'owner' }],
   },
   
   // -- Metas do Cofre da Agência (Apenas o Dev vê) --
@@ -75,7 +75,7 @@ export const goals: Goal[] = [
     participants: [devParticipant],
   },
 
-  // -- Metas do Cofre do Consultório (Apenas a Nutri vê) --
+  // -- Metas do Cofre do Consultório (Apenas a Anna vê) --
   {
     id: 'goal-office-1',
     ownerId: 'vault-office',
@@ -85,7 +85,7 @@ export const goals: Goal[] = [
     currentAmount: 11000, // This is now calculated dynamically
     emoji: '🔬',
     visibility: 'shared',
-    participants: [{ ...nutriParticipant, role: 'owner' }],
+    participants: [{ ...annaParticipant, role: 'owner' }],
   },
     {
     id: 'goal-office-2',
@@ -96,7 +96,7 @@ export const goals: Goal[] = [
     currentAmount: 0,
     emoji: '🖼️',
     visibility: 'shared',
-    participants: [{ ...nutriParticipant, role: 'owner' }],
+    participants: [{ ...annaParticipant, role: 'owner' }],
   },
   
   // -- Metas do Cofre da Família --
@@ -127,7 +127,7 @@ export const goals: Goal[] = [
     id: 'goal-family-priv-dev',
     ownerId: 'vault-family',
     ownerType: 'vault',
-    name: 'Presente Surpresa Nutri',
+    name: 'Presente Surpresa Anna',
     targetAmount: 2000,
     currentAmount: 1500, // This is now calculated dynamically
     emoji: '🎁',
@@ -135,14 +135,14 @@ export const goals: Goal[] = [
     participants: [devParticipant].map(p => ({ ...p, contributionContextId: 'vault-family' })),
   },
   {
-    id: 'goal-family-priv-nutri',
+    id: 'goal-family-priv-anna',
     ownerId: 'vault-family',
     ownerType: 'vault',
     name: 'Curso de Culinária',
     targetAmount: 1500,
     currentAmount: 950, // This is now calculated dynamically
     emoji: '🍳',
-    visibility: 'private', // Só a Nutri pode ver
-    participants: [nutriParticipant].map(p => ({ ...p, contributionContextId: 'vault-family' })),
+    visibility: 'private', // Só a Anna pode ver
+    participants: [annaParticipant].map(p => ({ ...p, contributionContextId: 'vault-family' })),
   },
 ];
