@@ -83,13 +83,13 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <span className="text-5xl">{goal.emoji}</span>
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left sm:items-start gap-4">
+              <span className="text-5xl sm:text-6xl">{goal.emoji}</span>
               <div className="flex-1">
-                <CardTitle className="font-headline text-3xl">
+                <CardTitle className="font-headline text-2xl md:text-3xl">
                   {goal.name}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="mt-1">
                   <AnimatedCounter
                     value={currentAmount}
                     formatter={formatCurrency}
@@ -113,7 +113,7 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="my-4 flex gap-2">
+            <div className="my-4 flex flex-col sm:flex-row gap-2">
               <GoalTransactionDialog type="deposit" goalId={goal.id} />
               <GoalTransactionDialog type="withdrawal" goalId={goal.id} />
             </div>
@@ -128,30 +128,32 @@ export default function GoalDetailPage({ params }: { params: { id: string } }) {
                 const actor = users.find((p) => p.id === activity.actorId) || { name: 'Usuário', avatarUrl: ''};
                 return (
                   <div key={activity.id} className="flex items-center gap-4">
-                    <Avatar className="h-9 w-9">
+                    <Avatar className="h-10 w-10">
                       <AvatarImage src={actor.avatarUrl} alt={actor.name} />
                       <AvatarFallback>{actor.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-semibold">{actor.name}</span>
-                        {isDeposit ? ' guardou ' : ' retirou '}
-                        <span
-                          className={cn(
-                            'font-bold',
-                            isDeposit ? 'text-green-600' : 'text-red-600'
-                          )}
-                        >
-                          {formatCurrency(activity.amount)}
-                        </span>
-                      </p>
+                      <div className='flex justify-between items-baseline'>
+                        <p className="text-sm sm:text-base">
+                            <span className="font-semibold">{actor.name}</span>
+                            {isDeposit ? ' guardou ' : ' retirou '}
+                            <span
+                            className={cn(
+                                'font-bold',
+                                isDeposit ? 'text-green-600' : 'text-red-600'
+                            )}
+                            >
+                            {formatCurrency(activity.amount)}
+                            </span>
+                        </p>
+                         <time className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                            {formatDate(activity.date)}
+                        </time>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {activity.description}
                       </p>
                     </div>
-                    <time className="text-sm text-muted-foreground">
-                      {formatDate(activity.date)}
-                    </time>
                   </div>
                 );
               })}
