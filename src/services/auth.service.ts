@@ -1,0 +1,215 @@
+import prisma from './prisma';
+
+export type UserWithoutPassword = {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  subscriptionStatus: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type CreateUserInput = {
+  name: string;
+  email: string;
+  password: string;
+  avatarUrl?: string;
+};
+
+export type LoginInput = {
+  email: string;
+  password: string;
+};
+
+/**
+ * AuthService - Serviço de autenticação de usuários
+ * Responsável por login, registro e validação de credenciais
+ */
+export class AuthService {
+  /**
+   * Autentica um usuário com email e senha
+   * @param data - Credenciais de login
+   * @returns Usuário autenticado (sem senha) ou null
+   */
+  static async login(data: LoginInput): Promise<UserWithoutPassword | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email: data.email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          subscriptionStatus: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      // Por enquanto, sem validação de senha (Firebase Auth fará isso)
+      // Quando migrarmos totalmente para Prisma, descomentar:
+      // const isValidPassword = await bcrypt.compare(data.password, user.password);
+      // if (!isValidPassword) return null;
+
+      return user;
+    } catch (error) {
+      console.error('Erro no login:', error);
+      throw new Error('Erro ao realizar login');
+    }
+  }
+
+  /**
+   * Registra um novo usuário
+   * @param data - Dados do novo usuário
+   * @returns Usuário criado (sem senha)
+   */
+  static async register(data: CreateUserInput): Promise<UserWithoutPassword> {
+    try {
+      // Verificar se o email já existe
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email },
+      });
+
+      if (existingUser) {
+        throw new Error('Este e-mail já está cadastrado');
+      }
+
+      // Hash da senha (quando não estivermos usando Firebase Auth)
+      // const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      // Criar usuário
+      const user = await prisma.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          avatarUrl: data.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
+          subscriptionStatus: 'trial',
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          subscriptionStatus: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Erro ao registrar usuário:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Busca um usuário por ID
+   * @param id - ID do usuário
+   * @returns Usuário encontrado (sem senha) ou null
+   */
+  static async getUserById(id: string): Promise<UserWithoutPassword | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          subscriptionStatus: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Busca um usuário por email
+   * @param email - Email do usuário
+   * @returns Usuário encontrado (sem senha) ou null
+   */
+  static async getUserByEmail(email: string): Promise<UserWithoutPassword | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          subscriptionStatus: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Erro ao buscar usuário por email:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Atualiza o status de assinatura do usuário
+   * @param userId - ID do usuário
+   * @param status - Novo status da assinatura
+   */
+  static async updateSubscriptionStatus(
+    userId: string,
+    status: 'active' | 'inactive' | 'trial'
+  ): Promise<void> {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { subscriptionStatus: status },
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status de assinatura:', error);
+      throw new Error('Erro ao atualizar status de assinatura');
+    }
+  }
+
+  /**
+   * Atualiza dados do perfil do usuário
+   * @param userId - ID do usuário
+   * @param data - Dados a serem atualizados
+   */
+  static async updateProfile(
+    userId: string,
+    data: { name?: string; avatarUrl?: string }
+  ): Promise<UserWithoutPassword> {
+    try {
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          subscriptionStatus: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      throw new Error('Erro ao atualizar perfil');
+    }
+  }
+}

@@ -16,7 +16,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useActionState, useEffect } from 'react';
-import { registerUser, type GenericState } from '@/app/actions';
+import { registerAction, type RegisterState } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { useFormStatus } from 'react-dom';
 
@@ -32,8 +32,8 @@ function SubmitButton() {
 
 export default function RegisterPage() {
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
-    const initialState: GenericState = {};
-    const [state, dispatch] = useActionState(registerUser, initialState);
+    const initialState: RegisterState = {};
+    const [state, dispatch] = useActionState(registerAction, initialState);
     const { toast } = useToast();
 
     useEffect(() => {
