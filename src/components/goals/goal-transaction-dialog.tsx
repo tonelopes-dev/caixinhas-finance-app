@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useEffect, useRef, useActionState } from 'react';
+import React, { useEffect, useRef, useState as useStateReact } from 'react';
 import { useFormStatus } from 'react-dom';
-import { goalTransaction, type GoalTransactionState } from '@/app/actions';
+import { depositToGoalAction, withdrawFromGoalAction } from '@/app/goals/actions';
 import {
   Dialog,
   DialogContent,
@@ -32,31 +32,56 @@ function SubmitButton({ type }: { type: 'deposit' | 'withdrawal' }) {
 type GoalTransactionDialogProps = {
   type: 'deposit' | 'withdrawal';
   goalId: string;
+  onComplete?: () => void;
 };
 
-export function GoalTransactionDialog({ type, goalId }: GoalTransactionDialogProps) {
-  const initialState: GoalTransactionState = {};
-  const [state, dispatch] = useActionState(goalTransaction, initialState);
+export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransactionDialogProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useStateReact(false);
+  const [isSubmitting, setIsSubmitting] = useStateReact(false);
 
-  useEffect(() => {
-    if (state.message && !state.errors) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const amount = parseFloat(formData.get('amount') as string);
+    const description = formData.get('description') as string || '';
+
+    try {
+      let result;
+      if (type === 'deposit') {
+        result = await depositToGoalAction(goalId, amount, description);
+      } else {
+        result = await withdrawFromGoalAction(goalId, amount, description);
+      }
+
+      if (result.success) {
+        toast({
+          title: "Sucesso!",
+          description: result.message,
+        });
+        formRef.current?.reset();
+        setOpen(false);
+        onComplete?.();
+      } else {
+        toast({
+          title: "Erro",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Sucesso!",
-        description: state.message,
-      });
-      formRef.current?.reset();
-      setOpen(false);
-    } else if (state.message && state.errors) {
-      toast({
-        title: "Erro de Validação",
-        description: state.message,
+        title: "Erro",
+        description: "Ocorreu um erro inesperado.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [state, toast]);
+  };
 
   const title = type === 'deposit' ? 'Guardar Dinheiro' : 'Retirar Dinheiro';
   const description = type === 'deposit' ? 'Quanto você quer guardar na sua caixinha?' : 'Quanto você quer retirar da sua caixinha?';
@@ -78,23 +103,28 @@ export function GoalTransactionDialog({ type, goalId }: GoalTransactionDialogPro
             {description}
           </DialogDescription>
         </DialogHeader>
-        <form ref={formRef} action={dispatch}>
-            <input type="hidden" name="type" value={type} />
-            <input type="hidden" name="goalId" value={goalId} />
+        <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                <Label htmlFor="amount" className="text-right">
-                    Valor
-                </Label>
-                <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" />
-                {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                  <Label htmlFor="amount" className="text-right">
+                      Valor
+                  </Label>
+                  <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-right">
+                      Descrição (opcional)
+                  </Label>
+                  <Input id="description" name="description" type="text" placeholder="Ex: Mesada de janeiro" />
                 </div>
             </div>
             <DialogFooter>
                 <DialogClose asChild>
                     <Button type="button" variant="ghost">Cancelar</Button>
                 </DialogClose>
-                <SubmitButton type={type} />
+                <Button type="submit" disabled={isSubmitting} variant={type === 'withdrawal' ? 'destructive' : 'default'}>
+                  {isSubmitting ? 'Salvando...' : type === 'deposit' ? 'Guardar' : 'Retirar'}
+                </Button>
             </DialogFooter>
         </form>
       </DialogContent>

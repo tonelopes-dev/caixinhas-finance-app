@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
-import { addGoal, type GoalState } from '@/app/actions';
+import { createGoalAction, type GoalActionState } from '@/app/goals/actions';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -35,8 +35,8 @@ function SubmitButton() {
 }
 
 export default function NewGoalPage() {
-  const initialState: GoalState = {};
-  const [state, dispatch] = useActionState(addGoal, initialState);
+  const initialState: GoalActionState = {};
+  const [state, dispatch] = useActionState(createGoalAction, initialState);
   const { toast } = useToast();
   const [visibility, setVisibility] = useState('shared');
   const [selectedEmoji, setSelectedEmoji] = useState('');
