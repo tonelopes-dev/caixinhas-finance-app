@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       }
+      ,
+      {
+        protocol: 'https',
+        hostname: 'caixinhas-finance-app.s3.us-east-1.amazonaws.com',}
     ],
   },
 };

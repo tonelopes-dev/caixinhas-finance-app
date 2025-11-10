@@ -1,40 +1,22 @@
-'use client';
+"use client"
 
-import { Hero } from '@/components/landing/hero';
-import { Features } from '@/components/landing/features';
-import { Testimonials } from '@/components/landing/testimonials';
-import { Faq } from '@/components/landing/faq';
-import { Cta } from '@/components/landing/cta';
-import { FeatureHighlights } from '@/components/landing/feature-highlights';
-import { FullyCustomizable } from '@/components/landing/fully-customizable';
-import { AnimatedDiv } from '@/components/ui/animated-div';
+import { Header, HeroSection, ProblemSolutionSection, FeaturesSection, PWASection, BenefitsSection, HowItWorksSection, StorySection, PricingSection, CTASection, useScrollAnimations } from "@/components/landing-page"
 
 export default function LandingPage() {
+  const { scrollY, isVisible } = useScrollAnimations()
+
   return (
-    <div className="flex min-h-dvh w-full flex-col text-foreground">
-      <main className="flex-1">
-        <AnimatedDiv>
-          <Hero />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <FeatureHighlights />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <Features />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <FullyCustomizable />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <Testimonials />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <Faq />
-        </AnimatedDiv>
-        <AnimatedDiv>
-          <Cta />
-        </AnimatedDiv>
-      </main>
+    <div className="min-h-screen">
+      <Header />
+      <HeroSection scrollY={scrollY} />
+      <ProblemSolutionSection isVisible={isVisible} />
+      <FeaturesSection isVisible={isVisible} />
+      <PWASection isVisible={isVisible} />
+      <BenefitsSection isVisible={isVisible} />
+      <HowItWorksSection isVisible={isVisible} />
+      <StorySection isVisible={isVisible} />
+      <PricingSection isVisible={isVisible} />
+      <CTASection />
     </div>
-  );
+  )
 }

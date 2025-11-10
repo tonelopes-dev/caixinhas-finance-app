@@ -28,7 +28,6 @@ export function Logo(props: Partial<ImageProps>) {
       width={48}
       height={48}
       priority
-      unoptimized
       className={cn('h-12 w-12 object-contain', className)}
       {...rest}
     />
