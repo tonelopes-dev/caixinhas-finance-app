@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
+import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { logoutAction } from '@/app/login/actions';
 
@@ -197,13 +198,15 @@ export function VaultsPageClient({
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
 
-  const handleSelectWorkspace = (workspaceId: string) => {
-    // workspaceId can be a userId or a vaultId
+  const handleSelectWorkspace = async (workspaceId: string) => {
+    // Salvar no sessionStorage para compatibilidade com código existente
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('CAIXINHAS_VAULT_ID', workspaceId);
       localStorage.setItem('CAIXINHAS_USER_ID', currentUser.id);
     }
-    router.push('/');
+    
+    // Salvar no cookie e redirecionar via Server Action
+    await setWorkspaceAction(workspaceId, currentUser.id);
   };
 
   const handleLogout = async () => {
