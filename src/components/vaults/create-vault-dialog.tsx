@@ -15,13 +15,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ExternalLink, Plus, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { users } from '@/lib/data';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import type { User } from '@/lib/definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
 import { VaultCreationSuccessDialog } from './vault-creation-success-dialog';
+import { createVaultAction } from '@/app/vaults/actions';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+};
 
 const coverImages = [
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -35,48 +44,54 @@ const coverImages = [
 interface CreateVaultDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentUser: User | null;
+  currentUser: User;
 }
 
 export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVaultDialogProps) {
   const [vaultName, setVaultName] = React.useState('');
-  const [members, setMembers] = React.useState<User[]>(currentUser ? [currentUser] : []);
   const [selectedImage, setSelectedImage] = React.useState(coverImages[0]);
   const [customImageUrl, setCustomImageUrl] = React.useState('');
-  const [email, setEmail] = React.useState('');
   const [isSuccessModalOpen, setSuccessModalOpen] = React.useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+  
+  const [state, formAction, isPending] = useActionState(createVaultAction, {
+    message: null,
+  });
 
-
-  const handleAddMember = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const userToAdd = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (userToAdd && !members.some(m => m.id === userToAdd.id)) {
-      setMembers([...members, userToAdd]);
-      setEmail('');
-    } else {
-      // Em um app real, aqui mostraria um toast de erro.
-      console.log('Usuário não encontrado ou já adicionado');
+  React.useEffect(() => {
+    if (state?.message && !state?.errors) {
+      toast({
+        title: 'Sucesso',
+        description: state.message,
+      });
+      
+      // Reset form
+      setVaultName('');
+      setSelectedImage(coverImages[0]);
+      setCustomImageUrl('');
+      
+      onOpenChange(false);
+      setSuccessModalOpen(true);
+      router.refresh();
+    } else if (state?.errors) {
+      toast({
+        title: 'Erro',
+        description: state.message || 'Erro ao criar cofre',
+        variant: 'destructive',
+      });
     }
-  };
+  }, [state, toast, onOpenChange, router]);
+  
   
   const handleRemoveMember = (userId: string) => {
-    // Prevent removing the current user
-    if (userId === currentUser?.id) return;
-    setMembers(members.filter(m => m.id !== userId));
+    // Feature para ser implementada quando tivermos InvitationService
   };
 
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Em uma aplicação real, aqui você chamaria uma server action para criar o cofre.
-    console.log({
-        name: vaultName,
-        ownerId: currentUser?.id,
-        members,
-        imageUrl: customImageUrl || selectedImage
-    });
-    onOpenChange(false); // Fecha o modal de criação
-    setSuccessModalOpen(true); // Abre o modal de sucesso
+    const formData = new FormData(e.currentTarget);
+    formAction(formData);
   }
   
   const handleImageSelection = (imageUrl: string) => {
@@ -101,55 +116,29 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                 </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6 py-4">
+                    <input type="hidden" name="userId" value={currentUser.id} />
                     <div className="space-y-2">
                         <Label htmlFor="vault-name">Nome do Cofre</Label>
                         <Input
                             id="vault-name"
+                            name="name"
                             value={vaultName}
                             onChange={(e) => setVaultName(e.target.value)}
                             placeholder="Ex: Reforma da Casa"
                             required
                         />
+                        {state?.errors?.name && (
+                          <p className="text-sm text-destructive">{state.errors.name[0]}</p>
+                        )}
                     </div>
+                    {/* 
                     <div className="space-y-2">
                         <Label>Membros</Label>
-                        <div className='flex flex-wrap gap-2'>
-                            {members.map(member => (
-                                <div key={member.id} className="flex items-center gap-2 rounded-full border bg-muted px-2 py-1">
-                                    <Avatar className="h-6 w-6">
-                                        <AvatarImage src={member.avatarUrl} />
-                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-sm font-medium">{member.name.split(' ')[0]}</span>
-                                    {member.id !== currentUser?.id && (
-                                        <button type="button" onClick={() => handleRemoveMember(member.id)} className="text-muted-foreground hover:text-destructive">
-                                            <X className="h-3 w-3" />
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="flex gap-2">
-                            <Input
-                                type="email"
-                                placeholder="Convidar por e-mail"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                            <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                <Button variant="outline" size="icon" type="button" onClick={handleAddMember}>
-                                    <Plus className="h-4 w-4" />
-                                </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                <p>O usuário receberá uma notificação no app ou um e-mail de convite.</p>
-                                </TooltipContent>
-                            </Tooltip>
-                            </TooltipProvider>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Convites de membros serão implementados em breve.
+                        </p>
                     </div>
+                    */}
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 mb-2">
                             <Label>Imagem de Capa</Label>
@@ -179,15 +168,21 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
                             <Input 
                                 id="custom-image-url"
+                                name="imageUrl"
                                 placeholder="https://images.unsplash.com/..."
                                 value={customImageUrl}
                                 onChange={handleCustomUrlChange}
                             />
+                            {state?.errors?.imageUrl && (
+                              <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
+                            )}
                         </div>
                     </div>
                 </div>
                 <DialogFooter>
-                <Button type="submit">Criar Cofre</Button>
+                <Button type="submit" disabled={isPending || !vaultName.trim()}>
+                  {isPending ? 'Criando...' : 'Criar Cofre'}
+                </Button>
                 </DialogFooter>
             </form>
         </DialogContent>
