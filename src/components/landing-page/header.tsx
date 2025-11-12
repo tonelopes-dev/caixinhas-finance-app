@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import {  Menu, X } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
@@ -65,8 +66,11 @@ export function Header() {
           <Button
             variant="ghost"
             className="text-foreground text-lg hover:bg-primary/10 transition-all"
+            asChild
           >
+            <Link href="/login">
             Entrar
+            </Link>
           </Button>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
             <span className="relative z-10">Assinar Agora</span>
