@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { createAccount, updateAccount, deleteAccount } from '@/app/accounts/actions';
 import {
   Card,
   CardContent,
@@ -65,8 +66,21 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     const [open, setOpen] = React.useState(false);
     const [selectedLogo, setSelectedLogo] = React.useState(account.logoUrl);
     const [accountType, setAccountType] = React.useState<Account['type']>(account.type);
+    const [scopeValue, setScopeValue] = React.useState(account.scope === 'personal' ? 'personal' : (account as any).vaultId || '');
     const [isPersonal, setIsPersonal] = React.useState(account.scope === 'personal');
+    const [allowFullAccess, setAllowFullAccess] = React.useState((account as any).allowFullAccess || false);
+    const [isLoading, setIsLoading] = React.useState(false);
     const isOwner = account.ownerId === currentUserId;
+
+    // Reset values when account changes or dialog opens
+    React.useEffect(() => {
+
+        setSelectedLogo(account.logoUrl);
+        setAccountType(account.type);
+        setScopeValue(account.scope === 'personal' ? 'personal' : (account as any).vaultId || '');
+        setIsPersonal(account.scope === 'personal');
+        setAllowFullAccess((account as any).allowFullAccess || false);
+    }, [account.logoUrl, account.type, account.scope, (account as any).vaultId, (account as any).allowFullAccess, open]);
 
     const tooltipContent = "Você não tem permissão para editar esta conta.";
 
@@ -102,11 +116,26 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     Atualize os detalhes da sua conta ou cartão.
                 </DialogDescription>
             </DialogHeader>
+            <form action={async (formData) => {
+                try {
+                    setIsLoading(true);
+                    await updateAccount(account.id, formData);
+                    setOpen(false);
+                } catch (error) {
+                    console.error('Erro ao atualizar conta:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }}>
             <fieldset disabled={!isOwner}>
+                <input type="hidden" name="logoUrl" value={selectedLogo} />
                 <div className="grid gap-4 py-4">
                      <div className="space-y-2">
                         <Label>Tipo de Conta</Label>
-                        <Select name="scope" defaultValue={account.scope} onValueChange={(v) => setIsPersonal(v === 'personal')}>
+                        <Select name="scope" value={scopeValue} onValueChange={(v) => {
+                            setScopeValue(v);
+                            setIsPersonal(v === 'personal');
+                        }}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Pessoal ou Conjunta?" />
                             </SelectTrigger>
@@ -126,7 +155,11 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                              {userVaults.map(vault => (
                                  <div key={vault.id} className="flex items-center justify-between">
                                     <Label htmlFor={`visible-${vault.id}`} className="font-normal">{vault.name}</Label>
-                                    <Switch id={`visible-${vault.id}`} defaultChecked={account.visibleIn?.includes(vault.id)} />
+                                    <Switch 
+                                        id={`visible-${vault.id}`} 
+                                        name={`visible-${vault.id}`}
+                                        defaultChecked={account.visibleIn?.includes(vault.id)} 
+                                    />
                                  </div>
                              ))}
                         </div>
@@ -152,7 +185,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="account-type">Tipo</Label>
-                        <Select name="account-type" defaultValue={account.type} onValueChange={(v) => setAccountType(v as Account['type'])}>
+                        <Select name="account-type" value={accountType} onValueChange={(v) => setAccountType(v as Account['type'])}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecione o tipo" />
                             </SelectTrigger>
@@ -167,6 +200,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                         <Label htmlFor="account-name">Nome da Conta/Cartão</Label>
                         <Input
                         id="account-name"
+                        name="account-name"
                         defaultValue={account.name}
                         placeholder='Ex: Conta Principal'
                         />
@@ -175,6 +209,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                         <Label htmlFor="bank-name">Instituição</Label>
                         <Input
                         id="bank-name"
+                        name="bank-name"
                         defaultValue={account.bank}
                         placeholder='Ex: Banco Digital S/A'
                         />
@@ -184,6 +219,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                             <Label htmlFor="credit-limit">Limite do Cartão</Label>
                             <Input
                                 id="credit-limit"
+                                name="credit-limit"
                                 type="number"
                                 step="0.01"
                                 defaultValue={account.creditLimit}
@@ -195,6 +231,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                             <Label htmlFor="balance">Saldo Atual</Label>
                             <Input
                                 id="balance"
+                                name="balance"
                                 type="number"
                                 step="0.01"
                                 defaultValue={account.balance}
@@ -203,8 +240,8 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                         </div>
                     )}
 
-                    {/* Full Access Switch - Only for account owner */}
-                    {isOwner && account.scope !== 'personal' && (
+                    {/* Full Access Switch - Only for account owner and non-personal accounts */}
+                    {isOwner && scopeValue !== 'personal' && (
                          <div className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-amber-500/10 border-amber-500/20">
                             <Label htmlFor="full-access" className="flex flex-col space-y-1">
                                 <span className="font-medium flex items-center gap-2"><AlertCircle className="h-4 w-4 text-amber-600" /> Acesso Total dos Membros</span>
@@ -212,17 +249,27 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                     Permitir que todos os membros do cofre editem e excluam esta conta.
                                 </span>
                             </Label>
-                            <Switch id="full-access" name="allowFullAccess" defaultChecked={account.allowFullAccess} />
+                            <>
+                                <input type="hidden" name="allowFullAccessValue" value={allowFullAccess.toString()} />
+                                <Switch 
+                                    id="full-access" 
+                                    name="allowFullAccess" 
+                                    checked={allowFullAccess}
+                                    disabled={isLoading}
+                                    onCheckedChange={setAllowFullAccess}
+                                />
+                            </>
                         </div>
                     )}
                 </div>
             </fieldset>
             <DialogFooter>
-                <Button onClick={() => setOpen(false)} disabled={!isOwner}>
-                    Salvar Alterações
-                </Button>
-                 {!isOwner && <p className="text-xs text-muted-foreground">Apenas o proprietário pode salvar alterações.</p>}
+              <Button type="submit" disabled={!isOwner || isLoading}>
+                {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+               {!isOwner && <p className="text-xs text-muted-foreground">Apenas o proprietário pode salvar alterações.</p>}
             </DialogFooter>
+            </form>
             </DialogContent>
         </Dialog>
     )
@@ -266,7 +313,11 @@ function DeleteAccountDialog({ account, disabled }: { account: Account, disabled
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction variant="destructive">Excluir</AlertDialogAction>
+          <form action={async () => {
+            await deleteAccount(account.id);
+          }}>
+            <AlertDialogAction type="submit" className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+          </form>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -274,10 +325,18 @@ function DeleteAccountDialog({ account, disabled }: { account: Account, disabled
 }
 
 export function AccountsManagement({ accounts, currentUserId, userVaults, workspaceId, workspaceName, isVaultOwner }: AccountsManagementProps) {
+    const isPersonalWorkspace = workspaceId === currentUserId;
+    
     const [open, setOpen] = React.useState(false);
     const [accountType, setAccountType] = React.useState<Account['type'] | ''>('');
-    const [selectedLogo, setSelectedLogo] = React.useState<string | undefined>();
-    const isPersonalWorkspace = workspaceId === currentUserId;
+    const [selectedLogo, setSelectedLogo] = React.useState<string | undefined>('');
+    const [accountName, setAccountName] = React.useState('');
+    const [bankName, setBankName] = React.useState('');
+    const [balance, setBalance] = React.useState('');
+    const [creditLimit, setCreditLimit] = React.useState('');
+    const [allowFullAccess, setAllowFullAccess] = React.useState(false);
+    const [createScopeValue, setCreateScopeValue] = React.useState(isPersonalWorkspace ? 'personal' : workspaceId);
+    const [createIsPersonal, setCreateIsPersonal] = React.useState(isPersonalWorkspace);
 
 
   return (
@@ -303,6 +362,29 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 A nova conta será adicionada ao espaço <span className='font-bold text-primary'>{workspaceName}</span>.
               </DialogDescription>
             </DialogHeader>
+            <form action={async (formData) => {
+              if (!accountType || !accountName || !bankName) {
+                return; // Previne envio se campos obrigatórios estão vazios
+              }
+              
+              try {
+                await createAccount(formData);
+                setOpen(false);
+                setAccountType('');
+                setSelectedLogo('');
+                setAccountName('');
+                setBankName('');
+                setBalance('');
+                setCreditLimit('');
+                setAllowFullAccess(false);
+                setCreateScopeValue(isPersonalWorkspace ? 'personal' : workspaceId);
+                setCreateIsPersonal(isPersonalWorkspace);
+              } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                // Aqui você poderia mostrar uma notificação de erro
+              }
+            }}>
+            <input type="hidden" name="logoUrl" value={selectedLogo} />
             <div className="grid gap-4 py-4">
                  <div className="space-y-2">
                     <Label>Logo do Banco</Label>
@@ -335,20 +417,46 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label>Tipo de Conta</Label>
+                <Select name="scope" value={createScopeValue} onValueChange={(v) => {
+                    setCreateScopeValue(v);
+                    setCreateIsPersonal(v === 'personal');
+                }}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Pessoal ou Conjunta?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="personal">Pessoal</SelectItem>
+                        {userVaults.map(vault => (
+                             <SelectItem key={vault.id} value={vault.id}>Conjunta: {vault.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+              </div>
+
             {accountType && (
                 <>
                     <div className="space-y-2">
-                        <Label htmlFor="account-name">Nome da Conta/Cartão</Label>
+                        <Label htmlFor="account-name">Nome da Conta/Cartão *</Label>
                         <Input
                         id="account-name"
+                        name="account-name"
+                        value={accountName}
+                        onChange={(e) => setAccountName(e.target.value)}
                         placeholder="Ex: Conta para o dia a dia"
+                        required
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="bank-name">Instituição</Label>
+                        <Label htmlFor="bank-name">Instituição *</Label>
                         <Input
                         id="bank-name"
+                        name="bank-name"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
                         placeholder="Ex: Banco Digital"
+                        required
                         />
                     </div>
                     {accountType === 'credit_card' ? (
@@ -356,8 +464,11 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                             <Label htmlFor="credit-limit">Limite do Cartão</Label>
                             <Input
                                 id="credit-limit"
+                                name="credit-limit"
                                 type="number"
                                 step="0.01"
+                                value={creditLimit}
+                                onChange={(e) => setCreditLimit(e.target.value)}
                                 placeholder='R$ 5.000,00'
                             />
                         </div>
@@ -366,20 +477,64 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                             <Label htmlFor="balance">Saldo Inicial</Label>
                             <Input
                                 id="balance"
+                                name="balance"
                                 type="number"
                                 step="0.01"
+                                value={balance}
+                                onChange={(e) => setBalance(e.target.value)}
                                 placeholder='R$ 1.234,56'
                             />
+                        </div>
+                    )}
+
+                    {createIsPersonal && (
+                        <div className="space-y-2 rounded-md border p-4">
+                            <Label>Visibilidade nos Cofres</Label>
+                            <p className='text-xs text-muted-foreground'>Marque em quais cofres esta conta pessoal deve ser visível.</p>
+                             {userVaults.map(vault => (
+                                 <div key={vault.id} className="flex items-center justify-between">
+                                    <Label htmlFor={`create-visible-${vault.id}`} className="font-normal">{vault.name}</Label>
+                                    <Switch 
+                                        id={`create-visible-${vault.id}`} 
+                                        name={`visible-${vault.id}`}
+                                    />
+                                 </div>
+                             ))}
+                        </div>
+                    )}
+
+                    {/* Full Access Switch - Only for vault accounts */}
+                    {!createIsPersonal && (
+                         <div className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-amber-500/10 border-amber-500/20">
+                            <Label htmlFor="create-full-access" className="flex flex-col space-y-1">
+                                <span className="font-medium flex items-center gap-2"><AlertCircle className="h-4 w-4 text-amber-600" /> Acesso Total dos Membros</span>
+                                <span className="text-xs font-normal leading-snug text-muted-foreground">
+                                    Permitir que todos os membros do cofre editem e excluam esta conta.
+                                </span>
+                            </Label>
+                            <>
+                                <input type="hidden" name="allowFullAccessValue" value={allowFullAccess.toString()} />
+                                <Switch 
+                                    id="create-full-access" 
+                                    name="allowFullAccess" 
+                                    checked={allowFullAccess}
+                                    onCheckedChange={setAllowFullAccess}
+                                />
+                            </>
                         </div>
                     )}
                 </>
             )}
             </div>
             <DialogFooter>
-              <Button onClick={() => setOpen(false)}>
+              <Button 
+                type="submit" 
+                disabled={!accountType || !accountName || !bankName}
+              >
                 Salvar
               </Button>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardHeader>
@@ -389,6 +544,8 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             const isOwner = account.ownerId === currentUserId;
             const canEdit = isOwner || !!account.allowFullAccess;
             const canDelete = isOwner || !!account.allowFullAccess;
+            
+
             
             return (
                 <div

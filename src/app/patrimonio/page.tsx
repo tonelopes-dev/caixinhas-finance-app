@@ -1,14 +1,8 @@
-
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { getMockDataForUser } from '@/lib/data';
-import type { Account, Goal, Vault } from '@/lib/definitions';
-import withAuth from '@/components/auth/with-auth';
-import { useRouter } from 'next/navigation';
-
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { getPatrimonyData } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PatrimonySection } from '@/components/patrimonio/patrimony-section';
@@ -16,45 +10,24 @@ import { AccountRow } from '@/components/patrimonio/account-row';
 import { GoalRow } from '@/components/patrimonio/goal-row';
 import { CreditCardRow } from '@/components/patrimonio/credit-card-row';
 
-
-function PatrimonioPage() {
-    const router = useRouter();
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [goals, setGoals] = useState<Goal[]>([]);
-    const [vaults, setVaults] = useState<Vault[]>([]);
-    const [userId, setUserId] = useState<string | null>(null);
-
-    useEffect(() => {
-        const id = localStorage.getItem('CAIXINHAS_USER_ID');
-        if (!id) {
-            router.push('/login');
-            return;
-        }
-        setUserId(id);
-        // Fetch all goals and all accounts the user has access to, regardless of workspace.
-        const { userAccounts, userGoals, userVaults } = getMockDataForUser(id, null, true);
-        setAccounts(userAccounts);
-        setGoals(userGoals);
-        setVaults(userVaults);
-
-    }, [router]);
-
-    const liquidAssets = accounts.filter(a => ['checking', 'savings'].includes(a.type));
-    const investedAccounts = accounts.filter(a => a.type === 'investment');
-    const creditCards = accounts.filter(a => a.type === 'credit_card');
-
-    const totalLiquid = liquidAssets.reduce((sum, acc) => sum + acc.balance, 0);
-    const totalInvestedAccounts = investedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
-    const totalInGoals = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
-    const totalInvested = totalInvestedAccounts + totalInGoals;
+export default async function PatrimonioPage() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
 
   if (!userId) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-background">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    redirect('/login');
   }
+
+  const { accounts, goals, vaults } = await getPatrimonyData(userId);
+
+  const liquidAssets = accounts.filter(a => ['checking', 'savings'].includes(a.type));
+  const investedAccounts = accounts.filter(a => a.type === 'investment');
+  const creditCards = accounts.filter(a => a.type === 'credit_card');
+
+  const totalLiquid = liquidAssets.reduce((sum, acc) => sum + acc.balance, 0);
+  const totalInvestedAccounts = investedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const totalInGoals = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+  const totalInvested = totalInvestedAccounts + totalInGoals;
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -78,7 +51,7 @@ function PatrimonioPage() {
           <CardContent className="grid gap-8">
             <PatrimonySection title="Disponível Agora (Ativos Líquidos)" total={totalLiquid}>
               {liquidAssets.length > 0 ? liquidAssets.map(account => (
-                <AccountRow key={account.id} account={account} />
+                <AccountRow key={account.id} account={account as any} />
               )) : <p className="text-muted-foreground text-sm px-3">Nenhuma conta corrente ou poupança cadastrada.</p>}
             </PatrimonySection>
 
@@ -87,20 +60,20 @@ function PatrimonioPage() {
                 <>
                     <h4 className="font-semibold text-muted-foreground mb-2 px-3">Contas de Investimento</h4>
                     {investedAccounts.map(account => (
-                      <AccountRow key={account.id} account={account} />
+                      <AccountRow key={account.id} account={account as any} />
                     ))}
                 </>
                )}
 
                 <h4 className="font-semibold text-muted-foreground mt-4 mb-2 px-3">Caixinhas de Sonhos</h4>
                  {goals.length > 0 ? goals.map(goal => (
-                    <GoalRow key={goal.id} goal={goal} vaults={vaults} />
+                    <GoalRow key={goal.id} goal={goal as any} vaults={vaults as any} />
               )) : <p className="text-muted-foreground text-sm px-3">Nenhuma caixinha criada neste espaço.</p>}
             </PatrimonySection>
 
             <PatrimonySection title="Crédito Disponível">
               {creditCards.length > 0 ? creditCards.map(card => (
-                <CreditCardRow key={card.id} card={card} />
+                <CreditCardRow key={card.id} card={card as any} />
               )) : <p className="text-muted-foreground text-sm px-3">Nenhum cartão de crédito cadastrado.</p>}
             </PatrimonySection>
 
@@ -110,5 +83,3 @@ function PatrimonioPage() {
     </div>
   );
 }
-
-export default withAuth(PatrimonioPage);

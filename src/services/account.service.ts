@@ -110,20 +110,29 @@ export class AccountService {
     allowFullAccess?: boolean;
   }): Promise<any> {
     try {
-      return await prisma.account.create({
-        data: {
-          name: data.name,
-          bank: data.bank,
-          type: data.type,
-          balance: data.balance,
-          ownerId: data.ownerId,
-          scope: data.scope,
-          vaultId: data.vaultId,
-          creditLimit: data.creditLimit,
-          logoUrl: data.logoUrl,
-          visibleIn: data.visibleIn || [],
-          allowFullAccess: data.allowFullAccess ?? false,
+      const createData: any = {
+        name: data.name,
+        bank: data.bank,
+        type: data.type,
+        balance: data.balance,
+        scope: data.scope,
+        creditLimit: data.creditLimit,
+        logoUrl: data.logoUrl,
+        visibleIn: data.visibleIn || [],
+        allowFullAccess: data.allowFullAccess ?? false,
+        owner: {
+          connect: { id: data.ownerId }
         },
+      };
+
+      if (data.vaultId) {
+        createData.vault = {
+          connect: { id: data.vaultId }
+        };
+      }
+
+      return await prisma.account.create({
+        data: createData,
       });
     } catch (error) {
       console.error('Erro ao criar conta:', error);
@@ -144,12 +153,40 @@ export class AccountService {
       logoUrl: string;
       visibleIn: string[];
       allowFullAccess: boolean;
+      scope: string;
+      vaultId: string | null;
     }>
   ): Promise<any> {
     try {
+      // Buscar a conta atual para verificar mudanças de escopo
+      const currentAccount = await prisma.account.findUnique({
+        where: { id: accountId },
+      });
+
+      if (!currentAccount) {
+        throw new Error('Conta não encontrada');
+      }
+
+      // Separar dados que podem causar problemas de relacionamento
+      const { vaultId, ...updateData } = data;
+      
+      // Preparar dados para update
+      const prismaData: any = { ...updateData };
+
+      // Tratar mudanças de escopo adequadamente
+      if (data.scope === 'personal' && currentAccount.vaultId) {
+        // Mudando de compartilhada para pessoal: desconectar do vault
+        prismaData.vault = { disconnect: true };
+        prismaData.vaultId = null;
+      } else if (data.scope === 'shared' && vaultId && vaultId !== currentAccount.vaultId) {
+        // Mudando de pessoal para compartilhada ou mudando de vault: conectar ao novo vault
+        prismaData.vault = { connect: { id: vaultId } };
+        prismaData.vaultId = vaultId;
+      }
+
       return await prisma.account.update({
         where: { id: accountId },
-        data,
+        data: prismaData,
       });
     } catch (error) {
       console.error('Erro ao atualizar conta:', error);
