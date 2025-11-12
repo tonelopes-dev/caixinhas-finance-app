@@ -1,19 +1,8 @@
-import { defineConfig } from '@prisma/cli'import { defineConfig, env } from "prisma/config";
+import { defineConfig } from 'prisma/config';
+import { env } from 'process';
 
-
-
-export default defineConfig({export default defineConfig({
-
-  schema: './prisma/schema.prisma',  schema: "prisma/schema.prisma",
-
-  migrations: {  migrations: {
-
-    path: './prisma/migrations'    path: "prisma/migrations",
-
-  }  },
-
-})  engine: "classic",
+export default defineConfig({
   datasource: {
-    url: env("DATABASE_URL"),
+    url: env('DATABASE_URL'),
   },
 });
