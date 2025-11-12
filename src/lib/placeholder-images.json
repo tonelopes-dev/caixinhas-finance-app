@@ -3,43 +3,43 @@
     {
       "id": "user-avatar",
       "description": "User avatar placeholder",
-      "imageUrl": "https://images.unsplash.com/photo-1609505848912-b7c3b8b4beda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTgwMzQ2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/photos/clara-perfil.png",
       "imageHint": "woman portrait"
     },
     {
       "id": "partner-avatar",
       "description": "Partner avatar placeholder",
-      "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE3NTYzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/photos/joao-perfil.png",
       "imageHint": "man portrait"
     },
     {
       "id": "couple-planning",
       "description": "Couple planning their finances together",
-      "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04421cd6c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb3VwbGUlMjBwbGFubmluZyUyMGZpbmFuY2VzfGVufDB8fHx8MTc2MTg0MjE4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04421cd6c3?w=1080",
       "imageHint": "couple finances"
     },
     {
       "id": "hero-phones",
       "description": "App screenshot on multiple phones for hero section",
-      "imageUrl": "https://images.unsplash.com/photo-1716279083224-d366e6d4144d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhcHAlMjBmaW5hbmNlfGVufDB8fHx8MTc2MjUzOTIxMnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "app finance"
+      "imageUrl": "/screenshots/main-dashboard.png",
+      "imageHint": "app interface"
     },
     {
       "id": "feature-highlight-phone",
       "description": "Single phone screenshot for feature highlight section",
-      "imageUrl": "https://images.unsplash.com/photo-1555020368-9e1b4cf78a52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxhcHAlMjBzY3JlZW58ZW58MHx8fHwxNzYyNDc0ODA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/screenshots/all-boxes-view.png",
       "imageHint": "app screen"
     },
     {
       "id": "testimonial-group",
       "description": "Illustration for testimonial section",
-      "imageUrl": "https://images.unsplash.com/photo-1554727242-741c14fa561c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZW9wbGUlMjBzbWlsaW5nfGVufDB8fHx8MTc2MjUzOTIxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/screenshots/personal-dashboard.png",
       "imageHint": "people smiling"
     },
     {
       "id": "cta-phones",
       "description": "App screenshot on phones for call-to-action section",
-      "imageUrl": "https://images.unsplash.com/photo-1654764450232-d0724be6dcd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhcHAlMjBpbnRlcmZhY2V8ZW58MHx8fHwxNzYyNTEwOTQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/screenshots/savings-box-detail.png",
       "imageHint": "app interface"
     }
   ]

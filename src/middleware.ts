@@ -52,10 +52,13 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - logo-caixinhas.png (logo file)
      * - icons (PWA icons)
      * - manifest.json (PWA manifest)
+     * - screenshots (screenshot files)
+     * - photos (photo files)
      * - gradient-underline.svg (image file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|icons|manifest.json|gradient-underline.svg).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|logo-caixinhas.png|icons|manifest.json|screenshots|photos|gradient-underline.svg).*)',
   ],
 };
