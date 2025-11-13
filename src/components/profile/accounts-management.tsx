@@ -473,21 +473,6 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                     <div>
                         <div className='flex items-center gap-2'>
                            <p className="font-medium">{account.name}</p>
-                           {account.scope === 'personal' ? (
-                               <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Badge variant="secondary" className="cursor-default">
-                                      <Lock className="mr-1 h-3 w-3" />
-                                      Pessoal
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Esta é uma conta pessoal.</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                           ) : null}
                         </div>
                         <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
                     </div>
