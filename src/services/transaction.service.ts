@@ -147,9 +147,14 @@ export class TransactionService {
         isInstallment: data.isInstallment ?? false,
         installmentNumber: data.installmentNumber,
         totalInstallments: data.totalInstallments,
-        vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
         actor: { connect: { id: data.actorId } },
       };
+
+      if (data.ownerType === 'vault') {
+        createData.vault = { connect: { id: data.ownerId } };
+      } else {
+        createData.user = { connect: { id: data.ownerId } };
+      }
 
       const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
       const destIsGoal = data.destinationAccountId?.startsWith('goal-');
