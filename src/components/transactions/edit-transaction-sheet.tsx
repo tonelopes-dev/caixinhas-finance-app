@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -53,7 +52,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function EditTransactionSheet({ transaction }: { transaction: Transaction }) {
+export function EditTransactionSheet({ transaction, accounts, goals }: { transaction: Transaction; accounts: Account[]; goals: Goal[] }) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
@@ -61,11 +60,8 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   const [open, setOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>(transaction.type);
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [sourceAccount, setSourceAccount] = useState<Account | null>(() => {
-    const { userAccounts } = getMockDataForUser(transaction.ownerId, transaction.ownerId); // Mock, needs real logic
-    return userAccounts.find(a => a.id === transaction.sourceAccountId) || null;
+    return accounts.find(a => a.id === transaction.sourceAccountId) || null;
   });
   
   const getChargeType = () => {
@@ -74,18 +70,6 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
     return 'single';
   }
   const [chargeType, setChargeType] = useState(getChargeType());
-
-  useEffect(() => {
-    if (open) {
-      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-      const workspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-      if (userId && workspaceId) {
-        const { userAccounts, userGoals } = getMockDataForUser(userId, workspaceId);
-        setAccounts(userAccounts);
-        setGoals(userGoals);
-      }
-    }
-  }, [open]);
 
   useEffect(() => {
     if (state.success) {
@@ -103,7 +87,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
     }
   }, [state, toast]);
 
-  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, id: g.id, name: `Caixinha: ${g.name}`, type: 'goal' }))];
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
   return (

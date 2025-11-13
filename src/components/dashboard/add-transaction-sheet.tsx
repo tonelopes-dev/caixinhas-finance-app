@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
+import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { goals as allGoals } from '@/lib/data';
+import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -54,7 +54,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function AddTransactionSheet({ accounts: workspaceAccounts, ownerId }: { accounts: Account[], ownerId: string }) {
+export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId }: { accounts: Account[], goals: Goal[], ownerId: string }) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -77,8 +77,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, ownerId }: { 
   };
 
   useEffect(() => {
-    if (!state) return;
-    if (state.success) {
+    if (state.success === true) {
       toast({
         title: "Sucesso!",
         description: state.message,
@@ -89,16 +88,16 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, ownerId }: { 
       setChargeType('single');
       setDate(undefined);
       setOpen(false);
-    } else if (state.message) {
+    } else if (state.success === false && state.message) {
       toast({
-        title: state.errors ? "Erro de Validação" : "Erro",
+        title: "Erro",
         description: state.message,
         variant: "destructive",
       });
     }
   }, [state, toast]);
   
-  const allSourcesAndDestinations = [...workspaceAccounts, ...allGoals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [...workspaceAccounts, ...workspaceGoals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
   
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 

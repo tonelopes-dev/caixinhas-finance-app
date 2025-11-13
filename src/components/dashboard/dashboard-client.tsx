@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -85,6 +86,7 @@ export function DashboardClient({
                 <RecentTransactions
                   transactions={transactions}
                   accounts={accounts}
+                  goals={goals}
                   ownerId={workspaceId}
                   ownerType={isPersonalWorkspace ? 'user' : 'vault'}
                   typeFilter={transactionFilter}

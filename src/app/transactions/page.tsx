@@ -376,7 +376,7 @@ export default function TransactionsPage() {
                       </SelectContent>
                     </Select>
                     <div className="hidden md:block">
-                        <AddTransactionSheet accounts={accounts} ownerId={workspaceId} />
+                        <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} />
                     </div>
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export default function TransactionsPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <EditTransactionSheet transaction={t} />
+                                        <EditTransactionSheet transaction={t} accounts={accounts} goals={goals}/>
                                         <DeleteTransactionDialog transactionId={t.id} />
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -503,7 +503,7 @@ export default function TransactionsPage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <EditTransactionSheet transaction={t} />
+                                            <EditTransactionSheet transaction={t} accounts={accounts} goals={goals} />
                                             <DeleteTransactionDialog transactionId={t.id} />
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -523,7 +523,7 @@ export default function TransactionsPage() {
             </Card>
         </motion.div>
         <div className="fixed bottom-6 right-6 md:hidden">
-            <AddTransactionSheet accounts={accounts} ownerId={workspaceId} />
+            <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} />
         </div>
       </div>
     </div>
