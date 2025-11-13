@@ -77,7 +77,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   };
 
   useEffect(() => {
-    if (state.message && !state.errors) {
+    if (state?.message && !state.errors) {
       toast({
         title: "Sucesso!",
         description: state.message,
@@ -88,7 +88,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
       setChargeType('single');
       setDate(undefined);
       setOpen(false);
-    } else if (state.message && state.errors) {
+    } else if (state?.message && state.errors) {
       toast({
         title: "Erro de Validação",
         description: state.message,

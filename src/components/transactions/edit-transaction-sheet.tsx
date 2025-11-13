@@ -88,13 +88,13 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   }, [open]);
 
   useEffect(() => {
-    if (state.message && !state.errors) {
+    if (state?.message && !state.errors) {
       toast({
         title: "Sucesso!",
         description: state.message,
       });
       setOpen(false);
-    } else if (state.message && state.errors) {
+    } else if (state?.message && state.errors) {
       toast({
         title: "Erro de Validação",
         description: state.message,
@@ -125,6 +125,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
           <input type="hidden" name="id" value={transaction.id} />
+          <input type="hidden" name="ownerId" value={transaction.ownerId} />
           {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
           <div className="grid gap-4 py-4 overflow-y-auto pr-4">
              <div className="space-y-2">
@@ -188,7 +189,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                     {(transactionType === 'expense' || transactionType === 'transfer') && (
                          <div className="space-y-2">
                             <Label htmlFor="sourceAccountId">Origem</Label>
-                            <Select name="sourceAccountId" defaultValue={transaction.sourceAccountId} onValueChange={(id) => setSourceAccount(accounts.find(a => a.id === id) || null)}>
+                            <Select name="sourceAccountId" defaultValue={transaction.sourceAccountId ?? undefined} onValueChange={(id) => setSourceAccount(accounts.find(a => a.id === id) || null)}>
                                 <SelectTrigger>
                                 <SelectValue placeholder="De onde saiu o dinheiro?" />
                                 </SelectTrigger>
@@ -203,7 +204,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                     {(transactionType === 'income' || transactionType === 'transfer') && (
                         <div className="space-y-2">
                             <Label htmlFor="destinationAccountId">Destino</Label>
-                            <Select name="destinationAccountId" defaultValue={transaction.destinationAccountId}>
+                            <Select name="destinationAccountId" defaultValue={transaction.destinationAccountId ?? undefined}>
                                 <SelectTrigger>
                                 <SelectValue placeholder="Para onde foi o dinheiro?" />
                                 </SelectTrigger>
