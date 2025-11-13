@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { transactions } from '@/lib/data';
+import { TransactionService } from '@/services';
 import { invalidateReportCache } from '../reports/actions';
 
 const transactionSchema = z.object({
@@ -13,8 +13,8 @@ const transactionSchema = z.object({
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
   category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
   date: z.string().optional(),
-  sourceAccountId: z.string().optional(),
-  destinationAccountId: z.string().optional(),
+  sourceAccountId: z.string().optional().nullable(),
+  destinationAccountId: z.string().optional().nullable(),
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional(),
   isRecurring: z.boolean().optional(),
   isInstallment: z.boolean().optional(),
@@ -22,8 +22,7 @@ const transactionSchema = z.object({
   totalInstallments: z.coerce.number().optional(),
 }).refine(data => {
     if (data.type === 'income') return !!data.destinationAccountId;
-    // For expense, either source or payment method is fine. But source is required if it's not a credit card payment essentially.
-    if (data.type === 'expense') return !!data.sourceAccountId || !!data.paymentMethod;
+    if (data.type === 'expense') return !!data.sourceAccountId;
     if (data.type === 'transfer') return !!data.sourceAccountId && !!data.destinationAccountId;
     return false;
 }, {
@@ -47,41 +46,28 @@ const deleteTransactionSchema = z.object({
 
 export type TransactionState = {
   message?: string | null;
-  errors?: {
-    id?: string[];
-    ownerId?: string[];
-    description?: string[];
-    amount?: string[];
-    type?: string[];
-    category?: string[];
-    date?: string[];
-    sourceAccountId?: string[];
-    destinationAccountId?: string[];
-    paymentMethod?: string[];
-    isRecurring?: string[];
-    isInstallment?: string[];
-    installmentNumber?: string[];
-    totalInstallments?: string[];
-  };
+  errors?: Record<string, string[] | undefined>;
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
   const chargeType = formData.get('chargeType');
-  const validatedFields = transactionSchema.safeParse({
+  const rawData = {
     ownerId: formData.get('ownerId'),
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
     category: formData.get('category'),
-    date: formData.get('date'),
-    sourceAccountId: formData.get('sourceAccountId'),
-    destinationAccountId: formData.get('destinationAccountId'),
+    date: formData.get('date') || new Date().toISOString(),
+    sourceAccountId: formData.get('sourceAccountId') || null,
+    destinationAccountId: formData.get('destinationAccountId') || null,
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
-  });
+  };
+  
+  const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
@@ -91,46 +77,49 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     };
   }
   
-  const { ownerId, ...data } = validatedFields.data;
-  const newTransaction = {
-    id: (transactions.length + 1).toString(),
-    date: data.date || new Date().toISOString(),
-    ownerId: ownerId,
-    ownerType: ownerId.startsWith('vault-') ? 'vault' : 'user',
-    ...data
-  };
+  try {
+    await TransactionService.createTransaction(validatedFields.data as any);
+    await invalidateReportCache(validatedFields.data.date, validatedFields.data.ownerId);
 
-  transactions.unshift(newTransaction as any);
-  console.log('New transaction added:', newTransaction);
-  
-  invalidateReportCache(newTransaction.date, newTransaction.ownerId);
+    revalidatePath('/');
+    revalidatePath('/transactions');
+    revalidatePath('/reports');
+    if (validatedFields.data.destinationAccountId?.startsWith('goal')) {
+        revalidatePath(`/goals/${validatedFields.data.destinationAccountId}`);
+    }
+    if (validatedFields.data.sourceAccountId?.startsWith('goal')) {
+        revalidatePath(`/goals/${validatedFields.data.sourceAccountId}`);
+    }
+    
+    return { message: 'Transação adicionada com sucesso!' };
 
-  revalidatePath('/');
-  revalidatePath('/transactions');
-  revalidatePath('/reports');
-  revalidatePath(`/goals/${newTransaction.destinationAccountId}`);
-  revalidatePath(`/goals/${newTransaction.sourceAccountId}`);
-
-  return { message: 'Transação adicionada com sucesso!' };
+  } catch(error) {
+     console.error('Erro ao criar transação:', error);
+     return { message: 'Ocorreu um erro no servidor ao salvar a transação.' };
+  }
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
   const chargeType = formData.get('chargeType');
-  const validatedFields = transactionSchema.omit({ ownerId: true }).safeParse({
+  
+  const rawData = {
     id: formData.get('id'),
+    ownerId: formData.get('ownerId'),
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date'),
-    sourceAccountId: formData.get('sourceAccountId'),
-    destinationAccountId: formData.get('destinationAccountId'),
+    sourceAccountId: formData.get('sourceAccountId') || null,
+    destinationAccountId: formData.get('destinationAccountId') || null,
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
-  });
+  };
+
+  const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
     return {
@@ -140,33 +129,38 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   }
 
   const { id, ...data } = validatedFields.data;
-  const index = transactions.findIndex(t => t.id === id);
 
-  if (index > -1) {
-    const originalTransaction = transactions[index];
-    transactions[index] = {
-      ...originalTransaction,
-      ...data,
-      date: data.date || originalTransaction.date,
-    };
+  if (!id) {
+    return { message: 'Erro: ID da transação não encontrado.' };
+  }
+
+  try {
+    const originalTransaction = await TransactionService.getTransactionById(id);
+    if (!originalTransaction) {
+        return { message: 'Erro: Transação não encontrada.' };
+    }
+
+    await TransactionService.updateTransaction(id, data as any);
     
-    invalidateReportCache(originalTransaction.date, originalTransaction.ownerId);
-    if(originalTransaction.date !== transactions[index].date) {
-        invalidateReportCache(transactions[index].date, transactions[index].ownerId);
+    await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.ownerId);
+    if(originalTransaction.date.toISOString() !== data.date) {
+        await invalidateReportCache(data.date, data.ownerId);
     }
     
-    console.log(`Transaction with id ${id} updated.`);
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
-    revalidatePath(`/goals/${originalTransaction.destinationAccountId}`);
-    revalidatePath(`/goals/${originalTransaction.sourceAccountId}`);
-    revalidatePath(`/goals/${transactions[index].destinationAccountId}`);
-    revalidatePath(`/goals/${transactions[index].sourceAccountId}`);
+    if (originalTransaction.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${originalTransaction.destinationAccountId}`);
+    if (originalTransaction.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${originalTransaction.sourceAccountId}`);
+    if (data.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.destinationAccountId}`);
+    if (data.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.sourceAccountId}`);
+    
     return { message: 'Transação atualizada com sucesso!' };
+
+  } catch(error) {
+     console.error('Erro ao atualizar transação:', error);
+     return { message: 'Ocorreu um erro no servidor ao atualizar a transação.' };
   }
-  
-  return { message: 'Erro: Transação não encontrada.' };
 }
 
 export async function deleteTransaction(prevState: { message: string | null }, formData: FormData): Promise<{ message: string | null }> {
@@ -181,20 +175,24 @@ export async function deleteTransaction(prevState: { message: string | null }, f
   }
   
   const { id } = validatedFields.data;
-  const index = transactions.findIndex(t => t.id === id);
+  
+  try {
+    const deletedTransaction = await TransactionService.getTransactionById(id);
+    if (deletedTransaction) {
+        await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.ownerId);
+        await TransactionService.deleteTransaction(id);
+        
+        revalidatePath('/');
+        revalidatePath('/transactions');
+        revalidatePath('/reports');
+        if (deletedTransaction.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${deletedTransaction.destinationAccountId}`);
+        if (deletedTransaction.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${deletedTransaction.sourceAccountId}`);
 
-  if (index > -1) {
-    const deletedTransaction = transactions[index];
-    invalidateReportCache(deletedTransaction.date, deletedTransaction.ownerId);
-    transactions.splice(index, 1);
-    console.log(`Transaction with id ${id} deleted.`);
-    revalidatePath('/');
-    revalidatePath('/transactions');
-    revalidatePath('/reports');
-    revalidatePath(`/goals/${deletedTransaction.destinationAccountId}`);
-    revalidatePath(`/goals/${deletedTransaction.sourceAccountId}`);
-    return { message: 'Transação excluída com sucesso!' };
+        return { message: 'Transação excluída com sucesso!' };
+    }
+    return { message: 'Erro: Transação não encontrada.' };
+  } catch (error) {
+    console.error('Erro ao deletar transação:', error);
+    return { message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
-
-  return { message: 'Erro: Transação não encontrada.' };
 }

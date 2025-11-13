@@ -185,13 +185,25 @@ export class TransactionService {
     type: 'income' | 'expense' | 'transfer';
     category: string;
     paymentMethod?: string;
-    sourceAccountId?: string;
-    destinationAccountId?: string;
+    sourceAccountId?: string | null;
+    destinationAccountId?: string | null;
     actorId?: string;
-    goalId?: string;
     isRecurring?: boolean;
+    isInstallment?: boolean;
+    installmentNumber?: number;
+    totalInstallments?: number;
   }): Promise<any> {
     try {
+      // Se source ou destination for uma meta, conecte-a.
+      const goalId = data.destinationAccountId?.startsWith('goal-') 
+        ? data.destinationAccountId 
+        : data.sourceAccountId?.startsWith('goal-') 
+        ? data.sourceAccountId 
+        : undefined;
+
+      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
+      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
+
       return await prisma.transaction.create({
         data: {
           ownerId: data.ownerId,
@@ -202,11 +214,14 @@ export class TransactionService {
           type: data.type,
           category: data.category,
           paymentMethod: data.paymentMethod,
-          sourceAccountId: data.sourceAccountId,
-          destinationAccountId: data.destinationAccountId,
+          sourceAccountId: sourceIsGoal ? null : data.sourceAccountId,
+          destinationAccountId: destIsGoal ? null : data.destinationAccountId,
           actorId: data.actorId,
-          goalId: data.goalId,
+          goalId: goalId,
           isRecurring: data.isRecurring ?? false,
+          isInstallment: data.isInstallment ?? false,
+          installmentNumber: data.installmentNumber,
+          totalInstallments: data.totalInstallments,
           vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
         },
       });
@@ -228,16 +243,32 @@ export class TransactionService {
       type: string;
       category: string;
       paymentMethod: string;
-      sourceAccountId: string;
-      destinationAccountId: string;
-      goalId: string;
+      sourceAccountId: string | null;
+      destinationAccountId: string | null;
       isRecurring: boolean;
+      isInstallment: boolean;
+      installmentNumber: number;
+      totalInstallments: number;
     }>
   ): Promise<any> {
     try {
+      const goalId = data.destinationAccountId?.startsWith('goal-') 
+        ? data.destinationAccountId 
+        : data.sourceAccountId?.startsWith('goal-') 
+        ? data.sourceAccountId 
+        : undefined;
+
+      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
+      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
+        
+      const updateData: any = { ...data };
+      updateData.goalId = goalId;
+      if (sourceIsGoal) updateData.sourceAccountId = null;
+      if (destIsGoal) updateData.destinationAccountId = null;
+
       return await prisma.transaction.update({
         where: { id: transactionId },
-        data,
+        data: updateData,
       });
     } catch (error) {
       console.error('Erro ao atualizar transação:', error);
