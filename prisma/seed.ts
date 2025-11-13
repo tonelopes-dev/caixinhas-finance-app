@@ -20,55 +20,57 @@ async function main() {
   // ============================================
   console.log('👥 Criando usuários...');
 
-  const users = await Promise.all([
-    prisma.user.create({
-      data: {
-        id: 'user1',
-        name: 'Dev',
-        email: 'email01@conta.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=1080',
-        subscriptionStatus: 'active',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'user2',
-        name: 'Anna',
-        email: 'email02@conta.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=1080',
-        subscriptionStatus: 'active',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'user3',
-        name: 'Carlos',
-        email: 'carlos@example.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080',
-        subscriptionStatus: 'inactive',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'user4',
-        name: 'Daniela',
-        email: 'daniela@example.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1080',
-        subscriptionStatus: 'active',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'user5',
-        name: 'Eduardo',
-        email: 'eduardo@example.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1080',
-        subscriptionStatus: 'trial',
-      },
-    }),
-  ]);
+  await prisma.user.create({
+    data: {
+      id: 'user1',
+      name: 'Dev',
+      email: 'email01@conta.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=1080',
+      subscriptionStatus: 'active',
+    },
+  });
 
-  console.log(`✅ ${users.length} usuários criados`);
+  await prisma.user.create({
+    data: {
+      id: 'user2',
+      name: 'Anna',
+      email: 'email02@conta.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=1080',
+      subscriptionStatus: 'active',
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      id: 'user3',
+      name: 'Carlos',
+      email: 'carlos@example.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080',
+      subscriptionStatus: 'inactive',
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      id: 'user4',
+      name: 'Daniela',
+      email: 'daniela@example.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1080',
+      subscriptionStatus: 'active',
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      id: 'user5',
+      name: 'Eduardo',
+      email: 'eduardo@example.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1080',
+      subscriptionStatus: 'trial',
+    },
+  });
+
+  console.log(`✅ 5 usuários criados`);
 
   // ============================================
   // 2. CRIAR VAULTS (COFRES)
@@ -136,7 +138,7 @@ async function main() {
   // ============================================
   console.log('💳 Criando contas...');
 
-  const accounts = await Promise.all([
+  await Promise.all([
     // Contas do Dev
     prisma.account.create({
       data: {
@@ -266,7 +268,7 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ ${accounts.length} contas criadas`);
+  console.log(`✅ 9 contas criadas`);
 
   // ============================================
   // 4. CRIAR GOALS (CAIXINHAS)
@@ -395,7 +397,7 @@ async function main() {
   // ============================================
   console.log('💸 Criando transações...');
 
-  const transactions = await Promise.all([
+  await Promise.all([
     // Transações do Dev
     prisma.transaction.create({
       data: {
@@ -509,14 +511,14 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ ${transactions.length} transações principais criadas`);
+  console.log(`✅ 7 transações principais criadas`);
 
   // ============================================
   // 6. CRIAR NOTIFICAÇÕES
   // ============================================
   console.log('🔔 Criando notificações...');
 
-  const notifications = await Promise.all([
+  await Promise.all([
     prisma.notification.create({
       data: {
         id: 'n1',
@@ -556,14 +558,14 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ ${notifications.length} notificações criadas`);
+  console.log(`✅ 3 notificações criadas`);
 
   // ============================================
   // 7. CRIAR CONVITES
   // ============================================
   console.log('📨 Criando convites...');
 
-  const invitations = await Promise.all([
+  await Promise.all([
     prisma.invitation.create({
       data: {
         id: 'inv1',
@@ -577,17 +579,9 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ ${invitations.length} convites criados`);
+  console.log(`✅ 1 convite criado`);
 
   console.log('\n🎉 Seed concluído com sucesso!');
-  console.log('\n📊 Resumo:');
-  console.log(`   - ${users.length} usuários`);
-  console.log(`   - 4 cofres`);
-  console.log(`   - ${accounts.length} contas`);
-  console.log(`   - 6 metas`);
-  console.log(`   - ${transactions.length} transações`);
-  console.log(`   - ${notifications.length} notificações`);
-  console.log(`   - ${invitations.length} convites`);
 }
 
 main()

@@ -1,4 +1,5 @@
 
+
 import { prisma } from './prisma';
 
 /**
@@ -155,18 +156,21 @@ export class TransactionService {
       } else {
         createData.user = { connect: { id: data.ownerId } };
       }
-
+      
       const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
       const destIsGoal = data.destinationAccountId?.startsWith('goal-');
 
-      if (data.sourceAccountId) {
-        if (sourceIsGoal) createData.goal = { connect: { id: data.sourceAccountId } };
-        else createData.sourceAccount = { connect: { id: data.sourceAccountId } };
+      if (data.sourceAccountId && !sourceIsGoal) {
+        createData.sourceAccount = { connect: { id: data.sourceAccountId } };
       }
       
-      if (data.destinationAccountId) {
-        if (destIsGoal) createData.goal = { connect: { id: data.destinationAccountId } };
-        else createData.destinationAccount = { connect: { id: data.destinationAccountId } };
+      if (data.destinationAccountId && !destIsGoal) {
+        createData.destinationAccount = { connect: { id: data.destinationAccountId } };
+      }
+
+      const goalId = sourceIsGoal ? data.sourceAccountId : destIsGoal ? data.destinationAccountId : undefined;
+      if (goalId) {
+          createData.goal = { connect: { id: goalId } };
       }
 
       return await prisma.transaction.create({ data: createData });
