@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getMockDataForUser } from '@/lib/data';
+import { getMockDataForUser, goals as allGoals } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -63,9 +63,6 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   const [promptOpen, setPromptOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
-
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
   
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -76,20 +73,6 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
       setOpen(true);
     }
   };
-
-
-  useEffect(() => {
-    if (open) {
-      const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-      const workspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-      if (userId && workspaceId) {
-        const { userAccounts, userGoals } = getMockDataForUser(userId, workspaceId);
-        setAccounts(userAccounts);
-        setGoals(userGoals);
-      }
-    }
-  }, [open]);
-
 
   useEffect(() => {
     if (state.message && !state.errors) {
@@ -110,7 +93,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
     }
   }, [state, toast]);
   
-  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [...workspaceAccounts, ...allGoals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
 
   return (
     <>
