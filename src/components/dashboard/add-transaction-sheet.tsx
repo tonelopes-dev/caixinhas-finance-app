@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
-import { addTransaction, type TransactionState } from '@/app/actions';
+import { addTransaction, type TransactionState } from '@/app/transactions/actions';
 import {
   Sheet,
   SheetContent,

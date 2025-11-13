@@ -1,7 +1,6 @@
 
 'use client';
 
-import { deleteGoal } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +14,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { deleteGoalAction } from '@/app/goals/actions';
 
 export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: string, goalName: string, disabled?: boolean }) {
-  const deleteGoalWithId = deleteGoal.bind(null);
-
+  
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -28,8 +27,7 @@ export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: strin
        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <form action={deleteGoalWithId}>
-          <input type="hidden" name="id" value={goalId} />
+        <form action={() => deleteGoalAction(goalId)}>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
             <AlertDialogDescription>

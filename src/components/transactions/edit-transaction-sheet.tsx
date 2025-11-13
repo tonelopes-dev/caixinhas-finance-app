@@ -3,7 +3,7 @@
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { updateTransaction, type TransactionState } from '@/app/actions';
+import { updateTransaction, type TransactionState } from '@/app/transactions/actions';
 import {
   Sheet,
   SheetContent,

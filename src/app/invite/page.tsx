@@ -15,9 +15,10 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, Send } from 'lucide-react';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { sendPartnerInvite, type GenericState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { getMockDataForUser } from '@/lib/data';
+import { sendPartnerInvite } from './actions';
+import type { GenericState } from '@/app/auth/actions';
 
 
 function SubmitButton() {
@@ -101,3 +102,4 @@ export default function InvitePage() {
     </div>
   );
 }
+

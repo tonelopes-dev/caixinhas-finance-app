@@ -1,6 +1,5 @@
 'use client';
 
-import { deleteTransaction } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,7 @@ import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useActionState } from 'react';
+import { deleteTransaction } from '@/app/transactions/actions';
 
 
 export function DeleteTransactionDialog({ transactionId }: { transactionId: string }) {

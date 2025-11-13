@@ -12,11 +12,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { users, transactions as allTransactions } from '@/lib/data';
-import { generateNewFinancialReport, type FinancialReportState } from '@/app/actions';
 import withAuth from '@/components/auth/with-auth';
 import type { User } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
+import { generateNewFinancialReport, type FinancialReportState } from './actions';
 
 
 function ReportsPage() {

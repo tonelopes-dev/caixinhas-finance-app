@@ -13,7 +13,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { removeParticipantFromGoal } from '@/app/actions';
 import { X } from 'lucide-react';
 
 interface RemoveParticipantDialogProps {
@@ -32,7 +31,10 @@ export function RemoveParticipantDialog({
   disabled = false,
 }: RemoveParticipantDialogProps) {
   
-  const removeParticipantAction = removeParticipantFromGoal.bind(null);
+  // A ser implementado com Server Actions
+  const handleRemove = () => {
+    console.log(`Remover ${participantName} da meta ${goalName}`);
+  }
 
   return (
     <AlertDialog>
@@ -48,7 +50,7 @@ export function RemoveParticipantDialog({
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <form action={removeParticipantAction}>
+        <form action="#">
            <input type="hidden" name="goalId" value={goalId} />
            <input type="hidden" name="participantId" value={participantId} />
             <AlertDialogHeader>
@@ -76,3 +78,4 @@ export function RemoveParticipantDialog({
     </AlertDialog>
   );
 }
+

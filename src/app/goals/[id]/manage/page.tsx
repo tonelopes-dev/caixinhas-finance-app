@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -27,8 +28,9 @@ import { RemoveParticipantDialog } from '@/components/goals/remove-participant-d
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
 import type { Goal, Vault, User } from '@/lib/definitions';
 import { Input } from '@/components/ui/input';
-import { updateGoal, type UpdateGoalState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { updateGoalAction } from '@/app/goals/actions';
+import type { GoalActionState } from '@/app/goals/actions';
 
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
@@ -50,8 +52,8 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentVault, setCurrentVault] = useState<Vault | null>(null);
 
-  const initialState: UpdateGoalState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(updateGoal, initialState);
+  const initialState: GoalActionState = { message: null, errors: {} };
+  const [state, formAction] = useActionState(updateGoalAction, initialState);
   
   useEffect(() => {
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');
@@ -271,3 +273,4 @@ export default function ManageGoalPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
