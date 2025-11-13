@@ -11,7 +11,7 @@ export type PatrimonyData = {
     balance: number;
     creditLimit: number | null;
     logoUrl: string | null;
-    scope: 'personal' | 'shared';
+    scope: 'personal' | string; // Changed from 'shared'
     ownerId: string;
   }[];
   goals: {
@@ -32,38 +32,39 @@ export type PatrimonyData = {
 
 /**
  * Busca todos os dados de patrimônio do usuário
- * Inclui todas as contas (pessoais + vaults) e todas as metas
+ * Inclui todas as contas (pessoais + vaults) e todas as metas, evitando duplicatas.
  */
 export async function getPatrimonyData(userId: string): Promise<PatrimonyData> {
   try {
-    // Buscar vaults do usuário
     const userVaults = await VaultService.getUserVaults(userId);
+    const vaultIds = userVaults.map(v => v.id);
 
-    // Buscar contas pessoais
-    const personalAccounts = await AccountService.getUserAccounts(userId);
+    const allAccountsRaw = await prisma.account.findMany({
+      where: {
+        OR: [
+          { ownerId: userId }, // All accounts owned by the user
+          { vaultId: { in: vaultIds } }, // All accounts belonging to user's vaults
+        ],
+      },
+    });
+    
+    // Filtra contas duplicadas, garantindo que cada conta apareça apenas uma vez.
+    const uniqueAccountIds = new Set<string>();
+    const allAccounts = allAccountsRaw.filter(account => {
+        if (uniqueAccountIds.has(account.id)) {
+            return false;
+        }
+        uniqueAccountIds.add(account.id);
+        return true;
+    });
 
-    // Buscar contas de todos os vaults
-    const vaultAccountsPromises = userVaults.map((vault) =>
-      AccountService.getVaultAccounts(vault.id)
-    );
-    const vaultAccountsArrays = await Promise.all(vaultAccountsPromises);
-    const vaultAccounts = vaultAccountsArrays.flat();
-
-    // Combinar todas as contas
-    const allAccounts = [...personalAccounts, ...vaultAccounts];
-
-    // Buscar metas pessoais
+    // Buscar todas as metas pessoais e de cofres do usuário
     const personalGoals = await GoalService.getUserGoals(userId);
-
-    // Buscar metas de todos os vaults
     const vaultGoalsPromises = userVaults.map((vault) =>
       GoalService.getVaultGoals(vault.id)
     );
     const vaultGoalsArrays = await Promise.all(vaultGoalsPromises);
-    const vaultGoals = vaultGoalsArrays.flat();
-
-    // Combinar todas as metas
-    const allGoals = [...personalGoals, ...vaultGoals];
+    const allGoals = [...personalGoals, ...vaultGoalsArrays.flat()];
 
     return {
       accounts: allAccounts.map((account) => ({
@@ -74,7 +75,7 @@ export async function getPatrimonyData(userId: string): Promise<PatrimonyData> {
         balance: account.balance,
         creditLimit: account.creditLimit,
         logoUrl: account.logoUrl,
-        scope: account.scope as 'personal' | 'shared',
+        scope: account.vaultId || 'personal',
         ownerId: account.ownerId,
       })),
       goals: allGoals.map((goal) => ({

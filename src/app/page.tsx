@@ -2,35 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import withAuth from '@/components/auth/with-auth';
 import DashboardPage from './dashboard/page';
+import { LandingPageClient } from '@/components/landing-page/landing-page-client';
 
 function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // A lógica de withAuth cuidará de verificar o usuário.
-    // Se o withAuth nos deixar renderizar, significa que o usuário está autenticado.
+    // No lado do cliente, verificamos se o usuário está logado.
     const userId = localStorage.getItem('CAIXINHAS_USER_ID');
     if (userId) {
       setIsAuthenticated(true);
-      const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-      if (vaultId) {
-        // Usuário logado e com cofre selecionado, vai para o dashboard
-        router.replace('/dashboard');
-      } else {
-        // Usuário logado mas sem cofre, vai para a seleção de cofres
-        router.replace('/vaults');
-      }
-    } else {
-       // Usuário não logado, vai para a nova landing page
-       router.replace('/landing');
     }
-  }, [router]);
+    setIsLoading(false);
+  }, []);
 
-  // Enquanto verifica, podemos mostrar um loader para evitar piscar de conteúdo.
-  if (!isAuthenticated) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -38,11 +26,15 @@ function HomePage() {
     );
   }
 
-  // Se estiver autenticado e com cofre, renderiza o dashboard.
-  // Caso contrário, o useEffect já terá redirecionado.
+  // Se o usuário não está autenticado, mostramos a landing page.
+  // O middleware já cuidará de redirecionar para /login se ele tentar acessar rotas protegidas.
+  if (!isAuthenticated) {
+    return <LandingPageClient />;
+  }
+
+  // Se estiver autenticado, renderiza o dashboard.
+  // A lógica interna do dashboard e do seletor de cofres cuidará do resto.
   return <DashboardPage />;
 }
 
-// O HOC withAuth ainda pode ser útil para proteger esta rota como uma camada extra,
-// mas o redirecionamento principal é feito no useEffect.
 export default HomePage;
