@@ -1,3 +1,4 @@
+
 import { prisma } from './prisma';
 
 /**
@@ -216,7 +217,7 @@ export class TransactionService {
           paymentMethod: data.paymentMethod,
           sourceAccountId: sourceIsGoal ? null : data.sourceAccountId,
           destinationAccountId: destIsGoal ? null : data.destinationAccountId,
-          actorId: data.actorId,
+          actor: data.actorId ? { connect: { id: data.actorId } } : undefined,
           goalId: goalId,
           isRecurring: data.isRecurring ?? false,
           isInstallment: data.isInstallment ?? false,
@@ -249,6 +250,7 @@ export class TransactionService {
       isInstallment: boolean;
       installmentNumber: number;
       totalInstallments: number;
+      actorId: string;
     }>
   ): Promise<any> {
     try {
@@ -265,6 +267,11 @@ export class TransactionService {
       updateData.goalId = goalId;
       if (sourceIsGoal) updateData.sourceAccountId = null;
       if (destIsGoal) updateData.destinationAccountId = null;
+      
+      if (data.actorId) {
+        updateData.actor = { connect: { id: data.actorId } };
+        delete updateData.actorId;
+      }
 
       return await prisma.transaction.update({
         where: { id: transactionId },

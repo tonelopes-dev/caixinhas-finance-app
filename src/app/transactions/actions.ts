@@ -23,6 +23,7 @@ const transactionSchema = z.object({
   isInstallment: z.boolean().optional(),
   installmentNumber: z.coerce.number().optional(),
   totalInstallments: z.coerce.number().optional(),
+  actorId: z.string().optional(), // Actor ID is now explicitly part of the schema
 }).refine(data => {
     if (data.type === 'expense' && !data.sourceAccountId) return false;
     if (data.type === 'income' && !data.destinationAccountId) return false;
@@ -54,7 +55,9 @@ export type TransactionState = {
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const cookieStore = cookies();
+  console.log("Recebendo dados para criar transação:", Object.fromEntries(formData.entries()));
+  
+  const cookieStore = await cookies();
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
   
   if (!userId) {
@@ -86,7 +89,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    console.log(validatedFields.error.flatten().fieldErrors);
+    console.log("Erro de validação:", validatedFields.error.flatten().fieldErrors);
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -117,7 +120,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
 
   if (!userId) {
