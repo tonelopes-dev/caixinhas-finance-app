@@ -166,7 +166,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
                                   />
                               </PopoverContent>
                           </Popover>
-                          <input type="hidden" name="date" value={date?.toISOString()} />
+                          <input type="hidden" name="date" value={date?.toISOString() || ''} />
                           {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
                       </div>
 
