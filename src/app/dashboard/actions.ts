@@ -1,3 +1,4 @@
+
 "use server";
 
 import {
@@ -20,13 +21,12 @@ export async function getDashboardData(userId: string, workspaceId: string) {
     const ownerType = isPersonalWorkspace ? 'user' : 'vault';
 
     // Buscar dados em paralelo
-    const [user, accounts, goals, transactions, vault, vaultMembers] =
+    const [user, accounts, goals, transactions, vault] =
       await Promise.all([
         AuthService.getUserById(userId),
         AccountService.getVisibleAccounts(userId, workspaceId),
         GoalService.getGoals(workspaceId, ownerType),
         TransactionService.getCurrentMonthTransactions(workspaceId, ownerType),
-        !isPersonalWorkspace ? VaultService.getVaultById(workspaceId) : null,
         !isPersonalWorkspace ? VaultService.getVaultById(workspaceId) : null,
       ]);
 
@@ -64,7 +64,7 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       subscriptionStatus: user.subscriptionStatus as 'active' | 'inactive' | 'trial',
     };
 
-    const formattedAccounts = accounts.map((account) => ({
+    const formattedAccounts = accounts.map((account: any) => ({
       id: account.id,
       name: account.name,
       bank: account.bank,
@@ -76,7 +76,7 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       scope: account.scope,
     }));
 
-    const formattedGoals = goals.map((goal) => ({
+    const formattedGoals = goals.map((goal: any) => ({
       id: goal.id,
       name: goal.name,
       emoji: goal.emoji,
@@ -84,8 +84,8 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       currentAmount: goal.currentAmount,
       visibility: goal.visibility as 'private' | 'shared',
       isFeatured: goal.isFeatured,
-      ownerId: goal.ownerId,
-      ownerType: goal.ownerType as 'user' | 'vault',
+      ownerId: goal.userId || goal.vaultId,
+      ownerType: goal.userId ? 'user' : 'vault',
       participants: goal.participants?.map((p: any) => ({
         id: p.user.id,
         name: p.user.name,
@@ -94,7 +94,7 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       })) || [],
     }));
 
-    const formattedTransactions = transactions.map((transaction) => ({
+    const formattedTransactions = transactions.map((transaction: any) => ({
       id: transaction.id,
       date: transaction.date.toISOString(),
       description: transaction.description,
@@ -107,8 +107,8 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       goalId: transaction.goalId,
       actorId: transaction.actorId,
       isRecurring: transaction.isRecurring,
-      ownerId: transaction.ownerId,
-      ownerType: transaction.ownerType as 'user' | 'vault',
+      ownerId: transaction.userId || transaction.vaultId,
+      ownerType: transaction.userId ? 'user' : 'vault',
     }));
 
     return {

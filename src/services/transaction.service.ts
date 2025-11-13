@@ -150,7 +150,7 @@ export class TransactionService {
       if (data.vaultId) {
         createData.vault = { connect: { id: data.vaultId } };
       } else if (data.userId) {
-        createData.user = { connect: { id: data.userId } };
+        createData.userId = data.userId;
       } else {
         throw new Error("Transaction must be associated with either a user or a vault.");
       }

@@ -1,3 +1,4 @@
+
 "use server";
 
 import { GoalService, AuthService, VaultService, TransactionService } from '@/services';
@@ -53,8 +54,8 @@ export async function getUserAllGoals(userId: string) {
       currentAmount: goal.currentAmount,
       visibility: goal.visibility as 'private' | 'shared',
       isFeatured: goal.isFeatured,
-      ownerId: goal.ownerId,
-      ownerType: goal.ownerType as 'user' | 'vault',
+      ownerId: goal.userId || goal.vaultId,
+      ownerType: goal.userId ? 'user' : 'vault',
       participants: goal.participants?.map((p: any) => ({
         id: p.user.id,
         name: p.user.name,
@@ -100,15 +101,15 @@ export async function getGoalDetails(goalId: string) {
 
     // Buscar transações relacionadas à meta
     const transactions = await TransactionService.getTransactions(
-      goal.ownerId,
-      goal.ownerType as 'user' | 'vault'
+      goal.userId || goal.vaultId,
+      goal.userId ? 'user' : 'vault'
     );
 
     // Filtrar transações que envolvem esta meta
     const goalTransactions = transactions.filter(
-      (t) => t.goalId === goalId || t.sourceAccountId === goalId || t.destinationAccountId === goalId
+      (t) => t.goalId === goalId
     );
-
+    
     return {
       goal: {
         id: goal.id,
@@ -118,8 +119,8 @@ export async function getGoalDetails(goalId: string) {
         currentAmount: goal.currentAmount,
         visibility: goal.visibility as 'private' | 'shared',
         isFeatured: goal.isFeatured,
-        ownerId: goal.ownerId,
-        ownerType: goal.ownerType as 'user' | 'vault',
+        ownerId: goal.userId || goal.vaultId,
+        ownerType: goal.userId ? 'user' : 'vault',
         participants: goal.participants?.map((p: any) => ({
           id: p.user.id,
           name: p.user.name,
@@ -127,7 +128,7 @@ export async function getGoalDetails(goalId: string) {
           role: p.role,
         })) || [],
       },
-      transactions: goalTransactions.map((t) => ({
+      transactions: goalTransactions.map((t:any) => ({
         id: t.id,
         date: t.date.toISOString(),
         description: t.description,
@@ -207,28 +208,50 @@ export async function createGoalAction(
  * Atualiza uma meta existente
  */
 export async function updateGoalAction(
-  goalId: string,
-  data: {
-    name?: string;
-    targetAmount?: number;
-    emoji?: string;
-    visibility?: 'private' | 'shared';
-    isFeatured?: boolean;
+  prevState: GoalActionState,
+  formData: FormData,
+): Promise<GoalActionState> {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  
+  if (!userId) {
+    return { message: 'Usuário não autenticado' };
   }
-) {
+
+  const goalId = formData.get('id') as string;
+  if (!goalId) {
+    return { message: 'ID da meta não encontrado' };
+  }
+  
+  const validatedFields = createGoalSchema.safeParse({
+    name: formData.get('name'),
+    targetAmount: formData.get('targetAmount'),
+    emoji: formData.get('emoji'),
+    visibility: formData.get('visibility'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação.',
+    };
+  }
+
   try {
-    await GoalService.updateGoal(goalId, data);
+    await GoalService.updateGoal(goalId, validatedFields.data);
 
     revalidatePath('/goals');
     revalidatePath(`/goals/${goalId}`);
+    revalidatePath(`/goals/${goalId}/manage`);
     revalidatePath('/dashboard');
 
-    return { success: true, message: 'Meta atualizada com sucesso!' };
+    return { message: 'Meta atualizada com sucesso!' };
   } catch (error) {
     console.error('Erro ao atualizar meta:', error);
-    return { success: false, message: 'Erro ao atualizar meta.' };
+    return { message: 'Erro ao atualizar meta.' };
   }
 }
+
 
 /**
  * Deleta uma meta
@@ -271,9 +294,8 @@ export async function depositToGoalAction(goalId: string, amount: number, descri
   try {
     const cookieStore = await cookies();
     const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
 
-    if (!userId || !workspaceId) {
+    if (!userId) {
       return { success: false, message: 'Usuário não autenticado' };
     }
 
@@ -284,8 +306,8 @@ export async function depositToGoalAction(goalId: string, amount: number, descri
     const goal = await GoalService.getGoalById(goalId);
     if (goal) {
       await TransactionService.createTransaction({
-        ownerId: goal.ownerId,
-        ownerType: goal.ownerType as 'user' | 'vault',
+        userId: goal.userId,
+        vaultId: goal.vaultId,
         date: new Date(),
         description: description || `Depósito na caixinha ${goal.name}`,
         amount,
@@ -313,9 +335,8 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
   try {
     const cookieStore = await cookies();
     const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
 
-    if (!userId || !workspaceId) {
+    if (!userId) {
       return { success: false, message: 'Usuário não autenticado' };
     }
 
@@ -326,8 +347,8 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
     const goal = await GoalService.getGoalById(goalId);
     if (goal) {
       await TransactionService.createTransaction({
-        ownerId: goal.ownerId,
-        ownerType: goal.ownerType as 'user' | 'vault',
+        userId: goal.userId,
+        vaultId: goal.vaultId,
         date: new Date(),
         description: description || `Retirada da caixinha ${goal.name}`,
         amount,

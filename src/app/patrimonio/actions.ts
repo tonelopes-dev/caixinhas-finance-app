@@ -1,5 +1,6 @@
-"use server";
 
+"use server";
+import { prisma } from '@/services';
 import { AccountService, GoalService, VaultService } from '@/services';
 
 export type PatrimonyData = {
@@ -84,8 +85,8 @@ export async function getPatrimonyData(userId: string): Promise<PatrimonyData> {
         emoji: goal.emoji,
         currentAmount: goal.currentAmount,
         targetAmount: goal.targetAmount,
-        ownerId: goal.ownerId,
-        ownerType: goal.ownerType as 'user' | 'vault',
+        ownerId: goal.userId || goal.vaultId,
+        ownerType: goal.userId ? 'user' : 'vault',
       })),
       vaults: userVaults.map((vault) => ({
         id: vault.id,
