@@ -195,7 +195,6 @@ export class TransactionService {
     totalInstallments?: number;
   }): Promise<any> {
     try {
-      // Se source ou destination for uma meta, conecte-a.
       const goalId = data.destinationAccountId?.startsWith('goal-') 
         ? data.destinationAccountId 
         : data.sourceAccountId?.startsWith('goal-') 
@@ -205,26 +204,40 @@ export class TransactionService {
       const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
       const destIsGoal = data.destinationAccountId?.startsWith('goal-');
 
+      const createData: any = {
+        ownerId: data.ownerId,
+        ownerType: data.ownerType,
+        date: data.date,
+        description: data.description,
+        amount: data.amount,
+        type: data.type,
+        category: data.category,
+        paymentMethod: data.paymentMethod,
+        isRecurring: data.isRecurring ?? false,
+        isInstallment: data.isInstallment ?? false,
+        installmentNumber: data.installmentNumber,
+        totalInstallments: data.totalInstallments,
+        vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
+      };
+
+      if (data.actorId) {
+        createData.actor = { connect: { id: data.actorId } };
+      }
+
+      if (goalId) {
+        createData.goal = { connect: { id: goalId } };
+      }
+      
+      if (data.sourceAccountId && !sourceIsGoal) {
+        createData.sourceAccount = { connect: { id: data.sourceAccountId } };
+      }
+      
+      if (data.destinationAccountId && !destIsGoal) {
+        createData.destinationAccount = { connect: { id: data.destinationAccountId } };
+      }
+
       return await prisma.transaction.create({
-        data: {
-          ownerId: data.ownerId,
-          ownerType: data.ownerType,
-          date: data.date,
-          description: data.description,
-          amount: data.amount,
-          type: data.type,
-          category: data.category,
-          paymentMethod: data.paymentMethod,
-          sourceAccountId: sourceIsGoal ? null : data.sourceAccountId,
-          destinationAccountId: destIsGoal ? null : data.destinationAccountId,
-          actor: data.actorId ? { connect: { id: data.actorId } } : undefined,
-          goalId: goalId,
-          isRecurring: data.isRecurring ?? false,
-          isInstallment: data.isInstallment ?? false,
-          installmentNumber: data.installmentNumber,
-          totalInstallments: data.totalInstallments,
-          vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
-        },
+        data: createData,
       });
     } catch (error) {
       console.error('Erro ao criar transação:', error);
@@ -264,9 +277,25 @@ export class TransactionService {
       const destIsGoal = data.destinationAccountId?.startsWith('goal-');
         
       const updateData: any = { ...data };
-      updateData.goalId = goalId;
-      if (sourceIsGoal) updateData.sourceAccountId = null;
-      if (destIsGoal) updateData.destinationAccountId = null;
+      
+      if (goalId) {
+        updateData.goal = { connect: { id: goalId } };
+      }
+      delete updateData.goalId; // Remove to avoid conflict
+
+      if (data.sourceAccountId && !sourceIsGoal) {
+        updateData.sourceAccount = { connect: { id: data.sourceAccountId } };
+      } else {
+        updateData.sourceAccount = { disconnect: true };
+      }
+      delete updateData.sourceAccountId;
+
+      if (data.destinationAccountId && !destIsGoal) {
+        updateData.destinationAccount = { connect: { id: data.destinationAccountId } };
+      } else {
+         updateData.destinationAccount = { disconnect: true };
+      }
+      delete updateData.destinationAccountId;
       
       if (data.actorId) {
         updateData.actor = { connect: { id: data.actorId } };
