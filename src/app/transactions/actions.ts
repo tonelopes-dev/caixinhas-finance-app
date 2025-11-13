@@ -5,10 +5,12 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { TransactionService } from '@/services';
 import { invalidateReportCache } from '../reports/actions';
+import { cookies } from 'next/headers';
 
 const transactionSchema = z.object({
   id: z.string().optional(),
   ownerId: z.string(),
+  ownerType: z.enum(['user', 'vault']),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
@@ -51,9 +53,20 @@ export type TransactionState = {
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const cookieStore = cookies();
+  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  
+  if (!userId) {
+    return { message: 'Usuário não autenticado.' };
+  }
+
   const chargeType = formData.get('chargeType');
+  const ownerId = formData.get('ownerId') as string;
+  const ownerType = ownerId === userId ? 'user' : 'vault';
+
   const rawData = {
-    ownerId: formData.get('ownerId'),
+    ownerId,
+    ownerType,
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -66,6 +79,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
+    actorId: userId,
   };
   
   const validatedFields = transactionSchema.safeParse(rawData);
@@ -101,11 +115,21 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const cookieStore = cookies();
+  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+
+  if (!userId) {
+    return { message: 'Usuário não autenticado.' };
+  }
+
   const chargeType = formData.get('chargeType');
+  const ownerId = formData.get('ownerId') as string;
+  const ownerType = ownerId === userId ? 'user' : 'vault';
   
   const rawData = {
     id: formData.get('id'),
-    ownerId: formData.get('ownerId'),
+    ownerId,
+    ownerType,
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -118,6 +142,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
+    actorId: userId,
   };
 
   const validatedFields = transactionSchema.safeParse(rawData);
@@ -144,7 +169,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     await TransactionService.updateTransaction(id, data as any);
     
     await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.ownerId);
-    if(originalTransaction.date.toISOString() !== data.date) {
+    if(data.date && originalTransaction.date.toISOString() !== data.date) {
         await invalidateReportCache(data.date, data.ownerId);
     }
     
