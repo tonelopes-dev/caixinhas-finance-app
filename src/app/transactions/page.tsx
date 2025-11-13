@@ -1,8 +1,7 @@
-
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search } from 'lucide-react';
+import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
 import { transactions as allTransactions, accounts as allAccounts, goals as allGoals, users } from '@/lib/data';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -185,6 +184,17 @@ export default function TransactionsPage() {
     return { income, expenses, balance, transfers };
   }, [filteredTransactions]);
 
+  const recurringSummary = useMemo(() => {
+    const recurring = transactions.filter(t => t.isRecurring);
+    const installments = transactions.filter(t => t.isInstallment);
+    
+    return {
+      recurringCount: recurring.length,
+      installmentsCount: installments.length
+    };
+  }, [transactions]);
+
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -246,7 +256,7 @@ export default function TransactionsPage() {
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="hidden md:block mb-8"
+          className="mb-8"
         >
           <Card>
               <CardHeader>
@@ -254,7 +264,7 @@ export default function TransactionsPage() {
                   <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <motion.div className="grid gap-4 md:grid-cols-3" initial="hidden" animate="visible" variants={containerVariants}>
+                  <motion.div className="grid gap-4 md:grid-cols-4" initial="hidden" animate="visible" variants={containerVariants}>
                       {typeFilter === 'transfer' ? (
                          <motion.div variants={summaryItemVariants(0.1)} className={cn(cardBaseClasses, typeFilter === 'transfer' && activeClasses)} onClick={() => setTypeFilter('transfer')}>
                             <div className="rounded-full bg-blue-500/10 p-3">
@@ -292,6 +302,15 @@ export default function TransactionsPage() {
                           <div>
                               <p className="text-sm text-muted-foreground">Saídas</p>
                               <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
+                          </div>
+                      </motion.div>
+                      <motion.div variants={summaryItemVariants(0.4)} className={cardBaseClasses} onClick={() => router.push('/recurring')}>
+                          <div className="rounded-full bg-purple-500/10 p-3">
+                              <Repeat className="h-6 w-6 text-purple-500" />
+                          </div>
+                          <div>
+                              <p className="text-sm text-muted-foreground">Recorrentes e Parcelas</p>
+                              <p className="text-xl font-bold">{recurringSummary.recurringCount + recurringSummary.installmentsCount}</p>
                           </div>
                       </motion.div>
                   </motion.div>
