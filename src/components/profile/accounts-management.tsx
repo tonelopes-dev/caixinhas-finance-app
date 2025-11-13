@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { bankLogos, users } from '@/lib/data';
-import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock, AlertCircle } from 'lucide-react';
+import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock, AlertCircle, Eye } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -458,32 +458,43 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             const canDelete = isOwner;
             
             return (
-                <div
-                key={account.id}
-                className="flex items-center justify-between rounded-lg border p-3"
-                >
-                <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
-                        {account.logoUrl ? (
-                             <Image src={account.logoUrl} alt={account.bank} width={28} height={28} className="h-7 w-7 object-contain" />
-                        ) : (
-                            account.type === 'credit_card' ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
-                        )}
-                    </div>
-                    <div>
-                        <div className='flex items-center gap-2'>
-                           <p className="font-medium">{account.name}</p>
+                <div key={account.id} className="rounded-lg border p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
+                                {account.logoUrl ? (
+                                    <Image src={account.logoUrl} alt={account.bank} width={28} height={28} className="h-7 w-7 object-contain" />
+                                ) : (
+                                    account.type === 'credit_card' ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
+                                )}
+                            </div>
+                            <div>
+                                <p className="font-medium">{account.name}</p>
+                                <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
+                        <div className='flex gap-1 items-center'>
+                            <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
+                            <DeleteAccountDialog 
+                                account={account} 
+                                disabled={!canDelete} 
+                            />
+                        </div>
                     </div>
-                </div>
-                <div className='flex gap-1 items-center'>
-                    <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
-                    <DeleteAccountDialog 
-                        account={account} 
-                        disabled={!canDelete} 
-                    />
-                </div>
+                    {isOwner && account.visibleIn && account.visibleIn.length > 0 && (
+                        <div className="border-t pt-3 mt-2 flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Eye className="h-3 w-3" />
+                                <span>Visível em:</span>
+                            </div>
+                            {account.visibleIn.map(vaultId => {
+                                const vault = userVaults.find(v => v.id === vaultId);
+                                return vault ? (
+                                    <Badge key={vaultId} variant="secondary">{vault.name}</Badge>
+                                ) : null;
+                            })}
+                        </div>
+                    )}
                 </div>
             )
           })}
