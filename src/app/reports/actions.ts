@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -79,7 +80,7 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     }
 }
 
-export function invalidateReportCache(date: string | undefined, ownerId: string | undefined) {
+export async function invalidateReportCache(date: string | undefined, ownerId: string | undefined) {
     if (!date || !ownerId) return;
 
     const transactionDate = new Date(date);
