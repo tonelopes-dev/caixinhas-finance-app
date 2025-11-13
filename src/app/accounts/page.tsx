@@ -11,17 +11,16 @@ import { AccountsManagement } from '@/components/profile/accounts-management';
 export default async function AccountsPage() {
   const cookieStore = await cookies();
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-  const selectedWorkspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
 
   if (!userId) {
     redirect('/login');
   }
 
-  if (!selectedWorkspaceId) {
-    redirect('/vaults');
-  }
+  // A lógica do workspaceId é menos relevante aqui agora, mas mantemos para consistência do nome
+  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+  const workspaceName = "seu"; // Simplificado, já que a página agora mostra todas as contas
 
-  const { accounts, currentUser, userVaults, workspaceId, workspaceName, isVaultOwner } = await getAccountsData(userId);
+  const { accounts, currentUser, userVaults } = await getAccountsData(userId);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -36,9 +35,9 @@ export default async function AccountsPage() {
           accounts={accounts}
           currentUserId={currentUser.id}
           userVaults={userVaults}
-          workspaceId={workspaceId}
+          workspaceId={workspaceId} // Ainda pode ser útil para saber o contexto atual
           workspaceName={workspaceName}
-          isVaultOwner={isVaultOwner}
+          isVaultOwner={true} // Simplificado, o usuário sempre é "dono" do seu gerenciamento
         />
       </div>
     </div>
