@@ -15,7 +15,7 @@ import { passwordResetEmailTemplate } from '@/app/_templates/emails/password-res
 
 const transactionSchema = z.object({
   id: z.string().optional(),
-  ownerId: z.string(), // Adicionado para receber o ID do cofre
+  ownerId: z.string(),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
@@ -25,6 +25,9 @@ const transactionSchema = z.object({
   destinationAccountId: z.string().optional(),
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional(),
   isRecurring: z.boolean().optional(),
+  isInstallment: z.boolean().optional(),
+  installmentNumber: z.coerce.number().optional(),
+  totalInstallments: z.coerce.number().optional(),
 }).refine(data => {
     if (data.type === 'income') return !!data.destinationAccountId;
     if (data.type === 'expense') return !!data.sourceAccountId;
@@ -33,6 +36,14 @@ const transactionSchema = z.object({
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
     path: ['sourceAccountId'],
+}).refine(data => {
+    if (data.isInstallment) {
+        return data.installmentNumber && data.totalInstallments && data.installmentNumber <= data.totalInstallments;
+    }
+    return true;
+}, {
+    message: "Número de parcelas inválido.",
+    path: ['installmentNumber'],
 });
 
 
@@ -103,6 +114,9 @@ export type TransactionState = {
     destinationAccountId?: string[];
     paymentMethod?: string[];
     isRecurring?: string[];
+    isInstallment?: string[];
+    installmentNumber?: string[];
+    totalInstallments?: string[];
   };
 }
 
@@ -245,6 +259,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: formData.get('isRecurring') === 'on',
+    isInstallment: formData.get('isInstallment') === 'on',
+    installmentNumber: formData.get('installmentNumber'),
+    totalInstallments: formData.get('totalInstallments'),
   });
 
   if (!validatedFields.success) {
@@ -264,7 +281,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     ...data
   };
 
-  transactions.unshift(newTransaction);
+  transactions.unshift(newTransaction as any);
   console.log('New transaction added:', newTransaction);
   
   invalidateReportCache(newTransaction.date, newTransaction.ownerId);
@@ -290,6 +307,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: formData.get('isRecurring') === 'on',
+    isInstallment: formData.get('isInstallment') === 'on',
+    installmentNumber: formData.get('installmentNumber'),
+    totalInstallments: formData.get('totalInstallments'),
   });
 
   if (!validatedFields.success) {
@@ -378,7 +398,7 @@ export async function addGoal(prevState: GoalState, formData: FormData): Promise
     id: `goal${goals.length + 1}`,
     currentAmount: 0,
     ...validatedFields.data
-  })
+  } as Goal)
   console.log('New goal added:', validatedFields.data);
   
   revalidatePath('/');
