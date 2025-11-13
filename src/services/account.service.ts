@@ -65,7 +65,7 @@ export class AccountService {
       return await prisma.account.findMany({
         where: {
           OR: [
-            { ownerId: userId, visibleIn: { has: scope } },
+            { ownerId: userId, visibleIn: { contains: scope } },
             { vaultId: scope },
           ],
         },
@@ -118,7 +118,7 @@ export class AccountService {
         scope: data.scope,
         creditLimit: data.creditLimit,
         logoUrl: data.logoUrl,
-        visibleIn: data.visibleIn || [],
+        visibleIn: (data.visibleIn || []).join(','),
         allowFullAccess: data.allowFullAccess ?? false,
         owner: {
           connect: { id: data.ownerId }
@@ -172,6 +172,11 @@ export class AccountService {
       
       // Preparar dados para update
       const prismaData: any = { ...updateData };
+
+      // Lidar com `visibleIn` como string
+      if (data.visibleIn) {
+        prismaData.visibleIn = data.visibleIn.join(',');
+      }
 
       // Tratar mudanças de escopo adequadamente
       if (data.scope === 'personal' && currentAccount.vaultId) {
@@ -241,7 +246,7 @@ export class AccountService {
         accounts = await prisma.account.findMany({
           where: {
             OR: [
-              { ownerId: userId, visibleIn: { has: scope } },
+              { ownerId: userId, visibleIn: { contains: scope } },
               { vaultId: scope },
             ],
             type: { in: ['checking', 'savings'] },
@@ -274,7 +279,7 @@ export class AccountService {
         accounts = await prisma.account.findMany({
           where: {
             OR: [
-              { ownerId: userId, visibleIn: { has: scope } },
+              { ownerId: userId, visibleIn: { contains: scope } },
               { vaultId: scope },
             ],
             type: 'investment',
@@ -301,14 +306,15 @@ export class AccountService {
       if (!account) {
         throw new Error('Conta não encontrada');
       }
-
-      const visibleIn = account.visibleIn.includes(vaultId)
-        ? account.visibleIn
-        : [...account.visibleIn, vaultId];
+      
+      const visibleIn = account.visibleIn ? account.visibleIn.split(',') : [];
+      if (!visibleIn.includes(vaultId)) {
+          visibleIn.push(vaultId);
+      }
 
       return await prisma.account.update({
         where: { id: accountId },
-        data: { visibleIn },
+        data: { visibleIn: visibleIn.join(',') },
       });
     } catch (error) {
       console.error('Erro ao adicionar visibilidade:', error);
@@ -329,11 +335,11 @@ export class AccountService {
         throw new Error('Conta não encontrada');
       }
 
-      const visibleIn = account.visibleIn.filter((id: string) => id !== vaultId);
+      const visibleIn = (account.visibleIn || '').split(',').filter(id => id && id !== vaultId);
 
       return await prisma.account.update({
         where: { id: accountId },
-        data: { visibleIn },
+        data: { visibleIn: visibleIn.join(',') },
       });
     } catch (error) {
       console.error('Erro ao remover visibilidade:', error);
