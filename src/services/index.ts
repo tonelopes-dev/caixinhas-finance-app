@@ -7,6 +7,9 @@ export type { VaultWithMembers, CreateVaultInput, UpdateVaultInput, VaultInvitat
 
 export { AccountService } from './account.service';
 export { GoalService } from './goal.service';
+
 export { TransactionService } from './transaction.service';
+export { TransactionQueryService } from './transaction.query.service';
+export { TransactionAnalysisService } from './transaction.analysis.service';
 
 export { default as prisma } from './prisma';

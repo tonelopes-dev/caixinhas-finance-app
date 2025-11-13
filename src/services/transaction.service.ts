@@ -4,77 +4,14 @@ import { prisma } from './prisma';
 /**
  * TransactionService
  * 
- * Serviço responsável por gerenciar transações financeiras.
+ * Serviço responsável pelas operações de escrita (CRUD) de transações financeiras.
+ * Para consultas complexas, use TransactionQueryService.
+ * Para análises e cálculos, use TransactionAnalysisService.
  */
 export class TransactionService {
   /**
-   * Busca todas as transações de um usuário
-   */
-  static async getUserTransactions(userId: string): Promise<any[]> {
-    try {
-      return await prisma.transaction.findMany({
-        where: {
-          ownerId: userId,
-          ownerType: 'user',
-        },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-          goal: true,
-          actor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatarUrl: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar transações do usuário:', error);
-      throw new Error('Não foi possível buscar as transações do usuário');
-    }
-  }
-
-  /**
-   * Busca todas as transações de um cofre
-   */
-  static async getVaultTransactions(vaultId: string): Promise<any[]> {
-    try {
-      return await prisma.transaction.findMany({
-        where: {
-          ownerId: vaultId,
-          ownerType: 'vault',
-        },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-          goal: true,
-          actor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatarUrl: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar transações do cofre:', error);
-      throw new Error('Não foi possível buscar as transações do cofre');
-    }
-  }
-
-  /**
    * Busca transações de um contexto (usuário ou vault)
+   * Este é o método principal para leitura de listas de transações.
    */
   static async getTransactions(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
@@ -105,9 +42,10 @@ export class TransactionService {
       throw new Error('Não foi possível buscar as transações');
     }
   }
-
+  
   /**
-   * Busca transações do mês atual
+   * Busca transações do mês atual para um determinado contexto.
+   * Usado principalmente no Dashboard para uma visão rápida.
    */
   static async getCurrentMonthTransactions(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
@@ -147,8 +85,9 @@ export class TransactionService {
     }
   }
 
+
   /**
-   * Busca uma transação por ID
+   * Busca uma transação única por seu ID.
    */
   static async getTransactionById(transactionId: string): Promise<any | null> {
     try {
@@ -175,7 +114,7 @@ export class TransactionService {
   }
 
   /**
-   * Cria uma nova transação
+   * Cria uma nova transação no banco de dados.
    */
   static async createTransaction(data: {
     ownerId: string;
@@ -185,25 +124,16 @@ export class TransactionService {
     amount: number;
     type: 'income' | 'expense' | 'transfer';
     category: string;
+    actorId: string;
     paymentMethod?: string;
     sourceAccountId?: string | null;
     destinationAccountId?: string | null;
-    actorId?: string;
     isRecurring?: boolean;
     isInstallment?: boolean;
     installmentNumber?: number;
     totalInstallments?: number;
   }): Promise<any> {
     try {
-      const goalId = data.destinationAccountId?.startsWith('goal-') 
-        ? data.destinationAccountId 
-        : data.sourceAccountId?.startsWith('goal-') 
-        ? data.sourceAccountId 
-        : undefined;
-
-      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
-      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
-
       const createData: any = {
         ownerId: data.ownerId,
         ownerType: data.ownerType,
@@ -218,27 +148,24 @@ export class TransactionService {
         installmentNumber: data.installmentNumber,
         totalInstallments: data.totalInstallments,
         vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
+        actor: { connect: { id: data.actorId } },
       };
 
-      if (data.actorId) {
-        createData.actor = { connect: { id: data.actorId } };
-      }
+      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
+      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
 
-      if (goalId) {
-        createData.goal = { connect: { id: goalId } };
+      if (data.sourceAccountId) {
+        if (sourceIsGoal) createData.goal = { connect: { id: data.sourceAccountId } };
+        else createData.sourceAccount = { connect: { id: data.sourceAccountId } };
       }
       
-      if (data.sourceAccountId && !sourceIsGoal) {
-        createData.sourceAccount = { connect: { id: data.sourceAccountId } };
-      }
-      
-      if (data.destinationAccountId && !destIsGoal) {
-        createData.destinationAccount = { connect: { id: data.destinationAccountId } };
+      if (data.destinationAccountId) {
+        if (destIsGoal) createData.goal = { connect: { id: data.destinationAccountId } };
+        else createData.destinationAccount = { connect: { id: data.destinationAccountId } };
       }
 
-      return await prisma.transaction.create({
-        data: createData,
-      });
+      return await prisma.transaction.create({ data: createData });
+
     } catch (error) {
       console.error('Erro ao criar transação:', error);
       throw new Error('Não foi possível criar a transação');
@@ -246,7 +173,7 @@ export class TransactionService {
   }
 
   /**
-   * Atualiza uma transação existente
+   * Atualiza uma transação existente.
    */
   static async updateTransaction(
     transactionId: string,
@@ -263,45 +190,29 @@ export class TransactionService {
       isInstallment: boolean;
       installmentNumber: number;
       totalInstallments: number;
-      actorId: string;
     }>
   ): Promise<any> {
     try {
-      const goalId = data.destinationAccountId?.startsWith('goal-') 
-        ? data.destinationAccountId 
-        : data.sourceAccountId?.startsWith('goal-') 
-        ? data.sourceAccountId 
-        : undefined;
-
-      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
-      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
-        
       const updateData: any = { ...data };
       
-      if (goalId) {
-        updateData.goal = { connect: { id: goalId } };
-      }
-      delete updateData.goalId; // Remove to avoid conflict
+      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
+      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
 
-      if (data.sourceAccountId && !sourceIsGoal) {
-        updateData.sourceAccount = { connect: { id: data.sourceAccountId } };
-      } else {
-        updateData.sourceAccount = { disconnect: true };
+      if ('sourceAccountId' in data) {
+        updateData.sourceAccount = data.sourceAccountId && !sourceIsGoal ? { connect: { id: data.sourceAccountId } } : { disconnect: true };
       }
+      if ('destinationAccountId' in data) {
+        updateData.destinationAccount = data.destinationAccountId && !destIsGoal ? { connect: { id: data.destinationAccountId } } : { disconnect: true };
+      }
+      
+      const goalId = sourceIsGoal ? data.sourceAccountId : destIsGoal ? data.destinationAccountId : undefined;
+      if (goalId !== undefined) {
+          updateData.goal = goalId ? { connect: { id: goalId } } : { disconnect: true };
+      }
+
       delete updateData.sourceAccountId;
-
-      if (data.destinationAccountId && !destIsGoal) {
-        updateData.destinationAccount = { connect: { id: data.destinationAccountId } };
-      } else {
-         updateData.destinationAccount = { disconnect: true };
-      }
       delete updateData.destinationAccountId;
       
-      if (data.actorId) {
-        updateData.actor = { connect: { id: data.actorId } };
-        delete updateData.actorId;
-      }
-
       return await prisma.transaction.update({
         where: { id: transactionId },
         data: updateData,
@@ -313,7 +224,7 @@ export class TransactionService {
   }
 
   /**
-   * Deleta uma transação
+   * Deleta uma transação do banco de dados.
    */
   static async deleteTransaction(transactionId: string): Promise<void> {
     try {
@@ -323,164 +234,6 @@ export class TransactionService {
     } catch (error) {
       console.error('Erro ao deletar transação:', error);
       throw new Error('Não foi possível deletar a transação');
-    }
-  }
-
-  /**
-   * Filtra transações por tipo
-   */
-  static async getTransactionsByType(
-    ownerId: string,
-    ownerType: 'user' | 'vault',
-    type: 'income' | 'expense' | 'transfer'
-  ): Promise<any[]> {
-    try {
-      return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          type,
-        },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-          goal: true,
-          actor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatarUrl: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar transações por tipo:', error);
-      throw new Error('Não foi possível buscar as transações por tipo');
-    }
-  }
-
-  /**
-   * Filtra transações por categoria
-   */
-  static async getTransactionsByCategory(
-    ownerId: string,
-    ownerType: 'user' | 'vault',
-    category: string
-  ): Promise<any[]> {
-    try {
-      return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          category,
-        },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-          goal: true,
-          actor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatarUrl: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar transações por categoria:', error);
-      throw new Error('Não foi possível buscar as transações por categoria');
-    }
-  }
-
-  /**
-   * Calcula o total de receitas
-   */
-  static async calculateTotalIncome(ownerId: string, ownerType: 'user' | 'vault'): Promise<number> {
-    try {
-      const transactions = await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          type: 'income',
-        },
-      });
-
-      return transactions.reduce((sum: number, transaction: any) => sum + transaction.amount, 0);
-    } catch (error) {
-      console.error('Erro ao calcular total de receitas:', error);
-      throw new Error('Não foi possível calcular o total de receitas');
-    }
-  }
-
-  /**
-   * Calcula o total de despesas
-   */
-  static async calculateTotalExpenses(ownerId: string, ownerType: 'user' | 'vault'): Promise<number> {
-    try {
-      const transactions = await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          type: 'expense',
-        },
-      });
-
-      return transactions.reduce((sum: number, transaction: any) => sum + transaction.amount, 0);
-    } catch (error) {
-      console.error('Erro ao calcular total de despesas:', error);
-      throw new Error('Não foi possível calcular o total de despesas');
-    }
-  }
-
-  /**
-   * Busca transações por período
-   */
-  static async getTransactionsByPeriod(
-    ownerId: string,
-    ownerType: 'user' | 'vault',
-    startDate: Date,
-    endDate: Date
-  ): Promise<any[]> {
-    try {
-      return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          date: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-          goal: true,
-          actor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatarUrl: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar transações por período:', error);
-      throw new Error('Não foi possível buscar as transações por período');
     }
   }
 }
