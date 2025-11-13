@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -60,6 +59,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
@@ -97,7 +97,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
     }
   }, [state, toast]);
   
-  const allSourcesAndDestinations = [...workspaceAccounts, ...workspaceGoals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [...workspaceAccounts, ...workspaceGoals.map(g => ({ ...g, id: g.id, name: `Caixinha: ${g.name}`, type: 'goal' }))];
   
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
@@ -150,7 +150,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
 
                       <div className="space-y-2">
                           <Label htmlFor="date">Data</Label>
-                          <Popover>
+                           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                               <PopoverTrigger asChild>
                                   <Button
                                   variant={"outline"}
@@ -167,7 +167,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                                   <Calendar
                                   mode="single"
                                   selected={date}
-                                  onSelect={setDate}
+                                  onSelect={(newDate) => { setDate(newDate); setPopoverOpen(false); }}
                                   initialFocus
                                   locale={ptBR}
                                   />

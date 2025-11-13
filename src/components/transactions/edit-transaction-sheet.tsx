@@ -58,6 +58,7 @@ export function EditTransactionSheet({ transaction, accounts, goals }: { transac
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>(transaction.type);
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
   const [sourceAccount, setSourceAccount] = useState<Account | null>(() => {
@@ -142,7 +143,7 @@ export function EditTransactionSheet({ transaction, accounts, goals }: { transac
 
                     <div className="space-y-2">
                         <Label htmlFor="date">Data</Label>
-                         <Popover>
+                         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                 variant={"outline"}
@@ -159,7 +160,7 @@ export function EditTransactionSheet({ transaction, accounts, goals }: { transac
                                 <Calendar
                                 mode="single"
                                 selected={date}
-                                onSelect={setDate}
+                                onSelect={(newDate) => { setDate(newDate); setPopoverOpen(false); }}
                                 initialFocus
                                 locale={ptBR}
                                 />
