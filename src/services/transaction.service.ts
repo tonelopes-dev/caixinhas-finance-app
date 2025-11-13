@@ -126,7 +126,7 @@ export class TransactionService {
     type: 'income' | 'expense' | 'transfer';
     category: string;
     actorId: string;
-    paymentMethod?: string;
+    paymentMethod?: string | null;
     sourceAccountId?: string | null;
     destinationAccountId?: string | null;
     isRecurring?: boolean;
@@ -136,7 +136,6 @@ export class TransactionService {
   }): Promise<any> {
     try {
       const createData: any = {
-        ownerId: data.ownerId,
         ownerType: data.ownerType,
         date: data.date,
         description: data.description,
@@ -172,7 +171,7 @@ export class TransactionService {
       if (goalId) {
           createData.goal = { connect: { id: goalId } };
       }
-
+      
       return await prisma.transaction.create({ data: createData });
 
     } catch (error) {
@@ -192,7 +191,7 @@ export class TransactionService {
       amount: number;
       type: string;
       category: string;
-      paymentMethod: string;
+      paymentMethod: string | null;
       sourceAccountId: string | null;
       destinationAccountId: string | null;
       isRecurring: boolean;
