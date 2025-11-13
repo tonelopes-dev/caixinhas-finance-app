@@ -55,7 +55,7 @@ const paymentMethods = [
 ]
 
 export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts: Account[] }) {
-  const initialState: TransactionState = {};
+  const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -77,7 +77,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   };
 
   useEffect(() => {
-    if (state?.message && !state.errors) {
+    if (state.success) {
       toast({
         title: "Sucesso!",
         description: state.message,
@@ -88,9 +88,9 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
       setChargeType('single');
       setDate(undefined);
       setOpen(false);
-    } else if (state?.message && state.errors) {
+    } else if (state.message) { // Handles both validation and server errors
       toast({
-        title: "Erro de Validação",
+        title: "Erro",
         description: state.message,
         variant: "destructive",
       });

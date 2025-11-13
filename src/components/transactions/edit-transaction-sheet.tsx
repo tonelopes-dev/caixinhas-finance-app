@@ -54,7 +54,7 @@ const paymentMethods = [
 ]
 
 export function EditTransactionSheet({ transaction }: { transaction: Transaction }) {
-  const initialState: TransactionState = {};
+  const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -88,15 +88,15 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   }, [open]);
 
   useEffect(() => {
-    if (state?.message && !state.errors) {
+    if (state.success) {
       toast({
         title: "Sucesso!",
         description: state.message,
       });
       setOpen(false);
-    } else if (state?.message && state.errors) {
+    } else if (state.message) { // Handles both validation and server errors
       toast({
-        title: "Erro de Validação",
+        title: "Erro",
         description: state.message,
         variant: "destructive",
       });

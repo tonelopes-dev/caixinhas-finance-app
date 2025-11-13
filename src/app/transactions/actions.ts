@@ -24,13 +24,13 @@ const transactionSchema = z.object({
   installmentNumber: z.coerce.number().optional(),
   totalInstallments: z.coerce.number().optional(),
 }).refine(data => {
-    if (data.type === 'income') return !!data.destinationAccountId;
-    if (data.type === 'expense') return !!data.sourceAccountId;
-    if (data.type === 'transfer') return !!data.sourceAccountId && !!data.destinationAccountId;
-    return false;
+    if (data.type === 'expense' && !data.sourceAccountId) return false;
+    if (data.type === 'income' && !data.destinationAccountId) return false;
+    if (data.type === 'transfer' && (!data.sourceAccountId || !data.destinationAccountId)) return false;
+    return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'],
+    path: ['sourceAccountId'], // Assign error to a relevant field
 }).refine(data => {
     if (data.isInstallment) {
         return data.installmentNumber && data.totalInstallments && data.installmentNumber <= data.totalInstallments;
@@ -48,6 +48,7 @@ const deleteTransactionSchema = z.object({
 
 
 export type TransactionState = {
+  success: boolean;
   message?: string | null;
   errors?: Record<string, string[] | undefined>;
 }
@@ -57,7 +58,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
   
   if (!userId) {
-    return { message: 'Usuário não autenticado.' };
+    return { success: false, message: 'Usuário não autenticado.' };
   }
 
   const chargeType = formData.get('chargeType');
@@ -87,6 +88,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Falha na validação. Por favor, verifique os campos.',
     };
@@ -106,11 +108,11 @@ export async function addTransaction(prevState: TransactionState, formData: Form
         revalidatePath(`/goals/${validatedFields.data.sourceAccountId}`);
     }
     
-    return { message: 'Transação adicionada com sucesso!' };
+    return { success: true, message: 'Transação adicionada com sucesso!' };
 
   } catch(error) {
      console.error('Erro ao criar transação:', error);
-     return { message: 'Ocorreu um erro no servidor ao salvar a transação.' };
+     return { success: false, message: 'Ocorreu um erro no servidor ao salvar a transação.' };
   }
 }
 
@@ -119,7 +121,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
 
   if (!userId) {
-    return { message: 'Usuário não autenticado.' };
+    return { success: false, message: 'Usuário não autenticado.' };
   }
 
   const chargeType = formData.get('chargeType');
@@ -149,6 +151,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Falha na validação. Por favor, verifique os campos.',
     };
@@ -157,13 +160,13 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   const { id, ...data } = validatedFields.data;
 
   if (!id) {
-    return { message: 'Erro: ID da transação não encontrado.' };
+    return { success: false, message: 'Erro: ID da transação não encontrado.' };
   }
 
   try {
     const originalTransaction = await TransactionService.getTransactionById(id);
     if (!originalTransaction) {
-        return { message: 'Erro: Transação não encontrada.' };
+        return { success: false, message: 'Erro: Transação não encontrada.' };
     }
 
     await TransactionService.updateTransaction(id, data as any);
@@ -181,11 +184,11 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     if (data.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.destinationAccountId}`);
     if (data.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.sourceAccountId}`);
     
-    return { message: 'Transação atualizada com sucesso!' };
+    return { success: true, message: 'Transação atualizada com sucesso!' };
 
   } catch(error) {
      console.error('Erro ao atualizar transação:', error);
-     return { message: 'Ocorreu um erro no servidor ao atualizar a transação.' };
+     return { success: false, message: 'Ocorreu um erro no servidor ao atualizar a transação.' };
   }
 }
 
