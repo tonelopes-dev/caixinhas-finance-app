@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -16,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Edit, Repeat } from 'lucide-react';
+import { CalendarIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getMockDataForUser } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -26,7 +27,7 @@ import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
-import { Switch } from '../ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -62,6 +63,17 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [sourceAccount, setSourceAccount] = useState<Account | null>(() => {
+    const { userAccounts } = getMockDataForUser(transaction.ownerId, transaction.ownerId); // Mock, needs real logic
+    return userAccounts.find(a => a.id === transaction.sourceAccountId) || null;
+  });
+  
+  const getChargeType = () => {
+    if (transaction.isInstallment) return 'installment';
+    if (transaction.isRecurring) return 'recurring';
+    return 'single';
+  }
+  const [chargeType, setChargeType] = useState(getChargeType());
 
   useEffect(() => {
     if (open) {
@@ -92,7 +104,8 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
   }, [state, toast]);
 
   const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
-  
+  const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -112,7 +125,8 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
           <input type="hidden" name="id" value={transaction.id} />
-          <div className="grid gap-4 py-4 overflow-y-auto">
+          {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
+          <div className="grid gap-4 py-4 overflow-y-auto pr-4">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>
               <Select name="type" defaultValue={transaction.type} onValueChange={(value) => setTransactionType(value as any)}>
@@ -166,7 +180,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                                 />
                             </PopoverContent>
                         </Popover>
-                        <input type="hidden" name="date" value={date?.toISOString()} />
+                        <input type="hidden" name="date" value={date?.toISOString() || ''} />
                          {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
                     </div>
 
@@ -174,7 +188,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                     {(transactionType === 'expense' || transactionType === 'transfer') && (
                          <div className="space-y-2">
                             <Label htmlFor="sourceAccountId">Origem</Label>
-                            <Select name="sourceAccountId" defaultValue={transaction.sourceAccountId}>
+                            <Select name="sourceAccountId" defaultValue={transaction.sourceAccountId} onValueChange={(id) => setSourceAccount(accounts.find(a => a.id === id) || null)}>
                                 <SelectTrigger>
                                 <SelectValue placeholder="De onde saiu o dinheiro?" />
                                 </SelectTrigger>
@@ -214,7 +228,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                         {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
                     </div>
 
-                    {transactionType === 'expense' && (
+                    {transactionType === 'expense' && !isCreditCardTransaction && (
                         <div className="space-y-2">
                             <Label htmlFor="paymentMethod">Método de Pagamento</Label>
                             <Select name="paymentMethod" defaultValue={transaction.paymentMethod}>
@@ -230,17 +244,41 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
                     )}
 
                     {(transactionType === 'income' || transactionType === 'expense') && (
-                      <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
-                          <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
-                              <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
-                              <span className="text-xs font-normal leading-snug text-muted-foreground">
-                                Marque se esta transação se repete mensalmente.
-                              </span>
-                          </Label>
-                          <Switch id="isRecurring" name="isRecurring" defaultChecked={transaction.isRecurring} />
-                      </div>
+                      <div className="space-y-3 rounded-lg border p-3">
+                            <Label>Tipo de cobrança</Label>
+                             <RadioGroup name="chargeType" value={chargeType} onValueChange={setChargeType}>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="single" id="edit-single" />
+                                    <Label htmlFor="edit-single" className="font-normal">Cobrança Única</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="recurring" id="edit-recurring" />
+                                    <Label htmlFor="edit-recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="installment" id="edit-installment" />
+                                    <Label htmlFor="edit-installment" className="font-normal">Compra Parcelada</Label>
+                                </div>
+                            </RadioGroup>
+                            
+                            {chargeType === 'recurring' && <input type="hidden" name="isRecurring" value="on" />}
+                            {chargeType === 'installment' && (
+                                <>
+                                    <input type="hidden" name="isInstallment" value="on" />
+                                    <div className="grid grid-cols-2 gap-4 pt-2">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="edit-installmentNumber">Parcela N°</Label>
+                                            <Input id="edit-installmentNumber" name="installmentNumber" type="number" defaultValue={transaction.installmentNumber || ''} placeholder="Ex: 2" />
+                                        </div>
+                                         <div className="space-y-1">
+                                            <Label htmlFor="edit-totalInstallments">De (Total)</Label>
+                                            <Input id="edit-totalInstallments" name="totalInstallments" type="number" defaultValue={transaction.totalInstallments || ''} placeholder="Ex: 12" />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     )}
-
                 </>
             )}
 

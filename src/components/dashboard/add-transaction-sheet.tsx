@@ -18,14 +18,14 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getMockDataForUser, goals as allGoals } from '@/lib/data';
+import { goals as allGoals } from '@/lib/data';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { ptBR } from 'date-fns/locale';
 import { useFormStatus } from 'react-dom';
-import { Switch } from '../ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Account, Goal } from '@/lib/definitions';
 import { AddAccountPromptDialog } from '../transactions/add-account-prompt-dialog';
 
@@ -63,6 +63,8 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   const [promptOpen, setPromptOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
+  const [sourceAccount, setSourceAccount] = useState<Account | null>(null);
+  const [chargeType, setChargeType] = useState('single');
   
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -82,6 +84,8 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
       });
       formRef.current?.reset();
       setTransactionType('');
+      setSourceAccount(null);
+      setChargeType('single');
       setDate(undefined);
       setOpen(false);
     } else if (state.message && state.errors) {
@@ -94,6 +98,8 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   }, [state, toast]);
   
   const allSourcesAndDestinations = [...workspaceAccounts, ...allGoals.map(g => ({ ...g, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  
+  const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
   return (
     <>
@@ -112,6 +118,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
           </SheetHeader>
           <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
             <input type="hidden" name="ownerId" value={sessionStorage.getItem('CAIXINHAS_VAULT_ID') || ''} />
+             {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
             <div className="grid gap-4 py-4 overflow-y-auto pr-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Tipo</Label>
@@ -174,7 +181,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
                       {(transactionType === 'expense' || transactionType === 'transfer') && (
                           <div className="space-y-2">
                               <Label htmlFor="sourceAccountId">Origem</Label>
-                              <Select name="sourceAccountId">
+                              <Select name="sourceAccountId" onValueChange={(id) => setSourceAccount(workspaceAccounts.find(a => a.id === id) || null)}>
                                   <SelectTrigger>
                                   <SelectValue placeholder="De onde saiu o dinheiro?" />
                                   </SelectTrigger>
@@ -214,7 +221,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
                           {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
                       </div>
 
-                      {transactionType === 'expense' && (
+                      {transactionType === 'expense' && !isCreditCardTransaction && (
                           <div className="space-y-2">
                               <Label htmlFor="paymentMethod">Método de Pagamento</Label>
                               <Select name="paymentMethod">
@@ -230,14 +237,39 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
                       )}
 
                       {(transactionType === 'income' || transactionType === 'expense') && (
-                        <div className="flex items-center justify-between space-x-2 rounded-lg border p-3">
-                            <Label htmlFor="isRecurring" className="flex flex-col space-y-1">
-                                <span className="font-medium flex items-center gap-2"><Repeat className="h-4 w-4" /> Transação Recorrente</span>
-                                <span className="text-xs font-normal leading-snug text-muted-foreground">
-                                  Marque se esta transação se repete mensalmente.
-                                </span>
-                            </Label>
-                            <Switch id="isRecurring" name="isRecurring" />
+                        <div className="space-y-3 rounded-lg border p-3">
+                            <Label>Tipo de cobrança</Label>
+                             <RadioGroup name="chargeType" defaultValue="single" value={chargeType} onValueChange={setChargeType}>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="single" id="single" />
+                                    <Label htmlFor="single" className="font-normal">Cobrança Única</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="recurring" id="recurring" />
+                                    <Label htmlFor="recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="installment" id="installment" />
+                                    <Label htmlFor="installment" className="font-normal">Compra Parcelada</Label>
+                                </div>
+                            </RadioGroup>
+                            
+                            {chargeType === 'recurring' && <input type="hidden" name="isRecurring" value="on" />}
+                            {chargeType === 'installment' && (
+                                <>
+                                    <input type="hidden" name="isInstallment" value="on" />
+                                    <div className="grid grid-cols-2 gap-4 pt-2">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="installmentNumber">Parcela N°</Label>
+                                            <Input id="installmentNumber" name="installmentNumber" type="number" placeholder="Ex: 2" />
+                                        </div>
+                                         <div className="space-y-1">
+                                            <Label htmlFor="totalInstallments">De (Total)</Label>
+                                            <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                       )}
 

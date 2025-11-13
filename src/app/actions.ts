@@ -30,7 +30,7 @@ const transactionSchema = z.object({
   totalInstallments: z.coerce.number().optional(),
 }).refine(data => {
     if (data.type === 'income') return !!data.destinationAccountId;
-    if (data.type === 'expense') return !!data.sourceAccountId;
+    if (data.type === 'expense') return !!data.sourceAccountId || !!data.paymentMethod;
     if (data.type === 'transfer') return !!data.sourceAccountId && !!data.destinationAccountId;
     return false;
 }, {
@@ -248,6 +248,7 @@ function invalidateReportCache(date: string | undefined, ownerId: string | undef
 
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const chargeType = formData.get('chargeType');
   const validatedFields = transactionSchema.safeParse({
     ownerId: formData.get('ownerId'),
     description: formData.get('description'),
@@ -258,8 +259,8 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     sourceAccountId: formData.get('sourceAccountId'),
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
-    isRecurring: formData.get('isRecurring') === 'on',
-    isInstallment: formData.get('isInstallment') === 'on',
+    isRecurring: chargeType === 'recurring',
+    isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
   });
@@ -296,6 +297,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
+  const chargeType = formData.get('chargeType');
   const validatedFields = transactionSchema.omit({ ownerId: true }).safeParse({
     id: formData.get('id'),
     description: formData.get('description'),
@@ -306,8 +308,8 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     sourceAccountId: formData.get('sourceAccountId'),
     destinationAccountId: formData.get('destinationAccountId'),
     paymentMethod: formData.get('paymentMethod'),
-    isRecurring: formData.get('isRecurring') === 'on',
-    isInstallment: formData.get('isInstallment') === 'on',
+    isRecurring: chargeType === 'recurring',
+    isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
   });
