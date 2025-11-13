@@ -18,7 +18,7 @@ const transactionSchema = z.object({
   date: z.string().optional(),
   sourceAccountId: z.string().optional().nullable(),
   destinationAccountId: z.string().optional().nullable(),
-  paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional(),
+  paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional().nullable(),
   isRecurring: z.boolean().optional(),
   isInstallment: z.boolean().optional(),
   installmentNumber: z.coerce.number().optional(),
@@ -33,6 +33,16 @@ const transactionSchema = z.object({
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
     path: ['sourceAccountId'], // Assign error to a relevant field
 }).refine(data => {
+    // Payment method is required for expenses, unless it's from a credit card account
+    if (data.type === 'expense' && !data.paymentMethod && !data.sourceAccountId?.includes('acc-') && data.sourceAccountId?.endsWith('-card')) {
+        return true; // special case for credit cards, payment method is implicit
+    }
+    if (data.type === 'expense' && !data.paymentMethod) return false;
+    return true;
+}, {
+    message: "O método de pagamento é obrigatório para despesas.",
+    path: ['paymentMethod'],
+}).refine(data => {
     if (data.isInstallment) {
         return data.installmentNumber && data.totalInstallments && data.installmentNumber <= data.totalInstallments;
     }
@@ -40,11 +50,6 @@ const transactionSchema = z.object({
 }, {
     message: "Número de parcelas inválido.",
     path: ['installmentNumber'],
-});
-
-
-const deleteTransactionSchema = z.object({
-  id: z.string(),
 });
 
 
@@ -78,7 +83,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     date: formData.get('date') || new Date().toISOString(),
     sourceAccountId: formData.get('sourceAccountId') || null,
     destinationAccountId: formData.get('destinationAccountId') || null,
-    paymentMethod: formData.get('paymentMethod'),
+    paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
@@ -196,6 +201,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 }
 
 export async function deleteTransaction(prevState: { message: string | null }, formData: FormData): Promise<{ message: string | null }> {
+  const deleteTransactionSchema = z.object({
+    id: z.string(),
+  });
   const validatedFields = deleteTransactionSchema.safeParse({
     id: formData.get('id'),
   });
