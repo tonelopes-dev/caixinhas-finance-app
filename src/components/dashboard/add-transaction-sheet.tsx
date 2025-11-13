@@ -54,7 +54,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts: Account[] }) {
+export function AddTransactionSheet({ accounts: workspaceAccounts, ownerId }: { accounts: Account[], ownerId: string }) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -77,6 +77,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
   };
 
   useEffect(() => {
+    if (!state) return;
     if (state.success) {
       toast({
         title: "Sucesso!",
@@ -88,9 +89,9 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
       setChargeType('single');
       setDate(undefined);
       setOpen(false);
-    } else if (state.message) { // Handles both validation and server errors
+    } else if (state.message) {
       toast({
-        title: "Erro",
+        title: state.errors ? "Erro de Validação" : "Erro",
         description: state.message,
         variant: "destructive",
       });
@@ -117,7 +118,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts }: { accounts:
             </SheetDescription>
           </SheetHeader>
           <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
-            <input type="hidden" name="ownerId" value={sessionStorage.getItem('CAIXINHAS_VAULT_ID') || ''} />
+            <input type="hidden" name="ownerId" value={ownerId} />
              {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
             <div className="grid gap-4 py-4 overflow-y-auto pr-4">
               <div className="space-y-2">

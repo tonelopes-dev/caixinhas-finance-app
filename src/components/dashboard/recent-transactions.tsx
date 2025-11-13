@@ -63,7 +63,7 @@ export default function RecentTransactions({ transactions, accounts, ownerId, ow
                     <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
-            <AddTransactionSheet accounts={accounts} />
+            <AddTransactionSheet accounts={accounts} ownerId={ownerId} />
         </div>
       </CardHeader>
       <CardContent>

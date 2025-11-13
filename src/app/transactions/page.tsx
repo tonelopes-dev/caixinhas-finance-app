@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -375,7 +376,7 @@ export default function TransactionsPage() {
                       </SelectContent>
                     </Select>
                     <div className="hidden md:block">
-                        <AddTransactionSheet accounts={accounts} />
+                        <AddTransactionSheet accounts={accounts} ownerId={workspaceId} />
                     </div>
                   </div>
                 </div>
@@ -522,7 +523,7 @@ export default function TransactionsPage() {
             </Card>
         </motion.div>
         <div className="fixed bottom-6 right-6 md:hidden">
-            <AddTransactionSheet accounts={accounts} />
+            <AddTransactionSheet accounts={accounts} ownerId={workspaceId} />
         </div>
       </div>
     </div>

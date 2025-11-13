@@ -219,6 +219,7 @@ export class TransactionService {
           updateData.goal = goalId ? { connect: { id: goalId } } : { disconnect: true };
       }
 
+      // Remover os campos de ID simples, pois estamos usando o objeto de conexão
       delete updateData.sourceAccountId;
       delete updateData.destinationAccountId;
       
