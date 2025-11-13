@@ -1,4 +1,5 @@
 
+
 import { prisma } from './prisma';
 
 /**
@@ -17,12 +18,9 @@ export class TransactionQueryService {
     type: 'income' | 'expense' | 'transfer'
   ): Promise<any[]> {
     try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId, type } : { vaultId: ownerId, type };
       return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          type,
-        },
+        where: whereClause,
         include: {
           sourceAccount: true,
           destinationAccount: true,
@@ -55,12 +53,9 @@ export class TransactionQueryService {
     category: string
   ): Promise<any[]> {
     try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId, category } : { vaultId: ownerId, category };
       return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          category,
-        },
+        where: whereClause,
         include: {
           sourceAccount: true,
           destinationAccount: true,
@@ -94,15 +89,14 @@ export class TransactionQueryService {
     endDate: Date
   ): Promise<any[]> {
     try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      whereClause.date = {
+        gte: startDate,
+        lte: endDate,
+      };
+      
       return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          date: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
+        where: whereClause,
         include: {
           sourceAccount: true,
           destinationAccount: true,

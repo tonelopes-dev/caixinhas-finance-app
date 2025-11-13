@@ -16,11 +16,9 @@ export class TransactionService {
    */
   static async getTransactions(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
       return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-        },
+        where: whereClause,
         include: {
           sourceAccount: true,
           destinationAccount: true,
@@ -54,15 +52,14 @@ export class TransactionService {
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      whereClause.date = {
+        gte: firstDayOfMonth,
+        lte: lastDayOfMonth,
+      };
+
       return await prisma.transaction.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          date: {
-            gte: firstDayOfMonth,
-            lte: lastDayOfMonth,
-          },
-        },
+        where: whereClause,
         include: {
           sourceAccount: true,
           destinationAccount: true,
@@ -118,8 +115,8 @@ export class TransactionService {
    * Cria uma nova transação no banco de dados.
    */
   static async createTransaction(data: {
-    ownerId: string;
-    ownerType: 'user' | 'vault';
+    userId?: string;
+    vaultId?: string;
     date: Date;
     description: string;
     amount: number;
@@ -129,6 +126,7 @@ export class TransactionService {
     paymentMethod?: string | null;
     sourceAccountId?: string | null;
     destinationAccountId?: string | null;
+    goalId?: string | null;
     isRecurring?: boolean;
     isInstallment?: boolean;
     installmentNumber?: number;
@@ -136,7 +134,6 @@ export class TransactionService {
   }): Promise<any> {
     try {
       const createData: any = {
-        ownerType: data.ownerType,
         date: data.date,
         description: data.description,
         amount: data.amount,
@@ -150,26 +147,24 @@ export class TransactionService {
         actor: { connect: { id: data.actorId } },
       };
 
-      if (data.ownerType === 'vault') {
-        createData.vault = { connect: { id: data.ownerId } };
+      if (data.vaultId) {
+        createData.vault = { connect: { id: data.vaultId } };
+      } else if (data.userId) {
+        createData.user = { connect: { id: data.userId } };
       } else {
-        createData.user = { connect: { id: data.ownerId } };
+        throw new Error("Transaction must be associated with either a user or a vault.");
       }
       
-      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
-      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
-
-      if (data.sourceAccountId && !sourceIsGoal) {
+      if (data.sourceAccountId) {
         createData.sourceAccount = { connect: { id: data.sourceAccountId } };
       }
       
-      if (data.destinationAccountId && !destIsGoal) {
+      if (data.destinationAccountId) {
         createData.destinationAccount = { connect: { id: data.destinationAccountId } };
       }
 
-      const goalId = sourceIsGoal ? data.sourceAccountId : destIsGoal ? data.destinationAccountId : undefined;
-      if (goalId) {
-          createData.goal = { connect: { id: goalId } };
+      if (data.goalId) {
+          createData.goal = { connect: { id: data.goalId } };
       }
       
       return await prisma.transaction.create({ data: createData });
@@ -194,6 +189,7 @@ export class TransactionService {
       paymentMethod: string | null;
       sourceAccountId: string | null;
       destinationAccountId: string | null;
+      goalId: string | null;
       isRecurring: boolean;
       isInstallment: boolean;
       installmentNumber: number;
@@ -202,25 +198,21 @@ export class TransactionService {
   ): Promise<any> {
     try {
       const updateData: any = { ...data };
-      
-      const sourceIsGoal = data.sourceAccountId?.startsWith('goal-');
-      const destIsGoal = data.destinationAccountId?.startsWith('goal-');
 
       if ('sourceAccountId' in data) {
-        updateData.sourceAccount = data.sourceAccountId && !sourceIsGoal ? { connect: { id: data.sourceAccountId } } : { disconnect: true };
+        updateData.sourceAccount = data.sourceAccountId ? { connect: { id: data.sourceAccountId } } : { disconnect: true };
       }
       if ('destinationAccountId' in data) {
-        updateData.destinationAccount = data.destinationAccountId && !destIsGoal ? { connect: { id: data.destinationAccountId } } : { disconnect: true };
+        updateData.destinationAccount = data.destinationAccountId ? { connect: { id: data.destinationAccountId } } : { disconnect: true };
       }
-      
-      const goalId = sourceIsGoal ? data.sourceAccountId : destIsGoal ? data.destinationAccountId : undefined;
-      if (goalId !== undefined) {
-          updateData.goal = goalId ? { connect: { id: goalId } } : { disconnect: true };
+      if ('goalId' in data) {
+          updateData.goal = data.goalId ? { connect: { id: data.goalId } } : { disconnect: true };
       }
 
       // Remover os campos de ID simples, pois estamos usando o objeto de conexão
       delete updateData.sourceAccountId;
       delete updateData.destinationAccountId;
+      delete updateData.goalId;
       
       return await prisma.transaction.update({
         where: { id: transactionId },

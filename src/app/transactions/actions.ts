@@ -9,8 +9,6 @@ import { cookies } from 'next/headers';
 
 const transactionSchema = z.object({
   id: z.string().optional(),
-  ownerId: z.string(),
-  ownerType: z.enum(['user', 'vault']),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
   amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
@@ -18,38 +16,21 @@ const transactionSchema = z.object({
   date: z.string().optional(),
   sourceAccountId: z.string().optional().nullable(),
   destinationAccountId: z.string().optional().nullable(),
+  goalId: z.string().optional().nullable(),
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional().nullable(),
   isRecurring: z.boolean().optional(),
   isInstallment: z.boolean().optional(),
   installmentNumber: z.coerce.number().optional(),
   totalInstallments: z.coerce.number().optional(),
-  actorId: z.string().optional(), // Actor ID is now explicitly part of the schema
+  actorId: z.string().optional(),
 }).refine(data => {
-    if (data.type === 'expense' && !data.sourceAccountId) return false;
-    if (data.type === 'income' && !data.destinationAccountId) return false;
-    if (data.type === 'transfer' && (!data.sourceAccountId || !data.destinationAccountId)) return false;
+    if (data.type === 'expense' && !data.sourceAccountId && !data.goalId) return false;
+    if (data.type === 'income' && !data.destinationAccountId && !data.goalId) return false;
+    if (data.type === 'transfer' && (!data.sourceAccountId && !data.goalId) && (!data.destinationAccountId && !data.goalId)) return false;
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'], // Assign error to a relevant field
-}).refine(data => {
-    // Payment method is required for expenses, unless it's from a credit card account
-    if (data.type === 'expense' && !data.paymentMethod && !data.sourceAccountId?.includes('acc-') && data.sourceAccountId?.endsWith('-card')) {
-        return true; // special case for credit cards, payment method is implicit
-    }
-    if (data.type === 'expense' && !data.paymentMethod) return false;
-    return true;
-}, {
-    message: "O método de pagamento é obrigatório para despesas.",
-    path: ['paymentMethod'],
-}).refine(data => {
-    if (data.isInstallment) {
-        return data.installmentNumber && data.totalInstallments && data.installmentNumber <= data.totalInstallments;
-    }
-    return true;
-}, {
-    message: "Número de parcelas inválido.",
-    path: ['installmentNumber'],
+    path: ['sourceAccountId'],
 });
 
 
@@ -60,8 +41,6 @@ export type TransactionState = {
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  console.log("Recebendo dados para criar transação:", Object.fromEntries(formData.entries()));
-  
   const cookieStore = await cookies();
   const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
   
@@ -71,11 +50,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 
   const chargeType = formData.get('chargeType');
   const ownerId = formData.get('ownerId') as string;
-  const ownerType = ownerId === userId ? 'user' : 'vault';
-
+  const isPersonal = ownerId === userId;
+  
   const rawData = {
-    ownerId,
-    ownerType,
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -83,18 +60,24 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     date: formData.get('date') || new Date().toISOString(),
     sourceAccountId: formData.get('sourceAccountId') || null,
     destinationAccountId: formData.get('destinationAccountId') || null,
+    goalId: formData.get('sourceAccountId')?.startsWith('goal-') 
+      ? formData.get('sourceAccountId') 
+      : formData.get('destinationAccountId')?.startsWith('goal-') 
+      ? formData.get('destinationAccountId') 
+      : null,
     paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
     actorId: userId,
+    userId: isPersonal ? userId : undefined,
+    vaultId: !isPersonal ? ownerId : undefined,
   };
-  
+
   const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    console.log("Erro de validação:", validatedFields.error.flatten().fieldErrors);
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -104,16 +87,13 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   
   try {
     await TransactionService.createTransaction(validatedFields.data as any);
-    await invalidateReportCache(validatedFields.data.date, validatedFields.data.ownerId);
+    await invalidateReportCache(validatedFields.data.date, ownerId);
 
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
-    if (validatedFields.data.destinationAccountId?.startsWith('goal')) {
-        revalidatePath(`/goals/${validatedFields.data.destinationAccountId}`);
-    }
-    if (validatedFields.data.sourceAccountId?.startsWith('goal')) {
-        revalidatePath(`/goals/${validatedFields.data.sourceAccountId}`);
+    if (validatedFields.data.goalId) {
+        revalidatePath(`/goals/${validatedFields.data.goalId}`);
     }
     
     return { success: true, message: 'Transação adicionada com sucesso!' };
@@ -134,12 +114,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 
   const chargeType = formData.get('chargeType');
   const ownerId = formData.get('ownerId') as string;
-  const ownerType = ownerId === userId ? 'user' : 'vault';
   
   const rawData = {
     id: formData.get('id'),
-    ownerId,
-    ownerType,
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -147,12 +124,16 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     date: formData.get('date'),
     sourceAccountId: formData.get('sourceAccountId') || null,
     destinationAccountId: formData.get('destinationAccountId') || null,
+    goalId: formData.get('sourceAccountId')?.startsWith('goal-') 
+      ? formData.get('sourceAccountId') 
+      : formData.get('destinationAccountId')?.startsWith('goal-') 
+      ? formData.get('destinationAccountId') 
+      : null,
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
-    actorId: userId,
   };
 
   const validatedFields = transactionSchema.safeParse(rawData);
@@ -179,18 +160,16 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 
     await TransactionService.updateTransaction(id, data as any);
     
-    await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.ownerId);
+    await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.vaultId || originalTransaction.userId);
     if(data.date && originalTransaction.date.toISOString() !== data.date) {
-        await invalidateReportCache(data.date, data.ownerId);
+        await invalidateReportCache(data.date, originalTransaction.vaultId || originalTransaction.userId);
     }
     
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
-    if (originalTransaction.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${originalTransaction.destinationAccountId}`);
-    if (originalTransaction.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${originalTransaction.sourceAccountId}`);
-    if (data.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.destinationAccountId}`);
-    if (data.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${data.sourceAccountId}`);
+    if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
+    if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
     
     return { success: true, message: 'Transação atualizada com sucesso!' };
 
@@ -219,14 +198,13 @@ export async function deleteTransaction(prevState: { message: string | null }, f
   try {
     const deletedTransaction = await TransactionService.getTransactionById(id);
     if (deletedTransaction) {
-        await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.ownerId);
+        await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.vaultId || deletedTransaction.userId);
         await TransactionService.deleteTransaction(id);
         
         revalidatePath('/');
         revalidatePath('/transactions');
         revalidatePath('/reports');
-        if (deletedTransaction.destinationAccountId?.startsWith('goal')) revalidatePath(`/goals/${deletedTransaction.destinationAccountId}`);
-        if (deletedTransaction.sourceAccountId?.startsWith('goal')) revalidatePath(`/goals/${deletedTransaction.sourceAccountId}`);
+        if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
 
         return { message: 'Transação excluída com sucesso!' };
     }

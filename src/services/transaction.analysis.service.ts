@@ -1,4 +1,5 @@
 
+
 import { prisma } from './prisma';
 
 /**
@@ -13,15 +14,14 @@ export class TransactionAnalysisService {
    */
   static async calculateTotalIncome(ownerId: string, ownerType: 'user' | 'vault'): Promise<number> {
     try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      whereClause.type = 'income';
+
       const result = await prisma.transaction.aggregate({
         _sum: {
           amount: true,
         },
-        where: {
-          ownerId,
-          ownerType,
-          type: 'income',
-        },
+        where: whereClause,
       });
       return result._sum.amount || 0;
     } catch (error) {
@@ -35,15 +35,14 @@ export class TransactionAnalysisService {
    */
   static async calculateTotalExpenses(ownerId: string, ownerType: 'user' | 'vault'): Promise<number> {
     try {
+       const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+       whereClause.type = 'expense';
+
        const result = await prisma.transaction.aggregate({
         _sum: {
           amount: true,
         },
-        where: {
-          ownerId,
-          ownerType,
-          type: 'expense',
-        },
+        where: whereClause,
       });
       return result._sum.amount || 0;
     } catch (error) {

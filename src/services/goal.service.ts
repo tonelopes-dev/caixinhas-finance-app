@@ -1,3 +1,4 @@
+
 import { prisma } from './prisma';
 
 /**
@@ -13,8 +14,7 @@ export class GoalService {
     try {
       return await prisma.goal.findMany({
         where: {
-          ownerId: userId,
-          ownerType: 'user',
+          userId: userId,
         },
         include: {
           participants: {
@@ -47,8 +47,7 @@ export class GoalService {
     try {
       return await prisma.goal.findMany({
         where: {
-          ownerId: vaultId,
-          ownerType: 'vault',
+          vaultId: vaultId,
         },
         include: {
           participants: {
@@ -79,11 +78,9 @@ export class GoalService {
    */
   static async getGoals(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
+      const whereClause = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
       return await prisma.goal.findMany({
-        where: {
-          ownerId,
-          ownerType,
-        },
+        where: whereClause,
         include: {
           participants: {
             include: {
@@ -150,18 +147,17 @@ export class GoalService {
     isFeatured?: boolean;
   }): Promise<any> {
     try {
+      const isPersonal = data.ownerType === 'user';
       return await prisma.goal.create({
         data: {
           name: data.name,
           targetAmount: data.targetAmount,
           currentAmount: data.currentAmount || 0,
           emoji: data.emoji,
-          ownerId: data.ownerId,
-          ownerType: data.ownerType,
           visibility: data.visibility || 'shared',
           isFeatured: data.isFeatured ?? false,
-          userId: data.ownerType === 'user' ? data.ownerId : undefined,
-          vaultId: data.ownerType === 'vault' ? data.ownerId : undefined,
+          userId: isPersonal ? data.ownerId : undefined,
+          vaultId: !isPersonal ? data.ownerId : undefined,
         },
       });
     } catch (error) {
@@ -313,11 +309,9 @@ export class GoalService {
    */
   static async calculateTotalSaved(ownerId: string, ownerType: 'user' | 'vault'): Promise<number> {
     try {
+      const whereClause = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
       const goals = await prisma.goal.findMany({
-        where: {
-          ownerId,
-          ownerType,
-        },
+        where: whereClause,
       });
 
       return goals.reduce((sum: number, goal: any) => sum + goal.currentAmount, 0);
@@ -332,12 +326,9 @@ export class GoalService {
    */
   static async getFeaturedGoals(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
+      const whereClause = ownerType === 'user' ? { userId: ownerId, isFeatured: true } : { vaultId: ownerId, isFeatured: true };
       return await prisma.goal.findMany({
-        where: {
-          ownerId,
-          ownerType,
-          isFeatured: true,
-        },
+        where: whereClause,
         include: {
           participants: {
             include: {

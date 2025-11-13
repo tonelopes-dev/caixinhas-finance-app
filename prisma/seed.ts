@@ -175,22 +175,22 @@ async function main() {
   console.log('🎯 Criando metas...');
 
   const goalDev1 = await prisma.goal.create({
-    data: { id: 'goal-dev-1', ownerId: user1.id, userId: user1.id, ownerType: 'user', name: 'Setup Novo', targetAmount: 15000, currentAmount: 7500, emoji: '🖥️', visibility: 'private', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }] } }
+    data: { id: 'goal-dev-1', ownerId: user1.id, ownerType: 'user', name: 'Setup Novo', targetAmount: 15000, currentAmount: 7500, emoji: '🖥️', visibility: 'private', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }] } }
   });
   const goalAnna1 = await prisma.goal.create({
-    data: { id: 'goal-anna-1', ownerId: user2.id, userId: user2.id, ownerType: 'user', name: 'Viagem com Amigos', targetAmount: 5000, currentAmount: 1200, emoji: '🏖️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user2.id, role: 'owner' }, { userId: user3.id, role: 'member' }, { userId: user4.id, role: 'member' }] } }
+    data: { id: 'goal-anna-1', ownerId: user2.id, ownerType: 'user', name: 'Viagem com Amigos', targetAmount: 5000, currentAmount: 1200, emoji: '🏖️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user2.id, role: 'owner' }, { userId: user3.id, role: 'member' }, { userId: user4.id, role: 'member' }] } }
   });
   const goalFamily1 = await prisma.goal.create({
-    data: { id: 'goal-family-1', ownerId: vaultFamily.id, vaultId: vaultFamily.id, ownerType: 'vault', name: 'Reforma da Cozinha', targetAmount: 35000, currentAmount: 8000, emoji: '🛠️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
+    data: { id: 'goal-family-1', ownerId: vaultFamily.id, ownerType: 'vault', name: 'Reforma da Cozinha', targetAmount: 35000, currentAmount: 8000, emoji: '🛠️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
   });
   const goalFamily2 = await prisma.goal.create({
-    data: { id: 'goal-family-2', ownerId: vaultFamily.id, vaultId: vaultFamily.id, ownerType: 'vault', name: 'Fundo de Emergência', targetAmount: 50000, currentAmount: 32000, emoji: '🛡️', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
+    data: { id: 'goal-family-2', ownerId: vaultFamily.id, ownerType: 'vault', name: 'Fundo de Emergência', targetAmount: 50000, currentAmount: 32000, emoji: '🛡️', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
   });
   const goalAgency1 = await prisma.goal.create({
-    data: { id: 'goal-agency-1', ownerId: vaultAgency.id, vaultId: vaultAgency.id, ownerType: 'vault', name: 'Macbook M4 Pro', targetAmount: 25000, currentAmount: 18000, emoji: '💻', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }] } }
+    data: { id: 'goal-agency-1', ownerId: vaultAgency.id, ownerType: 'vault', name: 'Macbook M4 Pro', targetAmount: 25000, currentAmount: 18000, emoji: '💻', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }] } }
   });
   const goalOffice1 = await prisma.goal.create({
-    data: { id: 'goal-office-1', ownerId: vaultOffice.id, vaultId: vaultOffice.id, ownerType: 'vault', name: 'Bioimpedância Nova', targetAmount: 40000, currentAmount: 11000, emoji: '🔬', visibility: 'shared', participants: { create: [{ userId: user2.id, role: 'owner' }] } }
+    data: { id: 'goal-office-1', ownerId: vaultOffice.id, ownerType: 'vault', name: 'Bioimpedância Nova', targetAmount: 40000, currentAmount: 11000, emoji: '🔬', visibility: 'shared', participants: { create: [{ userId: user2.id, role: 'owner' }] } }
   });
 
   console.log('✅ 6 metas principais criadas');
@@ -201,30 +201,30 @@ async function main() {
   console.log('💸 Criando transações...');
 
   await Promise.all([
-    // Entrada (income) pessoal do Dev
+    // Transações do User 1 (Dev)
     prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: accDev1.id, actorId: user1.id, userId: user1.id, isRecurring: true } }),
-    // Despesa (expense) pessoal do Dev com todos os métodos de pagamento
     prisma.transaction.create({ data: { date: new Date('2024-07-25'), description: 'Almoço com cliente (Crédito)', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Café (Débito)', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'debit_card', actorId: user1.id, userId: user1.id } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Estacionamento (Pix)', amount: 20, type: 'expense', category: 'Transporte', sourceAccountId: accDev1.id, paymentMethod: 'pix', actorId: user1.id, userId: user1.id } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Conta de luz (Boleto)', amount: 150, type: 'expense', category: 'Casa', sourceAccountId: accDev1.id, paymentMethod: 'boleto', actorId: user1.id, userId: user1.id, isRecurring: true } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-29'), description: 'Feira (Dinheiro)', amount: 50, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'cash', actorId: user1.id, userId: user1.id } }),
-    
-    // Transferência (transfer) entre contas do mesmo usuário
     prisma.transaction.create({ data: { date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: accDev1.id, destinationAccountId: accDev2.id, actorId: user1.id, userId: user1.id } }),
-    // Transferência (transfer) para uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id, userId: user1.id } }),
-    // Retirada de uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', goalId: goalDev1.id, destinationAccountId: accDev1.id, actorId: user1.id, userId: user1.id } }),
     
-    // Transação de parcela
+    // Transação para uma caixinha (corrigido)
+    prisma.transaction.create({ data: { date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id, userId: user1.id } }),
+    
+    // Retirada de uma caixinha (corrigido)
+    prisma.transaction.create({ data: { date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', destinationAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id, userId: user1.id } }),
+    
+    // Transações de parcela (corrigido e simplificado)
     prisma.transaction.create({ data: { date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id, isInstallment: true, installmentNumber: 1, totalInstallments: 3 } }),
     prisma.transaction.create({ data: { date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id, isInstallment: true, installmentNumber: 2, totalInstallments: 3 } }),
 
     // Transações no cofre da família
     prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: accFamily.id, paymentMethod: 'credit_card', actorId: user2.id, vaultId: vaultFamily.id } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: accFamily.id, paymentMethod: 'boleto', actorId: user1.id, vaultId: vaultFamily.id, isRecurring: true } }),
-    // Contribuições para o cofre
+    
+    // Contribuições para o cofre (corrigido)
     prisma.transaction.create({ data: { date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: accDev1.id, destinationAccountId: accFamily.id, actorId: user1.id, vaultId: vaultFamily.id, isRecurring: true } }),
     prisma.transaction.create({ data: { date: new Date('2024-07-16'), description: 'Contribuição da Anna', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: accNutri1.id, destinationAccountId: accFamily.id, actorId: user2.id, vaultId: vaultFamily.id, isRecurring: true } }),
   ]);
