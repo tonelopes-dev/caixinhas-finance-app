@@ -400,78 +400,57 @@ async function main() {
   console.log('💸 Criando transações...');
 
   await Promise.all([
-    // --- CENÁRIOS PADRÃO ---
-    // Entrada (income) pessoal
+    // --- CENÁRIOS PADRÃO (USER) ---
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1', isRecurring: true,
-      },
+      data: { userId: 'user1', date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: 'acc-dev-1', actorId: 'user1', isRecurring: true, },
     }),
-    // Saída (expense) pessoal com cartão de crédito
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-25'), description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1',
-      },
+      data: { userId: 'user1', date: new Date('2024-07-25'), description: 'Almoço com cliente', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1', },
     }),
-    // Transferência (transfer) para uma caixinha
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', goalId: 'goal-dev-1', actorId: 'user1',
-      },
+      data: { userId: 'user1', date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', goalId: 'goal-dev-1', actorId: 'user1', },
     }),
-    // Saída (expense) de um cofre
     prisma.transaction.create({
-      data: {
-        ownerId: 'vault-family', ownerType: 'vault', date: new Date('2024-07-27'), description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2',
-      },
+      data: { userId: 'user1', date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-dev-2', actorId: 'user1', },
     }),
 
-    // --- CENÁRIOS ADICIONAIS PARA TESTES ---
-    // Saída (expense) com Pix
+    // --- CENÁRIOS PADRÃO (VAULT) ---
     prisma.transaction.create({
-      data: {
-        ownerId: 'user2', ownerType: 'user', date: new Date('2024-07-29'), description: 'Pagamento de Freelancer', amount: 500, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-nutri-1', paymentMethod: 'pix', actorId: 'user2',
-      },
+      data: { vaultId: 'vault-family', date: new Date('2024-07-27'), description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-family', paymentMethod: 'credit_card', actorId: 'user2', },
     }),
-    // Saída (expense) com Boleto e Recorrente
     prisma.transaction.create({
-      data: {
-        ownerId: 'vault-family', ownerType: 'vault', date: new Date('2024-07-26'), description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: 'acc-family', paymentMethod: 'boleto', actorId: 'user1', isRecurring: true,
-      },
+      data: { vaultId: 'vault-family', date: new Date('2024-07-26'), description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: 'acc-family', paymentMethod: 'boleto', actorId: 'user1', isRecurring: true, },
     }),
-    // Entrada (income) em um cofre
     prisma.transaction.create({
-      data: {
-        ownerId: 'vault-family', ownerType: 'vault', date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1', isRecurring: true,
-      },
+      data: { vaultId: 'vault-family', date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1', isRecurring: true, },
     }),
-    // Transferência (transfer) entre contas do mesmo usuário
+    
+    // --- CENÁRIOS DE PARCELAMENTO ---
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-dev-2', actorId: 'user1',
-      },
+      data: { userId: 'user1', date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1', isInstallment: true, installmentNumber: 1, totalInstallments: 3, },
     }),
-    // Saída (expense) parcelada (1/3)
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1', isInstallment: true, installmentNumber: 1, totalInstallments: 3,
-      },
+      data: { userId: 'user1', date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1', isInstallment: true, installmentNumber: 2, totalInstallments: 3, },
     }),
-     // Saída (expense) parcelada (2/3)
+    
+    // --- CENÁRIOS DE MÉTODOS DE PAGAMENTO (DESPESA) ---
     prisma.transaction.create({
-      data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-dev-3', paymentMethod: 'credit_card', actorId: 'user1', isInstallment: true, installmentNumber: 2, totalInstallments: 3,
-      },
+      data: { userId: 'user2', date: new Date('2024-07-29'), description: 'Pagamento de Freelancer (Pix)', amount: 500, type: 'expense', category: 'Trabalho', sourceAccountId: 'acc-nutri-1', paymentMethod: 'pix', actorId: 'user2', },
     }),
-    // Saída (expense) em dinheiro
-     prisma.transaction.create({
-      data: {
-        ownerId: 'user2', ownerType: 'user', date: new Date('2024-07-30'), description: 'Café na padaria', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-nutri-1', paymentMethod: 'cash', actorId: 'user2',
-      },
+    prisma.transaction.create({
+      data: { vaultId: 'vault-family', date: new Date('2024-07-24'), description: 'Cinema (Débito)', amount: 60, type: 'expense', category: 'Lazer', sourceAccountId: 'acc-family', paymentMethod: 'debit_card', actorId: 'user2', },
+    }),
+    prisma.transaction-create({
+      data: { userId: 'user2', date: new Date('2024-07-30'), description: 'Café na padaria (Dinheiro)', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: 'acc-nutri-1', paymentMethod: 'cash', actorId: 'user2', },
+    }),
+    
+    // --- CENÁRIO DE RETIRADA DE CAIXINHA ---
+    prisma.transaction.create({
+      data: { userId: 'user1', date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', goalId: 'goal-dev-1', destinationAccountId: 'acc-dev-1', actorId: 'user1' },
     }),
   ]);
 
-  console.log(`✅ 12 transações de teste criadas`);
+  console.log(`✅ 13 transações de teste criadas`);
 
   // ============================================
   // 6. CRIAR NOTIFICAÇÕES
