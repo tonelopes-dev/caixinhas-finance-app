@@ -50,7 +50,7 @@ function ProfilePage() {
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
       <div className="w-full max-w-6xl">
         <Button asChild variant="ghost" className="mb-4">
-          <Link href="/">
+          <Link href="/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para o Painel
           </Link>

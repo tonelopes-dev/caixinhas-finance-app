@@ -92,7 +92,7 @@ export function GoalDetailClient({ goal, transactions, userId }: GoalDetailClien
       <div className="w-full max-w-2xl">
         <div className="mb-4 flex items-center justify-between">
           <Button asChild variant="ghost">
-            <Link href="/">
+            <Link href="/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar para o Painel
             </Link>
