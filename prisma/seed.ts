@@ -416,7 +416,7 @@ async function main() {
     // Transferência (transfer) para uma caixinha
     prisma.transaction.create({
       data: {
-        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', destinationAccountId: 'goal-dev-1', actorId: 'user1',
+        ownerId: 'user1', ownerType: 'user', date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: 'acc-dev-1', goalId: 'goal-dev-1', actorId: 'user1',
       },
     }),
     // Saída (expense) de um cofre
@@ -442,7 +442,7 @@ async function main() {
     // Entrada (income) em um cofre
     prisma.transaction.create({
       data: {
-        ownerId: 'vault-family', ownerType: 'vault', date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'income', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1', isRecurring: true,
+        ownerId: 'vault-family', ownerType: 'vault', date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: 'acc-dev-1', destinationAccountId: 'acc-family', actorId: 'user1', isRecurring: true,
       },
     }),
     // Transferência (transfer) entre contas do mesmo usuário
