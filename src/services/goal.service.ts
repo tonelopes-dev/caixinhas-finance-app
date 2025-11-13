@@ -158,6 +158,8 @@ export class GoalService {
           isFeatured: data.isFeatured ?? false,
           userId: isPersonal ? data.ownerId : undefined,
           vaultId: !isPersonal ? data.ownerId : undefined,
+          ownerType: data.ownerType, // Adicionando ownerType
+          ownerId: data.ownerId, // Adicionando ownerId
         },
       });
     } catch (error) {

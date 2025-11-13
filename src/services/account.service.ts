@@ -1,4 +1,6 @@
+
 import { prisma } from './prisma';
+import type { Prisma } from '@prisma/client';
 
 /**
  * AccountService
@@ -14,6 +16,13 @@ export class AccountService {
       return await prisma.account.findMany({
         where: {
           ownerId: userId,
+        },
+        include: {
+          visibleIn: {
+            include: {
+              vault: true,
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc',
@@ -54,6 +63,7 @@ export class AccountService {
         return await prisma.account.findMany({
           where: {
             ownerId: userId,
+            scope: 'personal'
           },
           orderBy: {
             createdAt: 'desc',
@@ -65,7 +75,9 @@ export class AccountService {
       return await prisma.account.findMany({
         where: {
           OR: [
-            { ownerId: userId, visibleIn: { contains: scope } },
+            // Contas onde o dono é o usuário E a conta está marcada como visível neste cofre
+            { ownerId: userId, visibleIn: { some: { vaultId: scope } } },
+            // Contas que pertencem diretamente ao cofre
             { vaultId: scope },
           ],
         },
@@ -86,6 +98,13 @@ export class AccountService {
     try {
       return await prisma.account.findUnique({
         where: { id: accountId },
+        include: {
+          visibleIn: {
+            include: {
+              vault: true,
+            }
+          }
+        }
       });
     } catch (error) {
       console.error('Erro ao buscar conta:', error);
@@ -102,15 +121,14 @@ export class AccountService {
     type: string;
     balance: number;
     ownerId: string;
-    scope: string;
+    scope: string; // 'personal' ou 'vault'
     vaultId?: string;
     creditLimit?: number;
     logoUrl?: string;
     visibleIn?: string[];
-    allowFullAccess?: boolean;
   }): Promise<any> {
     try {
-      const createData: any = {
+      const createData: Prisma.AccountCreateInput = {
         name: data.name,
         bank: data.bank,
         type: data.type,
@@ -118,16 +136,22 @@ export class AccountService {
         scope: data.scope,
         creditLimit: data.creditLimit,
         logoUrl: data.logoUrl,
-        visibleIn: (data.visibleIn || []).join(','),
-        allowFullAccess: data.allowFullAccess ?? false,
         owner: {
           connect: { id: data.ownerId }
         },
       };
 
-      if (data.vaultId) {
+      if (data.scope === 'vault' && data.vaultId) {
         createData.vault = {
           connect: { id: data.vaultId }
+        };
+      }
+      
+      if (data.scope === 'personal' && data.visibleIn && data.visibleIn.length > 0) {
+        createData.visibleIn = {
+          create: data.visibleIn.map(vaultId => ({
+            vault: { connect: { id: vaultId } }
+          }))
         };
       }
 
@@ -152,47 +176,41 @@ export class AccountService {
       creditLimit: number;
       logoUrl: string;
       visibleIn: string[];
-      allowFullAccess: boolean;
-      scope: string;
-      vaultId: string | null;
     }>
   ): Promise<any> {
     try {
-      // Buscar a conta atual para verificar mudanças de escopo
-      const currentAccount = await prisma.account.findUnique({
-        where: { id: accountId },
+      const { visibleIn, ...updateData } = data;
+      const prismaData: Prisma.AccountUpdateInput = { ...updateData };
+
+      // Transação para atualizar a conta e suas visibilidades
+      return await prisma.$transaction(async (tx) => {
+        // 1. Atualiza os dados básicos da conta
+        const updatedAccount = await tx.account.update({
+          where: { id: accountId },
+          data: prismaData,
+        });
+
+        // 2. Sincroniza as visibilidades (se `visibleIn` for fornecido)
+        if (visibleIn !== undefined) {
+          // Remove todas as visibilidades existentes para esta conta
+          await tx.accountVisibility.deleteMany({
+            where: { accountId: accountId },
+          });
+
+          // Adiciona as novas visibilidades
+          if (visibleIn.length > 0) {
+            await tx.accountVisibility.createMany({
+              data: visibleIn.map((vaultId) => ({
+                accountId: accountId,
+                vaultId: vaultId,
+              })),
+            });
+          }
+        }
+        
+        return updatedAccount;
       });
 
-      if (!currentAccount) {
-        throw new Error('Conta não encontrada');
-      }
-
-      // Separar dados que podem causar problemas de relacionamento
-      const { vaultId, ...updateData } = data;
-      
-      // Preparar dados para update
-      const prismaData: any = { ...updateData };
-
-      // Lidar com `visibleIn` como string
-      if (data.visibleIn) {
-        prismaData.visibleIn = data.visibleIn.join(',');
-      }
-
-      // Tratar mudanças de escopo adequadamente
-      if (data.scope === 'personal' && currentAccount.vaultId) {
-        // Mudando de compartilhada para pessoal: desconectar do vault
-        prismaData.vault = { disconnect: true };
-        prismaData.vaultId = null;
-      } else if (data.scope === 'shared' && vaultId && vaultId !== currentAccount.vaultId) {
-        // Mudando de pessoal para compartilhada ou mudando de vault: conectar ao novo vault
-        prismaData.vault = { connect: { id: vaultId } };
-        prismaData.vaultId = vaultId;
-      }
-
-      return await prisma.account.update({
-        where: { id: accountId },
-        data: prismaData,
-      });
     } catch (error) {
       console.error('Erro ao atualizar conta:', error);
       throw new Error('Não foi possível atualizar a conta');
@@ -204,57 +222,38 @@ export class AccountService {
    */
   static async deleteAccount(accountId: string): Promise<void> {
     try {
-      await prisma.account.delete({
-        where: { id: accountId },
+       // Em uma transação para garantir que a conta e suas visibilidades sejam removidas
+      await prisma.$transaction(async (tx) => {
+        await tx.accountVisibility.deleteMany({
+          where: { accountId: accountId },
+        });
+        await tx.account.delete({
+          where: { id: accountId },
+        });
       });
     } catch (error) {
       console.error('Erro ao deletar conta:', error);
       throw new Error('Não foi possível deletar a conta');
     }
   }
-
+  
   /**
-   * Atualiza o saldo de uma conta
-   */
-  static async updateBalance(accountId: string, newBalance: number): Promise<any> {
-    try {
-      return await prisma.account.update({
-        where: { id: accountId },
-        data: { balance: newBalance },
-      });
-    } catch (error) {
-      console.error('Erro ao atualizar saldo:', error);
-      throw new Error('Não foi possível atualizar o saldo da conta');
-    }
-  }
-
-  /**
-   * Calcula o total de ativos líquidos (checking + savings)
+   * Calcula o total de ativos líquidos (contas corrente e poupança) para um determinado contexto.
    */
   static async calculateLiquidAssets(userId: string, scope: string): Promise<number> {
     try {
-      let accounts;
+      const whereClause = scope === userId
+        ? { ownerId: userId, scope: 'personal', type: { in: ['checking', 'savings'] } }
+        : { OR: [{ vaultId: scope, type: { in: ['checking', 'savings'] } }, { ownerId: userId, visibleIn: { some: { vaultId: scope } }, type: { in: ['checking', 'savings'] }}] };
       
-      if (scope === userId) {
-        accounts = await prisma.account.findMany({
-          where: {
-            ownerId: userId,
-            type: { in: ['checking', 'savings'] },
-          },
-        });
-      } else {
-        accounts = await prisma.account.findMany({
-          where: {
-            OR: [
-              { ownerId: userId, visibleIn: { contains: scope } },
-              { vaultId: scope },
-            ],
-            type: { in: ['checking', 'savings'] },
-          },
-        });
-      }
+      const result = await prisma.account.aggregate({
+        _sum: {
+          balance: true,
+        },
+        where: whereClause,
+      });
 
-      return accounts.reduce((sum: number, account: any) => sum + account.balance, 0);
+      return result._sum.balance || 0;
     } catch (error) {
       console.error('Erro ao calcular ativos líquidos:', error);
       throw new Error('Não foi possível calcular os ativos líquidos');
@@ -262,88 +261,25 @@ export class AccountService {
   }
 
   /**
-   * Calcula o total de investimentos
+   * Calcula o total de ativos investidos (contas de investimento) para um determinado contexto.
    */
   static async calculateInvestedAssets(userId: string, scope: string): Promise<number> {
     try {
-      let accounts;
-      
-      if (scope === userId) {
-        accounts = await prisma.account.findMany({
-          where: {
-            ownerId: userId,
-            type: 'investment',
-          },
-        });
-      } else {
-        accounts = await prisma.account.findMany({
-          where: {
-            OR: [
-              { ownerId: userId, visibleIn: { contains: scope } },
-              { vaultId: scope },
-            ],
-            type: 'investment',
-          },
-        });
-      }
+      const whereClause = scope === userId
+        ? { ownerId: userId, scope: 'personal', type: 'investment' }
+        : { OR: [{ vaultId: scope, type: 'investment' }, { ownerId: userId, visibleIn: { some: { vaultId: scope } }, type: 'investment' }] };
 
-      return accounts.reduce((sum: number, account: any) => sum + account.balance, 0);
+      const result = await prisma.account.aggregate({
+        _sum: {
+          balance: true,
+        },
+        where: whereClause,
+      });
+
+      return result._sum.balance || 0;
     } catch (error) {
-      console.error('Erro ao calcular investimentos:', error);
-      throw new Error('Não foi possível calcular os investimentos');
-    }
-  }
-
-  /**
-   * Adiciona um vault à lista de visibilidade de uma conta
-   */
-  static async addVisibility(accountId: string, vaultId: string): Promise<any> {
-    try {
-      const account = await prisma.account.findUnique({
-        where: { id: accountId },
-      });
-
-      if (!account) {
-        throw new Error('Conta não encontrada');
-      }
-      
-      const visibleIn = account.visibleIn ? account.visibleIn.split(',') : [];
-      if (!visibleIn.includes(vaultId)) {
-          visibleIn.push(vaultId);
-      }
-
-      return await prisma.account.update({
-        where: { id: accountId },
-        data: { visibleIn: visibleIn.join(',') },
-      });
-    } catch (error) {
-      console.error('Erro ao adicionar visibilidade:', error);
-      throw new Error('Não foi possível adicionar visibilidade à conta');
-    }
-  }
-
-  /**
-   * Remove um vault da lista de visibilidade de uma conta
-   */
-  static async removeVisibility(accountId: string, vaultId: string): Promise<any> {
-    try {
-      const account = await prisma.account.findUnique({
-        where: { id: accountId },
-      });
-
-      if (!account) {
-        throw new Error('Conta não encontrada');
-      }
-
-      const visibleIn = (account.visibleIn || '').split(',').filter(id => id && id !== vaultId);
-
-      return await prisma.account.update({
-        where: { id: accountId },
-        data: { visibleIn: visibleIn.join(',') },
-      });
-    } catch (error) {
-      console.error('Erro ao remover visibilidade:', error);
-      throw new Error('Não foi possível remover visibilidade da conta');
+      console.error('Erro ao calcular ativos investidos:', error);
+      throw new Error('Não foi possível calcular os ativos investidos');
     }
   }
 }

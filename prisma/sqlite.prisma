@@ -1,13 +1,11 @@
-// Este é o arquivo de schema base. NÃO O USE DIRETAMENTE.
-// Use `sqlite.prisma` para desenvolvimento local e `postgres.prisma` para produção.
-// Os scripts em `package.json` foram atualizados para usar os arquivos corretos.
+// Schema para desenvolvimento local com SQLite
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // Padrão para produção
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -44,13 +42,14 @@ model Vault {
   accounts  Account[]
   goals     Goal[]
   transactions Transaction[]
+  visibilities AccountVisibility[]
 }
 
 model VaultMember {
   id        String   @id @default(cuid())
   vaultId   String
   userId    String
-  role      String   @default("member") // Ex: owner, admin, member
+  role      String   @default("member")
   createdAt DateTime @default(now())
   vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -62,12 +61,12 @@ model Account {
   id                   String        @id @default(cuid())
   name                 String
   bank                 String
-  type                 String // checking, savings, investment, credit_card, other
+  type                 String
   balance              Float
   creditLimit          Float?
   logoUrl              String?
   ownerId              String
-  scope                String        @default("personal") // 'personal' or 'vault'
+  scope                String        @default("personal")
   vaultId              String?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
@@ -78,7 +77,6 @@ model Account {
   destTransactions     Transaction[] @relation("DestAccountTransactions")
 }
 
-// Tabela de associação para visibilidade de contas pessoais em cofres
 model AccountVisibility {
   id        String   @id @default(cuid())
   accountId String
@@ -89,17 +87,14 @@ model AccountVisibility {
   @@unique([accountId, vaultId])
 }
 
-
 model Goal {
   id            String            @id @default(cuid())
   name          String
   targetAmount  Float
   currentAmount Float             @default(0)
   emoji         String
-  visibility    String            @default("shared") // private, shared
+  visibility    String            @default("shared")
   isFeatured    Boolean           @default(false)
-  ownerId       String
-  ownerType     String // 'user' or 'vault'
   userId        String?
   vaultId       String?
   createdAt     DateTime          @default(now())
@@ -123,54 +118,55 @@ model GoalParticipant {
 }
 
 model Transaction {
-  id                     String    @id @default(cuid())
-  date                   DateTime
-  description            String
-  amount                 Float
-  type                   String // income, expense, transfer
-  category               String
-  paymentMethod          String?
-  isRecurring            Boolean   @default(false)
-  isInstallment          Boolean   @default(false)
-  installmentNumber      Int?
-  totalInstallments      Int?
-  actorId                String
-  userId                 String?
-  vaultId                String?
-  sourceAccountId        String?
-  destinationAccountId   String?
-  goalId                 String?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  actor                  User      @relation("AuthoredTransactions", fields: [actorId], references: [id], onDelete: Restrict)
-  sourceAccount          Account?  @relation("SourceAccountTransactions", fields: [sourceAccountId], references: [id], onDelete: SetNull)
-  destinationAccount     Account?  @relation("DestAccountTransactions", fields: [destinationAccountId], references: [id], onDelete: SetNull)
-  goal                   Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
-  vault                  Vault?    @relation(fields: [vaultId], references: [id], onDelete: SetNull)
+  id                   String    @id @default(cuid())
+  date                 DateTime
+  description          String
+  amount               Float
+  type                 String
+  category             String
+  paymentMethod        String?
+  isRecurring          Boolean   @default(false)
+  isInstallment        Boolean   @default(false)
+  installmentNumber    Int?
+  totalInstallments    Int?
+  actorId              String
+  userId               String?
+  vaultId              String?
+  sourceAccountId      String?
+  destinationAccountId String?
+  goalId               String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  actor                User      @relation("AuthoredTransactions", fields: [actorId], references: [id], onDelete: Restrict)
+  sourceAccount        Account?  @relation("SourceAccountTransactions", fields: [sourceAccountId], references: [id], onDelete: SetNull)
+  destinationAccount   Account?  @relation("DestAccountTransactions", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+  goal                 Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  user                 User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  vault                Vault?    @relation(fields: [vaultId], references: [id], onDelete: SetNull)
 }
 
 model Notification {
-  id           String   @id @default(cuid())
-  userId       String
-  type         String // ex: goal_invite, transaction_added
-  text         String
-  actorId      String?
-  actorName    String?
-  actorAvatar  String?
-  link         String?
-  read         Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  text        String
+  actorId     String?
+  actorName   String?
+  actorAvatar String?
+  link        String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Invitation {
   id         String   @id @default(cuid())
-  type       String // goal, vault
+  type       String
   targetId   String
   targetName String
   senderId   String
   receiverId String
-  status     String   @default("pending") // pending, accepted, declined
+  status     String   @default("pending")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   sender     User     @relation("SentInvitations", fields: [senderId], references: [id], onDelete: Restrict)
@@ -180,11 +176,11 @@ model Invitation {
 }
 
 model SavedReport {
-  id          String   @id @default(cuid())
-  ownerId     String
-  monthYear   String
+  id           String   @id @default(cuid())
+  ownerId      String
+  monthYear    String
   analysisHtml String
-  createdAt   DateTime @default(now())
-  
+  createdAt    DateTime @default(now())
+
   @@unique([ownerId, monthYear])
 }
