@@ -112,7 +112,7 @@ export function EditTransactionSheet({ transaction }: { transaction: Transaction
         </SheetHeader>
         <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
           <input type="hidden" name="id" value={transaction.id} />
-          <div className="grid gap-4 py-4 overflow-y-auto pr-6 pl-1">
+          <div className="grid gap-4 py-4 overflow-y-auto">
              <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>
               <Select name="type" defaultValue={transaction.type} onValueChange={(value) => setTransactionType(value as any)}>
