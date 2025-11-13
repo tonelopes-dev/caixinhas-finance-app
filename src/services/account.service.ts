@@ -13,14 +13,15 @@ export class AccountService {
    */
   static async getUserAccounts(userId: string): Promise<any[]> {
     try {
-      return await prisma.account.findMany({
+      const accounts = await prisma.account.findMany({
         where: {
           ownerId: userId,
+          scope: 'personal'
         },
         include: {
           visibleIn: {
-            include: {
-              vault: true,
+            select: {
+              vaultId: true
             }
           }
         },
@@ -28,6 +29,13 @@ export class AccountService {
           createdAt: 'desc',
         },
       });
+
+      // Mapeia o resultado para transformar a lista de objetos 'visibleIn' em um array de strings
+      return accounts.map(account => ({
+        ...account,
+        visibleIn: account.visibleIn.map(vis => vis.vaultId)
+      }));
+
     } catch (error) {
       console.error('Erro ao buscar contas do usuário:', error);
       throw new Error('Não foi possível buscar as contas do usuário');
@@ -60,19 +68,11 @@ export class AccountService {
     try {
       // Se scope é o próprio userId, busca contas pessoais
       if (scope === userId) {
-        return await prisma.account.findMany({
-          where: {
-            ownerId: userId,
-            scope: 'personal'
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        });
+        return this.getUserAccounts(userId);
       }
       
       // Se scope é um vaultId, busca contas do vault + contas pessoais visíveis
-      return await prisma.account.findMany({
+      const accounts = await prisma.account.findMany({
         where: {
           OR: [
             // Contas onde o dono é o usuário E a conta está marcada como visível neste cofre
@@ -81,10 +81,23 @@ export class AccountService {
             { vaultId: scope },
           ],
         },
+        include: {
+          visibleIn: {
+            select: {
+              vaultId: true
+            }
+          }
+        },
         orderBy: {
           createdAt: 'desc',
         },
       });
+
+      return accounts.map(account => ({
+        ...account,
+        visibleIn: account.visibleIn.map(vis => vis.vaultId)
+      }));
+
     } catch (error) {
       console.error('Erro ao buscar contas visíveis:', error);
       throw new Error('Não foi possível buscar as contas visíveis');
@@ -96,16 +109,24 @@ export class AccountService {
    */
   static async getAccountById(accountId: string): Promise<any | null> {
     try {
-      return await prisma.account.findUnique({
+      const account = await prisma.account.findUnique({
         where: { id: accountId },
         include: {
           visibleIn: {
-            include: {
-              vault: true,
+            select: {
+              vaultId: true,
             }
           }
         }
       });
+
+      if (!account) return null;
+
+      return {
+        ...account,
+        visibleIn: account.visibleIn.map(vis => vis.vaultId)
+      };
+
     } catch (error) {
       console.error('Erro ao buscar conta:', error);
       throw new Error('Não foi possível buscar a conta');
@@ -121,7 +142,7 @@ export class AccountService {
     type: string;
     balance: number;
     ownerId: string;
-    scope: string; // 'personal' ou 'vault'
+    scope: string; // 'personal'
     vaultId?: string;
     creditLimit?: number;
     logoUrl?: string;
@@ -133,24 +154,19 @@ export class AccountService {
         bank: data.bank,
         type: data.type,
         balance: data.balance,
-        scope: data.scope,
+        scope: 'personal', // Sempre pessoal agora
         creditLimit: data.creditLimit,
         logoUrl: data.logoUrl,
         owner: {
           connect: { id: data.ownerId }
         },
       };
-
-      if (data.scope === 'vault' && data.vaultId) {
-        createData.vault = {
-          connect: { id: data.vaultId }
-        };
-      }
       
-      if (data.scope === 'personal' && data.visibleIn && data.visibleIn.length > 0) {
+      // Conecta as visibilidades se existirem
+      if (data.visibleIn && data.visibleIn.length > 0) {
         createData.visibleIn = {
           create: data.visibleIn.map(vaultId => ({
-            vault: { connect: { id: vaultId } }
+            vaultId: vaultId
           }))
         };
       }
@@ -180,14 +196,13 @@ export class AccountService {
   ): Promise<any> {
     try {
       const { visibleIn, ...updateData } = data;
-      const prismaData: Prisma.AccountUpdateInput = { ...updateData };
 
       // Transação para atualizar a conta e suas visibilidades
       return await prisma.$transaction(async (tx) => {
         // 1. Atualiza os dados básicos da conta
         const updatedAccount = await tx.account.update({
           where: { id: accountId },
-          data: prismaData,
+          data: updateData,
         });
 
         // 2. Sincroniza as visibilidades (se `visibleIn` for fornecido)
