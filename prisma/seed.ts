@@ -21,6 +21,8 @@ async function main() {
   // ============================================
   console.log('👥 Criando usuários...');
 
+  await prisma.user.deleteMany();
+
   const user1 = await prisma.user.create({
     data: {
       id: 'user1',
@@ -202,23 +204,23 @@ async function main() {
 
   await Promise.all([
     // Transações Pessoais do Dev (user1)
-    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: accDev1.id, actorId: user1.id, userId: user1.id, isRecurring: true } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-25'), description: 'Almoço com cliente (Crédito)', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Café (Débito)', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'debit_card', actorId: user1.id, userId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Estacionamento (Pix)', amount: 20, type: 'expense', category: 'Transporte', sourceAccountId: accDev1.id, paymentMethod: 'pix', actorId: user1.id, userId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Conta de luz (Boleto)', amount: 150, type: 'expense', category: 'Casa', sourceAccountId: accDev1.id, paymentMethod: 'boleto', actorId: user1.id, userId: user1.id, isRecurring: true } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-29'), description: 'Feira (Dinheiro)', amount: 50, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'cash', actorId: user1.id, userId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: accDev1.id, destinationAccountId: accDev2.id, actorId: user1.id, userId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: accDev1.id, actorId: user1.id, isRecurring: true } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-25'), description: 'Almoço com cliente (Crédito)', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Café (Débito)', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'debit_card', actorId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Estacionamento (Pix)', amount: 20, type: 'expense', category: 'Transporte', sourceAccountId: accDev1.id, paymentMethod: 'pix', actorId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Conta de luz (Boleto)', amount: 150, type: 'expense', category: 'Casa', sourceAccountId: accDev1.id, paymentMethod: 'boleto', actorId: user1.id, isRecurring: true } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-29'), description: 'Feira (Dinheiro)', amount: 50, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'cash', actorId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: accDev1.id, destinationAccountId: accDev2.id, actorId: user1.id } }),
     
     // Transação para uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id, userId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id } }),
     
     // Retirada de uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', destinationAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id, userId: user1.id } }),
+    prisma.transaction.create({ data: { date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', destinationAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id } }),
     
     // Transações de parcela
-    prisma.transaction.create({ data: { date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id, isInstallment: true, installmentNumber: 1, totalInstallments: 3 } }),
-    prisma.transaction.create({ data: { date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, userId: user1.id, isInstallment: true, installmentNumber: 2, totalInstallments: 3 } }),
+    prisma.transaction.create({ data: { date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, isInstallment: true, installmentNumber: 1, totalInstallments: 3 } }),
+    prisma.transaction.create({ data: { date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, isInstallment: true, installmentNumber: 2, totalInstallments: 3 } }),
 
     // Transações no cofre da família
     prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: accFamily.id, paymentMethod: 'credit_card', actorId: user2.id, vaultId: vaultFamily.id } }),
