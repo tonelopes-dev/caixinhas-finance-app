@@ -6,6 +6,7 @@ import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, Mor
 import { transactions as allTransactions, accounts as allAccounts, goals as allGoals, users } from '@/lib/data';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -103,6 +104,7 @@ const getTypeDisplay = (type: Transaction['type']) => {
 
 export default function TransactionsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -114,13 +116,15 @@ export default function TransactionsPage() {
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
 
   useEffect(() => {
-    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-
-    if (!userId || !selectedWorkspaceId) {
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
       router.push('/login');
       return;
     }
+
+    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || session.user.id;
+    const userId = session.user.id;
     setWorkspaceId(selectedWorkspaceId);
 
     const isPersonal = selectedWorkspaceId === userId;
@@ -137,7 +141,7 @@ export default function TransactionsPage() {
     setYearFilter(new Date().getFullYear().toString());
 
 
-  }, [router]);
+  }, [router, session, status]);
 
   const getAccountName = (id: string) => {
     if (id.startsWith('goal')) {

@@ -3,7 +3,8 @@
 
 import { z } from 'zod';
 import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
-import { savedReports, transactions } from '@/lib/data';
+import { transactions } from '@/lib/data';
+import { ReportService } from '@/services/ReportService';
 
 const generateReportSchema = z.object({
     month: z.string(),
@@ -34,9 +35,9 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     const yearNum = parseInt(year, 10);
     const monthName = new Date(yearNum, monthIndex).toLocaleString('pt-BR', { month: 'long' });
     const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
-    const reportId = `${ownerId}-${yearNum}-${month}`;
     
-    const cachedReport = savedReports.find(r => r.id === reportId);
+    // Verifica se já existe relatório salvo no banco
+    const cachedReport = await ReportService.getReport(ownerId, monthYear);
     if (cachedReport) {
         return {
             reportHtml: cachedReport.analysisHtml,
@@ -63,12 +64,16 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
             transactions: JSON.stringify(relevantTransactions, null, 2),
         });
 
-        savedReports.push({
-            id: reportId,
+        // Salva o relatório no banco de dados
+        const savedReport = await ReportService.saveReport({
             ownerId,
             monthYear,
             analysisHtml: result.analysisHtml
         });
+
+        if (!savedReport) {
+            console.warn('Falha ao salvar relatório no banco, mas continuando...');
+        }
 
         return {
             reportHtml: result.analysisHtml,
@@ -84,13 +89,13 @@ export async function invalidateReportCache(date: string | undefined, ownerId: s
     if (!date || !ownerId) return;
 
     const transactionDate = new Date(date);
-    const month = transactionDate.getMonth() + 1;
+    const month = transactionDate.getMonth();
     const year = transactionDate.getFullYear();
-    const reportId = `${ownerId}-${year}-${month}`;
+    const monthName = new Date(year, month).toLocaleString('pt-BR', { month: 'long' });
+    const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
     
-    const reportIndex = savedReports.findIndex(r => r.id === reportId);
-    if (reportIndex > -1) {
-        savedReports.splice(reportIndex, 1);
-        console.log(`Cache for report ${reportId} invalidated.`);
+    const deleted = await ReportService.deleteReport(ownerId, monthYear);
+    if (deleted) {
+        console.log(`Cache for report ${ownerId}-${monthYear} invalidated.`);
     }
 }

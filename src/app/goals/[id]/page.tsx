@@ -1,5 +1,6 @@
-import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
@@ -8,12 +9,13 @@ type PageProps = {
 };
 
 export default async function GoalDetailPage({ params }: PageProps) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
+
+  const userId = session.user.id;
 
   const { id } = await params;
   const data = await getGoalDetails(id);

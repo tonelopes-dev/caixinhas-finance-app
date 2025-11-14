@@ -113,8 +113,9 @@ export type Notification = {
 }
 
 export type SavedReport = {
-  id: string; // Composite key like `${ownerId}-${year}-${month}`
+  id: string;
   ownerId: string;
   monthYear: string;
   analysisHtml: string;
+  createdAt: Date;
 };

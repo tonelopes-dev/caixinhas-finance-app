@@ -106,3 +106,5 @@ export function DashboardClient({
     </div>
   );
 }
+
+export default DashboardClient;

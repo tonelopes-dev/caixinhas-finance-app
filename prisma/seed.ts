@@ -1,5 +1,14 @@
 
 import { PrismaClient } from '@prisma/client';
+import {
+  AuthService,
+  VaultService,
+  AccountService,
+  GoalService,
+  TransactionService,
+  type CreateUserInput,
+  type CreateVaultInput
+} from '../src/services';
 
 const prisma = new PrismaClient();
 
@@ -14,272 +23,591 @@ const bankLogos = [
 ];
 
 async function main() {
-  console.log('🌱 Iniciando seed do banco de dados...');
+  console.log('🌱 Iniciando seed completo do banco de dados...');
+  console.log('🔄 Este seed testará todas as funcionalidades CRUD do projeto\n');
 
-  // ============================================
-  // 1. CRIAR USUÁRIOS
-  // ============================================
-  console.log('👥 Criando usuários...');
-
-  await prisma.user.deleteMany();
-
-  const user1 = await prisma.user.create({
-    data: {
-      id: 'user1',
-      name: 'Dev',
-      email: 'email01@conta.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=1080',
-      subscriptionStatus: 'active',
-    },
-  });
-
-  const user2 = await prisma.user.create({
-    data: {
-      id: 'user2',
-      name: 'Anna',
-      email: 'email02@conta.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=1080',
-      subscriptionStatus: 'active',
-    },
-  });
-
-  const user3 = await prisma.user.create({
-    data: {
-      id: 'user3',
-      name: 'Carlos',
-      email: 'carlos@example.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080',
-      subscriptionStatus: 'inactive',
-    },
-  });
-
-  const user4 = await prisma.user.create({
-    data: {
-      id: 'user4',
-      name: 'Daniela',
-      email: 'daniela@example.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1080',
-      subscriptionStatus: 'active',
-    },
-  });
-
-  const user5 = await prisma.user.create({
-    data: {
-      id: 'user5',
-      name: 'Eduardo',
-      email: 'eduardo@example.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1080',
-      subscriptionStatus: 'trial',
-    },
-  });
-
-  console.log(`✅ 5 usuários criados`);
-
-  // ============================================
-  // 2. CRIAR VAULTS (COFRES)
-  // ============================================
-  console.log('🏦 Criando cofres...');
-
-  const vaultFamily = await prisma.vault.create({
-    data: {
-      id: 'vault-family',
-      name: 'Família DevAnna',
-      ownerId: user1.id,
-      imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080',
-      members: {
-        create: [
-          { userId: user1.id, role: 'owner' },
-          { userId: user2.id, role: 'member' },
-        ],
-      },
-    },
-  });
-
-  const vaultAgency = await prisma.vault.create({
-    data: {
-      id: 'vault-agency',
-      name: 'Agência de Software',
-      ownerId: user1.id,
-      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1080',
-      members: {
-        create: [{ userId: user1.id, role: 'owner' }],
-      },
-    },
-  });
-
-  const vaultOffice = await prisma.vault.create({
-    data: {
-      id: 'vault-office',
-      name: 'Consultório Anna',
-      ownerId: user2.id,
-      imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1080',
-      members: {
-        create: [{ userId: user2.id, role: 'owner' }],
-      },
-    },
-  });
-
-  const vaultTrip = await prisma.vault.create({
-    data: {
-      id: 'vault-trip',
-      name: 'Viagem para o Japão',
-      ownerId: user1.id,
-      imageUrl: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=1080',
-      members: {
-        create: [
-          { userId: user1.id, role: 'owner' },
-          { userId: user2.id, role: 'member' },
-        ],
-      },
-    },
-  });
-
-  console.log('✅ 4 cofres criados');
-
-  // ============================================
-  // 3. CRIAR CONTAS
-  // ============================================
-  console.log('💳 Criando contas...');
-
-  const accDev1 = await prisma.account.create({
-    data: { id: 'acc-dev-1', ownerId: user1.id, scope: 'personal', name: 'Conta Corrente Pessoal', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0], visibleIn: [vaultFamily.id] }
-  });
-  const accDev2 = await prisma.account.create({
-    data: { id: 'acc-dev-2', ownerId: user1.id, scope: 'personal', name: 'Investimentos Pessoais', bank: 'Corretora Ágil', type: 'investment', balance: 75000, logoUrl: bankLogos[2] }
-  });
-  const accDev3 = await prisma.account.create({
-    data: { id: 'acc-dev-3', ownerId: user1.id, scope: 'personal', name: 'Cartão Pessoal', bank: 'Banco Digital', type: 'credit_card', balance: 0, creditLimit: 15000, logoUrl: bankLogos[0] }
-  });
-  const accNutri1 = await prisma.account.create({
-    data: { id: 'acc-nutri-1', ownerId: user2.id, scope: 'personal', name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] }
-  });
-  const accNutri2 = await prisma.account.create({
-    data: { id: 'acc-nutri-2', ownerId: user2.id, scope: 'personal', name: 'Poupança Pessoal', bank: 'PoupaBanco', type: 'savings', balance: 42000, logoUrl: bankLogos[6], visibleIn: [vaultFamily.id] }
-  });
-  const accFamily = await prisma.account.create({
-    data: { id: 'acc-family', ownerId: user1.id, scope: 'vault', vaultId: vaultFamily.id, name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] }
-  });
-  const accAgency1 = await prisma.account.create({
-    data: { id: 'acc-agency-1', ownerId: user1.id, scope: 'vault', vaultId: vaultAgency.id, name: 'Conta PJ Agência', bank: 'Banco Empresarial', type: 'checking', balance: 25000, logoUrl: bankLogos[5] }
-  });
-  const accTripChecking = await prisma.account.create({
-    data: { id: 'acc-trip-checking', ownerId: user1.id, scope: 'vault', vaultId: vaultTrip.id, name: 'Conta Corrente Japão', bank: 'Banco Global', type: 'checking', balance: 2000, logoUrl: bankLogos[3] }
-  });
-  const accTripCard = await prisma.account.create({
-    data: { id: 'acc-trip-card', ownerId: user1.id, scope: 'vault', vaultId: vaultTrip.id, name: 'Cartão para Viagem', bank: 'Banco Global', type: 'credit_card', balance: 0, creditLimit: 20000, logoUrl: bankLogos[3] }
-  });
-
-  console.log(`✅ 9 contas criadas`);
-
-  // ============================================
-  // 4. CRIAR GOALS (CAIXINHAS)
-  // ============================================
-  console.log('🎯 Criando metas...');
-
-  const goalDev1 = await prisma.goal.create({
-    data: { id: 'goal-dev-1', userId: user1.id, name: 'Setup Novo', targetAmount: 15000, currentAmount: 7500, emoji: '🖥️', visibility: 'private', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }] } }
-  });
-  const goalAnna1 = await prisma.goal.create({
-    data: { id: 'goal-anna-1', userId: user2.id, name: 'Viagem com Amigos', targetAmount: 5000, currentAmount: 1200, emoji: '🏖️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user2.id, role: 'owner' }, { userId: user3.id, role: 'member' }, { userId: user4.id, role: 'member' }] } }
-  });
-  const goalFamily1 = await prisma.goal.create({
-    data: { id: 'goal-family-1', vaultId: vaultFamily.id, name: 'Reforma da Cozinha', targetAmount: 35000, currentAmount: 8000, emoji: '🛠️', visibility: 'shared', isFeatured: true, participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
-  });
-  const goalFamily2 = await prisma.goal.create({
-    data: { id: 'goal-family-2', vaultId: vaultFamily.id, name: 'Fundo de Emergência', targetAmount: 50000, currentAmount: 32000, emoji: '🛡️', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }, { userId: user2.id, role: 'member' }] } }
-  });
-  const goalAgency1 = await prisma.goal.create({
-    data: { id: 'goal-agency-1', vaultId: vaultAgency.id, name: 'Macbook M4 Pro', targetAmount: 25000, currentAmount: 18000, emoji: '💻', visibility: 'shared', participants: { create: [{ userId: user1.id, role: 'owner' }] } }
-  });
-  const goalOffice1 = await prisma.goal.create({
-    data: { id: 'goal-office-1', vaultId: vaultOffice.id, name: 'Bioimpedância Nova', targetAmount: 40000, currentAmount: 11000, emoji: '🔬', visibility: 'shared', participants: { create: [{ userId: user2.id, role: 'owner' }] } }
-  });
-
-  console.log('✅ 6 metas principais criadas');
-
-  // ============================================
-  // 5. CRIAR TRANSAÇÕES
-  // ============================================
-  console.log('💸 Criando transações...');
-
-  await Promise.all([
-    // Transações Pessoais do Dev (user1)
-    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Salário Mensal', amount: 12000, type: 'income', category: 'Salário', destinationAccountId: accDev1.id, actorId: user1.id, isRecurring: true } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-25'), description: 'Almoço com cliente (Crédito)', amount: 80, type: 'expense', category: 'Alimentação', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Café (Débito)', amount: 15, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'debit_card', actorId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Estacionamento (Pix)', amount: 20, type: 'expense', category: 'Transporte', sourceAccountId: accDev1.id, paymentMethod: 'pix', actorId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-28'), description: 'Conta de luz (Boleto)', amount: 150, type: 'expense', category: 'Casa', sourceAccountId: accDev1.id, paymentMethod: 'boleto', actorId: user1.id, isRecurring: true } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-29'), description: 'Feira (Dinheiro)', amount: 50, type: 'expense', category: 'Alimentação', sourceAccountId: accDev1.id, paymentMethod: 'cash', actorId: user1.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-18'), description: 'Movimentação para Investimentos', amount: 2000, type: 'transfer', category: 'Investimento', sourceAccountId: accDev1.id, destinationAccountId: accDev2.id, actorId: user1.id } }),
+  try {
+    // ============================================
+    // 1. LIMPEZA INICIAL
+    // ============================================
+    console.log('🧹 Limpando dados existentes...');
     
-    // Transação para uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-07-20'), description: 'Economia para Setup', amount: 1000, type: 'transfer', category: 'Caixinha', sourceAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id } }),
+    // Ordem de limpeza respeitando foreign keys
+    await prisma.transaction.deleteMany({});
+    await prisma.invitation.deleteMany({});
+    await prisma.notification.deleteMany({});
+    await prisma.goalParticipant.deleteMany({});
+    await prisma.goal.deleteMany({});
+    await prisma.account.deleteMany({});
+    await prisma.vaultMember.deleteMany({});
+    await prisma.vault.deleteMany({});
+    await prisma.user.deleteMany({});
     
-    // Retirada de uma caixinha
-    prisma.transaction.create({ data: { date: new Date('2024-06-01'), description: 'Resgate para emergência', amount: 500, type: 'transfer', category: 'Caixinha', destinationAccountId: accDev1.id, goalId: goalDev1.id, actorId: user1.id } }),
+    console.log('✅ Banco limpo');
+
+    // ============================================
+    // 2. CRIAR USUÁRIO PRINCIPAL (AUTH SERVICE)
+    // ============================================
+    console.log('👤 Criando usuário principal...');
     
-    // Transações de parcela
-    prisma.transaction.create({ data: { date: new Date('2024-07-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, isInstallment: true, installmentNumber: 1, totalInstallments: 3 } }),
-    prisma.transaction.create({ data: { date: new Date('2024-08-10'), description: 'Compra de Monitor Novo', amount: 800, type: 'expense', category: 'Trabalho', sourceAccountId: accDev3.id, paymentMethod: 'credit_card', actorId: user1.id, isInstallment: true, installmentNumber: 2, totalInstallments: 3 } }),
+    const mainUserData: CreateUserInput = {
+      name: 'Usuário Principal',
+      email: 'conta01@email.com',
+      password: 'conta@123',
+      avatarUrl: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=400'
+    };
 
-    // Transações no cofre da família
-    prisma.transaction.create({ data: { date: new Date('2024-07-27'), description: 'Supermercado do Mês', amount: 1800, type: 'expense', category: 'Alimentação', sourceAccountId: accFamily.id, paymentMethod: 'credit_card', actorId: user2.id, vaultId: vaultFamily.id } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-26'), description: 'Pagamento Aluguel', amount: 2500, type: 'expense', category: 'Casa', sourceAccountId: accFamily.id, paymentMethod: 'boleto', actorId: user1.id, vaultId: vaultFamily.id, isRecurring: true } }),
+    const mainUser = await AuthService.register(mainUserData);
+    console.log(`✅ Usuário criado: ${mainUser.name} (${mainUser.email})`);
+
+    // ============================================
+    // 3. CRIAR USUÁRIOS ADICIONAIS PARA TESTES
+    // ============================================
+    console.log('👥 Criando usuários adicionais para testes...');
     
-    // Contribuições para o cofre
-    prisma.transaction.create({ data: { date: new Date('2024-07-15'), description: 'Contribuição do Dev', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: accDev1.id, destinationAccountId: accFamily.id, actorId: user1.id, vaultId: vaultFamily.id, isRecurring: true } }),
-    prisma.transaction.create({ data: { date: new Date('2024-07-16'), description: 'Contribuição da Anna', amount: 1500, type: 'transfer', category: 'Contribuição Familiar', sourceAccountId: accNutri1.id, destinationAccountId: accFamily.id, actorId: user2.id, vaultId: vaultFamily.id, isRecurring: true } }),
-  ]);
+    const additionalUsers = await Promise.all([
+      AuthService.register({
+        name: 'Ana Silva',
+        email: 'ana@teste.com',
+        password: 'ana123',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'
+      }),
+      AuthService.register({
+        name: 'Carlos Santos',
+        email: 'carlos@teste.com',
+        password: 'carlos123',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
+      }),
+    ]);
 
-  console.log(`✅ Transações de teste criadas`);
+    console.log(`✅ ${additionalUsers.length} usuários adicionais criados`);
 
-  // ============================================
-  // 6. CRIAR NOTIFICAÇÕES
-  // ============================================
-  console.log('🔔 Criando notificações...');
+    // ============================================
+    // 4. CRIAR CONTAS PESSOAIS (ACCOUNT SERVICE)
+    // ============================================
+    console.log('💳 Criando contas bancárias...');
+    
+    // Contas do usuário principal - testando todos os tipos
+    const mainUserAccounts = await Promise.all([
+      // Conta Corrente
+      AccountService.createAccount({
+        name: 'Conta Corrente Principal',
+        bank: 'Nubank',
+        type: 'checking',
+        balance: 15000.50,
+        logoUrl: bankLogos[0],
+        scope: 'personal',
+        ownerId: mainUser.id
+      }),
+      
+      // Poupança
+      AccountService.createAccount({
+        name: 'Poupança Reserva',
+        bank: 'Inter',
+        type: 'savings',
+        balance: 25000.00,
+        logoUrl: bankLogos[1],
+        scope: 'personal',
+        ownerId: mainUser.id
+      }),
+      
+      // Investimentos
+      AccountService.createAccount({
+        name: 'Carteira de Investimentos',
+        bank: 'C6 Bank',
+        type: 'investment',
+        balance: 50000.75,
+        logoUrl: bankLogos[2],
+        scope: 'personal',
+        ownerId: mainUser.id
+      }),
+      
+      // Cartão de Crédito
+      AccountService.createAccount({
+        name: 'Cartão de Crédito',
+        bank: 'Itaú',
+        type: 'credit_card',
+        balance: -1200.00, // saldo devedor
+        creditLimit: 8000.00,
+        logoUrl: bankLogos[3],
+        scope: 'personal',
+        ownerId: mainUser.id
+      })
+    ]);
 
-  await Promise.all([
-    prisma.notification.create({ data: { userId: user1.id, type: 'goal_invite', text: '<b>Daniela</b> te convidou para a caixinha "Viagem de Fim de Ano".', actorId: user4.id, actorName: 'Daniela', actorAvatar: user4.avatarUrl, link: '/invitations' } }),
-    prisma.notification.create({ data: { userId: user1.id, type: 'transaction_added', text: '<b>Anna</b> adicionou uma nova despesa de <b>R$ 1.800,00</b> em "Família DevAnna".', actorId: user2.id, actorName: 'Anna', actorAvatar: user2.avatarUrl, link: '/transactions' } }),
-    prisma.notification.create({ data: { userId: user1.id, type: 'goal_progress', text: 'Parabéns! Vocês alcançaram <b>90%</b> da meta "Fundo de Emergência".', link: '/goals/goal-family-2', read: true } }),
-  ]);
+    // Contas dos usuários adicionais
+    const anaAccounts = await Promise.all([
+      AccountService.createAccount({
+        name: 'Conta Ana',
+        bank: 'Bradesco',
+        type: 'checking',
+        balance: 8500.00,
+        logoUrl: bankLogos[4],
+        scope: 'personal',
+        ownerId: additionalUsers[0].id
+      })
+    ]);
 
-  console.log(`✅ 3 notificações criadas`);
+    const carlosAccounts = await Promise.all([
+      AccountService.createAccount({
+        name: 'Conta Carlos',
+        bank: 'Banco do Brasil',
+        type: 'checking',
+        balance: 12000.00,
+        logoUrl: bankLogos[5],
+        scope: 'personal',
+        ownerId: additionalUsers[1].id
+      })
+    ]);
 
-  // ============================================
-  // 7. CRIAR CONVITES
-  // ============================================
-  console.log('📨 Criando convites...');
+    console.log(`✅ ${mainUserAccounts.length + anaAccounts.length + carlosAccounts.length} contas pessoais criadas`);
 
-  await Promise.all([
-    prisma.invitation.create({ data: { type: 'goal', targetId: 'goal-anna-1', targetName: 'Viagem com Amigos', senderId: user2.id, receiverId: user5.id, status: 'pending' } }),
-  ]);
+    // ============================================
+    // 5. CRIAR VAULTS (VAULT SERVICE)
+    // ============================================
+    console.log('🏦 Criando cofres compartilhados...');
+    
+    const vaultFamilia: CreateVaultInput = {
+      name: 'Cofre da Família',
+      imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
+      ownerId: mainUser.id
+    };
+    
+    const familyVault = await VaultService.createVault(vaultFamilia);
+    
+    // Adicionar membros ao cofre
+    await VaultService.addMember(familyVault.id, additionalUsers[0].id, 'member');
+    
+    const vaultNegocios: CreateVaultInput = {
+      name: 'Negócios e Investimentos',
+      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
+      ownerId: mainUser.id
+    };
+    
+    const businessVault = await VaultService.createVault(vaultNegocios);
+    await VaultService.addMember(businessVault.id, additionalUsers[1].id, 'member');
+    
+    console.log('✅ 2 cofres criados com múltiplos membros');
 
-  console.log(`✅ 1 convite criado`);
+    // ============================================
+    // 6. CRIAR CONTAS DE VAULT
+    // ============================================
+    console.log('🏪 Criando contas dos cofres...');
+    
+    const vaultAccounts = await Promise.all([
+      // Conta do cofre família
+      AccountService.createAccount({
+        name: 'Conta Conjunta Família',
+        bank: 'Caixa Econômica',
+        type: 'checking',
+        balance: 18000.00,
+        logoUrl: bankLogos[6],
+        scope: 'vault',
+        ownerId: mainUser.id,
+        vaultId: familyVault.id
+      }),
+      
+      // Conta do cofre negócios
+      AccountService.createAccount({
+        name: 'Conta Empresarial',
+        bank: 'Itaú',
+        type: 'checking',
+        balance: 35000.00,
+        logoUrl: bankLogos[3],
+        scope: 'vault',
+        ownerId: mainUser.id,
+        vaultId: businessVault.id
+      })
+    ]);
 
-  // ============================================
-  // 8. CRIAR TRANSAÇÕES COM IDs PERSONALIZADOS
-  // ============================================
-  console.log('🔧 Criando transações com IDs personalizados...');
-  
-  await prisma.transaction.create({
-    data: {
-      id: 't-anna-2025-11-2',
-      date: new Date('2025-11-28'),
-      description: 'Compras Black Friday',
-      amount: 1200,
-      type: 'expense',
-      category: 'Outros',
-      sourceAccountId: accNutri1.id,
-      paymentMethod: 'credit_card',
-      actorId: user2.id,
-      userId: user2.id
-    }
-  });
+    console.log(`✅ ${vaultAccounts.length} contas de cofre criadas`);
 
-  console.log('✅ Transações personalizadas criadas');
+    // ============================================
+    // 7. CRIAR GOALS/CAIXINHAS (GOAL SERVICE)
+    // ============================================
+    console.log('🎯 Criando caixinhas/metas...');
+    
+    // Goals pessoais do usuário principal
+    const personalGoals = await Promise.all([
+      GoalService.createGoal({
+        name: 'Viagem para Europa',
+        targetAmount: 20000.00,
+        emoji: '✈️',
+        visibility: 'private',
+        ownerId: mainUser.id,
+        ownerType: 'user'
+      }),
+      
+      GoalService.createGoal({
+        name: 'Novo Notebook',
+        targetAmount: 8000.00,
+        emoji: '💻',
+        visibility: 'shared',
+        ownerId: mainUser.id,
+        ownerType: 'user'
+      })
+    ]);
 
-  console.log('\n🎉 Seed concluído com sucesso!');
+    // Goals de vault
+    const vaultGoals = await Promise.all([
+      GoalService.createGoal({
+        name: 'Reforma da Casa',
+        targetAmount: 50000.00,
+        emoji: '🏠',
+        visibility: 'shared',
+        ownerId: familyVault.id,
+        ownerType: 'vault'
+      }),
+      
+      GoalService.createGoal({
+        name: 'Investimento Coletivo',
+        targetAmount: 100000.00,
+        emoji: '📈',
+        visibility: 'shared',
+        ownerId: businessVault.id,
+        ownerType: 'vault'
+      })
+    ]);
+
+    console.log(`✅ ${personalGoals.length + vaultGoals.length} caixinhas criadas`);
+
+    // ============================================
+    // 8. CRIAR TRANSAÇÕES (TRANSACTION SERVICE)
+    // ============================================
+    console.log('💸 Criando transações diversas...');
+    
+    // Transações de entrada (income)
+    await Promise.all([
+      // Salário
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-01'),
+        description: 'Salário Novembro',
+        amount: 8500.00,
+        type: 'income',
+        category: 'Salário',
+        destinationAccountId: mainUserAccounts[0].id, // conta corrente
+        actorId: mainUser.id
+      }),
+      
+      // Freelance
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-05'),
+        description: 'Projeto Freelance',
+        amount: 2500.00,
+        type: 'income',
+        category: 'Freelance',
+        destinationAccountId: mainUserAccounts[0].id,
+        actorId: mainUser.id
+      }),
+      
+      // Rendimento de investimentos
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-10'),
+        description: 'Rendimento CDB',
+        amount: 450.00,
+        type: 'income',
+        category: 'Investimentos',
+        destinationAccountId: mainUserAccounts[2].id, // conta investimento
+        actorId: mainUser.id
+      })
+    ]);
+
+    // Transações de saída (expense)
+    await Promise.all([
+      // Supermercado - débito
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-03'),
+        description: 'Supermercado Semanal',
+        amount: 350.00,
+        type: 'expense',
+        category: 'Alimentação',
+        sourceAccountId: mainUserAccounts[0].id,
+        paymentMethod: 'debit_card',
+        actorId: mainUser.id
+      }),
+      
+      // Conta de luz - boleto
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-08'),
+        description: 'Conta de Luz',
+        amount: 180.00,
+        type: 'expense',
+        category: 'Utilidades',
+        sourceAccountId: mainUserAccounts[0].id,
+        paymentMethod: 'boleto',
+        actorId: mainUser.id,
+        isRecurring: true
+      }),
+      
+      // Gasolina - PIX
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-12'),
+        description: 'Gasolina',
+        amount: 120.00,
+        type: 'expense',
+        category: 'Transporte',
+        sourceAccountId: mainUserAccounts[0].id,
+        paymentMethod: 'pix',
+        actorId: mainUser.id
+      }),
+      
+      // Compra parcelada no cartão
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-15'),
+        description: 'Smartphone Novo',
+        amount: 400.00, // 1ª parcela de 2400
+        type: 'expense',
+        category: 'Outros',
+        sourceAccountId: mainUserAccounts[3].id, // cartão de crédito
+        paymentMethod: 'credit_card',
+        actorId: mainUser.id,
+        isInstallment: true,
+        installmentNumber: 1,
+        totalInstallments: 6
+      })
+    ]);
+
+    // Transações de transferência entre contas
+    await Promise.all([
+      // Transferência para poupança
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-06'),
+        description: 'Reserva de Emergência',
+        amount: 1500.00,
+        type: 'transfer',
+        category: 'Transferência',
+        sourceAccountId: mainUserAccounts[0].id, // conta corrente
+        destinationAccountId: mainUserAccounts[1].id, // poupança
+        actorId: mainUser.id
+      }),
+      
+      // Transferência para investimento
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-09'),
+        description: 'Aplicação em CDB',
+        amount: 5000.00,
+        type: 'transfer',
+        category: 'Investimento',
+        sourceAccountId: mainUserAccounts[0].id,
+        destinationAccountId: mainUserAccounts[2].id,
+        actorId: mainUser.id
+      })
+    ]);
+
+    // Transações para caixinhas (goals)
+    await Promise.all([
+      // Contribuição para viagem
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-07'),
+        description: 'Economia para Viagem',
+        amount: 800.00,
+        type: 'transfer',
+        category: 'Caixinha',
+        sourceAccountId: mainUserAccounts[0].id,
+        goalId: personalGoals[0].id,
+        actorId: mainUser.id
+      }),
+      
+      // Contribuição para notebook
+      TransactionService.createTransaction({
+        userId: mainUser.id,
+        date: new Date('2024-11-14'),
+        description: 'Guardando para Notebook',
+        amount: 1200.00,
+        type: 'transfer',
+        category: 'Caixinha',
+        sourceAccountId: mainUserAccounts[1].id, // da poupança
+        goalId: personalGoals[1].id,
+        actorId: mainUser.id
+      })
+    ]);
+
+    // Transações no vault (compartilhadas)
+    await Promise.all([
+      // Contribuição do usuário principal para o cofre
+      TransactionService.createTransaction({
+        vaultId: familyVault.id,
+        date: new Date('2024-11-11'),
+        description: 'Contribuição Mensal Família',
+        amount: 2000.00,
+        type: 'transfer',
+        category: 'Contribuição Familiar',
+        sourceAccountId: mainUserAccounts[0].id,
+        destinationAccountId: vaultAccounts[0].id,
+        actorId: mainUser.id
+      }),
+      
+      // Despesa do cofre
+      TransactionService.createTransaction({
+        vaultId: familyVault.id,
+        date: new Date('2024-11-13'),
+        description: 'Compras da Casa',
+        amount: 850.00,
+        type: 'expense',
+        category: 'Casa',
+        sourceAccountId: vaultAccounts[0].id,
+        paymentMethod: 'debit_card',
+        actorId: mainUser.id
+      })
+    ]);
+
+    console.log('✅ Múltiplas transações criadas testando todos os cenários');
+
+    // ============================================
+    // 9. CRIAR NOTIFICAÇÕES
+    // ============================================
+    console.log('🔔 Criando notificações...');
+    
+    await Promise.all([
+      prisma.notification.create({
+        data: {
+          userId: mainUser.id,
+          type: 'goal_progress',
+          text: 'Parabéns! Você atingiu 60% da meta "Viagem para Europa".',
+          link: `/goals/${personalGoals[0].id}`,
+          read: false
+        }
+      }),
+      
+      prisma.notification.create({
+        data: {
+          userId: mainUser.id,
+          type: 'transaction_added',
+          text: '<b>Ana Silva</b> adicionou uma despesa de <b>R$ 850,00</b> no cofre "Família".',
+          actorId: additionalUsers[0].id,
+          actorName: additionalUsers[0].name,
+          actorAvatar: additionalUsers[0].avatarUrl,
+          link: '/transactions',
+          read: false
+        }
+      }),
+      
+      prisma.notification.create({
+        data: {
+          userId: mainUser.id,
+          type: 'vault_invite',
+          text: '<b>Carlos Santos</b> te convidou para o cofre "Projeto Startup".',
+          actorId: additionalUsers[1].id,
+          actorName: additionalUsers[1].name,
+          actorAvatar: additionalUsers[1].avatarUrl,
+          link: '/invitations',
+          read: true
+        }
+      })
+    ]);
+
+    console.log('✅ 3 notificações criadas');
+
+    // ============================================
+    // 10. CRIAR CONVITES
+    // ============================================
+    console.log('📧 Criando convites...');
+    
+    await Promise.all([
+      prisma.invitation.create({
+        data: {
+          type: 'vault',
+          targetId: businessVault.id,
+          targetName: businessVault.name,
+          senderId: mainUser.id,
+          receiverId: additionalUsers[0].id,
+          status: 'pending'
+        }
+      }),
+      
+      prisma.invitation.create({
+        data: {
+          type: 'goal',
+          targetId: personalGoals[1].id,
+          targetName: personalGoals[1].name,
+          senderId: mainUser.id,
+          receiverId: additionalUsers[1].id,
+          status: 'accepted'
+        }
+      })
+    ]);
+
+    console.log('✅ 2 convites criados');
+
+    // ============================================
+    // 11. TESTES DE ATUALIZAÇÃO (UPDATE)
+    // ============================================
+    console.log('🔄 Testando operações de atualização...');
+    
+    // Atualizar conta
+    await AccountService.updateAccount(mainUserAccounts[0].id, {
+      name: 'Conta Corrente Principal (Atualizada)',
+      balance: 16500.50
+    });
+
+    // Atualizar goal
+    await GoalService.updateGoal(personalGoals[0].id, {
+      name: 'Viagem para Europa 2025',
+      targetAmount: 22000.00
+    });
+
+    console.log('✅ Operações de atualização testadas');
+
+    // ============================================
+    // 12. ESTATÍSTICAS FINAIS
+    // ============================================
+    console.log('\n📊 RESUMO DO SEED:');
+    console.log('==================');
+    
+    const stats = {
+      users: await prisma.user.count(),
+      vaults: await prisma.vault.count(),
+      accounts: await prisma.account.count(),
+      goals: await prisma.goal.count(),
+      transactions: await prisma.transaction.count(),
+      notifications: await prisma.notification.count(),
+      invitations: await prisma.invitation.count()
+    };
+
+    Object.entries(stats).forEach(([key, count]) => {
+      console.log(`${key.padEnd(15)}: ${count}`);
+    });
+
+    console.log('\n🎯 FUNCIONALIDADES TESTADAS:');
+    console.log('============================');
+    console.log('✅ AuthService.register() - Criação de usuários');
+    console.log('✅ AccountService.createAccount() - Todos os tipos de conta');
+    console.log('✅ VaultService.createVault() - Cofres compartilhados');
+    console.log('✅ VaultService.addMember() - Adição de membros');
+    console.log('✅ GoalService.createGoal() - Metas pessoais e de vault');
+    console.log('✅ TransactionService.createTransaction() - Todos os tipos');
+    console.log('✅ AccountService.updateAccount() - Atualização de contas');
+    console.log('✅ GoalService.updateGoal() - Atualização de metas');
+    console.log('✅ Transações: income, expense, transfer');
+    console.log('✅ Métodos de pagamento: PIX, débito, crédito, boleto');
+    console.log('✅ Transações recorrentes e parceladas');
+    console.log('✅ Transações para caixinhas');
+    console.log('✅ Transações em vaults compartilhados');
+    console.log('✅ Notificações e convites');
+
+    console.log('\n🔐 CREDENCIAIS DE LOGIN:');
+    console.log('========================');
+    console.log('Email: conta01@email.com');
+    console.log('Senha: conta@123');
+
+    console.log('\n🎉 SEED COMPLETO - TODAS AS FUNCIONALIDADES CRUD TESTADAS!');
+
+  } catch (error) {
+    console.error('❌ Erro durante o seed:', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
 main()

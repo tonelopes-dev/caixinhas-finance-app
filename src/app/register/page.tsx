@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,36 +18,97 @@ import { Logo } from '@/components/logo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useActionState, useEffect } from 'react';
-import { registerAction, type RegisterState } from './actions';
-import { useToast } from '@/hooks/use-toast';
-import { useFormStatus } from 'react-dom';
-
-
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={pending}>
-            {pending ? 'Criando conta...' : 'Criar conta gratuitamente'}
-        </Button>
-    )
-}
+import { FcGoogle } from 'react-icons/fc';
 
 export default function RegisterPage() {
+    const router = useRouter();
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
-    const initialState: RegisterState = {};
-    const [state, dispatch] = useActionState(registerAction, initialState);
-    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+    });
 
-    useEffect(() => {
-        if(state?.message && state?.errors) {
-            toast({
-                title: "Erro de Validação",
-                description: state.message,
-                variant: 'destructive',
-            })
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
+        // Validações
+        if (formData.password !== formData.confirmPassword) {
+            setError('As senhas não coincidem');
+            setIsLoading(false);
+            return;
         }
-    }, [state, toast]);
+
+        if (formData.password.length < 6) {
+            setError('A senha deve ter pelo menos 6 caracteres');
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            // Registrar usuário
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao criar conta');
+            }
+
+            setSuccess('Conta criada com sucesso! Fazendo login...');
+
+            // Fazer login automaticamente após registro
+            const signInResult = await signIn('credentials', {
+                email: formData.email,
+                password: formData.password,
+                redirect: false,
+            });
+
+            if (signInResult?.ok) {
+                router.push('/vaults');
+            } else {
+                setError('Conta criada, mas houve erro no login. Tente fazer login manualmente.');
+            }
+        } catch (error: any) {
+            setError(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true);
+        try {
+            await signIn('google', { callbackUrl: '/vaults' });
+        } catch (error) {
+            setError('Erro ao fazer registro com Google');
+            setIsLoading(false);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
     
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-card p-4">
@@ -77,22 +141,85 @@ export default function RegisterPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="grid gap-4 px-0">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Seu Nome</Label>
-                                <Input id="name" name="name" placeholder="Como podemos te chamar?" required />
-                                 {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
+                            {/* Botão do Google */}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full py-6 text-lg"
+                                onClick={handleGoogleSignIn}
+                                disabled={isLoading}
+                            >
+                                <FcGoogle className="mr-2 h-5 w-5" />
+                                Continuar com Google
+                            </Button>
+                            
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                                </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">E-mail</Label>
-                                <Input id="email" name="email" type="email" placeholder="seu.melhor@email.com" required />
-                                {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Crie uma Senha</Label>
-                                <Input id="password" name="password" type="password" placeholder="Pelo menos 8 caracteres" required />
-                                {state?.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
-                            </div>
-                            <SubmitButton />
+
+                            <form onSubmit={handleSubmit} className="grid gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="name">Seu Nome</Label>
+                                    <Input 
+                                        id="name" 
+                                        name="name" 
+                                        placeholder="Como podemos te chamar?" 
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        required 
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">E-mail</Label>
+                                    <Input 
+                                        id="email" 
+                                        name="email" 
+                                        type="email" 
+                                        placeholder="seu.melhor@email.com" 
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required 
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="password">Crie uma Senha</Label>
+                                    <Input 
+                                        id="password" 
+                                        name="password" 
+                                        type="password" 
+                                        placeholder="Pelo menos 6 caracteres" 
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required 
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                                    <Input 
+                                        id="confirmPassword" 
+                                        name="confirmPassword" 
+                                        type="password" 
+                                        placeholder="Digite a senha novamente" 
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange}
+                                        required 
+                                    />
+                                </div>
+                                {error && (
+                                    <p className="text-sm font-medium text-destructive">{error}</p>
+                                )}
+                                {success && (
+                                    <p className="text-sm font-medium text-green-600">{success}</p>
+                                )}
+                                <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={isLoading}>
+                                    {isLoading ? 'Criando conta...' : 'Criar conta gratuitamente'}
+                                </Button>
+                            </form>
                         </CardContent>
                         <CardFooter className="flex-col items-center justify-center text-sm px-0">
                             <p className="text-center text-muted-foreground">

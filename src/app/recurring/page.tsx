@@ -1,6 +1,7 @@
 
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,13 +9,14 @@ import { RecurringPageClient } from '@/components/recurring/recurring-page-clien
 import { getRecurringData } from './actions';
 
 export default async function RecurringPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId || !workspaceId) {
+  if (!session?.user) {
     redirect('/login');
   }
+
+  const userId = session.user.id;
+  const workspaceId = userId; // Por enquanto usando userId como workspaceId
 
   const data = await getRecurringData(userId, workspaceId);
 

@@ -1,15 +1,17 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getUserVaultsData } from './actions';
 import { VaultsPageClient } from '@/components/vaults';
 
 export default async function VaultSelectionPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
+
+  const userId = session.user.id;
 
   const data = await getUserVaultsData(userId);
 

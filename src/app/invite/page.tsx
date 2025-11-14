@@ -16,6 +16,8 @@ import { ArrowLeft, Mail, Send } from 'lucide-react';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { getMockDataForUser } from '@/lib/data';
 import { sendPartnerInvite } from './actions';
 import type { GenericState } from '@/app/auth/actions';
@@ -35,19 +37,27 @@ export default function InvitePage() {
   const initialState: GenericState = {};
   const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
   const { toast } = useToast();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
   const [workspaceName, setWorkspaceName] = useState('');
 
   useEffect(() => {
-    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-    if (userId && vaultId) {
-        const { currentVault } = getMockDataForUser(userId, vaultId);
-        if (currentVault) {
-            setWorkspaceName(currentVault.name);
-        } else {
-            setWorkspaceName('seu cofre pessoal');
-        }
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+
+    const userId = session.user.id;
+    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
+    
+    const { currentVault } = getMockDataForUser(userId, vaultId);
+    if (currentVault) {
+        setWorkspaceName(currentVault.name);
+    } else {
+        setWorkspaceName('seu cofre pessoal');
     }
   }, []);
 
@@ -58,7 +68,7 @@ export default function InvitePage() {
     } else if (state.message && state.errors) {
         toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
     }
-  }, [state, toast]);
+  }, [state, toast, session, status, router]);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">

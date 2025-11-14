@@ -1,23 +1,24 @@
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getAccountsData } from './actions';
 
 import { Button } from '@/components/ui/button';
 import { AccountsManagement } from '@/components/profile/accounts-management';
 
 export default async function AccountsPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
 
+  const userId = session.user.id;
   // A lógica do workspaceId é menos relevante aqui agora, mas mantemos para consistência do nome
-  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+  const workspaceId = userId;
   const workspaceName = "seu"; // Simplificado, já que a página agora mostra todas as contas
 
   const { accounts, currentUser, userVaults } = await getAccountsData(userId);

@@ -1,18 +1,20 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
 import { getUserAllGoals } from './actions';
 import { Button } from '@/components/ui/button';
 
 export default async function GoalsPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
+
+  const userId = session.user.id;
 
   const { goals, vaults } = await getUserAllGoals(userId);
 

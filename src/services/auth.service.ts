@@ -1,4 +1,5 @@
-import prisma from './prisma';
+import bcrypt from 'bcryptjs';
+import { prisma } from './prisma';
 
 export type UserWithoutPassword = {
   id: string;
@@ -24,7 +25,7 @@ export type LoginInput = {
 
 /**
  * AuthService - Serviço de autenticação de usuários
- * Responsável por login, registro e validação de credenciais
+ * Agora integrado com NextAuth para login/registro
  */
 export class AuthService {
   /**
@@ -40,6 +41,7 @@ export class AuthService {
           id: true,
           email: true,
           name: true,
+          password: true,
           avatarUrl: true,
           subscriptionStatus: true,
           createdAt: true,
@@ -47,16 +49,19 @@ export class AuthService {
         },
       });
 
-      if (!user) {
+      if (!user || !user.password) {
         return null;
       }
 
-      // Por enquanto, sem validação de senha (Firebase Auth fará isso)
-      // Quando migrarmos totalmente para Prisma, descomentar:
-      // const isValidPassword = await bcrypt.compare(data.password, user.password);
-      // if (!isValidPassword) return null;
+      // Validar senha
+      const isValidPassword = await bcrypt.compare(data.password, user.password);
+      if (!isValidPassword) {
+        return null;
+      }
 
-      return user;
+      // Retornar sem a senha
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
     } catch (error) {
       console.error('Erro no login:', error);
       throw new Error('Erro ao realizar login');
@@ -79,14 +84,15 @@ export class AuthService {
         throw new Error('Este e-mail já está cadastrado');
       }
 
-      // Hash da senha (quando não estivermos usando Firebase Auth)
-      // const hashedPassword = await bcrypt.hash(data.password, 10);
+      // Hash da senha
+      const hashedPassword = await bcrypt.hash(data.password, 12);
 
       // Criar usuário
       const user = await prisma.user.create({
         data: {
           name: data.name,
           email: data.email,
+          password: hashedPassword,
           avatarUrl: data.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
           subscriptionStatus: 'trial',
         },

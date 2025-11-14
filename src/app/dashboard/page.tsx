@@ -1,18 +1,18 @@
-"use server";
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getDashboardData } from './actions';
-import { DashboardClient } from '@/components/dashboard/dashboard-client';
+import DashboardClient from '@/components/dashboard/dashboard-client';
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
 
-  const savedWorkspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+  const userId = session.user.id;
+  const savedWorkspaceId = userId; // Por enquanto usando o próprio userId como workspace
 
   const data = await getDashboardData(userId, savedWorkspaceId);
 

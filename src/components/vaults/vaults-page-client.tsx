@@ -12,7 +12,7 @@ import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
-import { logoutAction } from '@/app/login/actions';
+import { signOut } from 'next-auth/react';
 
 type User = {
   id: string;
@@ -214,7 +214,10 @@ export function VaultsPageClient({
       localStorage.removeItem('CAIXINHAS_USER_ID');
       sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
     }
-    await logoutAction();
+    await signOut({ 
+      callbackUrl: '/login',
+      redirect: true
+    });
   };
 
   const handleInvitationAction = () => {

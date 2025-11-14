@@ -368,3 +368,44 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
     return { success: false, message: 'Erro ao realizar retirada.' };
   }
 }
+
+/**
+ * Busca dados para a página de gerenciar goal
+ */
+export async function getGoalManageData(goalId: string) {
+  try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+    
+    if (!userId) {
+      return null;
+    }
+
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) {
+      return null;
+    }
+
+    // Buscar dados do usuário atual
+    const currentUser = await AuthService.getUserById(userId);
+    if (!currentUser) {
+      return null;
+    }
+
+    // Se for um goal de vault, buscar dados do vault
+    let currentVault = null;
+    if (goal.vaultId) {
+      currentVault = await VaultService.getVaultById(goal.vaultId);
+    }
+
+    return {
+      goal,
+      currentUser,
+      currentVault,
+    };
+    
+  } catch (error) {
+    console.error('Erro ao buscar dados da goal:', error);
+    return null;
+  }
+}

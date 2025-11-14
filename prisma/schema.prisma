@@ -18,6 +18,7 @@ model User {
   id                 String    @id @default(cuid())
   name               String
   email              String    @unique
+  password           String?
   avatarUrl          String?
   subscriptionStatus String    @default("active") // active, inactive, trial
   createdAt          DateTime  @default(now())
@@ -33,6 +34,10 @@ model User {
   receivedInvitations Invitation[]      @relation("ReceivedInvitations")
   notifications       Notification[]
   goalParticipations  GoalParticipant[]
+  
+  // NextAuth relations
+  accounts_nextauth   Account_NextAuth[]
+  sessions            Session[]
 
   @@map("users")
 }
@@ -206,4 +211,47 @@ model SavedReport {
 
   @@unique([ownerId, monthYear])
   @@map("saved_reports")
+}
+
+// ===================================
+// NextAuth Models
+// ===================================
+
+model Account_NextAuth {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts_nextauth")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

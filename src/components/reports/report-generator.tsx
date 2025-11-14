@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   Select,
@@ -10,16 +11,26 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
-function GenerateReportButton() {
+function GenerateReportButton({ 
+    label = 'Gerar Relatório', 
+    enabled = true, 
+    isGenerating = false 
+}: { 
+    label?: string; 
+    enabled?: boolean; 
+    isGenerating?: boolean; 
+}) {
     const { pending } = useFormStatus();
+    const isDisabled = !enabled || pending || isGenerating;
+    
     return (
-        <Button type="submit" disabled={pending} className="w-full md:w-auto">
-            {pending ? (
+        <Button type="submit" disabled={isDisabled} className="w-full md:w-auto">
+            {(pending || isGenerating) ? (
                 <>
                     <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                     Gerando Relatório...
                 </>
-            ) : 'Gerar Relatório'}
+            ) : label}
         </Button>
     )
 }
@@ -30,9 +41,12 @@ interface ReportGeneratorProps {
     setMonth: (month: string) => void;
     year: string;
     setYear: (year: string) => void;
-    availableMonths: { value: string, label: string }[];
+    availableMonths: { value: string, label: string, year: number }[];
     availableYears: string[];
     handleGenerateReport: (formData: FormData) => void;
+    buttonLabel?: string;
+    buttonEnabled?: boolean;
+    isGenerating?: boolean;
 }
 
 export function ReportGenerator({
@@ -44,8 +58,24 @@ export function ReportGenerator({
     availableMonths,
     availableYears,
     handleGenerateReport,
+    buttonLabel = 'Gerar Relatório',
+    buttonEnabled = true,
+    isGenerating = false,
 }: ReportGeneratorProps) {
     const { pending } = useFormStatus();
+    
+    // Filtra meses do ano selecionado
+    const monthsForSelectedYear = availableMonths.filter(m => m.year.toString() === year);
+    
+    // Atualiza mês se o selecionado não existe no ano atual
+    React.useEffect(() => {
+        if (year && monthsForSelectedYear.length > 0) {
+            const monthExists = monthsForSelectedYear.some(m => m.value === month);
+            if (!monthExists) {
+                setMonth(monthsForSelectedYear[0].value);
+            }
+        }
+    }, [year, month, monthsForSelectedYear, setMonth]);
 
     return (
         <form action={handleGenerateReport} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
@@ -60,7 +90,11 @@ export function ReportGenerator({
                             <SelectValue placeholder="Mês" />
                         </SelectTrigger>
                         <SelectContent>
-                            {availableMonths.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                            {monthsForSelectedYear.map(m => (
+                                <SelectItem key={`${m.year}-${m.value}`} value={m.value}>
+                                    {new Date(m.year, parseInt(m.value) - 1).toLocaleString('pt-BR', { month: 'long' })}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -77,7 +111,11 @@ export function ReportGenerator({
                 </div>
             </div>
             <div className='self-stretch flex items-end'>
-                <GenerateReportButton />
+                <GenerateReportButton 
+                    label={buttonLabel}
+                    enabled={buttonEnabled && month && year && monthsForSelectedYear.length > 0}
+                    isGenerating={isGenerating}
+                />
             </div>
         </form>
     );

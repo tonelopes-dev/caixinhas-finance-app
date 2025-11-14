@@ -44,4 +44,6 @@ export const goals: Goal[] = [];
 export const transactions: Transaction[] = [];
 export const invitations: any[] = [];
 export const notifications: any[] = [];
-export const savedReports: SavedReport[] = [];
+
+// DEPRECATED: savedReports agora são persistidos no banco de dados via ReportService
+// export const savedReports: SavedReport[] = [];

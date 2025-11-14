@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { getMockDataForUser } from '@/lib/data';
 import type { User, Vault } from '@/lib/definitions';
 
@@ -13,27 +14,29 @@ import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
-import withAuth from '@/components/auth/with-auth';
 
 function ProfilePage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentVault, setCurrentVault] = useState<Vault | null>(null);
 
   useEffect(() => {
-    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-
-    if (!userId || !vaultId) {
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
       router.push('/login');
       return;
     }
+
+    const userId = session.user.id;
+    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
 
     const { currentUser, currentVault } = getMockDataForUser(userId, vaultId);
     setCurrentUser(currentUser);
     setCurrentVault(currentVault);
 
-  }, [router]);
+  }, [router, session, status]);
 
   if (!currentUser) {
     return (
@@ -80,4 +83,4 @@ function ProfilePage() {
   );
 }
 
-export default withAuth(ProfilePage);
+export default ProfilePage;

@@ -12,95 +12,130 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { users, transactions as allTransactions } from '@/lib/data';
-import withAuth from '@/components/auth/with-auth';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
 import { generateNewFinancialReport, type FinancialReportState } from './actions';
-
+import { ReportService } from '@/services/ReportService';
 
 function ReportsPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [reportHtml, setReportHtml] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   
-  const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
-  const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
 
   const [availableYears, setAvailableYears] = useState<string[]>([]);
-  const [availableMonths, setAvailableMonths] = useState<{ value: string, label: string }[]>([]);
-
+  const [availableMonths, setAvailableMonths] = useState<{ value: string, label: string, year: number }[]>([]);
+  
+  // Novos estados para as regras refinadas
+  const [hasAnyTransactions, setHasAnyTransactions] = useState<boolean | null>(null);
+  const [reportStatus, setReportStatus] = useState<{
+    exists: boolean;
+    isOutdated: boolean;
+    buttonLabel: string;
+    buttonEnabled: boolean;
+  }>({ exists: false, isOutdated: false, buttonLabel: 'Gerar Relatório', buttonEnabled: true });
 
   const initialState: FinancialReportState = { reportHtml: null, error: null };
   const [reportState, generateReportAction] = useActionState(generateNewFinancialReport, initialState);
 
   useEffect(() => {
-    const userId = localStorage.getItem('CAIXINHAS_USER_ID');
-    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID');
-    if (userId) {
-        const user = users.find(u => u.id === userId) || null;
-        setCurrentUser(user);
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
+      router.push('/login');
+      return;
     }
-    if (selectedWorkspaceId) {
-        setWorkspaceId(selectedWorkspaceId);
 
-        const relevantTransactions = allTransactions.filter(t => t.ownerId === selectedWorkspaceId);
+    const userId = session.user.id;
+    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
+    
+    // Use NextAuth session data directly
+    const user: User = {
+      id: session.user.id,
+      name: session.user.name || 'Usuário',
+      email: session.user.email || '',
+      avatarUrl: session.user.image || '',
+      subscriptionStatus: 'active'
+    };
+    setCurrentUser(user);
+    setWorkspaceId(selectedWorkspaceId);
 
-        if (relevantTransactions.length > 0) {
-            const dates = relevantTransactions.map(t => new Date(t.date));
-            const years = [...new Set(dates.map(d => d.getFullYear().toString()))].sort((a, b) => b.localeCompare(a));
-            setAvailableYears(years);
-
-            const initialYear = years[0] || new Date().getFullYear().toString();
-            setYear(initialYear);
-
-            const mostRecentMonth = new Date(Math.max(...dates.map(date => date.getTime()))).getMonth() + 1;
-            setMonth(mostRecentMonth.toString());
-        } else {
-            const currentYearStr = new Date().getFullYear().toString();
-            setAvailableYears([currentYearStr]);
-            setAvailableMonths(Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }) })));
-        }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!workspaceId || !year) return;
-
-    const relevantTransactions = allTransactions.filter(t => t.ownerId === workspaceId && new Date(t.date).getFullYear().toString() === year);
-
-    if (relevantTransactions.length > 0) {
-        const dates = relevantTransactions.map(t => new Date(t.date));
-        const monthsSet = new Set(dates.map(d => d.getMonth()));
-        const monthsForYear = Array.from(monthsSet).map(m => ({
-            value: (m + 1).toString(),
-            label: new Date(parseInt(year), m).toLocaleString('pt-BR', { month: 'long' })
-        })).sort((a, b) => parseInt(a.value) - parseInt(b.value));
+    // Verifica se o usuário tem alguma transação
+    const checkTransactions = async () => {
+      const hasTransactions = await ReportService.hasAnyTransactions(selectedWorkspaceId);
+      setHasAnyTransactions(hasTransactions);
+      
+      if (hasTransactions) {
+        // Busca meses que realmente têm transações
+        const monthsWithTransactions = await ReportService.getMonthsWithTransactions(selectedWorkspaceId);
+        setAvailableMonths(monthsWithTransactions);
         
-        setAvailableMonths(monthsForYear);
-
-        if (!monthsForYear.some(m => m.value === month)) {
-            setMonth(monthsForYear[0]?.value || (new Date().getMonth() + 1).toString());
+        // Extrai anos únicos dos meses disponíveis
+        const uniqueYears = [...new Set(monthsWithTransactions.map(m => m.year.toString()))];
+        setAvailableYears(uniqueYears.sort((a, b) => b.localeCompare(a)));
+        
+        // Define mês e ano inicial (mais recente)
+        if (monthsWithTransactions.length > 0) {
+          const mostRecent = monthsWithTransactions[0];
+          setMonth(mostRecent.value);
+          setYear(mostRecent.year.toString());
         }
+      }
+    };
+    
+    checkTransactions();
+  }, [session, status, router]);
 
-    } else {
-        setAvailableMonths([]);
-    }
-  }, [workspaceId, year, month]);
+  // useEffect para verificar status do relatório quando mês/ano mudam
+  useEffect(() => {
+    if (!workspaceId || !month || !year) return;
+
+    const checkReportStatus = async () => {
+      // Encontra o mês selecionado nos meses disponíveis
+      const selectedMonth = availableMonths.find(m => m.value === month && m.year.toString() === year);
+      if (!selectedMonth) return;
+      
+      const status = await ReportService.getReportStatus(workspaceId, selectedMonth.label);
+      setReportStatus(status);
+      
+      // Se existe relatório e não está desatualizado, exibe o HTML salvo
+      if (status.exists && !status.isOutdated && status.report) {
+        setReportHtml(status.report.analysisHtml);
+      } else {
+        setReportHtml(null);
+      }
+    };
+    
+    checkReportStatus();
+  }, [workspaceId, month, year, availableMonths]);
 
   useEffect(() => {
     if (reportState?.isNewReport) {
         setReportHtml(reportState.reportHtml ?? null);
+        setIsGenerating(false);
     }
     if (reportState?.error) {
         console.error(reportState.error);
+        setIsGenerating(false);
     }
   }, [reportState]);
 
   const handleGenerateReport = (formData: FormData) => {
-    setReportHtml(null); // Clear previous report
+    // Só limpa o HTML se for gerar um novo relatório
+    if (reportStatus.isOutdated || !reportStatus.exists) {
+      setReportHtml(null);
+    }
+    setIsGenerating(true);
     generateReportAction(formData);
-  }
+  };
 
   if (!currentUser || !workspaceId) {
     return <div className="flex min-h-screen w-full items-center justify-center bg-background">
@@ -128,21 +163,42 @@ function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ReportGenerator
-              workspaceId={workspaceId}
-              month={month}
-              setMonth={setMonth}
-              year={year}
-              setYear={setYear}
-              availableMonths={availableMonths}
-              availableYears={availableYears}
-              handleGenerateReport={handleGenerateReport}
-            />
+            {hasAnyTransactions === false ? (
+              // Regra 1: Sem transações - esconder componente e mostrar mensagem
+              <div className="text-center py-10">
+                <p className="text-muted-foreground text-lg">
+                  Assim que houver alguma transação registrada, esta função será liberada.
+                </p>
+              </div>
+            ) : hasAnyTransactions === true ? (
+              // Tem transações - mostrar interface completa
+              <>
+                <ReportGenerator
+                  workspaceId={workspaceId}
+                  month={month}
+                  setMonth={setMonth}
+                  year={year}
+                  setYear={setYear}
+                  availableMonths={availableMonths}
+                  availableYears={availableYears}
+                  handleGenerateReport={handleGenerateReport}
+                  buttonLabel={reportStatus.buttonLabel}
+                  buttonEnabled={reportStatus.buttonEnabled && !isGenerating}
+                  isGenerating={isGenerating}
+                />
 
-            <ReportDisplay
-              reportHtml={reportHtml}
-              isLoading={reportState.pending}
-            />
+                <ReportDisplay
+                  reportHtml={reportHtml}
+                  isLoading={isGenerating}
+                />
+              </>
+            ) : (
+              // Carregando verificação de transações
+              <div className="text-center py-10">
+                <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="text-muted-foreground mt-4">Verificando transações...</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -150,4 +206,4 @@ function ReportsPage() {
   );
 }
 
-export default withAuth(ReportsPage);
+export default ReportsPage;

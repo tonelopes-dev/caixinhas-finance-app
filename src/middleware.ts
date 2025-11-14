@@ -1,48 +1,67 @@
+import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-// Este middleware gerencia o acesso às rotas da aplicação.
-export function middleware(request: NextRequest) {
-  const userId = request.cookies.get('CAIXINHAS_USER_ID')?.value;
-  const { pathname } = request.nextUrl;
+export default withAuth(
+  function middleware(req) {
+    const { pathname } = req.nextUrl;
+    const token = req.nextauth.token;
 
-  // Rotas que não devem ser acessadas por usuários logados (ex: login, registro)
-  const authRoutes = ['/login', '/register'];
-
-  // Rotas públicas que podem ser acessadas por todos
-  const publicRoutes = ['/login', '/register', '/terms', '/landing'];
-  
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-  
-  // A rota raiz (/) é um caso especial
-  if (pathname === '/') {
-    if (!userId) {
-      // Se não estiver logado, vai para a landing page
-      return NextResponse.redirect(new URL('/landing', request.url));
+    // Rotas que não devem ser acessadas por usuários logados
+    const authRoutes = ['/login', '/register'];
+    
+    // Rotas públicas que podem ser acessadas por todos
+    const publicRoutes = ['/login', '/register', '/terms', '/landing'];
+    
+    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+    
+    // A rota raiz (/) é um caso especial
+    if (pathname === '/') {
+      if (!token) {
+        // Se não estiver logado, vai para a landing page
+        return NextResponse.redirect(new URL('/landing', req.url));
+      }
+      // Se estiver logado, redireciona para dashboard
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
-    // Se estiver logado, deixa passar para a lógica da HomePage que decidirá o próximo passo (/vaults ou /dashboard)
+
+    // Se o usuário está logado
+    if (token) {
+      // E tenta acessar uma rota de autenticação (login/registro), redireciona para dashboard
+      if (authRoutes.includes(pathname)) {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
+    } 
+    // Se o usuário NÃO está logado
+    else {
+      // E tenta acessar uma rota que NÃO é pública
+      if (!isPublicRoute) {
+        // Redireciona para o login
+        return NextResponse.redirect(new URL('/login', req.url));
+      }
+    }
+
+    // Permite o acesso se nenhuma das condições de redirecionamento acima for atendida
     return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+        const publicRoutes = ['/login', '/register', '/terms', '/landing'];
+        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+        
+        // Permite acesso a rotas públicas sem token
+        if (isPublicRoute) return true;
+        
+        // Permite acesso a todas as rotas protegidas se tiver token
+        if (token) return true;
+        
+        // Bloqueia apenas se não tiver token e não for rota pública
+        return false;
+      },
+    },
   }
-
-  // Se o usuário está logado
-  if (userId) {
-    // E tenta acessar uma rota de autenticação (login/registro), redireciona para a seleção de cofres
-    if (authRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL('/vaults', request.url));
-    }
-  } 
-  // Se o usuário NÃO está logado
-  else {
-    // E tenta acessar uma rota que NÃO é pública
-    if (!isPublicRoute) {
-      // Redireciona para o login
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  }
-
-  // Permite o acesso se nenhuma das condições de redirecionamento acima for atendida
-  return NextResponse.next();
-}
+);
 
 export const config = {
   matcher: [

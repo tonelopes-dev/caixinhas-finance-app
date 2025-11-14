@@ -25,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { signOut } from 'next-auth/react';
 
 
 type HeaderProps = {
@@ -35,11 +36,18 @@ type HeaderProps = {
 export default function Header({ user, partner }: HeaderProps) {
   const router = useRouter();
   
-  const handleLogout = () => {
-    localStorage.removeItem('CAIXINHAS_USER_ID');
-    sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
-    document.cookie = 'CAIXINHAS_USER_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/login');
+  const handleLogout = async () => {
+    // Limpar localStorage/sessionStorage por compatibilidade
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('CAIXINHAS_USER_ID');
+      sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    }
+    
+    // Usar NextAuth signOut
+    await signOut({ 
+      callbackUrl: '/login',
+      redirect: true
+    });
   }
 
   return (

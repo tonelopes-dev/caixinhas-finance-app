@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getPatrimonyData } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,12 +12,13 @@ import { GoalRow } from '@/components/patrimonio/goal-row';
 import { CreditCardRow } from '@/components/patrimonio/credit-card-row';
 
 export default async function PatrimonioPage() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user) {
     redirect('/login');
   }
+
+  const userId = session.user.id;
 
   const { accounts, goals, vaults } = await getPatrimonyData(userId);
 

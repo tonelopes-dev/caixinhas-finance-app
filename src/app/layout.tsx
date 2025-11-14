@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { PwaPrompt } from '@/components/pwa-prompt';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { RootLayoutClient } from '@/components/root-layout-client';
+import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -44,13 +45,15 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body>
-        <FirebaseClientProvider>
-          <RootLayoutClient>
-            {children}
-          </RootLayoutClient>
-          <Toaster />
-          <PwaPrompt />
-        </FirebaseClientProvider>
+        <NextAuthProvider>
+          <FirebaseClientProvider>
+            <RootLayoutClient>
+              {children}
+            </RootLayoutClient>
+            <Toaster />
+            <PwaPrompt />
+          </FirebaseClientProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
