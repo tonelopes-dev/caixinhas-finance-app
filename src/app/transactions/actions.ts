@@ -10,7 +10,10 @@ import { cookies } from 'next/headers';
 const transactionSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
-  amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
+  amount: z.string()
+    .min(1, { message: 'Valor é obrigatório.' })
+    .transform((val) => parseFloat(val))
+    .refine((val) => !isNaN(val) && val > 0, { message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
   category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
   date: z.string().optional(),
@@ -23,6 +26,8 @@ const transactionSchema = z.object({
   installmentNumber: z.coerce.number().optional(),
   totalInstallments: z.coerce.number().optional(),
   actorId: z.string().optional(),
+  userId: z.string().optional(),
+  vaultId: z.string().optional(),
 }).refine(data => {
     if (data.type === 'expense' && !data.sourceAccountId && !data.goalId) return false;
     if (data.type === 'income' && !data.destinationAccountId && !data.goalId) return false;

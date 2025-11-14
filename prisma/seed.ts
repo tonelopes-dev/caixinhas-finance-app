@@ -142,7 +142,7 @@ async function main() {
   console.log('💳 Criando contas...');
 
   const accDev1 = await prisma.account.create({
-    data: { id: 'acc-dev-1', ownerId: user1.id, scope: 'personal', name: 'Conta Corrente Pessoal', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0], visibleIn: { create: [{ vaultId: vaultFamily.id }]}}
+    data: { id: 'acc-dev-1', ownerId: user1.id, scope: 'personal', name: 'Conta Corrente Pessoal', bank: 'Banco Digital', type: 'checking', balance: 12500, logoUrl: bankLogos[0], visibleIn: [vaultFamily.id] }
   });
   const accDev2 = await prisma.account.create({
     data: { id: 'acc-dev-2', ownerId: user1.id, scope: 'personal', name: 'Investimentos Pessoais', bank: 'Corretora Ágil', type: 'investment', balance: 75000, logoUrl: bankLogos[2] }
@@ -154,7 +154,7 @@ async function main() {
     data: { id: 'acc-nutri-1', ownerId: user2.id, scope: 'personal', name: 'Conta Profissional', bank: 'Banco Verde', type: 'checking', balance: 23000, logoUrl: bankLogos[1] }
   });
   const accNutri2 = await prisma.account.create({
-    data: { id: 'acc-nutri-2', ownerId: user2.id, scope: 'personal', name: 'Poupança Pessoal', bank: 'PoupaBanco', type: 'savings', balance: 42000, logoUrl: bankLogos[6], visibleIn: { create: [{ vaultId: vaultFamily.id }]}}
+    data: { id: 'acc-nutri-2', ownerId: user2.id, scope: 'personal', name: 'Poupança Pessoal', bank: 'PoupaBanco', type: 'savings', balance: 42000, logoUrl: bankLogos[6], visibleIn: [vaultFamily.id] }
   });
   const accFamily = await prisma.account.create({
     data: { id: 'acc-family', ownerId: user1.id, scope: 'vault', vaultId: vaultFamily.id, name: 'Conta Conjunta da Família', bank: 'Banco Familiar', type: 'checking', balance: 5200, logoUrl: bankLogos[4] }
@@ -256,6 +256,28 @@ async function main() {
   ]);
 
   console.log(`✅ 1 convite criado`);
+
+  // ============================================
+  // 8. CRIAR TRANSAÇÕES COM IDs PERSONALIZADOS
+  // ============================================
+  console.log('🔧 Criando transações com IDs personalizados...');
+  
+  await prisma.transaction.create({
+    data: {
+      id: 't-anna-2025-11-2',
+      date: new Date('2025-11-28'),
+      description: 'Compras Black Friday',
+      amount: 1200,
+      type: 'expense',
+      category: 'Outros',
+      sourceAccountId: accNutri1.id,
+      paymentMethod: 'credit_card',
+      actorId: user2.id,
+      userId: user2.id
+    }
+  });
+
+  console.log('✅ Transações personalizadas criadas');
 
   console.log('\n🎉 Seed concluído com sucesso!');
 }

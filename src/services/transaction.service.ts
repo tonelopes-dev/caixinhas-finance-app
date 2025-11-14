@@ -89,7 +89,7 @@ export class TransactionService {
    */
   static async getTransactionById(transactionId: string): Promise<any | null> {
     try {
-      return await prisma.transaction.findUnique({
+      const result = await prisma.transaction.findUnique({
         where: { id: transactionId },
         include: {
           sourceAccount: true,
@@ -105,6 +105,7 @@ export class TransactionService {
           },
         },
       });
+      return result;
     } catch (error) {
       console.error('Erro ao buscar transação:', error);
       throw new Error('Não foi possível buscar a transação');
@@ -150,7 +151,7 @@ export class TransactionService {
       if (data.vaultId) {
         createData.vault = { connect: { id: data.vaultId } };
       } else if (data.userId) {
-        createData.userId = data.userId;
+        createData.user = { connect: { id: data.userId } };
       } else {
         throw new Error("Transaction must be associated with either a user or a vault.");
       }
