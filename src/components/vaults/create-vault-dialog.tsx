@@ -88,12 +88,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
     // Feature para ser implementada quando tivermos InvitationService
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formAction(formData);
-  }
-  
   const handleImageSelection = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setCustomImageUrl('');
@@ -108,7 +102,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[525px]">
-            <form onSubmit={handleSubmit}>
+            <form action={formAction}>
                 <DialogHeader>
                 <DialogTitle className="font-headline text-xl">Criar Novo Cofre Compartilhado</DialogTitle>
                 <DialogDescription>
