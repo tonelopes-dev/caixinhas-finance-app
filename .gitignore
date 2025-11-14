@@ -41,3 +41,4 @@ firebase-debug.log
 
 # Local Environment
 .env
+.env.nextauth
