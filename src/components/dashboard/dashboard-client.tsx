@@ -55,14 +55,14 @@ export function DashboardClient({
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header user={currentUser} partner={partner} />
-      <main className="flex-1 p-4 md:p-8 lg:p-10">
-        <div className="mx-auto grid w-full max-w-7xl gap-8">
+      <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <div className="mx-auto w-full max-w-7xl">
           <AnimatedDiv>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mb-8">
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
                 Painel: <span className="text-primary">{workspaceName}</span>
               </h1>
-              <p className="text-muted-foreground font-headline">
+              <p className="text-muted-foreground">
                 {isPersonalWorkspace
                   ? 'Seu centro de comando financeiro pessoal.'
                   : '"Sonhar juntos é o primeiro passo para conquistar."'}
@@ -70,7 +70,7 @@ export function DashboardClient({
             </div>
           </AnimatedDiv>
           {almostThereGoal && (
-            <AnimatedDiv transition={{ delay: 0.5 }}>
+            <AnimatedDiv transition={{ delay: 0.5 }} className="mb-8">
               <MotivationalNudge goal={almostThereGoal} />
             </AnimatedDiv>
           )}

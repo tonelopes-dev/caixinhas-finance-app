@@ -52,7 +52,7 @@ export default function Header({ user, partner }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+      <div className="container flex items-center justify-between">
         <Link href="/vaults" className="flex items-center gap-2">
           <Logo className="h-8 w-8" />
           <h1 className="font-headline hidden sm:block text-xl font-bold text-foreground">Caixinhas</h1>
