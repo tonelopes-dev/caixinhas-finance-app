@@ -3,6 +3,10 @@
 
 import { cookies } from 'next/headers';
 import { AuthService, VaultService } from '@/services';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 /**
  * Busca os dados necessários para a página de perfil
@@ -30,5 +34,51 @@ export async function getProfileData(userId: string) {
   } catch (error) {
     console.error('Erro ao buscar dados do perfil:', error);
     return null;
+  }
+}
+
+const updateProfileSchema = z.object({
+  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
+});
+
+export type ProfileActionState = {
+  message?: string | null;
+  errors?: {
+    name?: string[];
+  };
+};
+
+/**
+ * Server Action para atualizar o perfil do usuário
+ */
+export async function updateProfileAction(prevState: ProfileActionState, formData: FormData): Promise<ProfileActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { message: "Usuário não autenticado." };
+  }
+
+  const validatedFields = updateProfileSchema.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação.',
+    };
+  }
+
+  try {
+    await AuthService.updateProfile(session.user.id, {
+      name: validatedFields.data.name,
+    });
+    
+    revalidatePath('/profile');
+    revalidatePath('/', 'layout'); // Revalida o layout para atualizar o nome no header
+
+    return { message: 'Perfil atualizado com sucesso!' };
+  } catch (error) {
+    console.error("Erro ao atualizar perfil:", error);
+    return { message: 'Ocorreu um erro ao atualizar o perfil.' };
   }
 }
