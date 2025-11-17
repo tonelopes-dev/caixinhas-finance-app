@@ -29,7 +29,7 @@ export function AnimatedCounter({ value, className, formatter }: AnimatedCounter
       if (ref.current) {
         const formattedValue = formatter 
           ? formatter(latest)
-          : new Intl.NumberFormat("en-US").format(latest);
+          : new Intl.NumberFormat("pt-BR").format(latest);
         ref.current.textContent = formattedValue;
       }
     });
@@ -41,7 +41,7 @@ export function AnimatedCounter({ value, className, formatter }: AnimatedCounter
     if (!node) return;
 
     const controls = springValue.on("change", (latest) => {
-      node.textContent = formatter ? formatter(Math.round(latest)) : Math.round(latest).toString();
+      node.textContent = formatter ? formatter(latest) : latest.toLocaleString('pt-BR');
     });
 
     return () => controls();

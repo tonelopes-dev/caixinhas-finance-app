@@ -13,8 +13,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { bankLogos, users } from '@/lib/data';
-import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Lock, AlertCircle, Eye } from 'lucide-react';
+import { bankLogos } from '@/lib/data';
+import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Eye } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,11 +38,12 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import type { Account, Vault } from '@/lib/definitions';
+import type { Account, Vault, User } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Switch } from '../ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { AnimatedCounter } from '../ui/animated-counter';
 
 
 const accountTypeLabels: Record<Account['type'], string> = {
@@ -52,6 +53,14 @@ const accountTypeLabels: Record<Account['type'], string> = {
     credit_card: 'Cartão de Crédito',
     other: 'Outro',
 }
+
+function formatCurrency(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+}
+
 
 interface AccountsManagementProps {
   accounts: Account[];
@@ -125,7 +134,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                 }
             }}>
             <fieldset disabled={!isOwner}>
-                <input type="hidden" name="logoUrl" value={selectedLogo} />
+                <input type="hidden" name="logoUrl" value={selectedLogo || ''} />
                 <input type="hidden" name="scope" value="personal" />
                 <div className="grid gap-4 py-4">
 
@@ -204,7 +213,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                 name="credit-limit"
                                 type="number"
                                 step="0.01"
-                                defaultValue={account.creditLimit}
+                                defaultValue={account.creditLimit || ''}
                                 placeholder='R$ 5.000,00'
                             />
                         </div>
@@ -235,9 +244,9 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     )
 }
 
-function DeleteAccountDialog({ account, disabled }: { account: Account, disabled: boolean }) {
-  const owner = users.find(u => u.id === account.ownerId);
-  const tooltipContent = `Apenas o proprietário (${owner?.name.split(' ')[0]}) pode realizar esta ação.`;
+function DeleteAccountDialog({ account, disabled, currentUserId }: { account: Account, disabled: boolean, currentUserId: string }) {
+  const owner = account.ownerId === currentUserId ? { name: 'Você' } : { name: 'outro usuário' };
+  const tooltipContent = `Apenas o proprietário (${owner?.name}) pode realizar esta ação.`;
 
   return (
     <AlertDialog>
@@ -456,37 +465,56 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         <div className="space-y-4">
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
-            // Na nova lógica, só o dono pode editar ou deletar.
             const canEdit = isOwner;
             const canDelete = isOwner;
             const visibleInArray = typeof account.visibleIn === 'string' ? account.visibleIn.split(',').filter(Boolean) : [];
-            
+            const isCreditCard = account.type === 'credit_card';
+
             return (
-                <div key={account.id} className="rounded-lg border p-4 flex flex-col gap-3">
+                <div key={account.id} className="rounded-lg border p-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-1">
                             <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
                                 {account.logoUrl ? (
                                     <Image src={account.logoUrl} alt={account.bank} width={28} height={28} className="h-7 w-7 object-contain" />
                                 ) : (
-                                    account.type === 'credit_card' ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
+                                    isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
                                 )}
                             </div>
-                            <div>
+                            <div className='flex-1'>
                                 <p className="font-medium">{account.name}</p>
                                 <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
                             </div>
                         </div>
-                        <div className='flex gap-1 items-center'>
-                            <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
-                            <DeleteAccountDialog 
-                                account={account} 
-                                disabled={!canDelete} 
-                            />
+                        <div className='flex items-center gap-4'>
+                            <div className='text-right'>
+                                {isCreditCard ? (
+                                    <>
+                                        <p className="font-medium text-red-500">
+                                            <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            de {formatCurrency(account.creditLimit || 0)}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p className={cn("font-medium text-lg", account.balance >= 0 ? 'text-green-600' : 'text-red-500')}>
+                                       <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                                    </p>
+                                )}
+                            </div>
+                            <div className='flex gap-1 items-center'>
+                                <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
+                                <DeleteAccountDialog 
+                                    account={account} 
+                                    disabled={!canDelete} 
+                                    currentUserId={currentUserId}
+                                />
+                            </div>
                         </div>
                     </div>
                     {isOwner && visibleInArray.length > 0 && (
-                        <div className="border-t pt-3 mt-2 flex items-center gap-2 flex-wrap">
+                        <div className="border-t pt-3 mt-3 flex items-center gap-2 flex-wrap">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Eye className="h-3 w-3" />
                                 <span>Visível em:</span>
@@ -510,3 +538,4 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
+
