@@ -1,12 +1,19 @@
 
 'use server';
 
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { AccountService } from '@/services/account.service';
 import { VaultService } from '@/services/vault.service';
 import { AuthService } from '@/services/auth.service';
 import { revalidatePath } from 'next/cache';
 import type { Account } from '@/lib/definitions';
+
+async function getUserIdFromSession(): Promise<string | null> {
+  const session = await getServerSession(authOptions);
+  return session?.user?.id || null;
+}
+
 
 interface AccountsData {
   accounts: Account[];
@@ -34,9 +41,8 @@ export async function getAccountsData(userId: string): Promise<AccountsData> {
 }
 
 export async function createAccount(formData: FormData) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-
+  const userId = await getUserIdFromSession();
+  
   if (!userId) {
     throw new Error('Usuário não autenticado');
   }
@@ -82,8 +88,7 @@ export async function createAccount(formData: FormData) {
 }
 
 export async function updateAccount(accountId: string, formData: FormData) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const userId = await getUserIdFromSession();
 
   if (!userId) {
     throw new Error('Usuário não autenticado');
@@ -129,8 +134,7 @@ export async function updateAccount(accountId: string, formData: FormData) {
 }
 
 export async function deleteAccount(accountId: string) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
+  const userId = await getUserIdFromSession();
 
   if (!userId) {
     throw new Error('Usuário não autenticado');
