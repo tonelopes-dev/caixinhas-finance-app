@@ -1,53 +1,35 @@
 
-'use client';
+'use server';
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { getMockDataForUser } from '@/lib/data';
-import type { User, Vault } from '@/lib/definitions';
-
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { getProfileData } from './actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
+import type { User, Vault } from '@/lib/definitions';
 
-function ProfilePage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentVault, setCurrentVault] = useState<Vault | null>(null);
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (!session?.user) {
-      router.push('/login');
-      return;
-    }
-
-    const userId = session.user.id;
-    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
-
-    const { currentUser, currentVault } = getMockDataForUser(userId, vaultId);
-    setCurrentUser(currentUser);
-    setCurrentVault(currentVault);
-
-  }, [router, session, status]);
-
-  if (!currentUser) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-background">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  if (!session?.user) {
+    redirect('/login');
   }
 
-  // Se for um cofre pessoal, não há membros para gerenciar além de si mesmo.
-  const isPersonalVault = currentVault === null || currentVault.id === currentUser.id;
+  const data = await getProfileData(session.user.id);
+
+  if (!data?.currentUser) {
+    redirect('/login');
+  }
+
+  const { currentUser, currentVault } = data;
+
+  const isPersonalVault = !currentVault || currentVault.id === currentUser.id;
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -66,7 +48,7 @@ function ProfilePage() {
             </p>
           </div>
           <div className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2">
-            <ProfileForm />
+            <ProfileForm user={currentUser} />
             <NotificationsManagement />
             <CategoriesManagement />
             {!isPersonalVault && currentVault && currentUser && (
@@ -82,5 +64,3 @@ function ProfilePage() {
     </div>
   );
 }
-
-export default ProfilePage;

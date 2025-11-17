@@ -12,9 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { user } from '@/lib/data';
+import type { User } from '@/lib/definitions';
 
-export function ProfileForm() {
+export function ProfileForm({ user }: { user: User }) {
   return (
     <Card>
       <CardHeader>
@@ -31,7 +31,7 @@ export function ProfileForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" defaultValue={user.email} />
+            <Input id="email" type="email" defaultValue={user.email} readOnly />
           </div>
         </form>
       </CardContent>
