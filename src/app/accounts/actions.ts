@@ -41,7 +41,8 @@ export async function getAccountsData(userId: string): Promise<AccountsData> {
 }
 
 export async function createAccount(formData: FormData) {
-  const userId = await getUserIdFromSession();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
   
   if (!userId) {
     throw new Error('Usuário não autenticado');
@@ -88,7 +89,8 @@ export async function createAccount(formData: FormData) {
 }
 
 export async function updateAccount(accountId: string, formData: FormData) {
-  const userId = await getUserIdFromSession();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   if (!userId) {
     throw new Error('Usuário não autenticado');
@@ -134,7 +136,8 @@ export async function updateAccount(accountId: string, formData: FormData) {
 }
 
 export async function deleteAccount(accountId: string) {
-  const userId = await getUserIdFromSession();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   if (!userId) {
     throw new Error('Usuário não autenticado');
