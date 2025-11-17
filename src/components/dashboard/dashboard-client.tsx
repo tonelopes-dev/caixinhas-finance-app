@@ -56,7 +56,7 @@ export function DashboardClient({
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header user={currentUser} partner={partner} />
       <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="mx-auto w-full max-w-7xl">
+        <div className="mx-auto w-full">
           <AnimatedDiv>
             <div className="flex flex-col gap-2 mb-8">
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
@@ -74,8 +74,8 @@ export function DashboardClient({
               <MotivationalNudge goal={almostThereGoal} />
             </AnimatedDiv>
           )}
-          <div className="grid gap-8 lg:grid-cols-3">
-            <div className="grid auto-rows-max items-start gap-8 lg:col-span-2">
+          <div className="grid gap-8 xl:grid-cols-3">
+            <div className="grid auto-rows-max items-start gap-8 xl:col-span-2">
               <AnimatedDiv transition={{ delay: 0.1 }}>
                 <NetWorthSummary
                   liquidAssets={liquidAssets}
