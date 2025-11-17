@@ -116,10 +116,10 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
               Registre uma nova entrada, saída ou transferência para manter tudo organizado.
             </SheetDescription>
           </SheetHeader>
-          <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between">
+          <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
             <input type="hidden" name="ownerId" value={ownerId} />
              {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
-            <div className="grid gap-4 py-4 overflow-y-auto pr-4">
+            <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Tipo</Label>
                 <Select name="type" onValueChange={(value) => setTransactionType(value as any)}>
@@ -277,7 +277,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
               )}
 
             </div>
-            <SheetFooter className='mt-auto'>
+            <SheetFooter className='mt-auto pt-4 border-t'>
               <SubmitButton />
             </SheetFooter>
           </form>
