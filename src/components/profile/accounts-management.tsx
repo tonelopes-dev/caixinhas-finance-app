@@ -44,6 +44,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { Switch } from '../ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { AnimatedCounter } from '../ui/animated-counter';
+import { motion } from 'framer-motion';
 
 
 const accountTypeLabels: Record<Account['type'], string> = {
@@ -178,11 +179,11 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                     key={index}
                                     onClick={() => setSelectedLogo(logo)}
                                     className={cn(
-                                        "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all",
+                                        "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all overflow-hidden",
                                         selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                     )}
                                 >
-                                    <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-full w-full rounded-full object-cover" />
+                                    <Image src={logo} alt={`logo ${index}`} width={48} height={48} className="h-full w-full object-cover rounded-full" />
                                 </button>
                             ))}
                         </div>
@@ -317,6 +318,27 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     const [balance, setBalance] = React.useState('');
     const [creditLimit, setCreditLimit] = React.useState('');
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+            staggerChildren: 0.1,
+            },
+        },
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+            ease: "easeOut",
+            duration: 0.4,
+            },
+        },
+    };
 
   return (
     <Card>
@@ -371,11 +393,11 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                                 key={index}
                                 onClick={() => setSelectedLogo(logo)}
                                 className={cn(
-                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all",
+                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all overflow-hidden",
                                     selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                 )}
                             >
-                                <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-full w-full rounded-full object-cover" />
+                                <Image src={logo} alt={`logo ${index}`} width={48} height={48} className="h-full w-full object-cover rounded-full" />
                             </button>
                         ))}
                     </div>
@@ -475,7 +497,12 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         </Dialog>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <motion.div 
+            className="space-y-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
           {accounts.map((account) => {
             const isOwner = account.ownerId === currentUserId;
             const canEdit = isOwner;
@@ -490,12 +517,12 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             const isCreditCard = account.type === 'credit_card';
 
             return (
-                <div key={account.id} className="rounded-lg border p-4">
+                <motion.div key={account.id} variants={itemVariants} className="rounded-lg border p-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
                             <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
                                 {account.logoUrl ? (
-                                    <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover" />
+                                    <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover rounded-full" />
                                 ) : (
                                     isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
                                 )}
@@ -546,13 +573,13 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                             })}
                         </div>
                     )}
-                </div>
+                </motion.div>
             )
           })}
            {accounts.length === 0 && (
             <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma conta ou cartão cadastrado.</p>
            )}
-        </div>
+        </motion.div>
       </CardContent>
     </Card>
   );
