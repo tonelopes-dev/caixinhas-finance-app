@@ -1,3 +1,4 @@
+
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -31,13 +32,13 @@ async function clearDatabase() {
     };
 
     for (const modelName of models) {
-        const displayName = modelDisplayNames[modelName as keyof typeof modelDisplayNames] || modelName;
-        const prismaModel = prisma[modelName as keyof typeof prisma];
+        const displayName = modelDisplayNames[modelName] || modelName;
+        const prismaModel = prisma[modelName];
 
-      if (prismaModel && typeof (prismaModel as any).count === 'function') {
-        const count = await (prismaModel as any).count();
+      if (prismaModel && typeof prismaModel.count === 'function') {
+        const count = await prismaModel.count();
         if (count > 0) {
-            await (prismaModel as any).deleteMany({});
+            await prismaModel.deleteMany({});
             console.log(`✅ ${count} registros de ${displayName} removidos`);
         } else {
             console.log(`ℹ️  Nenhum registro de ${displayName} encontrado`);
