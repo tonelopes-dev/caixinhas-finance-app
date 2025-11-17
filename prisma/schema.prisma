@@ -1,240 +1,64 @@
-// Este schema é otimizado para PostgreSQL, usado em produção (ex: NeonDB).
-// Ele pode usar tipos de dados mais avançados, como arrays, que o SQLite não suporta.
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-// ===================================
-// Modelos Principais
-// ===================================
-
+// ======================================
+// Modelo de Autenticação e Usuários
+// ======================================
 model User {
   id                 String    @id @default(cuid())
   name               String
   email              String    @unique
   password           String?
   avatarUrl          String?
-  subscriptionStatus String    @default("active") // active, inactive, trial
+  subscriptionStatus String    @default("active")
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  ownedVaults         Vault[]           @relation("VaultOwner")
-  vaults              VaultMember[]
-  accounts            Account[]
-  goals               Goal[]
-  ownedTransactions   Transaction[]     @relation("OwnedTransactions")
-  authoredTransactions Transaction[]    @relation("AuthoredTransactions")
-  sentInvitations     Invitation[]      @relation("SentInvitations")
-  receivedInvitations Invitation[]      @relation("ReceivedInvitations")
-  notifications       Notification[]
-  goalParticipations  GoalParticipant[]
-  
-  // NextAuth relations
-  accounts_nextauth   Account_NextAuth[]
-  sessions            Session[]
+  ownedVaults   Vault[]          @relation("VaultOwner")
+  memberOf      VaultMember[]
+  accounts      Account[]
+  sentInvites   Invitation[]     @relation("Sender")
+  receivedInvites Invitation[]   @relation("Receiver")
+  notifications Notification[]
+  goals         Goal[]
+  transactions  Transaction[]
+  categories    Category[]
+
+  // NextAuth.js specific fields
+  sessions      Session[]
+  authAccounts  AuthAccount[] @relation("UserAuthAccounts")
 
   @@map("users")
 }
 
-model Vault {
-  id        String    @id @default(cuid())
-  name      String
-  imageUrl  String?
-  ownerId   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  owner   User          @relation("VaultOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members VaultMember[]
-  accounts Account[]
-  goals    Goal[]
-  transactions Transaction[]
-
-  @@map("vaults")
-}
-
-model VaultMember {
-  id        String   @id @default(cuid())
-  role      String   @default("member") // owner, admin, member
-  createdAt DateTime @default(now())
-
-  vaultId String
-  vault   Vault  @relation(fields: [vaultId], references: [id], onDelete: Cascade)
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, vaultId])
-  @@map("vault_members")
-}
-
-model Account {
-  id          String   @id @default(cuid())
-  name        String
-  bank        String
-  type        String // checking, savings, investment, credit_card, other
-  balance     Float
-  creditLimit Float?
-  logoUrl     String?
-  scope       String   @default("personal") // 'personal' or a vaultId
-  visibleIn   String[] @default([]) // Array de vaultIds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  vaultId     String?
-  vault       Vault?   @relation(fields: [vaultId], references: [id], onDelete: SetNull)
-
-  sourceTransactions      Transaction[] @relation("SourceAccountTransactions")
-  destinationTransactions Transaction[] @relation("DestinationAccountTransactions")
-
-  @@map("accounts")
-}
-
-model Goal {
-  id            String   @id @default(cuid())
-  name          String
-  targetAmount  Float
-  currentAmount Float    @default(0)
-  emoji         String
-  visibility    String   @default("shared") // private, shared
-  isFeatured    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  userId        String?
-  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  vaultId       String?
-  vault         Vault?    @relation(fields: [vaultId], references: [id], onDelete: SetNull)
-
-  participants  GoalParticipant[]
-  transactions  Transaction[]
-
-  @@map("goals")
-}
-
-model GoalParticipant {
-  id        String   @id @default(cuid())
-  role      String   @default("member")
-  createdAt DateTime @default(now())
-
-  goalId String
-  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, goalId])
-  @@map("goal_participants")
-}
-
-model Transaction {
-  id            String   @id @default(cuid())
-  date          DateTime
-  description   String
-  amount        Float
-  type          String // income, expense, transfer
-  category      String
-  paymentMethod String?
-  isRecurring   Boolean  @default(false)
-  isInstallment Boolean  @default(false)
-  installmentNumber Int?
-  totalInstallments Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  actorId   String
-  actor     User   @relation("AuthoredTransactions", fields: [actorId], references: [id], onDelete: Restrict)
-  
-  sourceAccountId      String?
-  sourceAccount        Account? @relation("SourceAccountTransactions", fields: [sourceAccountId], references: [id], onDelete: SetNull)
-  destinationAccountId String?
-  destinationAccount   Account? @relation("DestinationAccountTransactions", fields: [destinationAccountId], references: [id], onDelete: SetNull)
-
-  goalId String?
-  goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
-  
-  // Propriedade da transação
-  userId    String?
-  user      User?     @relation("OwnedTransactions", fields: [userId], references: [id], onDelete: SetNull)
-  vaultId   String?
-  vault     Vault?    @relation(fields: [vaultId], references: [id], onDelete: SetNull)
-
-  @@map("transactions")
-}
-
-model Notification {
-  id          String   @id @default(cuid())
-  type        String
-  text        String
-  actorId     String?
-  actorName   String?
-  actorAvatar String?
-  link        String?
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-model Invitation {
-  id         String   @id @default(cuid())
-  type       String // vault, goal
-  targetId   String
-  targetName String
-  status     String   @default("pending") // pending, accepted, declined
-  createdAt  DateTime @default(now())
-
-  senderId   String
-  sender     User     @relation("SentInvitations", fields: [senderId], references: [id], onDelete: Restrict)
-  receiverId String
-  receiver   User     @relation("ReceivedInvitations", fields: [receiverId], references: [id], onDelete: Restrict)
-
-  @@unique([receiverId, targetId])
-  @@map("invitations")
-}
-
-model SavedReport {
-  id           String @id @default(cuid())
-  ownerId      String
-  monthYear    String
-  analysisHtml String
-  createdAt    DateTime @default(now())
-
-  @@unique([ownerId, monthYear])
-  @@map("saved_reports")
-}
-
-// ===================================
-// NextAuth Models
-// ===================================
-
-model Account_NextAuth {
+model AuthAccount {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation("UserAuthAccounts", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("accounts_nextauth")
+  @@map("auth_accounts")
 }
 
 model Session {
@@ -247,11 +71,131 @@ model Session {
   @@map("sessions")
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
 
-  @@unique([identifier, token])
-  @@map("verification_tokens")
+// ======================================
+// Modelo de Cofres e Membros
+// ======================================
+model Vault {
+  id        String   @id @default(cuid())
+  name      String
+  imageUrl  String?
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User          @relation("VaultOwner", fields: [ownerId], references: [id])
+  members VaultMember[]
+  accounts Account[]
+  goals   Goal[]
+  transactions Transaction[]
+
+  @@map("vaults")
 }
+
+model VaultMember {
+  id      String @id @default(cuid())
+  vaultId String
+  userId  String
+  role    String @default("member") // owner, admin, member
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vaultId, userId])
+  @@map("vault_members")
+}
+
+
+// ======================================
+// Modelo de Contas Financeiras
+// ======================================
+model Account {
+  id          String   @id @default(cuid())
+  name        String
+  bank        String
+  type        String // checking, savings, investment, credit_card
+  balance     Float
+  creditLimit Float?
+  logoUrl     String?
+  scope       String   // 'personal' ou um vaultId
+  ownerId     String
+  vaultId     String?
+  visibleIn   String[] @default([]) // Para contas pessoais visíveis em vaults
+
+  owner   User    @relation(fields: [ownerId], references: [id])
+  vault   Vault?  @relation(fields: [vaultId], references: [id])
+
+  sourceTransactions      Transaction[] @relation("SourceTransactions")
+  destinationTransactions Transaction[] @relation("DestinationTransactions")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("accounts")
+}
+
+
+// ======================================
+// Modelo de Metas (Caixinhas)
+// ======================================
+model Goal {
+  id            String   @id @default(cuid())
+  name          String
+  targetAmount  Float
+  currentAmount Float    @default(0)
+  emoji         String
+  visibility    String   @default("shared") // private, shared
+  isFeatured    Boolean  @default(false)
+  
+  userId        String?
+  vaultId       String?
+  
+  user          User?     @relation(fields: [userId], references: [id])
+  vault         Vault?    @relation(fields: [vaultId], references: [id])
+  participants  GoalParticipant[]
+  transactions  Transaction[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("goals")
+}
+
+model GoalParticipant {
+  id      String @id @default(cuid())
+  goalId  String
+  userId  String
+  role    String @default("member") // owner, member
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([goalId, userId])
+  @@map("goal_participants")
+}
+
+// ======================================
+// Modelo de Transações
+// ======================================
+model Transaction {
+  id                 String   @id @default(cuid())
+  date               DateTime
+  description        String
+  amount             Float
+  type               String // income, expense, transfer
+  category           String
+  paymentMethod      String?
+  sourceAccountId    String?
+  destinationAccountId String?
+  goalId             String?
+  actorId            String
+  isRecurring        Boolean  @default(false)
+  isInstallment      Boolean  @default(false)
+  installmentNumber  Int?
+  totalInstallments  Int?
+  
+  userId             String?
+  vaultId            String?
+
+  user          User?    @relation(fields: [userId], references: [id])
+  vault         Vault?   @relation(fields: [vaultId], references

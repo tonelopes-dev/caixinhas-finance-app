@@ -1,6 +1,4 @@
-
 import prisma from './prisma';
-import type { User } from '@/lib/definitions';
 
 export type Category = {
   id: string;
