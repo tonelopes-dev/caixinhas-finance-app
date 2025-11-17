@@ -11,109 +11,131 @@ datasource db {
 }
 
 // ======================================
-//          MODELOS PRINCIPAIS
+// MODELO DE USUÁRIO
 // ======================================
-
 model User {
-  id                 String          @id @default(cuid())
-  email              String          @unique
-  name               String
-  password           String?
-  avatarUrl          String?
-  subscriptionStatus String          @default("trial")
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  ownedVaults        Vault[]         @relation("VaultOwner")
-  memberships        VaultMember[]
-  accounts           Account[]
-  ownedGoals         Goal[]          @relation("GoalOwner")
-  transactions       Transaction[]
-  sentInvitations    Invitation[]    @relation("Sender")
-  receivedInvitations Invitation[]    @relation("Receiver")
-  notifications      Notification[]
-  categories         Category[]
-  goalParticipations GoalParticipant[] // Relação de volta adicionada
-}
-
-model Vault {
-  id        String        @id @default(cuid())
-  name      String
-  imageUrl  String?
-  ownerId   String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  owner     User          @relation("VaultOwner", fields: [ownerId], references: [id])
-  members   VaultMember[]
-  accounts  Account[]
-  goals     Goal[]
-  transactions Transaction[]
-
-  @@index([ownerId])
-}
-
-model Account {
   id                 String   @id @default(cuid())
   name               String
-  bank               String
-  type               String // checking, savings, investment, credit_card, other
-  balance            Float
-  creditLimit        Float?
-  logoUrl            String?
-  scope              String   @default("personal") // 'personal' ou um vaultId
-  visibleIn          String[] @default([]) // Array de vaultIds
-  allowFullAccess    Boolean  @default(false)
+  email              String   @unique
+  password           String
+  avatarUrl          String?
+  subscriptionStatus String   @default("trial") // active, inactive, trial
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  ownerId            String
-  owner              User     @relation(fields: [ownerId], references: [id])
-  vaultId            String?
-  vault              Vault?   @relation(fields: [vaultId], references: [id])
-  
-  sourceTransactions      Transaction[] @relation("SourceAccount")
-  destinationTransactions Transaction[] @relation("DestinationAccount")
-
-  @@index([ownerId])
-  @@index([vaultId])
+  // Relações
+  ownedVaults        Vault[]           @relation("Owner")
+  vaults             VaultMember[]
+  ownedAccounts      Account[]         @relation("Owner")
+  ownedGoals         Goal[]            @relation("Owner")
+  transactions       Transaction[]     @relation("UserTransactions")
+  actedTransactions  Transaction[]     @relation("Actor")
+  notifications      Notification[]
+  sentInvitations    Invitation[]      @relation("Sender")
+  receivedInvitations Invitation[]    @relation("Receiver")
+  goalParticipations GoalParticipant[]
+  categories         Category[]        @relation("Owner")
 }
 
+// ======================================
+// MODELO DE COFRE (VAULT)
+// ======================================
+model Vault {
+  id        String   @id @default(cuid())
+  name      String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation("Owner", fields: [ownerId], references: [id])
+
+  members      VaultMember[]
+  accounts     Account[]
+  goals        Goal[]
+  transactions Transaction[]
+  invitations  Invitation[]
+}
+
+model VaultMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // owner, admin, member
+  createdAt DateTime @default(now())
+
+  userId  String
+  vaultId String
+  user    User   @relation(fields: [userId], references: [id])
+  vault   Vault  @relation(fields: [vaultId], references: [id])
+
+  @@unique([userId, vaultId])
+}
+
+// ======================================
+// MODELO DE CONTA (BANCÁRIA/CARTÃO)
+// ======================================
+model Account {
+  id          String   @id @default(cuid())
+  name        String
+  bank        String
+  type        String // checking, savings, investment, credit_card, other
+  balance     Float
+  creditLimit Float?
+  logoUrl     String?
+  scope       String // personal or vault
+  visibleIn   String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation("Owner", fields: [ownerId], references: [id])
+
+  vaultId String?
+  vault   Vault?  @relation(fields: [vaultId], references: [id])
+
+  sourceTransactions      Transaction[] @relation("SourceAccount")
+  destinationTransactions Transaction[] @relation("DestinationAccount")
+}
+
+// ======================================
+// MODELO DE META (CAIXINHA)
+// ======================================
 model Goal {
   id            String   @id @default(cuid())
   name          String
   targetAmount  Float
   currentAmount Float    @default(0)
   emoji         String
-  visibility    String   @default("private") // private, shared
+  visibility    String   @default("shared") // private, shared
   isFeatured    Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  userId        String?
-  vaultId       String?
-  user          User?    @relation("GoalOwner", fields: [userId], references: [id])
-  vault         Vault?   @relation(fields: [vaultId], references: [id])
-  
-  participants  GoalParticipant[]
-  transactions  Transaction[]
+  userId  String?
+  user    User?   @relation("Owner", fields: [userId], references: [id])
+  vaultId String?
+  vault   Vault?  @relation(fields: [vaultId], references: [id])
 
-  @@index([userId])
-  @@index([vaultId])
+  participants GoalParticipant[]
+  transactions Transaction[]
+  invitations  Invitation[]
 }
 
 model GoalParticipant {
-  id     String @id @default(cuid())
+  id        String   @id @default(cuid())
+  role      String   @default("member") // owner, member
+  createdAt DateTime @default(now())
+
   userId String
   goalId String
-  role   String @default("member")
-
-  user User @relation(fields: [userId], references: [id])
-  goal Goal @relation(fields: [goalId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+  goal   Goal @relation(fields: [goalId], references: [id])
 
   @@unique([userId, goalId])
-  @@index([userId])
-  @@index([goalId])
 }
 
+// ======================================
+// MODELO DE TRANSAÇÃO
+// ======================================
 model Transaction {
   id                 String   @id @default(cuid())
   date               DateTime
@@ -133,89 +155,88 @@ model Transaction {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  userId             String?
-  vaultId            String?
+  userId  String?
+  vaultId String?
 
-  user          User?    @relation(fields: [userId], references: [id])
+  user          User?    @relation("UserTransactions", fields: [userId], references: [id])
   vault         Vault?   @relation(fields: [vaultId], references: [id])
-  sourceAccount Account? @relation("SourceAccount", fields: [sourceAccountId], references: [id])
+  sourceAccount      Account? @relation("SourceAccount", fields: [sourceAccountId], references: [id])
   destinationAccount Account? @relation("DestinationAccount", fields: [destinationAccountId], references: [id])
   goal          Goal?    @relation(fields: [goalId], references: [id])
   actor         User     @relation(name: "Actor", fields: [actorId], references: [id])
 
   @@index([userId])
   @@index([vaultId])
-  @@index([sourceAccountId])
-  @@index([destinationAccountId])
-  @@index([goalId])
+  @@index([date])
 }
-
 
 // ======================================
-//       MODELOS DE SUPORTE
+// MODELO DE CATEGORIA
 // ======================================
-
-model VaultMember {
-  id        String   @id @default(cuid())
-  vaultId   String
-  userId    String
-  role      String   @default("member") // owner, admin, member
-  joinedAt  DateTime @default(now())
-  vault     Vault    @relation(fields: [vaultId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@unique([vaultId, userId])
-  @@index([userId])
-}
-
-model Invitation {
-  id         String   @id @default(cuid())
-  type       String // vault, goal
-  targetId   String
-  targetName String
-  senderId   String
-  receiverId String
-  status     String   @default("pending") // pending, accepted, declined
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sender     User     @relation("Sender", fields: [senderId], references: [id])
-  receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
-
-  @@index([receiverId])
-}
-
-model Notification {
-  id          String   @id @default(cuid())
-  userId      String
-  type        String
-  text        String
-  link        String?
-  read        Boolean  @default(false)
-  actorId     String?
-  actorName   String?
-  actorAvatar String?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-}
-
 model Category {
   id      String @id @default(cuid())
   name    String
   ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation("Owner", fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([name, ownerId])
-  @@index([ownerId])
 }
 
+// ======================================
+// MODELO DE NOTIFICAÇÃO
+// ======================================
+model Notification {
+  id          String   @id @default(cuid())
+  text        String
+  type        String // vault_invite, goal_progress, etc.
+  read        Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  actorId     String?
+  actorName   String?
+  actorAvatar String?
+}
+
+// ======================================
+// MODELO DE CONVITE
+// ======================================
+model Invitation {
+  id        String   @id @default(cuid())
+  type      String // vault, goal
+  status    String   @default("pending") // pending, accepted, declined
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  targetId   String
+  targetName String
+  
+  senderId    String
+  receiverId  String
+  sender      User     @relation("Sender", fields: [senderId], references: [id])
+  receiver    User     @relation("Receiver", fields: [receiverId], references: [id])
+  
+  vault Vault? @relation(fields: [targetId], references: [id])
+  goal  Goal?  @relation(fields: [targetId], references: [id])
+}
+
+// ======================================
+// MODELO DE RELATÓRIOS SALVOS
+// ======================================
 model SavedReport {
   id           String   @id @default(cuid())
-  ownerId      String
-  monthYear    String
+  ownerId      String // Pode ser userId ou vaultId
+  monthYear    String // Ex: "Novembro de 2024"
   analysisHtml String
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@unique([ownerId, monthYear])
 }
