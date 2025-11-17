@@ -1,4 +1,5 @@
 
+
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -19,10 +20,10 @@ export default async function AccountsPage() {
 
   const userId = session.user.id;
   // A lógica do workspaceId é menos relevante aqui agora, mas mantemos para consistência do nome
-  const workspaceId = userId;
+  const workspaceId = userId; 
   const workspaceName = "seu"; // Simplificado, já que a página agora mostra todas as contas
 
-  const { accounts, currentUser, userVaults } = await getAccountsData(userId);
+  const { accounts, currentUser, userVaults, categories } = await getAccountsData(userId);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -41,7 +42,7 @@ export default async function AccountsPage() {
           workspaceName={workspaceName}
           isVaultOwner={true} // Simplificado, o usuário sempre é "dono" do seu gerenciamento
         />
-        <CategoriesManagement />
+        <CategoriesManagement initialCategories={categories} />
       </div>
     </div>
   );

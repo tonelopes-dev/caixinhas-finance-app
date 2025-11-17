@@ -1,3 +1,4 @@
+
 // Export all services from a single entry point
 export { AuthService } from './auth.service';
 export type { CreateUserInput, LoginInput, UserWithoutPassword } from './auth.service';
@@ -7,6 +8,7 @@ export type { VaultWithMembers, CreateVaultInput, UpdateVaultInput, VaultInvitat
 
 export { AccountService } from './account.service';
 export { GoalService } from './goal.service';
+export { CategoryService } from './category.service';
 
 export { TransactionService } from './transaction.service';
 export { TransactionQueryService } from './transaction.query.service';

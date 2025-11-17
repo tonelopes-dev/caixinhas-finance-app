@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { getServerSession } from 'next-auth';
@@ -6,19 +7,16 @@ import { authOptions } from '@/lib/auth';
 import { AccountService } from '@/services/account.service';
 import { VaultService } from '@/services/vault.service';
 import { AuthService } from '@/services/auth.service';
+import { CategoryService } from '@/services/category.service';
 import { revalidatePath } from 'next/cache';
 import type { Account } from '@/lib/definitions';
-
-async function getUserIdFromSession(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id || null;
-}
-
+import { z } from 'zod';
 
 interface AccountsData {
   accounts: Account[];
   currentUser: any;
   userVaults: any[];
+  categories: any[];
 }
 
 export async function getAccountsData(userId: string): Promise<AccountsData> {
@@ -33,10 +31,14 @@ export async function getAccountsData(userId: string): Promise<AccountsData> {
   // E todos os cofres dos quais ele participa, para a lógica de visibilidade
   const userVaults = await VaultService.getUserVaults(userId);
 
+  // E as categorias do usuário
+  const categories = await CategoryService.getUserCategories(userId);
+
   return {
     accounts: accounts as Account[],
     currentUser,
     userVaults,
+    categories,
   };
 }
 
@@ -154,3 +156,77 @@ export async function deleteAccount(accountId: string) {
   revalidatePath('/dashboard');
   revalidatePath('/', 'layout');
 }
+
+
+// --- CATEGORY ACTIONS ---
+
+const categorySchema = z.object({
+  name: z.string().min(1, 'O nome da categoria é obrigatório.'),
+});
+
+export type CategoryActionState = {
+  message?: string;
+  errors?: {
+    name?: string[];
+  };
+  success?: boolean;
+};
+
+export async function createCategory(prevState: CategoryActionState, formData: FormData): Promise<CategoryActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+  
+  const validatedFields = categorySchema.safeParse({ name: formData.get('name') });
+  if (!validatedFields.success) {
+    return { success: false, errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  try {
+    await CategoryService.createCategory(validatedFields.data.name, session.user.id);
+    revalidatePath('/accounts');
+    return { success: true, message: 'Categoria criada com sucesso!' };
+  } catch (error) {
+    return { success: false, message: 'Erro ao criar categoria.' };
+  }
+}
+
+export async function updateCategory(prevState: CategoryActionState, formData: FormData): Promise<CategoryActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+
+  const id = formData.get('id') as string;
+  const validatedFields = categorySchema.safeParse({ name: formData.get('name') });
+  if (!validatedFields.success) {
+    return { success: false, errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  try {
+    await CategoryService.updateCategory(id, validatedFields.data.name, session.user.id);
+    revalidatePath('/accounts');
+    return { success: true, message: 'Categoria atualizada!' };
+  } catch (error) {
+    return { success: false, message: 'Erro ao atualizar categoria.' };
+  }
+}
+
+export async function deleteCategory(prevState: CategoryActionState, formData: FormData): Promise<CategoryActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+
+  const id = formData.get('id') as string;
+
+  try {
+    await CategoryService.deleteCategory(id, session.user.id);
+    revalidatePath('/accounts');
+    return { success: true, message: 'Categoria excluída!' };
+  } catch (error) {
+    return { success: false, message: 'Erro ao excluir categoria.' };
+  }
+}
+

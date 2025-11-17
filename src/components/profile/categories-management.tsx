@@ -1,7 +1,9 @@
 
+
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useActionState } from 'react-dom';
 import {
   Card,
   CardContent,
@@ -33,45 +35,73 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { createCategory, updateCategory, deleteCategory, type CategoryActionState } from '@/app/accounts/actions';
+import type { Category } from '@/services/category.service';
 
-const expenseCategories = ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros'];
-
-function EditCategoryDialog({ category }: { category: string }) {
-  const [open, setOpen] = React.useState(false);
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
-                <Edit className="h-3 w-3" />
-            </Button>
-        </DialogTrigger>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Editar Categoria</DialogTitle>
-                <DialogDescription>
-                    Altere o nome da sua categoria de despesa.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                    <Label htmlFor="category-name">Nome da Categoria</Label>
-                    <Input
-                        id="category-name"
-                        defaultValue={category}
-                    />
-                </div>
-            </div>
-            <DialogFooter>
-                <Button onClick={() => setOpen(false)}>
-                    Salvar Alterações
-                </Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
-  )
+function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
+  const { pending } = useFormStatus();
+  return <Button type="submit" disabled={pending}>{pending ? pendingLabel : label}</Button>;
 }
 
-function DeleteCategoryDialog({ category }: { category: string }) {
+function EditCategoryDialog({ category }: { category: Category }) {
+  const [open, setOpen] = React.useState(false);
+  const { toast } = useToast();
+  const initialState: CategoryActionState = {};
+  const [state, formAction] = useActionState(updateCategory, initialState);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast({ title: 'Sucesso!', description: state.message });
+      setOpen(false);
+    } else if (state?.message) {
+      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast]);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
+          <Edit className="h-3 w-3" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form action={formAction}>
+          <input type="hidden" name="id" value={category.id} />
+          <DialogHeader>
+            <DialogTitle>Editar Categoria</DialogTitle>
+            <DialogDescription>Altere o nome da sua categoria de despesa.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="category-name">Nome da Categoria</Label>
+              <Input id="category-name" name="name" defaultValue={category.name} required />
+              {state?.errors?.name && <p className="text-sm text-destructive">{state.errors.name[0]}</p>}
+            </div>
+          </div>
+          <DialogFooter>
+            <SubmitButton label="Salvar Alterações" pendingLabel="Salvando..." />
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteCategoryDialog({ category }: { category: Category }) {
+  const { toast } = useToast();
+  const initialState: CategoryActionState = {};
+  const [state, formAction] = useActionState(deleteCategory, initialState);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast({ title: 'Sucesso!', description: state.message });
+    } else if (state?.message) {
+      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast]);
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -80,33 +110,46 @@ function DeleteCategoryDialog({ category }: { category: string }) {
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Isso excluirá permanentemente a categoria{' '}
-            <span className="font-bold text-foreground">{category}</span>.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction>Excluir</AlertDialogAction>
-        </AlertDialogFooter>
+        <form action={formAction}>
+          <input type="hidden" name="id" value={category.id} />
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente a categoria{' '}
+              <span className="font-bold text-foreground">{category.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction type="submit">Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </form>
       </AlertDialogContent>
     </AlertDialog>
   );
 }
 
-export function CategoriesManagement() {
-    const [open, setOpen] = React.useState(false);
+export function CategoriesManagement({ initialCategories }: { initialCategories: Category[] }) {
+  const [open, setOpen] = React.useState(false);
+  const { toast } = useToast();
+  const initialState: CategoryActionState = {};
+  const [state, formAction] = useActionState(createCategory, initialState);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast({ title: 'Sucesso!', description: state.message });
+      setOpen(false);
+    } else if (state?.message) {
+      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast]);
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Categorias de Despesa</CardTitle>
-          <CardDescription>
-            Personalize as categorias para organizar suas transações.
-          </CardDescription>
+          <CardDescription>Personalize as categorias para organizar suas transações.</CardDescription>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -116,40 +159,39 @@ export function CategoriesManagement() {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Nova Categoria</DialogTitle>
-              <DialogDescription>
-                Crie uma nova categoria para classificar suas despesas.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="category-name">Nome da Categoria</Label>
-                <Input
-                  id="category-name"
-                  placeholder="Ex: Educação"
-                />
+            <form action={formAction}>
+              <DialogHeader>
+                <DialogTitle>Adicionar Nova Categoria</DialogTitle>
+                <DialogDescription>Crie uma nova categoria para classificar suas despesas.</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-category-name">Nome da Categoria</Label>
+                  <Input id="new-category-name" name="name" placeholder="Ex: Educação" required />
+                  {state?.errors?.name && <p className="text-sm text-destructive">{state.errors.name[0]}</p>}
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setOpen(false)}>
-                Salvar Categoria
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <SubmitButton label="Salvar Categoria" pendingLabel="Salvando..." />
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {expenseCategories.map((category) => (
-            <div key={category} className="group inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50">
-                <span>{category}</span>
-                <div className="flex items-center transition-opacity">
-                    <EditCategoryDialog category={category} />
-                    <DeleteCategoryDialog category={category} />
-                </div>
+          {initialCategories.map((category) => (
+            <div key={category.id} className="group inline-flex items-center gap-1 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50">
+              <span>{category.name}</span>
+              <div className="flex items-center">
+                <EditCategoryDialog category={category} />
+                <DeleteCategoryDialog category={category} />
+              </div>
             </div>
           ))}
+          {initialCategories.length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhuma categoria personalizada criada.</p>
+          )}
         </div>
       </CardContent>
     </Card>
