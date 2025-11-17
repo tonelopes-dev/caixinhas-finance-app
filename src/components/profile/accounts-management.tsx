@@ -87,7 +87,6 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
 
     const tooltipContent = "Apenas o proprietário pode editar esta conta.";
     
-    // O campo `visibleIn` no SQLite é uma string separada por vírgulas
     const visibleInArray = React.useMemo(() => {
         if (Array.isArray(account.visibleIn)) {
             return account.visibleIn;
@@ -156,7 +155,13 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                     <Switch 
                                         id={`visible-${vault.id}`} 
                                         name={`visible-${vault.id}`}
-                                        defaultChecked={visibleInArray.includes(vault.id)} 
+                                        checked={visibleInArray.includes(vault.id)}
+                                        onCheckedChange={(checked) => {
+                                            const newVisibleIn = checked
+                                            ? [...visibleInArray, vault.id]
+                                            : visibleInArray.filter((id) => id !== vault.id);
+                                            // Este estado local é apenas para a UI, o formulário envia o valor do switch.
+                                        }}
                                     />
                                  </div>
                              ))}
@@ -177,7 +182,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                         selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                     )}
                                 >
-                                    <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-8 w-8 object-contain" />
+                                    <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-full w-full rounded-full object-cover" />
                                 </button>
                             ))}
                         </div>
@@ -370,7 +375,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                                     selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                 )}
                             >
-                                <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-8 w-8 object-contain" />
+                                <Image src={logo} alt={`logo ${index}`} width={32} height={32} className="h-full w-full rounded-full object-cover" />
                             </button>
                         ))}
                     </div>
