@@ -6,7 +6,6 @@ async function clearDatabase() {
   try {
     console.log('🧹 Iniciando limpeza completa do banco de dados...\n');
     
-    // Ordem de exclusão para respeitar as foreign keys
     const models = [
       'transaction',
       'invitation',
@@ -19,8 +18,7 @@ async function clearDatabase() {
       'user'
     ];
 
-    // Nomes para exibição (PascalCase)
-    const modelDisplayNames: { [key: string]: string } = {
+    const modelDisplayNames = {
         transaction: 'Transaction',
         invitation: 'Invitation',
         notification: 'Notification',
@@ -30,15 +28,22 @@ async function clearDatabase() {
         vaultMember: 'VaultMember',
         vault: 'Vault',
         user: 'User'
-    }
+    };
 
-    for (const model of models) {
-      const count = await prisma[model].count();
-      if (count > 0) {
-        await prisma[model].deleteMany({});
-        console.log(`✅ ${count} registros de ${modelDisplayNames[model]} removidos`);
+    for (const modelName of models) {
+        const displayName = modelDisplayNames[modelName as keyof typeof modelDisplayNames] || modelName;
+        const prismaModel = prisma[modelName as keyof typeof prisma];
+
+      if (prismaModel && typeof (prismaModel as any).count === 'function') {
+        const count = await (prismaModel as any).count();
+        if (count > 0) {
+            await (prismaModel as any).deleteMany({});
+            console.log(`✅ ${count} registros de ${displayName} removidos`);
+        } else {
+            console.log(`ℹ️  Nenhum registro de ${displayName} encontrado`);
+        }
       } else {
-        console.log(`ℹ️  Nenhum registro de ${modelDisplayNames[model]} encontrado`);
+        console.warn(`⚠️  Modelo '${modelName}' não encontrado no cliente Prisma. Pulando.`);
       }
     }
 
@@ -53,7 +58,6 @@ async function clearDatabase() {
   }
 }
 
-// Executar apenas se for chamado diretamente
 if (require.main === module) {
   console.log('⚠️  ATENÇÃO: Este script irá apagar TODOS os dados do banco!');
   console.log('📊 Banco de dados:', process.env.DATABASE_URL ? 'PostgreSQL (Neon)' : 'Local');

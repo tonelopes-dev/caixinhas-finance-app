@@ -24,7 +24,6 @@ async function clearDatabaseInteractive() {
     console.log('📊 Banco:', process.env.DATABASE_URL ? 'PostgreSQL (Neon)' : 'Local');
     console.log('');
 
-    // Ordem de exclusão para respeitar as foreign keys
     const models = [
       'transaction',
       'invitation',
@@ -37,8 +36,7 @@ async function clearDatabaseInteractive() {
       'user'
     ];
     
-    // Nomes para exibição (PascalCase)
-    const modelDisplayNames: { [key: string]: string } = {
+    const modelDisplayNames = {
         transaction: 'Transaction',
         invitation: 'Invitation',
         notification: 'Notification',
@@ -48,17 +46,25 @@ async function clearDatabaseInteractive() {
         vaultMember: 'VaultMember',
         vault: 'Vault',
         user: 'User'
-    }
+    };
 
     console.log('📈 Dados atuais no banco:');
-    const counts: { [key: string]: number } = {};
-    for (const model of models) {
+    const counts = {};
+    for (const modelName of models) {
+        const displayName = modelDisplayNames[modelName] || modelName;
+        const prismaModel = prisma[modelName];
       try {
-        const count = await prisma[model].count();
-        counts[model] = count;
-        console.log(`   ${modelDisplayNames[model]}: ${count} registros`);
+        if (prismaModel && typeof prismaModel.count === 'function') {
+            const count = await prismaModel.count();
+            counts[modelName] = count;
+            console.log(`   ${displayName}: ${count} registros`);
+        } else {
+            console.log(`   ${displayName}: modelo não encontrado no Prisma.`);
+            counts[modelName] = 0;
+        }
       } catch (error) {
-        console.log(`   ${modelDisplayNames[model]}: erro ao contar`);
+        console.log(`   ${displayName}: erro ao contar`);
+        counts[modelName] = 0;
       }
     }
     console.log('');
@@ -82,11 +88,13 @@ async function clearDatabaseInteractive() {
     console.log('\n🧹 Iniciando limpeza...');
     
     let totalDeleted = 0;
-    for (const model of models) {
-      const count = counts[model] || 0;
+    for (const modelName of models) {
+      const count = counts[modelName] || 0;
+      const displayName = modelDisplayNames[modelName] || modelName;
       if (count > 0) {
-        await prisma[model].deleteMany({});
-        console.log(`✅ ${count} registros de ${modelDisplayNames[model]} removidos`);
+        const prismaModel = prisma[modelName];
+        await prismaModel.deleteMany({});
+        console.log(`✅ ${count} registros de ${displayName} removidos`);
         totalDeleted += count;
       }
     }
