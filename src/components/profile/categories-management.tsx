@@ -144,7 +144,7 @@ export function CategoriesManagement() {
           {expenseCategories.map((category) => (
             <div key={category} className="group inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50">
                 <span>{category}</span>
-                <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex items-center transition-opacity">
                     <EditCategoryDialog category={category} />
                     <DeleteCategoryDialog category={category} />
                 </div>
