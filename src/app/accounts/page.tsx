@@ -8,6 +8,7 @@ import { getAccountsData } from './actions';
 
 import { Button } from '@/components/ui/button';
 import { AccountsManagement } from '@/components/profile/accounts-management';
+import { CategoriesManagement } from '@/components/profile/categories-management';
 
 export default async function AccountsPage() {
   const session = await getServerSession(authOptions);
@@ -25,7 +26,7 @@ export default async function AccountsPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl space-y-8">
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -40,6 +41,7 @@ export default async function AccountsPage() {
           workspaceName={workspaceName}
           isVaultOwner={true} // Simplificado, o usuário sempre é "dono" do seu gerenciamento
         />
+        <CategoriesManagement />
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ import { getProfileData } from './actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
-import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 import type { User, Vault } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
@@ -114,9 +113,6 @@ export default function ProfilePage() {
             </motion.div>
             <motion.div variants={itemVariants}>
               <NotificationsManagement />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <CategoriesManagement />
             </motion.div>
             {!isPersonalVault && currentVault && currentUser && (
               <motion.div variants={itemVariants}>
