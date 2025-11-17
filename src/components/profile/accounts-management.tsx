@@ -88,7 +88,15 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     const tooltipContent = "Apenas o proprietário pode editar esta conta.";
     
     // O campo `visibleIn` no SQLite é uma string separada por vírgulas
-    const visibleInArray = typeof account.visibleIn === 'string' ? account.visibleIn.split(',') : [];
+    const visibleInArray = React.useMemo(() => {
+        if (Array.isArray(account.visibleIn)) {
+            return account.visibleIn;
+        }
+        if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
+            return account.visibleIn.split(',');
+        }
+        return [];
+    }, [account.visibleIn]);
 
     return (
          <Dialog open={open} onOpenChange={setOpen}>
@@ -467,7 +475,13 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             const isOwner = account.ownerId === currentUserId;
             const canEdit = isOwner;
             const canDelete = isOwner;
-            const visibleInArray = typeof account.visibleIn === 'string' ? account.visibleIn.split(',').filter(Boolean) : [];
+            const visibleInArray = React.useMemo(() => {
+                if (Array.isArray(account.visibleIn)) return account.visibleIn;
+                if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
+                    return account.visibleIn.split(',');
+                }
+                return [];
+            }, [account.visibleIn]);
             const isCreditCard = account.type === 'credit_card';
 
             return (
@@ -538,4 +552,3 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     </Card>
   );
 }
-
