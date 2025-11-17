@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -18,8 +17,8 @@ export function CreditCardRow({ card }: CreditCardRowProps) {
   return (
     <div className="flex items-center justify-between rounded-lg p-3 hover:bg-muted/50">
       <div className="flex items-center gap-4">
-        <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
-          {card.logoUrl ? <Image src={card.logoUrl} alt={card.bank} width={28} height={28} className="h-7 w-7 object-contain" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
+        <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
+          {card.logoUrl ? <Image src={card.logoUrl} alt={card.bank} width={40} height={40} className="h-full w-full object-cover rounded-full" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
         </div>
         <div>
           <p className="font-medium">{card.name}</p>
