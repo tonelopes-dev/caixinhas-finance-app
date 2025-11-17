@@ -6,30 +6,44 @@ async function clearDatabase() {
   try {
     console.log('🧹 Iniciando limpeza completa do banco de dados...\n');
     
-    // Ordem de exclusão baseada nas foreign keys
-    const deleteOrder = [
-      'Transaction',
-      'Invitation', 
-      'Notification',
-      'Goal',
-      'Account',
-      'vaultMember', // Corrigido de 'VaultMember' para 'vaultMember'
-      'Vault',
-      'User'
+    // Ordem de exclusão para respeitar as foreign keys
+    const models = [
+      'transaction',
+      'invitation',
+      'notification',
+      'goalParticipant',
+      'goal',
+      'account',
+      'vaultMember',
+      'vault',
+      'user'
     ];
 
-    for (const model of deleteOrder) {
-      const count = await prisma[model.toLowerCase()].count();
+    // Nomes para exibição (PascalCase)
+    const modelDisplayNames: { [key: string]: string } = {
+        transaction: 'Transaction',
+        invitation: 'Invitation',
+        notification: 'Notification',
+        goalParticipant: 'GoalParticipant',
+        goal: 'Goal',
+        account: 'Account',
+        vaultMember: 'VaultMember',
+        vault: 'Vault',
+        user: 'User'
+    }
+
+    for (const model of models) {
+      const count = await prisma[model].count();
       if (count > 0) {
-        await prisma[model.toLowerCase()].deleteMany({});
-        console.log(`✅ ${count} registros de ${model} removidos`);
+        await prisma[model].deleteMany({});
+        console.log(`✅ ${count} registros de ${modelDisplayNames[model]} removidos`);
       } else {
-        console.log(`ℹ️  Nenhum registro de ${model} encontrado`);
+        console.log(`ℹ️  Nenhum registro de ${modelDisplayNames[model]} encontrado`);
       }
     }
 
     console.log('\n🎉 Limpeza do banco de dados concluída com sucesso!');
-    console.log('💡 Para recriar os dados, execute: npm run seed');
+    console.log('💡 Para recriar os dados, execute: npm run db:seed');
     
   } catch (error) {
     console.error('❌ Erro durante a limpeza:', error);
