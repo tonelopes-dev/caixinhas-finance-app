@@ -517,7 +517,7 @@ async function main() {
       prisma.invitation.create({
         data: {
           type: 'vault',
-          targetId: businessVault.id,
+          vaultId: businessVault.id,
           targetName: businessVault.name,
           senderId: mainUser.id,
           receiverId: additionalUsers[0].id,
@@ -528,7 +528,7 @@ async function main() {
       prisma.invitation.create({
         data: {
           type: 'goal',
-          targetId: personalGoals[1].id,
+          goalId: personalGoals[1].id,
           targetName: personalGoals[1].name,
           senderId: mainUser.id,
           receiverId: additionalUsers[1].id,
