@@ -1,3 +1,4 @@
+
 import { prisma } from './prisma';
 import type { Account } from '@/lib/definitions';
 
@@ -50,7 +51,7 @@ export class AccountService {
     try {
       const accounts = await prisma.account.findMany({
         where: { ownerId: userId, scope: 'personal' },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { updatedAt: 'desc' },
       });
 
       return accounts as Account[];
