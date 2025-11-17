@@ -13,7 +13,7 @@ async function clearDatabase() {
       'Notification',
       'Goal',
       'Account',
-      'VaultMember',
+      'vaultMember', // Corrigido de 'VaultMember' para 'vaultMember'
       'Vault',
       'User'
     ];

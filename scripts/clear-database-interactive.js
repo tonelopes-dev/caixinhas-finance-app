@@ -26,7 +26,7 @@ async function clearDatabaseInteractive() {
 
     // Mostrar contagem atual
     const counts = {};
-    const models = ['User', 'Vault', 'VaultMember', 'Account', 'Goal', 'Transaction', 'Invitation', 'Notification'];
+    const models = ['User', 'Vault', 'vaultMember', 'Account', 'Goal', 'Transaction', 'Invitation', 'Notification'];
     
     console.log('📈 Dados atuais no banco:');
     for (const model of models) {
@@ -65,7 +65,7 @@ async function clearDatabaseInteractive() {
       'Notification',
       'Goal',
       'Account',
-      'VaultMember',
+      'vaultMember', // Corrigido de 'VaultMember' para 'vaultMember'
       'Vault',
       'User'
     ];
