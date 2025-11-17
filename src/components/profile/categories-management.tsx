@@ -41,7 +41,7 @@ function EditCategoryDialog({ category }: { category: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
                 <Edit className="h-3 w-3" />
             </Button>
         </DialogTrigger>
@@ -75,7 +75,7 @@ function DeleteCategoryDialog({ category }: { category: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6">
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
           <Trash2 className="h-3 w-3" />
         </Button>
       </AlertDialogTrigger>
