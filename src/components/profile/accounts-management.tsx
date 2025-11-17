@@ -178,7 +178,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                     key={index}
                                     onClick={() => setSelectedLogo(logo)}
                                     className={cn(
-                                        "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted p-1 transition-all",
+                                        "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all",
                                         selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                     )}
                                 >
@@ -371,7 +371,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                                 key={index}
                                 onClick={() => setSelectedLogo(logo)}
                                 className={cn(
-                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted p-1 transition-all",
+                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all",
                                     selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
                                 )}
                             >
@@ -493,9 +493,9 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 <div key={account.id} className="rounded-lg border p-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
-                            <div className="rounded-full bg-muted p-2 flex items-center justify-center h-10 w-10">
+                            <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
                                 {account.logoUrl ? (
-                                    <Image src={account.logoUrl} alt={account.bank} width={28} height={28} className="h-7 w-7 object-contain" />
+                                    <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover" />
                                 ) : (
                                     isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
                                 )}
