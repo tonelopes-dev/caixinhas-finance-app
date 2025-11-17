@@ -1,11 +1,10 @@
 
-'use server';
+'use client';
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { getProfileData } from './actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
@@ -13,22 +12,74 @@ import { GuestsManagement } from '@/components/profile/guests-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 import type { User, Vault } from '@/lib/definitions';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
+type ProfileData = {
+  currentUser: User;
+  currentVault: Vault | null;
+};
 
-  if (!session?.user) {
-    redirect('/login');
+export default function ProfilePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      const data = await getProfileData(session.user.id);
+      if (!data?.currentUser) {
+        router.push('/login');
+      } else {
+        setProfileData(data as ProfileData);
+      }
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [session, status, router]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        ease: 'easeOut',
+        duration: 0.4,
+      },
+    },
+  };
+
+  if (isLoading || !profileData) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
   }
-
-  const data = await getProfileData(session.user.id);
-
-  if (!data?.currentUser) {
-    redirect('/login');
-  }
-
-  const { currentUser, currentVault } = data;
-
+  
+  const { currentUser, currentVault } = profileData;
   const isPersonalVault = !currentVault || currentVault.id === currentUser.id;
 
   return (
@@ -41,24 +92,42 @@ export default async function ProfilePage() {
           </Link>
         </Button>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-1">
+          <motion.div
+            className="lg:col-span-1"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          >
             <h2 className="text-2xl font-headline font-bold">Configurações</h2>
             <p className="text-muted-foreground">
               Gerencie suas informações pessoais, financeiras e de acesso.
             </p>
-          </div>
-          <div className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2">
-            <ProfileForm user={currentUser} />
-            <NotificationsManagement />
-            <CategoriesManagement />
+          </motion.div>
+          <motion.div
+            className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <ProfileForm user={currentUser} />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <NotificationsManagement />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <CategoriesManagement />
+            </motion.div>
             {!isPersonalVault && currentVault && currentUser && (
-              <GuestsManagement
-                members={currentVault.members}
-                vaultOwnerId={currentVault.ownerId}
-                currentUserId={currentUser.id}
-              />
+              <motion.div variants={itemVariants}>
+                <GuestsManagement
+                  members={currentVault.members}
+                  vaultOwnerId={currentVault.ownerId}
+                  currentUserId={currentUser.id}
+                />
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
