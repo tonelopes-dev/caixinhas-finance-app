@@ -40,8 +40,13 @@ const nextConfig: NextConfig = {
         hostname: 'randomuser.me',
         port: '',
         pathname: '/**',
-      }
-      ,
+      },
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'caixinhas-finance-app.s3.us-east-1.amazonaws.com',}
