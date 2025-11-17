@@ -15,7 +15,7 @@ import { authOptions } from '@/lib/auth';
  */
 export async function getProfileData(userId: string) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
     
     const [currentUser, currentVault] = await Promise.all([
