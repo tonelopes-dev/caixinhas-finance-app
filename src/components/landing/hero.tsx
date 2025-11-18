@@ -1,95 +1,136 @@
-'use client';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+'use client'
+import { Button } from '@/components/ui/button'
+import { ArrowRight, Mail, Menu, SendHorizonal, X } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
+import { Logo } from '@/components/logo'
+import Image from 'next/image'
 
-// Lista de imagens para o fundo sutil
-const DEMO_IMAGES = [
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-];
-const duplicatedImages = [...DEMO_IMAGES, ...DEMO_IMAGES];
+const menuItems = [
+    { name: 'Recursos', href: '#features' },
+    { name: 'Depoimentos', href: '#testimonials' },
+    { name: 'FAQ', href: '#faq' },
+]
 
+export function HeroSection() {
+    const [menuState, setMenuState] = useState(false)
+    return (
+        <>
+            <header>
+                <nav
+                    data-state={menuState && 'active'}
+                    className="group fixed z-20 w-full border-b border-dashed bg-background/80 backdrop-blur-sm md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent">
+                    <div className="m-auto max-w-5xl px-6">
+                        <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+                            <div className="flex w-full justify-between lg:w-auto">
+                                <Link
+                                    href="/"
+                                    aria-label="home"
+                                    className="flex items-center space-x-2">
+                                    <Logo />
+                                </Link>
 
-export function Hero() {
-  return (
-    <section id="hero" className="relative h-screen overflow-hidden">
-      {/* Camada de Fundo: Carrossel Sutil */}
-      <div className="absolute inset-0 z-0 opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]">
-        <motion.div
-          className="flex gap-8"
-          animate={{ x: ["0%", "-100%"] }}
-          transition={{ ease: "linear", duration: 120, repeat: Infinity }}
-        >
-          {duplicatedImages.map((src, index) => (
-            <div
-              key={`marquee-bg-${index}`}
-              className="relative aspect-[4/3] h-64 flex-shrink-0"
-              style={{ rotate: `${(index % 2 === 0 ? -3 : 3)}deg` }}
-            >
-              <Image
-                src={src}
-                alt={`Background image ${index + 1}`}
-                fill
-                className="w-full h-full object-cover rounded-2xl shadow-md"
-                data-ai-hint="couple travel"
-              />
-            </div>
-          ))}
-        </motion.div>
-      </div>
+                                <button
+                                    onClick={() => setMenuState(!menuState)}
+                                    aria-label={menuState == true ? 'Close Menu' : 'Open Menu'}
+                                    className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
+                                    <Menu className="group-data-[state=active]:rotate-180 group-data-[state=active]:scale-0 group-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
+                                    <X className="group-data-[state=active]:rotate-0 group-data-[state=active]:scale-100 group-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" />
+                                </button>
+                            </div>
 
-      {/* Container Principal */}
-      <div className="relative z-10 mx-auto max-w-5xl px-6 flex items-center h-full">
+                            <div className="bg-background group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
+                                <div className="lg:pr-4">
+                                    <ul className="space-y-6 text-base lg:flex lg:gap-8 lg:space-y-0 lg:text-sm">
+                                        {menuItems.map((item, index) => (
+                                            <li key={index}>
+                                                <Link
+                                                    href={item.href}
+                                                    className="text-muted-foreground hover:text-accent-foreground block duration-150">
+                                                    <span>{item.name}</span>
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 items-center w-full">
-          {/* Lado Esquerdo: Texto */}
-          <div className="text-center lg:text-start space-y-6">
-            <h1 className="font-headline text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
-                Sonhar juntos é <br /> o primeiro <span className="text-primary">passo</span> <br /> para <span className="text-primary">conquistar</span>
-            </h1>
-            <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
-                Caixinhas não é apenas um aplicativo de finanças. É uma ferramenta de comunicação e confiança para transformar sonhos individuais em conquistas conjuntas.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 lg:flex-row lg:justify-start">
-                <Button asChild size="lg">
-                    <Link href="/register">
-                        Assinar Agora
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                </Button>
-            </div>
-          </div>
+                                <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6">
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        size="sm">
+                                        <Link href="/login">
+                                            <span>Entrar</span>
+                                        </Link>
+                                    </Button>
 
-          {/* Lado Direito: Ilustração */}
-          <div className="relative h-full w-full min-h-[400px] flex-1 hidden lg:flex items-center justify-center">
-            <Image 
-                src="/screenshots/gift-illustration.png" 
-                alt="Ilustração de um presente simbolizando um sonho"
-                width={500}
-                height={500}
-                className="object-contain drop-shadow-2xl animate-float"
-                data-ai-hint="gift box illustration"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+                                    <Button
+                                        asChild
+                                        size="sm">
+                                        <Link href="/register">
+                                            <span>Criar Conta</span>
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <main>
+                <section className="overflow-hidden">
+                    <div className="relative mx-auto max-w-5xl px-6 py-28 lg:py-20">
+                        <div className="lg:flex lg:items-center lg:gap-12">
+                            <div className="relative z-10 mx-auto max-w-xl text-center lg:ml-0 lg:w-1/2 lg:text-left">
+                                <Link
+                                    href="/register"
+                                    className="rounded-lg mx-auto flex w-fit items-center gap-2 border p-1 pr-3 lg:ml-0">
+                                    <span className="bg-muted rounded-[calc(var(--radius)-0.25rem)] px-2 py-1 text-xs text-primary font-semibold">Novo</span>
+                                    <span className="text-sm">Junte-se a milhares de casais</span>
+                                    <span className="bg-(--color-border) block h-4 w-px"></span>
+
+                                    <ArrowRight className="size-4" />
+                                </Link>
+
+                                <h1 className="mt-10 text-balance text-4xl font-bold md:text-5xl xl:text-5xl font-headline">Sonhar juntos é o primeiro passo para conquistar</h1>
+                                <p className="mt-8 text-muted-foreground">O Caixinhas é a ponte para casais transformarem sonhos em realidade, com planejamento financeiro colaborativo, transparente e motivador.</p>
+
+                                <div>
+                                    <div className="mx-auto my-10 max-w-sm lg:my-12 lg:ml-0 lg:mr-auto">
+                                        <Button asChild size="lg" className="w-full">
+                                            <Link href="/register">
+                                                Criar Conta Gratuita
+                                                <ArrowRight className="ml-2 h-5 w-5" />
+                                            </Link>
+                                        </Button>
+                                    </div>
+
+                                    <ul className="space-y-2 text-left text-muted-foreground list-inside">
+                                        <li className="flex items-center gap-2"><ArrowRight className="h-4 w-4 text-primary" /><span>Planejamento Orientado a Sonhos</span></li>
+                                        <li className="flex items-center gap-2"><ArrowRight className="h-4 w-4 text-primary" /><span>Transparência e Confiança</span></li>
+                                        <li className="flex items-center gap-2"><ArrowRight className="h-4 w-4 text-primary" /><span>Inteligência Artificial como Aliada</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="absolute inset-0 -mx-4 rounded-3xl p-3 lg:col-span-3">
+                            <div aria-hidden className="absolute z-[1] inset-0 bg-gradient-to-r from-background from-35%" />
+                            <div className="relative h-full w-full">
+                                <Image
+                                    className="object-cover h-full w-full"
+                                    src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=80"
+                                    alt="app illustration"
+                                    fill
+                                    priority
+                                    data-ai-hint="mountain landscape"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </>
+    )
 }
