@@ -1,0 +1,96 @@
+// src/components/landing-page/hero-section.tsx
+"use client"
+
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { Logo } from "../logo"
+import { PlaceHolderImages } from "@/lib/placeholder-images"
+
+type HeroSectionProps = {
+  scrollY: number
+}
+
+export function HeroSection({ scrollY }: HeroSectionProps) {
+  const marqueeImages = PlaceHolderImages.filter((img) =>
+    img.id.startsWith("feature")
+  ).map((img) => img.imageUrl)
+  const duplicatedImages = [...marqueeImages, ...marqueeImages]
+
+  return (
+    <section className="pt-32 px-4 relative overflow-hidden h-[800px] flex items-center justify-center">
+      {/* Animated Image Marquee Background */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+
+        {/* Small Row */}
+        <motion.div
+          className="flex gap-8 mb-4" // Adicionado margem inferior para espaçamento entre as filas
+          animate={{
+            x: ["-100%", "0%"], // Invertido para mover da direita para a esquerda
+            transition: {
+              ease: "linear",
+              duration: 90, // Velocidade mais lenta para a fila pequena
+              repeat: Infinity,
+            },
+          }}
+          style={{ height: '80px' }} // Altura da fila pequena
+        >
+          {duplicatedImages.map((src, index) => (
+            <div key={`marquee-small-${index}`} className="relative h-full aspect-[3/2] rounded-lg overflow-hidden shadow-lg">
+              <Image src={src} alt={`Small image ${index}`} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px" />
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Medium Row */}
+        <motion.div
+          className="flex gap-8 my-4" // Margem superior e inferior para espaçamento
+          animate={{
+            x: ["-100%", "0%"], // Invertido para mover da direita para a esquerda
+            transition: {
+              ease: "linear",
+              duration: 70, // Velocidade média
+              repeat: Infinity,
+            },
+          }}
+          style={{ height: '120px' }} // Altura da fila média
+        >
+          {duplicatedImages.map((src, index) => (
+            <div key={`marquee-medium-${index}`} className="relative h-full aspect-[4/3] rounded-lg overflow-hidden shadow-lg">
+              <Image src={src} alt={`Medium image ${index}`} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 150px, (max-width: 1200px) 200px, 250px" />
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Large Row */}
+        <motion.div
+          className="flex gap-8 mt-4" // Margem superior
+          animate={{
+            x: ["-100%", "0%"], // Invertido para mover da direita para a esquerda
+            transition: {
+              ease: "linear",
+              duration: 50, // Velocidade mais rápida para a fila grande
+              repeat: Infinity,
+            },
+          }}
+          style={{ height: '180px' }} // Altura da fila grande
+        >
+          {duplicatedImages.map((src, index) => (
+            <div key={`marquee-large-${index}`} className="relative h-full aspect-[5/4] rounded-lg overflow-hidden shadow-lg">
+              <Image src={src} alt={`Large image ${index}`} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 200px, (max-width: 1200px) 250px, 300px" />
+            </div>
+          ))}
+        </motion.div>
+
+      </div>
+      {/* Conteúdo central da seção Hero */}
+      <div className="relative z-10 text-center text-white">
+        <Logo className="w-24 h-24 mx-auto mb-4" />
+        <h1 className="text-5xl font-bold mb-4">Seu título aqui</h1>
+        <p className="text-lg">Sua descrição impactante aqui.</p>
+      </div>
+    </section>
+  )
+}
+{
+  "mcpServers": {}
+}
