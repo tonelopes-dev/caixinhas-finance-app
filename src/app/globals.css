@@ -86,6 +86,18 @@
 
 /* Landing Page Custom Animations */
 @layer utilities {
+  @keyframes marquee-right-to-left {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-marquee-right-to-left {
+    animation: marquee-right-to-left linear infinite;
+  }
   /* Fade in animations */
   @keyframes fadeIn {
     from {
