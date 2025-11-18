@@ -28,10 +28,10 @@ function PhotoCarousel() {
   const allImages = [...images, ...images, ...images] // Duplicate for seamless loop
 
   const rowConfigs = [
-    { rotation: 20, duration: 280, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno e mais lento
-    { rotation: -20, duration: 240, sizeClass: "h-36 w-28 md:h-48 md:w-36" }, // Médio
-    { rotation: 20, duration: 200, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande e mais rápido
-  ];
+    { rotation: 20, duration: 560, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno e mais lento
+    { rotation: -20, duration: 480, sizeClass: "h-36 w-28 md:h-48 md:w-36" }, // Médio
+    { rotation: 20, duration: 400, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande e mais rápido
+  ]
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
@@ -72,15 +72,20 @@ function PhotoCarousel() {
   )
 }
 
-export function HeroSection() {
+export function HeroSection({ scrollY }: { scrollY: number }) {
+  const rotation = scrollY / 10
+
   return (
     <section className="relative flex min-h-[80svh] items-center justify-center overflow-hidden px-4 pt-32 pb-20">
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-           <div className="flex items-center justify-center lg:order-last">
-            <Logo className="h-96 w-96" />
+          {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
+          <div className="flex items-center justify-center lg:order-last">
+            <Logo
+              className="h-96 w-96"
+              style={{ transform: `rotate(${rotation}deg)` }}
+            />
           </div>
 
           {/* Coluna da Esquerda: Texto (aparece em segundo no mobile) */}
