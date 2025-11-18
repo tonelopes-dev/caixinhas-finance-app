@@ -89,7 +89,7 @@ function PhotoCarousel() {
 }
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
-  const rotation = scrollY / 10
+  const yMovement = -scrollY / 10;
 
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden px-4 pt-32 pb-20">
@@ -97,10 +97,9 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-          <div className="flex items-center justify-center lg:order-last">
+          <div className="flex items-center justify-center lg:order-last animate-fade-in-up" style={{ transform: `translateY(${yMovement}px)` }}>
             <Logo
               className="h-96 w-96 animate-float"
-              style={{ transform: `rotate(${rotation}deg)` }}
             />
           </div>
 
