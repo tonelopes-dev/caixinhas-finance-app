@@ -1,4 +1,3 @@
-
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -7,22 +6,32 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 // Lista de imagens para o fundo sutil
-const BG_IMAGES = [
-  "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=900&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1618220179428-22790b461013?w=900&auto=format&fit=crop&q=60",
+const DEMO_IMAGES = [
+  "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=900&auto=format&fit=crop&q=60", // Natureza/Montanha
+  "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=900&auto=format&fit=crop&q=60", // Cidade/Urbano
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&auto=format&fit=crop&q=60", // Praia/Mar
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=60", // Tecnologia/Trabalho
+  "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=900&auto=format&fit=crop&q=60", // Abstrato/Luzes
+  "https://images.unsplash.com/photo-1618220179428-22790b461013?w=900&auto=format&fit=crop&q=60", // Interiores/Sala
+  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&auto=format&fit=crop&q=60", // Viagem/Paisagem
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&auto=format&fit=crop&q=60", // Comida
+  "https://images.unsplash.com/photo-1497436072909-60f360e1d4b0?w=900&auto=format&fit=crop&q=60", // Escritório/Clean
+  "https://images.unsplash.com/photo-1522770179533-24471fcdba45?w=900&auto=format&fit=crop&q=60", // Fotografia/Câmera
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&auto=format&fit=crop&q=60", // Aventura/Natureza
+  "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=900&auto=format&fit=crop&q=60", // Decoração
+  "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&auto=format&fit=crop&q=60", // Mobile/Tech
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&auto=format&fit=crop&q=60", // Água/Cachoeira
+  "https://images.unsplash.com/photo-1520085601670-ee14aa5fa3e8?w=900&auto=format&fit=crop&q=60", // Moda/Roupas
+  "https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=900&auto=format&fit=crop&q=60", // Compras/Lifestyle
 ];
-const duplicatedImages = [...BG_IMAGES, ...BG_IMAGES];
+const duplicatedImages = [...DEMO_IMAGES, ...DEMO_IMAGES];
 
 
 export function Hero() {
   return (
     <section id="hero" className="relative h-screen overflow-hidden">
       {/* Camada de Fundo: Carrossel Sutil */}
-      <div className="absolute inset-0 z-0 opacity-10 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]">
+      <div className="absolute inset-0 z-0 opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]">
         <motion.div
           className="flex gap-8"
           animate={{ x: ["0%", "-100%"] }}
