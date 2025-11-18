@@ -34,99 +34,111 @@ export function Hero() {
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
        {/* Animated Image Marquee Background */}
-      <div className="absolute bottom-0 right-0 w-1/2 h-full opacity-15 [mask-image:linear-gradient(to_right,transparent_0%,black_100%)]">
-        <motion.div
-          className="flex gap-8"
-          animate={{
-            x: ["0%", "-100%"],
-          }}
-          transition={{
-            ease: "linear",
-            duration: 80,
-            repeat: Infinity,
-          }}
-        >
-          {duplicatedImages.map((src, index) => (
-            <div
-              key={`marquee-1-${index}`}
-              className="relative aspect-[4/3] h-48 flex-shrink-0"
-              style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
+      <div className="absolute bottom-0 right-0 w-full h-full overflow-hidden">
+        <div className="absolute bottom-0 right-0 h-full w-1/2">
+            <motion.div
+            className="flex gap-8"
+            animate={{
+                x: ["0%", "-100%"],
+            }}
+            transition={{
+                ease: "linear",
+                duration: 80,
+                repeat: Infinity,
+            }}
             >
-              <Image
-                src={src}
-                alt={`Showcase image ${index + 1}`}
-                fill
-                className="w-full h-full object-cover rounded-2xl shadow-md"
-              />
-            </div>
-          ))}
-        </motion.div>
-        <motion.div
-          className="flex gap-8 mt-8"
-          animate={{
-            x: ["-100%", "0%"],
-          }}
-          transition={{
-            ease: "linear",
-            duration: 90,
-            repeat: Infinity,
-            delay: 2,
-          }}
-        >
-          {duplicatedImages.map((src, index) => (
-            <div
-              key={`marquee-2-${index}`}
-              className="relative aspect-[4/3] h-64 flex-shrink-0"
-              style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
+            {duplicatedImages.map((src, index) => (
+                <div
+                key={`marquee-1-${index}`}
+                className="relative aspect-[4/3] h-48 flex-shrink-0"
+                style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
+                >
+                <Image
+                    src={src}
+                    alt={`Showcase image ${index + 1}`}
+                    fill
+                    className="w-full h-full object-cover rounded-2xl shadow-md"
+                />
+                </div>
+            ))}
+            </motion.div>
+            <motion.div
+            className="flex gap-8 mt-8"
+            animate={{
+                x: ["-100%", "0%"],
+            }}
+            transition={{
+                ease: "linear",
+                duration: 90,
+                repeat: Infinity,
+                delay: 2,
+            }}
             >
-              <Image
-                src={src}
-                alt={`Showcase image ${index + 1}`}
-                fill
-                className="w-full h-full object-cover rounded-2xl shadow-md"
-              />
-            </div>
-          ))}
-        </motion.div>
+            {duplicatedImages.map((src, index) => (
+                <div
+                key={`marquee-2-${index}`}
+                className="relative aspect-[4/3] h-64 flex-shrink-0"
+                style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
+                >
+                <Image
+                    src={src}
+                    alt={`Showcase image ${index + 1}`}
+                    fill
+                    className="w-full h-full object-cover rounded-2xl shadow-md"
+                />
+                </div>
+            ))}
+            </motion.div>
+        </div>
       </div>
       
-      <div className="relative text-center lg:text-start space-y-6 lg:w-1/2">
-          <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
-            Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' /></span> Financeiras
-          </h1>
-          <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
-            Transforme a gestão do dinheiro em uma jornada colaborativa. Com o Caixinhas, vocês organizam despesas, criam metas e realizam sonhos, juntos.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 lg:flex-row lg:justify-start">
-              <Button asChild size="lg">
-                  <Link href="/register">
-                      Começar Agora
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-              </Button>
-              <Button asChild variant="ghost" size="lg">
-                  <Link href="#">
-                      <PlayCircle className="mr-2 h-5 w-5" />
-                      Veja como funciona
-                  </Link>
-              </Button>
-          </div>
-          <div className='flex items-center justify-center gap-4 lg:justify-start pt-4'>
-              <div className='flex -space-x-2'>
-                  <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" />
-                  <Image src="https://randomuser.me/api/portraits/women/32.jpg" alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" />
-                  <Image src="https://randomuser.me/api/portraits/men/33.jpg" alt="User 3" width={40} height={40} className="rounded-full border-2 border-background" />
-                  <Image src="https://randomuser.me/api/portraits/women/33.jpg" alt="User 4" width={40} height={40} className="rounded-full border-2 border-background" />
-              </div>
-              <div>
-                  <p className='font-semibold text-foreground'>+10.000 casais</p>
-                  <p className='text-sm text-muted-foreground'>realizando sonhos juntos</p>
-              </div>
-          </div>
+       {/* Gradient Overlay */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'linear-gradient(to right, hsl(var(--background)) 50%, transparent 100%)'
+        }}
+      />
+
+      <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center w-full">
+        <div className="relative text-center lg:text-start space-y-6">
+            <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
+                Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' /></span> Financeiras
+            </h1>
+            <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
+                Transforme a gestão do dinheiro em uma jornada colaborativa. Com o Caixinhas, vocês organizam despesas, criam metas e realizam sonhos, juntos.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-4 lg:flex-row lg:justify-start">
+                <Button asChild size="lg">
+                    <Link href="/register">
+                        Começar Agora
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                </Button>
+                <Button asChild variant="ghost" size="lg">
+                    <Link href="#">
+                        <PlayCircle className="mr-2 h-5 w-5" />
+                        Veja como funciona
+                    </Link>
+                </Button>
+            </div>
+            <div className='flex items-center justify-center gap-4 lg:justify-start pt-4'>
+                <div className='flex -space-x-2'>
+                    <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" />
+                    <Image src="https://randomuser.me/api/portraits/women/32.jpg" alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" />
+                    <Image src="https://randomuser.me/api/portraits/men/33.jpg" alt="User 3" width={40} height={40} className="rounded-full border-2 border-background" />
+                    <Image src="https://randomuser.me/api/portraits/women/33.jpg" alt="User 4" width={40} height={40} className="rounded-full border-2 border-background" />
+                </div>
+                <div>
+                    <p className='font-semibold text-foreground'>+10.000 casais</p>
+                    <p className='text-sm text-muted-foreground'>realizando sonhos juntos</p>
+                </div>
+            </div>
         </div>
         <div className="relative h-[400px] w-full max-w-md lg:h-[500px] lg:flex-1">
             <Logo className="w-full h-full drop-shadow-2xl" />
         </div>
+      </div>
     </section>
   );
 }
