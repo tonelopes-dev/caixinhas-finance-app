@@ -30,7 +30,7 @@ export function Header() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-8">
           <a
             href="#recursos"
             className="text-foreground/70 hover:text-foreground transition-colors text-lg relative group"
@@ -62,7 +62,7 @@ export function Header() {
         </nav>
 
         {/* Desktop CTA Buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <Button
             variant="ghost"
             className="text-foreground text-lg hover:bg-primary/10 transition-all"
@@ -81,7 +81,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 hover:bg-primary/10 rounded-lg transition-colors"
+          className="lg:hidden p-2 hover:bg-primary/10 rounded-lg transition-colors"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? (
@@ -94,7 +94,7 @@ export function Header() {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`md:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-b border-border transition-all duration-300 ease-in-out ${
+        className={`lg:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-b border-border transition-all duration-300 ease-in-out ${
           isMobileMenuOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-4 pointer-events-none"

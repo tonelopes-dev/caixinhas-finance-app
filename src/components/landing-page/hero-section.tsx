@@ -97,9 +97,9 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
     <section className="relative flex min-h-[600px] items-center overflow-hidden px-4 pt-32 pb-20">
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center justify-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-          <div className="flex items-center mb-[-345px] lg:order-last animate-fade-in-up">
+          <div className="flex items-center lg:mb-[-345px] lg:order-last animate-fade-in-up">
             <Logo
               className="h-full w-[800px] animate-float-logo"
             />
