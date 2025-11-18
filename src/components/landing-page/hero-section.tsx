@@ -16,7 +16,7 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
   const duplicatedImages = [...marqueeImages, ...marqueeImages]
 
   return (
-    <section className="pt-32 pb-20 px-4 relative overflow-hidden h-screen flex items-center justify-center">
+    <section className="pt-32 px-4 relative overflow-hidden h-[800px] flex items-center justify-center">
       {/* Animated Image Marquee Background */}
       <div className="absolute inset-0 w-full h-full overflow-hidden opacity-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
         <motion.div
@@ -91,13 +91,13 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
             </p>
           </div>
 
-          <div className="relative animate-fade-in-up animation-delay-200">
+          <div className="relative animate-fade-in-up animation-delay-200 mb-[-345px]">
             <div
               className="relative z-10 transform hover:scale-105 transition-all duration-700 hover:rotate-2 flex items-center justify-center h-full"
               style={{ transform: `translateY(${scrollY * 0.1}px)` }}
             >
               <Logo
-                className="w-64 h-64 drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
+                className="w-[1024px] h-[1024px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
               />
             </div>
           </div>
