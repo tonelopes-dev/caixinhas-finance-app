@@ -36,16 +36,11 @@ export function Hero() {
                   <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" />
                   <Image src="https://randomuser.me/api/portraits/women/32.jpg" alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" />
                   <Image src="https://randomuser.me/api/portraits/men/33.jpg" alt="User 3" width={40} height={40} className="rounded-full border-2 border-background" />
+                  <Image src="https://randomuser.me/api/portraits/women/33.jpg" alt="User 4" width={40} height={40} className="rounded-full border-2 border-background" />
               </div>
               <div>
-                  <div className='flex text-yellow-500'>
-                      <Star className='w-5 h-5 fill-current' />
-                      <Star className='w-5 h-5 fill-current' />
-                      <Star className='w-5 h-5 fill-current' />
-                      <Star className='w-5 h-5 fill-current' />
-                      <Star className='w-5 h-5 fill-current' />
-                  </div>
-                  <p className='text-sm text-muted-foreground'>Baseado em 3.000+ avaliações</p>
+                  <p className='font-semibold text-foreground'>+10.000 casais</p>
+                  <p className='text-sm text-muted-foreground'>realizando sonhos juntos</p>
               </div>
           </div>
         </div>
