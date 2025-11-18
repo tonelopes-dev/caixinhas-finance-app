@@ -18,7 +18,7 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
   return (
     <section className="pt-32 px-4 relative overflow-hidden h-[800px] flex items-center justify-center">
       {/* Animated Image Marquee Background */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden opacity-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+      <div className="absolute inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
         <motion.div
           className="flex gap-8"
           animate={{
