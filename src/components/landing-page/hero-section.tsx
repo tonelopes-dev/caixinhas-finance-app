@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sparkles, ChevronRight } from "lucide-react"
+import { Logo } from "../logo"
 
 type HeroSectionProps = {
   scrollY: number
@@ -32,11 +33,6 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
       <div className="container mx-auto relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-in-up">
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 animate-fade-in">
-              <Sparkles className="w-4 h-4 inline mr-2 animate-pulse" />
-              Mais que um app, uma ponte para sonhos
-            </Badge>
-
             <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight text-balance animate-fade-in-up animation-delay-100">
               Sonhar juntos é o primeiro{" "}
               <span className="text-primary animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
@@ -94,16 +90,11 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
           <div className="relative animate-fade-in-up animation-delay-200">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-[3rem] blur-3xl animate-pulse-slow" />
             <div
-              className="relative z-10 transform hover:scale-105 transition-all duration-700 hover:rotate-2"
+              className="relative z-10 transform hover:scale-105 transition-all duration-700 hover:rotate-2 flex items-center justify-center h-full"
               style={{ transform: `translateY(${scrollY * 0.1}px)` }}
             >
-              <Image
-                src="/screenshots/main-dashboard.png"
-                alt="Dashboard Principal do Caixinhas"
-                width={600}
-                height={1200}
-                data-ai-hint="app dashboard"
-                className="relative z-10 w-full drop-shadow-2xl rounded-[2rem]"
+              <Logo
+                className="w-64 h-64 drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
               />
             </div>
           </div>
