@@ -34,62 +34,60 @@ export function Hero() {
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
        {/* Animated Image Marquee Background */}
-      <div className="absolute bottom-0 right-0 w-full h-full overflow-hidden">
-        <div className="absolute bottom-0 right-0 h-full w-1/2">
-            <motion.div
-            className="flex gap-8"
-            animate={{
-                x: ["0%", "-100%"],
-            }}
-            transition={{
-                ease: "linear",
-                duration: 80,
-                repeat: Infinity,
-            }}
+      <div className="absolute bottom-0 right-0 h-full w-1/2 overflow-hidden">
+        <motion.div
+        className="flex gap-8"
+        animate={{
+            x: ["0%", "-100%"],
+        }}
+        transition={{
+            ease: "linear",
+            duration: 80,
+            repeat: Infinity,
+        }}
+        >
+        {duplicatedImages.map((src, index) => (
+            <div
+            key={`marquee-1-${index}`}
+            className="relative aspect-[4/3] h-48 flex-shrink-0"
+            style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
             >
-            {duplicatedImages.map((src, index) => (
-                <div
-                key={`marquee-1-${index}`}
-                className="relative aspect-[4/3] h-48 flex-shrink-0"
-                style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
-                >
-                <Image
-                    src={src}
-                    alt={`Showcase image ${index + 1}`}
-                    fill
-                    className="w-full h-full object-cover rounded-2xl shadow-md"
-                />
-                </div>
-            ))}
-            </motion.div>
-            <motion.div
-            className="flex gap-8 mt-8"
-            animate={{
-                x: ["-100%", "0%"],
-            }}
-            transition={{
-                ease: "linear",
-                duration: 90,
-                repeat: Infinity,
-                delay: 2,
-            }}
+            <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+            />
+            </div>
+        ))}
+        </motion.div>
+        <motion.div
+        className="flex gap-8 mt-8"
+        animate={{
+            x: ["-100%", "0%"],
+        }}
+        transition={{
+            ease: "linear",
+            duration: 90,
+            repeat: Infinity,
+            delay: 2,
+        }}
+        >
+        {duplicatedImages.map((src, index) => (
+            <div
+            key={`marquee-2-${index}`}
+            className="relative aspect-[4/3] h-64 flex-shrink-0"
+            style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
             >
-            {duplicatedImages.map((src, index) => (
-                <div
-                key={`marquee-2-${index}`}
-                className="relative aspect-[4/3] h-64 flex-shrink-0"
-                style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
-                >
-                <Image
-                    src={src}
-                    alt={`Showcase image ${index + 1}`}
-                    fill
-                    className="w-full h-full object-cover rounded-2xl shadow-md"
-                />
-                </div>
-            ))}
-            </motion.div>
-        </div>
+            <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+            />
+            </div>
+        ))}
+        </motion.div>
       </div>
       
        {/* Gradient Overlay */}
@@ -135,7 +133,7 @@ export function Hero() {
                 </div>
             </div>
         </div>
-        <div className="relative h-[400px] w-full max-w-md lg:h-[500px] lg:flex-1">
+        <div className="relative h-[500px] w-full max-w-lg lg:h-[600px] lg:flex-1">
             <Logo className="w-full h-full drop-shadow-2xl" />
         </div>
       </div>
