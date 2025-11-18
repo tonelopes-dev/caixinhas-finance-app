@@ -36,7 +36,7 @@ function PhotoCarousel() {
             key={rowIndex}
             className="flex animate-marquee-right-to-left items-center justify-around gap-4"
             style={{
-              animationDuration: `${50 + rowIndex * 10}s`,
+              animationDuration: `${100 + rowIndex * 20}s`,
               transform: `rotate(${rotation}deg)`,
             }}
           >
