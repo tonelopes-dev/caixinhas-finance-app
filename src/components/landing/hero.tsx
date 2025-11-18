@@ -34,7 +34,7 @@ export function Hero() {
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
        {/* Animated Image Marquee Background */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_50%)] lg:[mask-image:linear-gradient(to_right,transparent,black_30%)]">
+      <div className="absolute inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_50%)] lg:[mask-image:linear-gradient(to_right,hsl(var(--background))_50%,transparent_100%)]">
         <motion.div
         className="flex gap-8"
         animate={{
@@ -103,7 +103,7 @@ export function Hero() {
       <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center w-full">
         <div className="relative text-center lg:text-start space-y-6">
             <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
-                Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' data-ai-hint="abstract illustration" /></span> Financeiras
+                Tome as Melhores <span className="text-primary relative">Decisões</span> Financeiras
             </h1>
             <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
                 Transforme a gestão do dinheiro em uma jornada colaborativa. Com o Caixinhas, vocês organizam despesas, criam metas e realizam sonhos, juntos.
@@ -124,10 +124,10 @@ export function Hero() {
             </div>
             <div className='flex items-center justify-center gap-4 lg:justify-start pt-4'>
                 <div className='flex -space-x-2'>
-                    <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="man portrait"/>
-                    <Image src="https://randomuser.me/api/portraits/women/32.jpg" alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="woman portrait" />
-                    <Image src="https://randomuser.me/api/portraits/men/33.jpg" alt="User 3" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="man face" />
-                    <Image src="https://randomuser.me/api/portraits/women/33.jpg" alt="User 4" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="woman face" />
+                    <Image src={DEMO_IMAGES[3]} alt="User 1" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="man portrait"/>
+                    <Image src={DEMO_IMAGES[2]} alt="User 2" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="woman portrait" />
+                    <Image src={DEMO_IMAGES[1]} alt="User 3" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="man face" />
+                    <Image src={DEMO_IMAGES[0]} alt="User 4" width={40} height={40} className="rounded-full border-2 border-background" data-ai-hint="woman face" />
                 </div>
                 <div>
                     <p className='font-semibold text-foreground'>+10.000 casais</p>
