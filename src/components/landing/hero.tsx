@@ -4,13 +4,93 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, PlayCircle, Star } from 'lucide-react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { motion } from 'framer-motion';
+import { Logo } from '../logo';
+
+const DEMO_IMAGES = [
+  "https://images.unsplash.com/photo-1756312148347-611b60723c7a?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzN3x8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1757865579201-693dd2080c73?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw2MXx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1756786605218-28f7dd95a493?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMzh8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757519740947-eef07a74c4ab?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxNDh8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757263005786-43d955f07fb1?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxNzB8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757207445614-d1e12b8f753e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxODZ8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757269746970-dc477517268f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjN8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1755119902709-a53513bcbedc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNDF8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1756312148347-611b60723c7a?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzN3x8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1757865579201-693dd2080c73?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw2MXx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1756786605218-28f7dd95a493?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMzh8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757519740947-eef07a74c4ab?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxNDh8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757263005786-43d955f07fb1?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxNzB8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757207445614-d1e12b8f753e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxODZ8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1757269746970-dc477517268f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjN8fHxlbnwwfHx8fHw%3D",
+  "https://images.unsplash.com/photo-1755119902709-a53513bcbedc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNDF8fHxlbnwwfHx8fHw%3D",
+];
+
 
 export function Hero() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-phones');
+  const duplicatedImages = [...DEMO_IMAGES, ...DEMO_IMAGES];
 
   return (
-    <section id="hero" className="container flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32">
-      <div className="text-center lg:text-start space-y-6 lg:w-1/2">
+    <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
+      
+       {/* Animated Image Marquee Background */}
+      <div className="absolute inset-0 w-full h-full opacity-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+        <motion.div
+          className="flex gap-8"
+          animate={{
+            x: ["0%", "-100%"],
+          }}
+          transition={{
+            ease: "linear",
+            duration: 80,
+            repeat: Infinity,
+          }}
+        >
+          {duplicatedImages.map((src, index) => (
+            <div
+              key={`marquee-1-${index}`}
+              className="relative aspect-[4/3] h-48 flex-shrink-0"
+              style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
+            >
+              <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+              />
+            </div>
+          ))}
+        </motion.div>
+        <motion.div
+          className="flex gap-8 mt-8"
+          animate={{
+            x: ["-100%", "0%"],
+          }}
+          transition={{
+            ease: "linear",
+            duration: 90,
+            repeat: Infinity,
+            delay: 2,
+          }}
+        >
+          {duplicatedImages.map((src, index) => (
+            <div
+              key={`marquee-2-${index}`}
+              className="relative aspect-[4/3] h-64 flex-shrink-0"
+              style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
+            >
+              <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+              />
+            </div>
+          ))}
+        </motion.div>
+      </div>
+      
+      <div className="relative text-center lg:text-start space-y-6 lg:w-1/2">
           <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
             Tome as Melhores <span className="text-primary relative">Decisões<Image src="/gradient-underline.svg" alt="underline" width={300} height={30} className='absolute bottom-0 left-0 w-full' /></span> Financeiras
           </h1>
@@ -45,16 +125,7 @@ export function Hero() {
           </div>
         </div>
         <div className="relative h-[400px] w-full max-w-md lg:h-[500px] lg:flex-1">
-          {heroImage && (
-              <Image
-                  src={heroImage.imageUrl}
-                  alt="App Caixinhas em múltiplos celulares"
-                  fill
-                  className="object-contain"
-                  priority
-                  data-ai-hint={heroImage.imageHint}
-              />
-          )}
+            <Logo className="w-full h-full drop-shadow-2xl" />
         </div>
     </section>
   );
