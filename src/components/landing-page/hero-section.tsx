@@ -97,7 +97,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-          <div className="flex items-center mb-[-345px] justify-center lg:order-last animate-fade-in-up">
+          <div className="flex items-center mb-[-345px] lg:order-last animate-fade-in-up">
             <Logo
               className="h-full w-[800px] animate-float-logo"
             />
