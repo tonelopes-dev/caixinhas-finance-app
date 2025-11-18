@@ -34,7 +34,7 @@ export function Hero() {
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
        {/* Animated Image Marquee Background */}
-      <div className="absolute inset-0 w-full h-full opacity-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+      <div className="absolute bottom-0 right-0 w-1/2 h-full opacity-15 [mask-image:linear-gradient(to_right,transparent_0%,black_100%)]">
         <motion.div
           className="flex gap-8"
           animate={{
