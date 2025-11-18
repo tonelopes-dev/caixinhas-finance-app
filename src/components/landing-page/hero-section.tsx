@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -5,6 +6,8 @@ import Link from "next/link"
 import { Logo } from "../logo"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { ChevronRight } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 const images = [
   PlaceHolderImages.find((img) => img.id === "couple-planning")?.imageUrl,
@@ -86,10 +89,40 @@ export function HeroSection() {
               conquistas conjuntas.
             </p>
 
-            <div className="animate-fade-in-up animation-delay-300">
-              <Button asChild size="lg" className="h-14 px-8 text-lg">
-                <Link href="/register">Criar Conta Gratuita</Link>
-              </Button>
+            <div className="animate-fade-in-up animation-delay-300 space-y-8">
+              <div className="flex items-center gap-4">
+                <Button asChild size="lg" className="h-14 px-8 text-lg">
+                  <Link href="/register">Começar Agora <ChevronRight className="ml-2 h-5 w-5" /></Link>
+                </Button>
+                <Button variant="ghost" size="lg" className="h-14 px-8 text-lg">
+                  <Link href="#como-funciona">Ver Como Funciona</Link>
+                </Button>
+              </div>
+
+               <div className="flex items-center gap-4">
+                <div className="flex -space-x-4">
+                  <Avatar className="h-12 w-12 border-2 border-background">
+                    <AvatarImage src="https://images.unsplash.com/photo-1554151228-14d9def656e4?w=100" data-ai-hint="woman portrait" />
+                    <AvatarFallback>C</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="h-12 w-12 border-2 border-background">
+                    <AvatarImage src="https://images.unsplash.com/photo-1552058544-f2b08422138a?w=100" data-ai-hint="man portrait"/>
+                    <AvatarFallback>J</AvatarFallback>
+                  </Avatar>
+                   <Avatar className="h-12 w-12 border-2 border-background">
+                    <AvatarImage src="https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?w=100" data-ai-hint="woman smiling"/>
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
+                   <Avatar className="h-12 w-12 border-2 border-background">
+                    <AvatarImage src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=100" data-ai-hint="man glasses"/>
+                    <AvatarFallback>M</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div>
+                  <p className="font-bold text-foreground text-lg">+10.000 casais</p>
+                  <p className="text-muted-foreground">realizando sonhos juntos</p>
+                </div>
+              </div>
             </div>
           </div>
 
