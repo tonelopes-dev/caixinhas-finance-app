@@ -27,23 +27,29 @@ const images = [
 function PhotoCarousel() {
   const allImages = [...images, ...images, ...images] // Duplicate for seamless loop
 
+  const rowConfigs = [
+    { rotation: 20, duration: 200, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno
+    { rotation: -20, duration: 240, sizeClass: "h-36 w-28 md:h-48 md:w-36" }, // Médio
+    { rotation: 20, duration: 280, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande
+  ];
+
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent z-10" />
       <div className="absolute -top-1/4 -bottom-1/4 flex flex-col justify-center gap-4">
-        {[20, -20, 20].map((rotation, rowIndex) => (
+        {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
           <div
             key={rowIndex}
             className="flex animate-marquee-right-to-left items-center justify-around gap-4"
             style={{
-              animationDuration: `${200 + rowIndex * 40}s`,
+              animationDuration: `${duration}s`,
               transform: `rotate(${rotation}deg)`,
             }}
           >
             {allImages.map((src, i) => (
               <div
                 key={i}
-                className="relative h-48 w-32 shrink-0 overflow-hidden rounded-xl border-4 border-background/50 shadow-lg md:h-64 md:w-48"
+                className={`relative shrink-0 overflow-hidden rounded-xl border-4 border-background/50 shadow-lg ${sizeClass}`}
                 style={{
                   transform: `rotate(${i % 2 === 0 ? 2 : -2}deg)`,
                 }}
@@ -72,7 +78,7 @@ export function HeroSection() {
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
+          {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
           <div className="flex items-center justify-center lg:order-last">
             <Logo className="h-96 w-96" />
           </div>
