@@ -1,63 +1,56 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
+import { validateUserSession } from './lib/auth-helpers';
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
-    // Rotas que não devem ser acessadas por usuários logados
-    const authRoutes = ['/login', '/register'];
-    
     // Rotas públicas que podem ser acessadas por todos
     const publicRoutes = ['/login', '/register', '/terms', '/landing'];
-    
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-    
+
     // A rota raiz (/) é um caso especial
     if (pathname === '/') {
-      if (!token) {
-        // Se não estiver logado, vai para a landing page
-        return NextResponse.redirect(new URL('/landing', req.url));
-      }
-      // Se estiver logado, redireciona para dashboard
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    // Se o usuário está logado
-    if (token) {
+    // Se o usuário está autenticado
+    if (token && token.id) {
       // E tenta acessar uma rota de autenticação (login/registro), redireciona para dashboard
-      if (authRoutes.includes(pathname)) {
+      if (publicRoutes.includes(pathname)) {
         return NextResponse.redirect(new URL('/dashboard', req.url));
       }
-    } 
-    // Se o usuário NÃO está logado
-    else {
-      // E tenta acessar uma rota que NÃO é pública
-      if (!isPublicRoute) {
-        // Redireciona para o login
-        return NextResponse.redirect(new URL('/login', req.url));
+
+      // Valida a sessão do usuário no banco de dados para cada request em rota protegida
+      const isSessionValid = await validateUserSession(token.id as string);
+      
+      // Se a sessão não for válida (usuário deletado, etc.), força o logout
+      if (!isSessionValid) {
+        const logoutUrl = new URL('/login', req.url);
+        logoutUrl.searchParams.set('callbackUrl', req.url);
+        
+        const response = NextResponse.redirect(logoutUrl);
+        
+        // Limpa os cookies de autenticação do NextAuth
+        const cookieNames = Object.keys(req.cookies).filter(name => name.startsWith('next-auth.'));
+        cookieNames.forEach(name => response.cookies.delete(name));
+        
+        return response;
       }
     }
 
-    // Permite o acesso se nenhuma das condições de redirecionamento acima for atendida
+    // Se nenhuma das condições acima for atendida, permite o acesso.
+    // A verificação de `authorized` do withAuth já cuida do redirecionamento de não logados.
     return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-        const publicRoutes = ['/login', '/register', '/terms', '/landing'];
-        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-        
-        // Permite acesso a rotas públicas sem token
-        if (isPublicRoute) return true;
-        
-        // Permite acesso a todas as rotas protegidas se tiver token
-        if (token) return true;
-        
-        // Bloqueia apenas se não tiver token e não for rota pública
-        return false;
+      authorized: ({ token }) => {
+        // `authorized` só precisa verificar a existência do token.
+        // A validação de sessão no banco é feita no corpo do middleware.
+        return !!token;
       },
     },
   }

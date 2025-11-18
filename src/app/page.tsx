@@ -8,15 +8,20 @@ import { LandingPageClient } from '@/components/landing-page/landing-page-client
 
 function HomePage() {
   const { data: session, status } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    if (status !== 'loading') {
-      setIsLoading(false);
+    // A lógica de redirecionamento agora é centralizada no middleware.
+    // Esta página apenas decide qual componente renderizar.
+    if (status === 'unauthenticated') {
+      router.push('/landing');
+    } else if (status === 'authenticated') {
+      router.push('/dashboard');
     }
-  }, [status]);
+  }, [status, router]);
 
-  if (isLoading) {
+  // Enquanto a sessão está sendo verificada, mostramos um loader.
+  if (status === 'loading') {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -24,14 +29,13 @@ function HomePage() {
     );
   }
 
-  // Se o usuário não está autenticado, mostramos a landing page.
-  // O middleware já cuidará de redirecionar para /login se ele tentar acessar rotas protegidas.
-  if (!session?.user) {
+  // Se o middleware falhou por algum motivo e o usuário chegou aqui sem sessão,
+  // mostramos a landing page como fallback.
+  if (!session) {
     return <LandingPageClient />;
   }
 
-  // Se estiver autenticado, renderiza o dashboard.
-  // A lógica interna do dashboard e do seletor de cofres cuidará do resto.
+  // Se a sessão for válida, renderiza o dashboard (ou será redirecionado pelo useEffect).
   return <DashboardPage />;
 }
 
