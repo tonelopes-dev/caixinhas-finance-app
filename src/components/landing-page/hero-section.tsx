@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -53,7 +54,7 @@ function PhotoCarousel() {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent z-10" />
-      <div className="absolute -top-1/4 -bottom-1/4 flex flex-col justify-center gap-4">
+      <div className="absolute inset-0 flex flex-col justify-start gap-4 lg:-top-1/4 lg:-bottom-1/4 lg:justify-center">
         {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
           <div
             key={rowIndex}
