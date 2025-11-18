@@ -28,9 +28,9 @@ function PhotoCarousel() {
   const allImages = [...images, ...images, ...images] // Duplicate for seamless loop
 
   const rowConfigs = [
-    { rotation: 20, duration: 200, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno
+    { rotation: 20, duration: 280, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno e mais lento
     { rotation: -20, duration: 240, sizeClass: "h-36 w-28 md:h-48 md:w-36" }, // Médio
-    { rotation: 20, duration: 280, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande
+    { rotation: 20, duration: 200, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande e mais rápido
   ];
 
   return (
@@ -78,8 +78,8 @@ export function HeroSection() {
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-          <div className="flex items-center justify-center lg:order-last">
+           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
+           <div className="flex items-center justify-center lg:order-last">
             <Logo className="h-96 w-96" />
           </div>
 
