@@ -32,7 +32,7 @@ export function Hero() {
   return (
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
-       {/* Animated Image Marquee Background */}
+       {/* Animated Image Marquee Background - Layer 1 (Bottom) */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <motion.div
         className="flex gap-8"
@@ -91,15 +91,17 @@ export function Hero() {
         </motion.div>
       </div>
       
-       {/* Gradient Overlay */}
+       {/* Gradient Overlay - Layer 2 */}
       <div 
-        className="absolute inset-0 z-0 bg-gradient-to-r from-background from-50% to-transparent"
+        aria-hidden="true"
+        className="absolute inset-0 z-[1] bg-gradient-to-r from-background from-40% to-transparent"
       />
 
+      {/* Content - Layer 3 (Top) */}
       <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center w-full">
         <div className="relative text-center lg:text-start space-y-6">
             <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
-                Tome as Melhores <span className="text-primary">Decisões</span> Financeiras
+                Tome as Melhores Decisões Financeiras
             </h1>
             <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
                 Transforme a gestão do dinheiro em uma jornada colaborativa. Com o Caixinhas, vocês organizam despesas, criam metas e realizam sonhos, juntos.
