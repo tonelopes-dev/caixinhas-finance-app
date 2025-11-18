@@ -25,7 +25,24 @@ const images = [
 ]
 
 function PhotoCarousel() {
-  const allImages = [...images, ...images, ...images] // Duplicate for seamless loop
+  const allImages = [
+  "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1618220179428-22790b461013?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1497436072909-60f360e1d4b0?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1522770179533-24471fcdba45?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1520085601670-ee14aa5fa3e8?w=900&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=900&auto=format&fit=crop&q=60",
+];
 
   const rowConfigs = [
     { rotation: 20, duration: 560, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno e mais lento
@@ -34,8 +51,8 @@ function PhotoCarousel() {
   ]
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent z-10" />
+    <div className="absolute h-full inset-0 z-0 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent z-10" />
       <div className="absolute -top-1/4 -bottom-1/4 flex flex-col justify-center gap-4">
         {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
           <div
@@ -76,14 +93,14 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
   const rotation = scrollY / 10
 
   return (
-    <section className="relative flex min-h-[80svh] items-center justify-center overflow-hidden px-4 pt-32 pb-20">
+    <section className="relative flex ]h-[500px]  items-center justify-center overflow-hidden px-4 pt-32 pb-20">
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
           <div className="flex items-center justify-center lg:order-last">
             <Logo
-              className="h-96 w-96"
+              className="h-full w-[800px] mb-[-345px]"
               style={{ transform: `rotate(${rotation}deg)` }}
             />
           </div>
