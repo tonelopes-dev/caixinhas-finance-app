@@ -48,11 +48,6 @@ export function HeroSection() {
       </div>
 
       <div className="absolute top-0 right-0 h-full w-full lg:w-1/2 [mask-image:linear-gradient(to_right,transparent,black_20%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_20%,black_80%)]">
-        {/* Camada do Logo */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Logo className="w-96 h-96" />
-        </div>
-        
         {/* Carrossel de Imagens */}
         <div className="absolute inset-0 flex flex-col gap-8 justify-center overflow-hidden">
           <motion.div
@@ -134,6 +129,11 @@ export function HeroSection() {
             ))}
           </motion.div>
         </div>
+      </div>
+      
+      {/* Camada do Logo, agora fora e por cima de tudo */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+        <Logo className="w-96 h-96 opacity-20" />
       </div>
     </section>
   )
