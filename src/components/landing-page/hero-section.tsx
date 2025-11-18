@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from "next/image"
@@ -131,9 +132,9 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Camada do Logo, agora fora e por cima de tudo */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-        <Logo className="w-96 h-96 opacity-20" />
+      {/* Camada do Logo, agora sem posicionamento absoluto */}
+      <div className="flex items-center justify-center pointer-events-none">
+        <Logo className="w-96 h-96" />
       </div>
     </section>
   )
