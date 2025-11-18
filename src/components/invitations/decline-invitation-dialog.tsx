@@ -11,8 +11,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import type { Invitation } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
 export function DeclineInvitationDialog({ invitation }: { invitation: Invitation }) {
@@ -39,7 +40,7 @@ export function DeclineInvitationDialog({ invitation }: { invitation: Invitation
           </AlertDialogHeader>
           <AlertDialogFooter className='mt-4'>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDecline} variant="destructive">Recusar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDecline} className={cn(buttonVariants({ variant: "destructive" }))}>Recusar</AlertDialogAction>
           </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

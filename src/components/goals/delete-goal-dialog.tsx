@@ -12,9 +12,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { deleteGoalAction } from '@/app/goals/actions';
+import { cn } from '@/lib/utils';
 
 export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: string, goalName: string, disabled?: boolean }) {
   
@@ -37,7 +38,7 @@ export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: strin
           </AlertDialogHeader>
           <AlertDialogFooter className='mt-4'>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction type="submit" >Excluir</AlertDialogAction>
+            <AlertDialogAction type="submit" className={cn(buttonVariants({ variant: "destructive" }))}>Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </form>
       </AlertDialogContent>
