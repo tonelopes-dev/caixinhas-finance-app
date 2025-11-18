@@ -23,7 +23,7 @@ export function HeroSection() {
       <div className="container mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-in-up z-10">
-            <div className="flex items-center gap-4">
+             <div className="flex items-center gap-4">
               <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight text-balance animate-fade-in-up animation-delay-100">
                 Sonhar juntos é o primeiro{" "}
                 <span className="text-primary animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
@@ -50,7 +50,7 @@ export function HeroSection() {
       <div className="absolute top-0 right-0 h-full w-full lg:w-1/2 [mask-image:linear-gradient(to_right,transparent,black_20%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_20%,black_80%)]">
         {/* Camada do Logo */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Logo className="w-96 h-96 opacity-20 blur-sm" />
+          <Logo className="w-96 h-96" />
         </div>
         
         {/* Carrossel de Imagens */}
