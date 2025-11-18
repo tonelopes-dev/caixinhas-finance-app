@@ -1,9 +1,8 @@
-
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useActionState } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import {
   Card,
   CardContent,
@@ -121,7 +120,7 @@ function DeleteCategoryDialog({ category }: { category: Category }) {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction type="submit">Excluir</AlertDialogAction>
+            <AlertDialogAction type="submit" variant="destructive">Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </form>
       </AlertDialogContent>
