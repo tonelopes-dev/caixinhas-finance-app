@@ -1,11 +1,11 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Mail, Menu, SendHorizonal, X } from 'lucide-react'
+import { ArrowRight, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Logo } from '@/components/logo'
 import Image from 'next/image'
+import { Logo } from '../logo'
 
 const menuItems = [
     { name: 'Recursos', href: '#features' },
