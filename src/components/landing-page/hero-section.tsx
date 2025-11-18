@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -51,7 +50,7 @@ function PhotoCarousel() {
   ]
 
   return (
-    <div className="absolute h-full inset-0 z-0 overflow-hidden">
+    <div className="absolute inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent z-10" />
       <div className="absolute -top-1/4 -bottom-1/4 flex flex-col justify-center gap-4">
         {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
@@ -93,14 +92,14 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
   const rotation = scrollY / 10
 
   return (
-    <section className="relative flex ]h-[500px]  items-center justify-center overflow-hidden px-4 pt-32 pb-20">
+    <section className="relative flex min-h-screen items-center overflow-hidden px-4 pt-32 pb-20">
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
           <div className="flex items-center justify-center lg:order-last">
             <Logo
-              className="h-full w-[800px] mb-[-345px]"
+              className="h-96 w-96 animate-float"
               style={{ transform: `rotate(${rotation}deg)` }}
             />
           </div>
