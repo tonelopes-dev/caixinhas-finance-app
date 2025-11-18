@@ -31,7 +31,7 @@ function PhotoCarousel() {
     <div className="absolute inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent z-10" />
       <div className="absolute -top-1/4 -bottom-1/4 flex flex-col justify-center gap-4">
-        {[-20, 20, -20].map((rotation, rowIndex) => (
+        {[20, -20, 20].map((rotation, rowIndex) => (
           <div
             key={rowIndex}
             className="flex animate-marquee-right-to-left items-center justify-around gap-4"
@@ -72,8 +72,13 @@ export function HeroSection() {
       <PhotoCarousel />
       <div className="container relative z-10 mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Coluna da Esquerda: Texto */}
-          <div className="z-10 space-y-8 animate-fade-in-up">
+           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
+          <div className="flex items-center justify-center lg:order-last">
+            <Logo className="h-96 w-96" />
+          </div>
+
+          {/* Coluna da Esquerda: Texto (aparece em segundo no mobile) */}
+          <div className="z-10 space-y-8 animate-fade-in-up lg:order-first">
             <div className="flex items-center gap-4">
               <h1 className="animate-fade-in-up text-balance text-5xl font-bold leading-tight text-foreground animation-delay-100 md:text-7xl">
                 Sonhar juntos é o primeiro{" "}
@@ -124,11 +129,6 @@ export function HeroSection() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Coluna da Direita: Logo */}
-          <div className="flex items-center justify-center">
-            <Logo className="h-96 w-96" />
           </div>
         </div>
       </div>
