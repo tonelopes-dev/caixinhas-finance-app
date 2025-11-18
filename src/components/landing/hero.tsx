@@ -1,9 +1,9 @@
+
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlayCircle, Star } from 'lucide-react';
+import { ArrowRight, PlayCircle } from 'lucide-react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { motion } from 'framer-motion';
 import { Logo } from '../logo';
 
@@ -26,7 +26,6 @@ const DEMO_IMAGES = [
   "https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=900&auto=format&fit=crop&q=60",
 ];
 
-
 export function Hero() {
   const duplicatedImages = [...DEMO_IMAGES, ...DEMO_IMAGES];
 
@@ -34,7 +33,7 @@ export function Hero() {
     <section id="hero" className="container relative flex flex-col lg:flex-row items-center justify-center gap-10 py-20 md:py-32 h-screen overflow-hidden">
       
        {/* Animated Image Marquee Background */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_50%)] lg:[mask-image:linear-gradient(to_right,hsl(var(--background))_50%,transparent_100%)]">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         <motion.div
         className="flex gap-8"
         animate={{
@@ -94,16 +93,13 @@ export function Hero() {
       
        {/* Gradient Overlay */}
       <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: 'linear-gradient(to right, hsl(var(--background)) 50%, transparent 100%)'
-        }}
+        className="absolute inset-0 z-0 bg-gradient-to-r from-background from-50% to-transparent"
       />
 
       <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center w-full">
         <div className="relative text-center lg:text-start space-y-6">
             <h1 className="font-sans text-5xl font-bold leading-tight tracking-tighter md:text-6xl lg:text-7xl">
-                Tome as Melhores <span className="text-primary relative">Decisões</span> Financeiras
+                Tome as Melhores <span className="text-primary">Decisões</span> Financeiras
             </h1>
             <p className="mx-auto max-w-xl text-lg text-muted-foreground lg:mx-0">
                 Transforme a gestão do dinheiro em uma jornada colaborativa. Com o Caixinhas, vocês organizam despesas, criam metas e realizam sonhos, juntos.
@@ -135,7 +131,7 @@ export function Hero() {
                 </div>
             </div>
         </div>
-        <div className="relative h-[500px] w-full max-w-lg lg:h-[600px] lg:flex-1">
+        <div className="relative h-[500px] w-full max-w-lg lg:h-full lg:min-h-[600px] lg:flex-1">
             <Logo className="w-full h-full drop-shadow-2xl" />
         </div>
       </div>
