@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Logo } from "../logo"
 
 export function HeroSection() {
   const marqueeImages = PlaceHolderImages.filter((img) =>
@@ -22,12 +23,14 @@ export function HeroSection() {
       <div className="container mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-in-up z-10">
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight text-balance animate-fade-in-up animation-delay-100">
-              Sonhar juntos é o primeiro{" "}
-              <span className="text-primary animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                passo para conquistar
-              </span>
-            </h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight text-balance animate-fade-in-up animation-delay-100">
+                Sonhar juntos é o primeiro{" "}
+                <span className="text-primary animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
+                  passo para conquistar
+                </span>
+              </h1>
+            </div>
 
             <p className="text-xl md:text-2xl text-foreground/70 leading-relaxed text-pretty animate-fade-in-up animation-delay-200">
               Caixinhas não é apenas um aplicativo de finanças. É uma ferramenta
@@ -41,89 +44,95 @@ export function HeroSection() {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="absolute top-0 right-0 h-full w-full lg:w-1/2 [mask-image:linear-gradient(to_right,transparent,black_20%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent,black_30%,black_100%)]">
-            <div className="absolute inset-0 flex flex-col gap-8 justify-center overflow-hidden">
-                <motion.div
-                    className="flex gap-8"
-                    animate={{
-                        x: ["-100%", "0%"],
-                        transition: {
-                        ease: "linear",
-                        duration: 60,
-                        repeat: Infinity,
-                        },
-                    }}
-                >
-                    {firstRow.map((src, index) => (
-                        <div
-                        key={`row1-${index}`}
-                        className="relative aspect-[4/3] h-40 flex-shrink-0"
-                        style={{ rotate: `${(index % 2 === 0 ? -3 : 5)}deg` }}
-                        >
-                        <Image
-                            src={src}
-                            alt={`Showcase image ${index + 1}`}
-                            fill
-                            className="w-full h-full object-cover rounded-2xl shadow-md"
-                        />
-                        </div>
-                    ))}
-                </motion.div>
-                <motion.div
-                    className="flex gap-8"
-                    animate={{
-                        x: ["0%", "-100%"],
-                        transition: {
-                        ease: "linear",
-                        duration: 75,
-                        repeat: Infinity,
-                        },
-                    }}
-                >
-                    {secondRow.map((src, index) => (
-                        <div
-                        key={`row2-${index}`}
-                        className="relative aspect-[3/4] h-56 flex-shrink-0"
-                        style={{ rotate: `${(index % 2 === 0 ? 4 : -2)}deg` }}
-                        >
-                        <Image
-                            src={src}
-                            alt={`Showcase image ${index + 1}`}
-                            fill
-                            className="w-full h-full object-cover rounded-2xl shadow-lg"
-                        />
-                        </div>
-                    ))}
-                </motion.div>
-                 <motion.div
-                    className="flex gap-8"
-                    animate={{
-                        x: ["-100%", "0%"],
-                        transition: {
-                        ease: "linear",
-                        duration: 55,
-                        repeat: Infinity,
-                        },
-                    }}
-                >
-                    {thirdRow.map((src, index) => (
-                        <div
-                        key={`row3-${index}`}
-                        className="relative aspect-[16/9] h-32 flex-shrink-0"
-                        style={{ rotate: `${(index % 2 === 0 ? 2 : -4)}deg` }}
-                        >
-                        <Image
-                            src={src}
-                            alt={`Showcase image ${index + 1}`}
-                            fill
-                            className="w-full h-full object-cover rounded-xl shadow-sm"
-                        />
-                        </div>
-                    ))}
-                </motion.div>
-            </div>
-          </div>
+      <div className="absolute top-0 right-0 h-full w-full lg:w-1/2 [mask-image:linear-gradient(to_right,transparent,black_20%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_20%,black_80%)]">
+        {/* Camada do Logo */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Logo className="w-96 h-96 opacity-20 blur-sm" />
+        </div>
+        
+        {/* Carrossel de Imagens */}
+        <div className="absolute inset-0 flex flex-col gap-8 justify-center overflow-hidden">
+          <motion.div
+            className="flex gap-8"
+            animate={{
+              x: ["0%", "-100%"],
+              transition: {
+                ease: "linear",
+                duration: 60,
+                repeat: Infinity,
+              },
+            }}
+          >
+            {firstRow.map((src, index) => (
+              <div
+                key={`row1-${index}`}
+                className="relative aspect-[4/3] h-40 flex-shrink-0"
+                style={{ rotate: `${(index % 2 === 0 ? -3 : 5)}deg` }}
+              >
+                <Image
+                  src={src}
+                  alt={`Showcase image ${index + 1}`}
+                  fill
+                  className="w-full h-full object-cover rounded-2xl shadow-md"
+                />
+              </div>
+            ))}
+          </motion.div>
+          <motion.div
+            className="flex gap-8"
+            animate={{
+              x: ["-100%", "0%"],
+              transition: {
+                ease: "linear",
+                duration: 75,
+                repeat: Infinity,
+              },
+            }}
+          >
+            {secondRow.map((src, index) => (
+              <div
+                key={`row2-${index}`}
+                className="relative aspect-[3/4] h-56 flex-shrink-0"
+                style={{ rotate: `${(index % 2 === 0 ? 4 : -2)}deg` }}
+              >
+                <Image
+                  src={src}
+                  alt={`Showcase image ${index + 1}`}
+                  fill
+                  className="w-full h-full object-cover rounded-2xl shadow-lg"
+                />
+              </div>
+            ))}
+          </motion.div>
+          <motion.div
+            className="flex gap-8"
+            animate={{
+              x: ["0%", "-100%"],
+              transition: {
+                ease: "linear",
+                duration: 55,
+                repeat: Infinity,
+              },
+            }}
+          >
+            {thirdRow.map((src, index) => (
+              <div
+                key={`row3-${index}`}
+                className="relative aspect-[16/9] h-32 flex-shrink-0"
+                style={{ rotate: `${(index % 2 === 0 ? 2 : -4)}deg` }}
+              >
+                <Image
+                  src={src}
+                  alt={`Showcase image ${index + 1}`}
+                  fill
+                  className="w-full h-full object-cover rounded-xl shadow-sm"
+                />
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>
