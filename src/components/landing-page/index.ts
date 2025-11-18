@@ -9,4 +9,3 @@ export { StorySection } from './story-section';
 export { PricingSection } from './pricing-section';
 export { CTASection } from './cta-section';
 export { useScrollAnimations } from './use-scroll-animations';
-export { AnimatedMarqueeHero } from '../landing/animated-marquee-hero';

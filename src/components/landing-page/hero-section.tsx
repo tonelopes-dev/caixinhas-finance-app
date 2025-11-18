@@ -1,33 +1,80 @@
 "use client"
 
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { Logo } from "../logo"
+import { PlaceHolderImages } from "@/lib/placeholder-images"
 
 type HeroSectionProps = {
   scrollY: number
 }
 
 export function HeroSection({ scrollY }: HeroSectionProps) {
-  return (
-    <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-gradient-slow" />
+  const marqueeImages = PlaceHolderImages.filter((img) =>
+    img.id.startsWith("feature")
+  ).map((img) => img.imageUrl)
+  const duplicatedImages = [...marqueeImages, ...marqueeImages]
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-primary/20 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 10}s`,
-            }}
-          />
-        ))}
+  return (
+    <section className="pt-32 pb-20 px-4 relative overflow-hidden h-screen flex items-center justify-center">
+      {/* Animated Image Marquee Background */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden opacity-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+        <motion.div
+          className="flex gap-8"
+          animate={{
+            x: ["0%", "-100%"],
+            transition: {
+              ease: "linear",
+              duration: 80,
+              repeat: Infinity,
+            },
+          }}
+        >
+          {duplicatedImages.map((src, index) => (
+            <div
+              key={`marquee-1-${index}`}
+              className="relative aspect-[4/3] h-48 flex-shrink-0"
+              style={{ rotate: `${(index % 2 === 0 ? -4 : 4)}deg` }}
+            >
+              <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+              />
+            </div>
+          ))}
+        </motion.div>
+        <motion.div
+          className="flex gap-8 mt-8"
+          animate={{
+            x: ["-100%", "0%"],
+            transition: {
+              ease: "linear",
+              duration: 90,
+              repeat: Infinity,
+              delay: 2,
+            },
+          }}
+        >
+          {duplicatedImages.map((src, index) => (
+            <div
+              key={`marquee-2-${index}`}
+              className="relative aspect-[4/3] h-64 flex-shrink-0"
+              style={{ rotate: `${(index % 2 === 0 ? 5 : -3)}deg` }}
+            >
+              <Image
+                src={src}
+                alt={`Showcase image ${index + 1}`}
+                fill
+                className="w-full h-full object-cover rounded-2xl shadow-md"
+              />
+            </div>
+          ))}
+        </motion.div>
       </div>
 
-      <div className="container mx-auto relative">
+      <div className="container mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-in-up">
             <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight text-balance animate-fade-in-up animation-delay-100">
@@ -45,7 +92,6 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
           </div>
 
           <div className="relative animate-fade-in-up animation-delay-200">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-[3rem] blur-3xl animate-pulse-slow" />
             <div
               className="relative z-10 transform hover:scale-105 transition-all duration-700 hover:rotate-2 flex items-center justify-center h-full"
               style={{ transform: `translateY(${scrollY * 0.1}px)` }}
