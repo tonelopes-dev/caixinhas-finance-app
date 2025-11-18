@@ -1,5 +1,7 @@
+
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
+import { CategoryService } from './category.service'; // Importar o CategoryService
 
 export type UserWithoutPassword = {
   id: string;
@@ -69,14 +71,15 @@ export class AuthService {
   }
 
   /**
-   * Registra um novo usuário
+   * Registra um novo usuário e cria suas categorias padrão.
    * @param data - Dados do novo usuário
    * @returns Usuário criado (sem senha)
    */
   static async register(data: CreateUserInput): Promise<UserWithoutPassword> {
-    try {
+    // Usar uma transação para garantir que o usuário e as categorias sejam criados juntos
+    return prisma.$transaction(async (tx) => {
       // Verificar se o email já existe
-      const existingUser = await prisma.user.findUnique({
+      const existingUser = await tx.user.findUnique({
         where: { email: data.email },
       });
 
@@ -88,7 +91,7 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(data.password, 12);
 
       // Criar usuário
-      const user = await prisma.user.create({
+      const user = await tx.user.create({
         data: {
           name: data.name,
           email: data.email,
@@ -107,11 +110,15 @@ export class AuthService {
         },
       });
 
+      // Criar categorias padrão para o novo usuário
+      await CategoryService.createDefaultCategoriesForUser(user.id, tx);
+
       return user;
-    } catch (error) {
-      console.error('Erro ao registrar usuário:', error);
-      throw error;
-    }
+    }).catch(error => {
+        console.error('Erro ao registrar usuário e criar categorias:', error);
+        // Lançar o erro original para ser tratado no nível superior
+        throw error;
+    });
   }
 
   /**

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -37,12 +38,6 @@ function SubmitButton() {
   );
 }
 
-const categories = {
-    expense: ['Alimentação', 'Transporte', 'Casa', 'Lazer', 'Saúde', 'Utilidades', 'Outros', 'Aluguel', 'Materiais'],
-    income: ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros', 'Consultas', 'Contribuição Familiar'],
-    transfer: ['Caixinha', 'Transferência entre contas', 'Contribuição Familiar', 'Investimento']
-}
-
 const paymentMethods = [
     { value: 'credit_card', label: 'Cartão de Crédito' },
     { value: 'debit_card', label: 'Cartão de Débito' },
@@ -52,7 +47,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function EditTransactionSheet({ transaction, accounts, goals }: { transaction: Transaction; accounts: Account[]; goals: Goal[] }) {
+export function EditTransactionSheet({ transaction, accounts, goals, categories }: { transaction: Transaction; accounts: Account[]; goals: Goal[], categories: any[] }) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
@@ -208,7 +203,7 @@ export function EditTransactionSheet({ transaction, accounts, goals }: { transac
                             <SelectValue placeholder="Selecione a categoria" />
                             </SelectTrigger>
                             <SelectContent>
-                                {categories[transactionType]?.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                {categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
                         {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}

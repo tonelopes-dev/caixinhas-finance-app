@@ -6,10 +6,38 @@ export type Category = {
   ownerId: string;
 };
 
+const defaultCategories = [
+    'Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 
+    'Vestuário', 'Contas e Utilidades', 'Salário', 'Freelance', 'Investimentos', 
+    'Presente', 'Transferência', 'Caixinha', 'Outros'
+];
+
 /**
  * Serviço para gerenciar categorias de despesa
  */
 export class CategoryService {
+    
+  /**
+   * Cria as categorias padrão para um novo usuário
+   */
+  static async createDefaultCategoriesForUser(userId: string, tx: any = prisma): Promise<void> {
+    try {
+      const categoriesToCreate = defaultCategories.map(name => ({
+        name,
+        ownerId: userId,
+      }));
+
+      await tx.category.createMany({
+        data: categoriesToCreate,
+        skipDuplicates: true, // Não causa erro se já existirem
+      });
+    } catch (error) {
+      console.error('Erro ao criar categorias padrão:', error);
+      // O erro será tratado pela transação no AuthService
+      throw new Error('Não foi possível criar as categorias padrão');
+    }
+  }
+
   /**
    * Busca todas as categorias de um usuário
    */

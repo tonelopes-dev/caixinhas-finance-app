@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -52,6 +53,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getAccountsData } from '../accounts/actions';
 
 
 function formatCurrency(value: number) {
@@ -108,6 +110,7 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
@@ -135,6 +138,13 @@ export default function TransactionsPage() {
     // Na página de transações, precisamos de TODAS as contas e metas para resolver os nomes
     setAccounts(allAccounts);
     setGoals(allGoals);
+
+    // Fetch categories
+    async function fetchCategories() {
+        const data = await getAccountsData(userId);
+        setCategories(data.categories);
+    }
+    fetchCategories();
 
     // Set filters to current month and year on initial load
     setMonthFilter((new Date().getMonth() + 1).toString());
@@ -380,7 +390,7 @@ export default function TransactionsPage() {
                       </SelectContent>
                     </Select>
                     <div className="hidden md:block">
-                        <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} />
+                        <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} categories={categories} />
                     </div>
                   </div>
                 </div>
@@ -421,7 +431,7 @@ export default function TransactionsPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <EditTransactionSheet transaction={t} accounts={accounts} goals={goals}/>
+                                        <EditTransactionSheet transaction={t} accounts={accounts} goals={goals} categories={categories} />
                                         <DeleteTransactionDialog transactionId={t.id} />
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -507,7 +517,7 @@ export default function TransactionsPage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <EditTransactionSheet transaction={t} accounts={accounts} goals={goals} />
+                                            <EditTransactionSheet transaction={t} accounts={accounts} goals={goals} categories={categories} />
                                             <DeleteTransactionDialog transactionId={t.id} />
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -527,7 +537,7 @@ export default function TransactionsPage() {
             </Card>
         </motion.div>
         <div className="fixed bottom-6 right-6 md:hidden">
-            <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} />
+            <AddTransactionSheet accounts={accounts} goals={goals} ownerId={workspaceId} categories={categories} />
         </div>
       </div>
     </div>
