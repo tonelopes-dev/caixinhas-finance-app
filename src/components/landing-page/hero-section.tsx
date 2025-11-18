@@ -1,9 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Sparkles, ChevronRight } from "lucide-react"
 import { Logo } from "../logo"
 
 type HeroSectionProps = {
@@ -45,46 +42,6 @@ export function HeroSection({ scrollY }: HeroSectionProps) {
               de comunicação e confiança para transformar sonhos individuais em
               conquistas conjuntas.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up animation-delay-300">
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-xl h-14 px-8 hover:scale-105 transition-all relative overflow-hidden group"
-              >
-                <span className="relative z-10 flex items-center">
-                  Começar Agora
-                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-xl h-14 px-8 border-2 bg-transparent hover:bg-primary/5 hover:border-primary transition-all hover:scale-105"
-              >
-                Ver Como Funciona
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-8 pt-4 animate-fade-in-up animation-delay-400">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent border-4 border-background hover:scale-110 transition-transform cursor-pointer"
-                    style={{ animationDelay: `${i * 0.1}s` }}
-                  />
-                ))}
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-foreground">
-                  +10.000 casais
-                </p>
-                <p className="text-sm text-foreground/60">
-                  realizando sonhos juntos
-                </p>
-              </div>
-            </div>
           </div>
 
           <div className="relative animate-fade-in-up animation-delay-200">

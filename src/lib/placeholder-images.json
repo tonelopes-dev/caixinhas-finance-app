@@ -41,6 +41,30 @@
       "description": "App screenshot on phones for call-to-action section",
       "imageUrl": "/screenshots/savings-box-detail.png",
       "imageHint": "app interface"
+    },
+    {
+      "id": "feature-1",
+      "description": "A happy couple reviewing their finances on a tablet.",
+      "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04421cd6c3?w=600&q=80",
+      "imageHint": "couple finances"
+    },
+    {
+      "id": "feature-2",
+      "description": "A close-up of a piggy bank with coins.",
+      "imageUrl": "https://images.unsplash.com/photo-1591032184093-c95078531398?w=600&q=80",
+      "imageHint": "piggy bank"
+    },
+    {
+      "id": "feature-3",
+      "description": "A person pointing at a financial chart on a laptop screen.",
+      "imageUrl": "https://images.unsplash.com/photo-1542744095-fcf48d80b2fd?w=600&q=80",
+      "imageHint": "financial chart"
+    },
+    {
+      "id": "feature-4",
+      "description": "A travel-themed collage with a map, camera, and passport.",
+      "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+      "imageHint": "travel planning"
     }
   ]
 }
