@@ -95,7 +95,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
 
   return (
     <section className="relative flex min-h-[600px] items-center pt-32 pb-20">
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <PhotoCarousel />
       </div>
       <div className="container relative z-10 mx-auto px-6 sm:px-4">
@@ -111,7 +111,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
           {/* Coluna da Esquerda: Texto (aparece em segundo no mobile) */}
           <div className="z-10 space-y-8 lg:order-first">
             <div className="flex items-center gap-4">
-              <h1 className="animate-fade-in-up text-balance text-5xl font-bold leading-tight text-foreground animation-delay-100 md:text-7xl">
+              <h1 className="animate-fade-in-up text-balance text-4xl font-bold leading-tight text-foreground animation-delay-100 md:text-5xl lg:text-7xl">
                 Sonhar juntos é o primeiro{" "}
                 <span className="animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
                   passo para conquistar
@@ -119,7 +119,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
               </h1>
             </div>
 
-            <p className="animate-fade-in-up text-pretty text-xl leading-relaxed text-foreground/70 animation-delay-200 md:text-2xl">
+            <p className="animate-fade-in-up text-pretty text-lg leading-relaxed text-foreground/70 animation-delay-200 md:text-xl">
               Caixinhas não é apenas um aplicativo de finanças. É uma ferramenta
               de comunicação e confiança para transformar sonhos individuais em
               conquistas conjuntas.
