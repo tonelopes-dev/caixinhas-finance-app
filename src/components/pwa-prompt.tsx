@@ -128,8 +128,8 @@ export function PwaPrompt() {
         )}
          {showNotifications && (
             <div className="bg-background border rounded-lg shadow-lg p-4 mt-4 max-w-sm animate-in fade-in-50 slide-in-from-bottom-10">
-                <p className="text-sm font-medium">Gostaria de receber notificações sobre o progresso das suas metas?</p>
-                <div className="flex gap-2 mt-4">
+                <p className="text-sm font-medium text-center sm:text-left">Gostaria de receber notificações sobre o progresso das suas metas?</p>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
                     <Button onClick={handleNotificationsClick} className="flex-1">
                         <BellRing className="mr-2 h-4 w-4" />
                         Ativar Notificações
