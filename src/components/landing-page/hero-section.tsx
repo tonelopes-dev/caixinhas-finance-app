@@ -54,7 +54,7 @@ function PhotoCarousel() {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent z-10" />
-      <div className="absolute inset-0 flex flex-col justify-start gap-4 lg:top-auto lg:bottom-auto lg:justify-center">
+      <div className="absolute inset-x-0 top-0 flex flex-col justify-start gap-4 lg:inset-y-auto lg:justify-center">
         {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
           <div
             key={rowIndex}
@@ -94,12 +94,14 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
   const yMovement = -scrollY / 10
 
   return (
-    <section className="relative flex min-h-[600px] items-center px-4 pt-32 pb-20">
-      <PhotoCarousel />
-      <div className="container relative z-10 mx-auto">
+    <section className="relative flex min-h-[600px] items-center pt-32 pb-20">
+      <div className="absolute inset-0 z-0">
+        <PhotoCarousel />
+      </div>
+      <div className="container relative z-10 mx-auto px-6 sm:px-4">
         <div className="grid items-center justify-center gap-12 lg:grid-cols-2">
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
-          <div className="flex items-center mt-8 mb-12 lg:mb-[-345px] justify-center lg:order-last animate-fade-in-up">
+          <div className="flex items-center mt-8 mb-12 lg:mb-[-345px] justify-center order-first lg:order-last animate-fade-in-up">
             <Logo
               className="h-full w-[800px] animate-float-logo"
               style={{ transform: `translateY(${yMovement}px)` }}
