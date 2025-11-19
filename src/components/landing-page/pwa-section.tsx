@@ -11,7 +11,7 @@ type PWASectionProps = {
 
 export function PWASection({ isVisible }: PWASectionProps) {
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-30">
         {[...Array(15)].map((_, i) => (
           <div
