@@ -60,7 +60,7 @@ export function NotificationsDropdown() {
           <span className="sr-only">Notificações</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 md:w-96" align="end">
+      <DropdownMenuContent className="w-screen max-w-md" align="end">
         <DropdownMenuLabel className="flex justify-between items-center">
             Notificações
             <Link href="/notifications" className='text-xs font-normal text-primary hover:underline'>Ver todas</Link>
