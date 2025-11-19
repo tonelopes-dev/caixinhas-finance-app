@@ -25,7 +25,7 @@ type PricingSectionProps = {
 
 export function PricingSection({ isVisible }: PricingSectionProps) {
   return (
-    <section id="planos" className="py-20 px-4">
+    <section id="planos" className="py-20">
       <div className="container mx-auto">
         <div
           className="text-center mb-16 space-y-4"

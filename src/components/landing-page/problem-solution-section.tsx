@@ -11,7 +11,7 @@ export function ProblemSolutionSection({
   isVisible,
 }: ProblemSolutionSectionProps) {
   return (
-    <section className="py-20 px-4 bg-card/50">
+    <section className="py-20 bg-card/50">
       <div className="container mx-auto">
         <div
           className="max-w-4xl mx-auto text-center space-y-6 mb-16"

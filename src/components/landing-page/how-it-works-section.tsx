@@ -17,7 +17,7 @@ type HowItWorksSectionProps = {
 
 export function HowItWorksSection({ isVisible }: HowItWorksSectionProps) {
   return (
-    <section id="como-funciona" className="py-20 px-4">
+    <section id="como-funciona" className="py-20">
       <div className="container mx-auto">
         <div
           className="text-center mb-16 space-y-4"

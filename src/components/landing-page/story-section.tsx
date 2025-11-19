@@ -13,7 +13,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
   return (
     <section
       id="historia"
-      className="py-20 px-4 bg-gradient-to-br from-primary/5 to-accent/5 relative overflow-hidden"
+      className="py-20 bg-gradient-to-br from-primary/5 to-accent/5 relative overflow-hidden"
     >
       <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float animation-delay-1000" />
