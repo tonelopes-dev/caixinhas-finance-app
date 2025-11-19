@@ -5,7 +5,7 @@ import { Check, ChevronRight } from "lucide-react"
 
 export function CTASection() {
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-primary via-primary to-accent relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-primary via-primary to-accent relative overflow-hidden">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary-foreground rounded-full animate-ping-slow" />
         <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-primary-foreground rounded-full animate-ping-slow animation-delay-1000" />
