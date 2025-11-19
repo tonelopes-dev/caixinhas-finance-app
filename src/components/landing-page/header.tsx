@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -94,7 +95,7 @@ export function Header() {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`lg:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-b border-border transition-all duration-300 ease-in-out ${
+        className={`lg:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-b border-border transition-all duration-300 ease-in-out w-full ${
           isMobileMenuOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-4 pointer-events-none"
