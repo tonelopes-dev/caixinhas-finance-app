@@ -21,14 +21,16 @@ export function LandingPageClient() {
     <div className="min-h-screen">
       <Header />
       <HeroSection scrollY={scrollY} />
-      <ProblemSolutionSection isVisible={isVisible} />
-      <FeaturesSection isVisible={isVisible} />
-      <PWASection isVisible={isVisible} />
-      <BenefitsSection isVisible={isVisible} />
-      <HowItWorksSection isVisible={isVisible} />
-      <StorySection isVisible={isVisible} />
-      <PricingSection isVisible={isVisible} />
-      <CTASection />
+      <div className="relative z-10 bg-background">
+        <ProblemSolutionSection isVisible={isVisible} />
+        <FeaturesSection isVisible={isVisible} />
+        <PWASection isVisible={isVisible} />
+        <BenefitsSection isVisible={isVisible} />
+        <HowItWorksSection isVisible={isVisible} />
+        <StorySection isVisible={isVisible} />
+        <PricingSection isVisible={isVisible} />
+        <CTASection />
+      </div>
     </div>
   )
 }
