@@ -126,7 +126,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
             </p>
 
             <div className="animate-fade-in-up animation-delay-300 space-y-8">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
                 <Button asChild size="lg" className="h-14 px-8 text-lg">
                   <Link href="/register">
                     Começar Agora <ChevronRight className="ml-2 h-5 w-5" />
