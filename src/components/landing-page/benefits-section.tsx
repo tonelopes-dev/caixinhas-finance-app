@@ -17,7 +17,7 @@ type BenefitsSectionProps = {
 
 export function BenefitsSection({ isVisible }: BenefitsSectionProps) {
   return (
-    <section className="py-20 bg-card">
+    <section className="py-20 bg-card px-4">
       <div className="container mx-auto">
         <div
           className="text-center mb-16 space-y-4"

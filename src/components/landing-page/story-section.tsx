@@ -13,7 +13,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
   return (
     <section
       id="historia"
-      className="py-20 bg-gradient-to-br from-primary/5 to-accent/5 relative overflow-hidden"
+      className="py-20 px-4 bg-gradient-to-br from-primary/5 to-accent/5 relative overflow-hidden"
     >
       <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float animation-delay-1000" />
@@ -23,15 +23,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
           className="text-center mb-16 space-y-4"
           data-animate="story-header"
         >
-          <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["story-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            História Real
-          </Badge>
+         
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["story-header"]

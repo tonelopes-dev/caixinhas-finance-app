@@ -25,21 +25,13 @@ type PricingSectionProps = {
 
 export function PricingSection({ isVisible }: PricingSectionProps) {
   return (
-    <section id="planos" className="py-20">
+    <section id="planos" className="py-20 px-4">
       <div className="container mx-auto">
         <div
           className="text-center mb-16 space-y-4"
           data-animate="pricing-header"
         >
-          <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["pricing-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            Preço Simples
-          </Badge>
+          
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["pricing-header"]
@@ -63,7 +55,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
 
         <div className="max-w-3xl mx-auto">
           <div className="relative pb-6">
-            <div className="absolute -top-0 left-1/2 -translate-x-1/2 animate-bounce-slow z-20">
+            <div className="absolute -top-0 left-[65px] md:left-1/2 -translate-x-1/2 animate-bounce-slow z-20">
               <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
                 Acesso Completo
@@ -184,6 +176,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                     <Lock className="w-4 h-4" />
                     <span>Pagamento seguro processado por</span>
                     <Image
+                      priority
                       src="/logo-kiwify.webp"
                       alt="Kiwify"
                       width={60}

@@ -17,21 +17,12 @@ type HowItWorksSectionProps = {
 
 export function HowItWorksSection({ isVisible }: HowItWorksSectionProps) {
   return (
-    <section id="como-funciona" className="py-20">
+    <section id="como-funciona" className="py-20 px-4">
       <div className="container mx-auto">
         <div
           className="text-center mb-16 space-y-4"
           data-animate="how-it-works-header"
         >
-          <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["how-it-works-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            Processo Simples
-          </Badge>
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["how-it-works-header"]

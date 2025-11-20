@@ -11,7 +11,7 @@ type PWASectionProps = {
 
 export function PWASection({ isVisible }: PWASectionProps) {
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 relative overflow-hidden">
+    <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-30">
         {[...Array(15)].map((_, i) => (
           <div
@@ -32,16 +32,7 @@ export function PWASection({ isVisible }: PWASectionProps) {
           className="text-center mb-16 space-y-4"
           data-animate="pwa-header"
         >
-          <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["pwa-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            <Zap className="w-4 h-4 inline mr-2" />
-            Tecnologia Progressiva
-          </Badge>
+          
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["pwa-header"]
