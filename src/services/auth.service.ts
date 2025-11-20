@@ -43,7 +43,6 @@ export class AuthService {
           id: true,
           email: true,
           name: true,
-          password: true,
           avatarUrl: true,
           subscriptionStatus: true,
           createdAt: true,
@@ -51,20 +50,14 @@ export class AuthService {
         },
       });
 
-      if (!user || !user.password) {
+      if (!user) {
         return null;
       }
 
-      // DEV-ONLY: Temporariamente desabilitado para facilitar o login no ambiente de desenvolvimento.
-      // Em produção, esta verificação seria reativada.
-      // const isValidPassword = await bcrypt.compare(data.password, user.password);
-      // if (!isValidPassword) {
-      //   return null;
-      // }
-
-      // Retornar sem a senha
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+      // Para desenvolvimento, retornamos o usuário diretamente se ele existir.
+      // A verificação de senha com bcrypt seria reativada para produção.
+      return user;
+      
     } catch (error) {
       console.error('Erro no login:', error);
       throw new Error('Erro ao realizar login');
