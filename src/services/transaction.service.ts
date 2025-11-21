@@ -143,7 +143,12 @@ export class TransactionService {
           description: data.description,
           amount: data.amount,
           type: data.type,
-          category: data.category,
+          category: {
+            connectOrCreate: {
+                where: { name_ownerId: { name: data.category, ownerId: data.userId || data.vaultId! } },
+                create: { name: data.category, ownerId: data.userId || data.vaultId! }
+            }
+          },
           paymentMethod: data.paymentMethod,
           isRecurring: data.isRecurring ?? false,
           isInstallment: data.isInstallment ?? false,
@@ -184,14 +189,14 @@ export class TransactionService {
         if (data.type === 'transfer') {
             if (data.sourceAccountId) {
                 if (data.sourceAccountId.startsWith('goal-')) {
-                    await GoalService.removeFromGoal(data.sourceAccountId, data.amount);
+                    await GoalService.removeFromGoal(data.sourceAccountId.replace('goal-',''), data.amount);
                 } else {
                     await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
                 }
             }
             if (data.destinationAccountId) {
                 if (data.destinationAccountId.startsWith('goal-')) {
-                    await GoalService.addToGoal(data.destinationAccountId, data.amount);
+                    await GoalService.addToGoal(data.destinationAccountId.replace('goal-',''), data.amount);
                 } else {
                     await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
                 }
@@ -233,6 +238,19 @@ export class TransactionService {
     // Por simplicidade, esta função apenas atualiza os dados da transação sem ajustar os saldos.
     try {
       const updateData: any = { ...data };
+
+      if(data.category) {
+        const ownerId = (await prisma.transaction.findUnique({where: {id: transactionId}}))?.userId;
+        if(ownerId) {
+            updateData.category = {
+                connectOrCreate: {
+                    where: { name_ownerId: { name: data.category, ownerId } },
+                    create: { name: data.category, ownerId }
+                }
+            };
+        }
+      }
+
 
       if ('sourceAccountId' in data) {
         updateData.sourceAccount = data.sourceAccountId ? { connect: { id: data.sourceAccountId } } : { disconnect: true };
