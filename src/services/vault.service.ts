@@ -281,6 +281,69 @@ export class VaultService {
   }
 
   /**
+   * Cria um convite para um cofre
+   */
+  static async createInvitation(vaultId: string, senderId: string, receiverEmail: string): Promise<void> {
+    try {
+        const [receiver, vault, sender] = await Promise.all([
+            prisma.user.findUnique({ where: { email: receiverEmail } }),
+            prisma.vault.findUnique({ where: { id: vaultId } }),
+            prisma.user.findUnique({ where: { id: senderId } }),
+        ]);
+
+        if (!vault) throw new Error('Cofre não encontrado.');
+        if (!sender) throw new Error('Usuário remetente não encontrado.');
+        
+        let receiverId: string;
+        
+        // Se o usuário não existe, um registro de convite é criado sem um receiverId,
+        // aguardando o cadastro. Idealmente, teríamos uma tabela separada para pré-convites
+        // ou criaríamos um usuário "placeholder". Por simplicidade, vamos exigir que o usuário exista.
+        if (!receiver) {
+            // Em uma app de produção, você poderia criar um pré-registro aqui.
+            // Por agora, vamos simplificar e lançar um erro.
+            throw new Error(`Usuário com e-mail ${receiverEmail} não encontrado. Peça para ele(a) se cadastrar primeiro.`);
+        }
+        receiverId = receiver.id;
+
+        // Verificar se já existe um convite pendente para este usuário e cofre
+        const existingInvitation = await prisma.invitation.findFirst({
+            where: { targetId: vaultId, receiverId, status: 'pending' }
+        });
+        if (existingInvitation) {
+            throw new Error('Este usuário já tem um convite pendente para este cofre.');
+        }
+
+        // Verificar se o usuário já é membro
+        const isAlreadyMember = await this.isMember(vaultId, receiverId);
+        if (isAlreadyMember) {
+            throw new Error('Este usuário já é membro deste cofre.');
+        }
+
+        await prisma.invitation.create({
+            data: {
+                type: 'vault',
+                targetId: vaultId,
+                targetName: vault.name,
+                senderId: senderId,
+                receiverId: receiverId,
+                status: 'pending',
+            }
+        });
+
+        // Aqui você poderia disparar o e-mail
+        // await EmailService.sendVaultInvitation(sender.name, receiver.email, vault.name);
+    } catch (error) {
+        console.error('Erro ao criar convite:', error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error('Não foi possível criar o convite.');
+    }
+  }
+
+
+  /**
    * Busca convites pendentes para um usuário
    * @param userId - ID do usuário
    * @returns Lista de convites

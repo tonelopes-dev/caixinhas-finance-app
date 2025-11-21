@@ -18,9 +18,9 @@ import { useFormStatus } from 'react-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { getMockDataForUser } from '@/lib/data';
 import { sendPartnerInvite } from './actions';
 import type { GenericState } from '@/app/auth/actions';
+import { VaultService } from '@/services';
 
 
 function SubmitButton() {
@@ -41,6 +41,7 @@ export default function InvitePage() {
   const { data: session, status } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
   const [workspaceName, setWorkspaceName] = useState('');
+  const [workspaceId, setWorkspaceId] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -52,14 +53,22 @@ export default function InvitePage() {
 
     const userId = session.user.id;
     const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
+    setWorkspaceId(vaultId);
     
-    const { currentVault } = getMockDataForUser(userId, vaultId);
-    if (currentVault) {
-        setWorkspaceName(currentVault.name);
-    } else {
-        setWorkspaceName('seu cofre pessoal');
+    async function fetchVaultName() {
+        if (vaultId && vaultId !== userId) {
+            const vault = await VaultService.getVaultById(vaultId);
+            if (vault) {
+                setWorkspaceName(vault.name);
+            }
+        } else {
+            setWorkspaceName('seu cofre pessoal');
+        }
     }
-  }, []);
+
+    fetchVaultName();
+
+  }, [session, status, router]);
 
   useEffect(() => {
     if(state.message && !state.errors) {
@@ -68,7 +77,7 @@ export default function InvitePage() {
     } else if (state.message && state.errors) {
         toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
     }
-  }, [state, toast, session, status, router]);
+  }, [state, toast]);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
@@ -81,7 +90,7 @@ export default function InvitePage() {
         </Button>
         <Card>
             <form action={dispatch} ref={formRef}>
-                <input type="hidden" name="vaultName" value={workspaceName} />
+                <input type="hidden" name="vaultId" value={workspaceId} />
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
                     <Mail className="h-6 w-6 text-primary" />
@@ -112,4 +121,3 @@ export default function InvitePage() {
     </div>
   );
 }
-
