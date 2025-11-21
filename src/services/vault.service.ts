@@ -285,8 +285,7 @@ export class VaultService {
    */
   static async createInvitation(vaultId: string, senderId: string, receiverEmail: string): Promise<void> {
     try {
-        const [receiver, vault, sender] = await Promise.all([
-            prisma.user.findUnique({ where: { email: receiverEmail } }),
+        const [vault, sender] = await Promise.all([
             prisma.vault.findUnique({ where: { id: vaultId } }),
             prisma.user.findUnique({ where: { id: senderId } }),
         ]);
@@ -294,21 +293,19 @@ export class VaultService {
         if (!vault) throw new Error('Cofre não encontrado.');
         if (!sender) throw new Error('Usuário remetente não encontrado.');
         
+        let receiver = await prisma.user.findUnique({ where: { email: receiverEmail } });
         let receiverId: string;
-        
-        // Se o usuário não existe, um registro de convite é criado sem um receiverId,
-        // aguardando o cadastro. Idealmente, teríamos uma tabela separada para pré-convites
-        // ou criaríamos um usuário "placeholder". Por simplicidade, vamos exigir que o usuário exista.
+
+        // Se o usuário convidado não existe, não podemos criar o convite ainda.
+        // A lógica de negócio é que o usuário deve se cadastrar primeiro, o que é um fluxo comum.
         if (!receiver) {
-            // Em uma app de produção, você poderia criar um pré-registro aqui.
-            // Por agora, vamos simplificar e lançar um erro.
             throw new Error(`Usuário com e-mail ${receiverEmail} não encontrado. Peça para ele(a) se cadastrar primeiro.`);
         }
         receiverId = receiver.id;
 
         // Verificar se já existe um convite pendente para este usuário e cofre
         const existingInvitation = await prisma.invitation.findFirst({
-            where: { targetId: vaultId, receiverId, status: 'pending' }
+            where: { targetId: vaultId, receiverId, status: 'pending', type: 'vault' }
         });
         if (existingInvitation) {
             throw new Error('Este usuário já tem um convite pendente para este cofre.');
@@ -331,8 +328,6 @@ export class VaultService {
             }
         });
 
-        // Aqui você poderia disparar o e-mail
-        // await EmailService.sendVaultInvitation(sender.name, receiver.email, vault.name);
     } catch (error) {
         console.error('Erro ao criar convite:', error);
         if (error instanceof Error) {
@@ -382,32 +377,34 @@ export class VaultService {
    */
   static async acceptInvitation(invitationId: string, userId: string): Promise<void> {
     try {
-      // Buscar o convite
-      const invitation = await prisma.invitation.findUnique({
-        where: { id: invitationId },
-      });
+      // Usar transação para garantir atomicidade
+      await prisma.$transaction(async (tx) => {
+        const invitation = await tx.invitation.findUnique({
+          where: { id: invitationId },
+        });
 
-      if (!invitation || invitation.receiverId !== userId) {
-        throw new Error('Convite não encontrado ou inválido');
-      }
+        if (!invitation || invitation.receiverId !== userId || invitation.status !== 'pending') {
+          throw new Error('Convite não encontrado, inválido ou já processado.');
+        }
 
-      // Adicionar como membro do cofre
-      await prisma.vaultMember.create({
-        data: {
-          vaultId: invitation.targetId,
-          userId,
-          role: 'member',
-        },
-      });
+        // Adicionar como membro do cofre
+        await tx.vaultMember.create({
+          data: {
+            vaultId: invitation.targetId,
+            userId,
+            role: 'member',
+          },
+        });
 
-      // Atualizar status do convite
-      await prisma.invitation.update({
-        where: { id: invitationId },
-        data: { status: 'accepted' },
+        // Atualizar status do convite
+        await tx.invitation.update({
+          where: { id: invitationId },
+          data: { status: 'accepted' },
+        });
       });
     } catch (error) {
       console.error('Erro ao aceitar convite:', error);
-      throw new Error('Erro ao aceitar convite');
+      throw new Error('Erro ao aceitar convite. Talvez você já seja membro deste cofre.');
     }
   }
 
@@ -422,7 +419,7 @@ export class VaultService {
         where: { id: invitationId },
       });
 
-      if (!invitation || invitation.receiverId !== userId) {
+      if (!invitation || invitation.receiverId !== userId || invitation.status !== 'pending') {
         throw new Error('Convite não encontrado ou inválido');
       }
 

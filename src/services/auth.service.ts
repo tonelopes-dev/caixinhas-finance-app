@@ -9,6 +9,7 @@ export type UserWithoutPassword = {
   name: string;
   avatarUrl: string | null;
   subscriptionStatus: string;
+  trialExpiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -39,24 +40,21 @@ export class AuthService {
     try {
       const user = await prisma.user.findUnique({
         where: { email: data.email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          avatarUrl: true,
-          subscriptionStatus: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
 
       if (!user) {
         return null;
       }
+      
+      // A senha é verificada aqui
+      const isPasswordValid = await bcrypt.compare(data.password, user.password);
+      if (!isPasswordValid) {
+        return null;
+      }
 
-      // Para desenvolvimento, retornamos o usuário diretamente se ele existir.
-      // A verificação de senha com bcrypt seria reativada para produção.
-      return user;
+      // Retorna o usuário sem a senha
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
       
     } catch (error) {
       console.error('Erro no login:', error);
@@ -84,6 +82,10 @@ export class AuthService {
       // Hash da senha
       const hashedPassword = await bcrypt.hash(data.password, 12);
 
+      // Define a data de expiração do trial
+      const trialExpiresAt = new Date();
+      trialExpiresAt.setDate(trialExpiresAt.getDate() + 30);
+
       // Criar usuário
       const user = await tx.user.create({
         data: {
@@ -92,6 +94,7 @@ export class AuthService {
           password: hashedPassword,
           avatarUrl: data.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
           subscriptionStatus: 'trial',
+          trialExpiresAt: trialExpiresAt,
         },
         select: {
           id: true,
@@ -99,6 +102,7 @@ export class AuthService {
           name: true,
           avatarUrl: true,
           subscriptionStatus: true,
+          trialExpiresAt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -130,6 +134,7 @@ export class AuthService {
           name: true,
           avatarUrl: true,
           subscriptionStatus: true,
+          trialExpiresAt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -157,6 +162,7 @@ export class AuthService {
           name: true,
           avatarUrl: true,
           subscriptionStatus: true,
+          trialExpiresAt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -208,6 +214,7 @@ export class AuthService {
           name: true,
           avatarUrl: true,
           subscriptionStatus: true,
+          trialExpiresAt: true,
           createdAt: true,
           updatedAt: true,
         },
