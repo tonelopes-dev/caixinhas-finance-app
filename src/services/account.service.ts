@@ -1,4 +1,5 @@
 
+
 import { prisma } from './prisma';
 import type { Account } from '@/lib/definitions';
 
@@ -79,13 +80,18 @@ export class AccountService {
         return personalAccounts as Account[];
       }
       
-      // Por enquanto, retorna apenas contas do vault diretamente até corrigir o schema
-      const accounts = await prisma.account.findMany({
-        where: { vaultId: scope },
-        orderBy: { createdAt: 'desc' },
+      const vaultAccounts = await prisma.account.findMany({ 
+        where: { vaultId: scope } 
+      });
+      
+      const visiblePersonalAccounts = await prisma.account.findMany({
+        where: {
+          scope: 'personal',
+          visibleIn: { has: scope }
+        }
       });
 
-      return accounts as Account[];
+      return [...vaultAccounts, ...visiblePersonalAccounts] as Account[];
 
     } catch (error) {
       console.error('Erro ao buscar contas visíveis:', error);
@@ -164,66 +170,78 @@ export class AccountService {
   /**
    * Atualiza o saldo de uma conta
    */
-  static async updateBalance(accountId: string, newBalance: number): Promise<void> {
+  static async updateBalance(accountId: string, amount: number, type: 'income' | 'expense'): Promise<void> {
     try {
-      await prisma.account.update({
-        where: { id: accountId },
-        data: { balance: newBalance },
-      });
+        const operation = type === 'income' ? 'increment' : 'decrement';
+        await prisma.account.update({
+            where: { id: accountId },
+            data: { 
+                balance: { [operation]: amount }
+            },
+        });
     } catch (error) {
-      console.error('Erro ao atualizar saldo:', error);
-      throw new Error('Não foi possível atualizar o saldo');
+        console.error('Erro ao atualizar saldo:', error);
+        throw new Error('Não foi possível atualizar o saldo');
     }
   }
 
   /**
-   * Busca contas de um vault
+   * Calcula ativos líquidos (contas correntes e poupança)
    */
-  static async getVaultAccounts(vaultId: string): Promise<Account[]> {
+  static async calculateLiquidAssets(userId: string, scope: string): Promise<number> {
     try {
-      const accounts = await prisma.account.findMany({
-        where: { vaultId },
-        orderBy: { createdAt: 'desc' },
-      });
+        const whereClause: any = {
+            type: { in: ['checking', 'savings'] }
+        };
 
-      return accounts as Account[];
+        if (scope === userId) { // Pessoal
+            whereClause.ownerId = userId;
+            whereClause.scope = 'personal';
+        } else { // Cofre
+            whereClause.OR = [
+                { vaultId: scope },
+                { ownerId: userId, visibleIn: { has: scope } }
+            ]
+        }
+
+        const result = await prisma.account.aggregate({
+            _sum: { balance: true },
+            where: whereClause,
+        });
+
+        return result._sum.balance || 0;
     } catch (error) {
-      console.error('Erro ao buscar contas do vault:', error);
-      throw new Error('Não foi possível buscar as contas do vault');
+        console.error('Erro ao calcular ativos líquidos:', error);
+        return 0;
     }
   }
 
   /**
-   * Calcula o patrimônio líquido de um usuário
+   * Calcula ativos investidos (contas de investimento)
    */
-  static async getUserNetWorth(userId: string): Promise<number> {
+  static async calculateInvestedAssets(userId: string, scope: string): Promise<number> {
     try {
-      const result = await prisma.account.aggregate({
-        where: { ownerId: userId, scope: 'personal' },
-        _sum: { balance: true },
-      });
+        const whereClause: any = { type: 'investment' };
 
-      return result._sum?.balance || 0;
+        if (scope === userId) {
+            whereClause.ownerId = userId;
+            whereClause.scope = 'personal';
+        } else {
+             whereClause.OR = [
+                { vaultId: scope },
+                { ownerId: userId, visibleIn: { has: scope } }
+            ]
+        }
+
+        const result = await prisma.account.aggregate({
+            _sum: { balance: true },
+            where: whereClause,
+        });
+
+        return result._sum.balance || 0;
     } catch (error) {
-      console.error('Erro ao calcular patrimônio:', error);
-      throw new Error('Não foi possível calcular o patrimônio');
-    }
-  }
-
-  /**
-   * Calcula o patrimônio de um vault
-   */
-  static async getVaultNetWorth(vaultId: string): Promise<number> {
-    try {
-      const result = await prisma.account.aggregate({
-        where: { vaultId },
-        _sum: { balance: true },
-      });
-
-      return result._sum?.balance || 0;
-    } catch (error) {
-      console.error('Erro ao calcular patrimônio do vault:', error);
-      throw new Error('Não foi possível calcular o patrimônio do vault');
+        console.error('Erro ao calcular ativos investidos:', error);
+        return 0;
     }
   }
 }

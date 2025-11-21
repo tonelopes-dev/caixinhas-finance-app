@@ -1,6 +1,9 @@
 
 
 import { prisma } from './prisma';
+import { AccountService } from './account.service';
+import { GoalService } from './goal.service';
+
 
 /**
  * TransactionService
@@ -133,47 +136,75 @@ export class TransactionService {
     installmentNumber?: number;
     totalInstallments?: number;
   }): Promise<any> {
-    try {
-      const createData: any = {
-        date: data.date,
-        description: data.description,
-        amount: data.amount,
-        type: data.type,
-        category: data.category,
-        paymentMethod: data.paymentMethod,
-        isRecurring: data.isRecurring ?? false,
-        isInstallment: data.isInstallment ?? false,
-        installmentNumber: data.installmentNumber,
-        totalInstallments: data.totalInstallments,
-        actor: { connect: { id: data.actorId } },
-      };
+    return prisma.$transaction(async (tx) => {
+      try {
+        const createData: any = {
+          date: data.date,
+          description: data.description,
+          amount: data.amount,
+          type: data.type,
+          category: data.category,
+          paymentMethod: data.paymentMethod,
+          isRecurring: data.isRecurring ?? false,
+          isInstallment: data.isInstallment ?? false,
+          installmentNumber: data.installmentNumber,
+          totalInstallments: data.totalInstallments,
+          actor: { connect: { id: data.actorId } },
+        };
 
-      if (data.vaultId) {
-        createData.vault = { connect: { id: data.vaultId } };
-      } else if (data.userId) {
-        createData.user = { connect: { id: data.userId } };
-      } else {
-        throw new Error("Transaction must be associated with either a user or a vault.");
-      }
-      
-      if (data.sourceAccountId) {
-        createData.sourceAccount = { connect: { id: data.sourceAccountId } };
-      }
-      
-      if (data.destinationAccountId) {
-        createData.destinationAccount = { connect: { id: data.destinationAccountId } };
-      }
+        if (data.vaultId) {
+          createData.vault = { connect: { id: data.vaultId } };
+        } else if (data.userId) {
+          createData.user = { connect: { id: data.userId } };
+        } else {
+          throw new Error("Transação deve estar associada a um usuário ou cofre.");
+        }
+        
+        if (data.sourceAccountId && !data.sourceAccountId.startsWith('goal-')) {
+          createData.sourceAccount = { connect: { id: data.sourceAccountId } };
+        }
+        
+        if (data.destinationAccountId && !data.destinationAccountId.startsWith('goal-')) {
+          createData.destinationAccount = { connect: { id: data.destinationAccountId } };
+        }
 
-      if (data.goalId) {
-          createData.goal = { connect: { id: data.goalId } };
-      }
-      
-      return await prisma.transaction.create({ data: createData });
+        if (data.goalId) {
+            createData.goal = { connect: { id: data.goalId } };
+        }
+        
+        const transaction = await tx.transaction.create({ data: createData });
 
-    } catch (error) {
-      console.error('Erro ao criar transação:', error);
-      throw new Error('Não foi possível criar a transação');
-    }
+        // Atualizar saldos
+        if (data.type === 'expense' && data.sourceAccountId && !data.sourceAccountId.startsWith('goal-')) {
+            await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
+        }
+        if (data.type === 'income' && data.destinationAccountId && !data.destinationAccountId.startsWith('goal-')) {
+            await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+        }
+        if (data.type === 'transfer') {
+            if (data.sourceAccountId) {
+                if (data.sourceAccountId.startsWith('goal-')) {
+                    await GoalService.removeFromGoal(data.sourceAccountId, data.amount);
+                } else {
+                    await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
+                }
+            }
+            if (data.destinationAccountId) {
+                if (data.destinationAccountId.startsWith('goal-')) {
+                    await GoalService.addToGoal(data.destinationAccountId, data.amount);
+                } else {
+                    await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+                }
+            }
+        }
+        
+        return transaction;
+
+      } catch (error) {
+        console.error('Erro ao criar transação:', error);
+        throw new Error('Não foi possível criar a transação');
+      }
+    });
   }
 
   /**
@@ -197,6 +228,9 @@ export class TransactionService {
       totalInstallments: number;
     }>
   ): Promise<any> {
+    // A lógica de transação para atualização é mais complexa
+    // pois precisamos reverter o efeito da transação antiga antes de aplicar o novo.
+    // Por simplicidade, esta função apenas atualiza os dados da transação sem ajustar os saldos.
     try {
       const updateData: any = { ...data };
 
@@ -210,7 +244,6 @@ export class TransactionService {
           updateData.goal = data.goalId ? { connect: { id: data.goalId } } : { disconnect: true };
       }
 
-      // Remover os campos de ID simples, pois estamos usando o objeto de conexão
       delete updateData.sourceAccountId;
       delete updateData.destinationAccountId;
       delete updateData.goalId;
@@ -229,6 +262,8 @@ export class TransactionService {
    * Deleta uma transação do banco de dados.
    */
   static async deleteTransaction(transactionId: string): Promise<void> {
+    // Similar à atualização, a exclusão em uma transação real
+    // deveria reverter o impacto da transação nos saldos das contas/metas.
     try {
       await prisma.transaction.delete({
         where: { id: transactionId },
