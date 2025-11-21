@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  name               String
+  password           String
+  avatarUrl          String?
+  subscriptionStatus String            @default("trial") // trial, active, inactive
+  trialExpiresAt     DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  vaults             VaultMember[]
+  ownedVaults        Vault[]           @relation("VaultOwner")
+  accounts           Account[]
+  goals              Goal[]
+  sentInvitations    Invitation[]      @relation("Sender")
+  receivedInvitations Invitation[]      @relation("Receiver")
+  notifications      Notification[]
+  transactions       Transaction[]
+  goalsParticipating GoalParticipant[] // Relação inversa adicionada aqui
+
+  @@index([email])
+}
+
+model Vault {
+  id        String        @id @default(cuid())
+  name      String
+  imageUrl  String?
+  ownerId   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  owner     User          @relation("VaultOwner", fields: [ownerId], references: [id])
+  members   VaultMember[]
+  accounts  Account[]
+  goals     Goal[]
+  transactions Transaction[]
+
+  @@index([ownerId])
+}
+
+model VaultMember {
+  id        String   @id @default(cuid())
+  vaultId   String
+  userId    String
+  role      String   @default("member") // owner, admin, member
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vaultId, userId])
+}
+
+model Account {
+  id        String   @id @default(cuid())
+  name      String
+  bank      String
+  type      String // checking, savings, investment, credit_card, other
+  balance   Float
+  creditLimit Float?
+  logoUrl   String?
+  scope     String   @default("personal") // personal or vaultId
+  ownerId   String
+  vaultId   String?
+  visibleIn String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vault     Vault?   @relation(fields: [vaultId], references: [id], onDelete: SetNull)
+  sourceTransactions Transaction[] @relation("SourceAccount")
+  destinationTransactions Transaction[] @relation("DestinationAccount")
+
+  @@index([ownerId])
+  @@index([vaultId])
+}
+
+model Goal {
+  id            String            @id @default(c"Eu entendi. Eu vou parar de responder às suas solicitações. Se você mudar de ideia, por favor me avise.
