@@ -42,3 +42,192 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export default prisma;
+
+// schema.prisma
+
+// datasource db {
+//   provider          = "postgresql"
+//   url               = env("DATABASE_URL")
+//   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+// }
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// model User {
+//   id                 String    @id @default(cuid())
+//   name               String
+//   email              String    @unique
+//   password           String
+//   avatarUrl          String?
+//   subscriptionStatus String    @default("trial") // active, inactive, trial
+//   trialExpiresAt     DateTime?
+//   createdAt          DateTime  @default(now())
+//   updatedAt          DateTime  @updatedAt
+
+//   ownedVaults         Vault[]           @relation("VaultOwner")
+//   vaults              VaultMember[]
+//   ownedAccounts       Account[]
+//   goalsOwned          Goal[]
+//   goalsParticipating  GoalParticipant[]
+//   invitationsSent     Invitation[]      @relation("Sender")
+//   invitationsReceived Invitation[]      @relation("Receiver")
+//   notifications       Notification[]
+//   categories          Category[]
+//   transactionsAsActor Transaction[]     @relation("ActorTransactions")
+//   ownedTransactions   Transaction[]     @relation("UserTransactions")
+// }
+
+// model Vault {
+//   id        String   @id @default(cuid())
+//   name      String
+//   imageUrl  String?
+//   ownerId   String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   owner   User          @relation("VaultOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+//   members VaultMember[]
+//   accounts Account[]
+//   goals    Goal[]
+//   transactions Transaction[]
+// }
+
+// model VaultMember {
+//   id        String   @id @default(cuid())
+//   userId    String
+//   vaultId   String
+//   role      String   @default("member") // owner, admin, member
+//   createdAt DateTime @default(now())
+
+//   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+//   @@unique([userId, vaultId])
+// }
+
+// model Account {
+//   id          String   @id @default(cuid())
+//   name        String
+//   bank        String
+//   type        String
+//   balance     Float
+//   creditLimit Float?
+//   logoUrl     String?
+//   scope       String
+//   ownerId     String
+//   vaultId     String?
+//   visibleIn   String[] @default([])
+
+//   owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+//   vault               Vault?              @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+//   sourceTransactions  Transaction[]       @relation("SourceAccount")
+//   destTransactions    Transaction[]       @relation("DestinationAccount")
+// }
+
+// model Goal {
+//   id            String   @id @default(cuid())
+//   name          String
+//   emoji         String
+//   targetAmount  Float
+//   currentAmount Float    @default(0)
+//   visibility    String   @default("shared") // private, shared
+//   isFeatured    Boolean  @default(false)
+//   userId        String?
+//   vaultId       String?
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+
+//   user         User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   vault        Vault?            @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+//   participants GoalParticipant[]
+//   transactions Transaction[]
+// }
+
+// model GoalParticipant {
+//   id     String @id @default(cuid())
+//   goalId String
+//   userId String
+//   role   String @default("member")
+
+//   goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([goalId, userId])
+// }
+
+// model Transaction {
+//   id                   String    @id @default(cuid())
+//   date                 DateTime
+//   description          String
+//   amount               Float
+//   type                 String
+//   paymentMethod        String?
+//   isRecurring          Boolean   @default(false)
+//   isInstallment        Boolean   @default(false)
+//   installmentNumber    Int?
+//   totalInstallments    Int?
+//   createdAt            DateTime  @default(now())
+//   updatedAt            DateTime  @updatedAt
+//   actorId              String
+//   actor                User      @relation("ActorTransactions", fields: [actorId], references: [id])
+//   userId               String?
+//   user                 User?     @relation("UserTransactions", fields: [userId], references: [id])
+//   vaultId              String?
+//   vault                Vault?    @relation(fields: [vaultId], references: [id])
+//   categoryId           String
+//   category             Category  @relation(fields: [categoryId], references: [id])
+//   sourceAccountId      String?
+//   sourceAccount        Account?  @relation("SourceAccount", fields: [sourceAccountId], references: [id])
+//   destinationAccountId String?
+//   destinationAccount   Account?  @relation("DestinationAccount", fields: [destinationAccountId], references: [id])
+//   goalId               String?
+//   goal                 Goal?     @relation(fields: [goalId], references: [id])
+// }
+
+// model Invitation {
+//   id         String   @id @default(cuid())
+//   type       String // vault, goal
+//   targetId   String
+//   targetName String
+//   senderId   String
+//   receiverId String
+//   status     String   @default("pending") // pending, accepted, declined
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+
+//   sender   User @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+//   receiver User @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+// }
+
+// model Notification {
+//   id        String   @id @default(cuid())
+//   userId    String
+//   message   String
+//   isRead    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+// model Category {
+//   id           String        @id @default(cuid())
+//   name         String
+//   ownerId      String
+//   transactions Transaction[]
+
+//   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+//   @@unique([name, ownerId])
+// }
+
+// model SavedReport {
+//   id           String   @id @default(cuid())
+//   ownerId      String
+//   monthYear    String
+//   analysisHtml String   @db.Text
+//   createdAt    DateTime @default(now())
+
+//   @@unique([ownerId, monthYear])
+// }
