@@ -33,13 +33,23 @@ const transactionSchema = z.object({
   userId: z.string().optional(),
   vaultId: z.string().optional(),
 }).refine(data => {
-    if (data.type === 'expense' && !data.sourceAccountId) return false;
-    if (data.type === 'income' && !data.destinationAccountId) return false;
-    if (data.type === 'transfer' && (!data.sourceAccountId || !data.destinationAccountId)) return false;
+    if (data.type === 'expense') {
+        return !!data.sourceAccountId;
+    }
+    if (data.type === 'income') {
+        return !!data.destinationAccountId;
+    }
+    if (data.type === 'transfer') {
+        // For a transfer, we need a source AND a destination.
+        // The destination can be either another account OR a goal.
+        const hasSource = !!data.sourceAccountId;
+        const hasDestination = !!data.destinationAccountId || !!data.goalId;
+        return hasSource && hasDestination;
+    }
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'],
+    path: ['sourceAccountId'], // This error can apply to either field, but Zod requires one path.
 });
 
 
@@ -68,9 +78,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date') || new Date().toISOString(),
-    sourceAccountId: sourceValue && !sourceValue.startsWith('goal_') ? sourceValue : null,
-    destinationAccountId: destinationValue && !destinationValue.startsWith('goal_') ? destinationValue : null,
-    goalId: (sourceValue?.startsWith('goal_') ? sourceValue.replace('goal_', '') : (destinationValue?.startsWith('goal_') ? destinationValue.replace('goal_', '') : null)),
+    sourceAccountId: sourceValue && !sourceValue.startsWith('goal-') ? sourceValue : null,
+    destinationAccountId: destinationValue && !destinationValue.startsWith('goal-') ? destinationValue : null,
+    goalId: destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null,
     paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: formData.get('chargeType') === 'recurring',
     isInstallment: formData.get('chargeType') === 'installment',
@@ -135,9 +145,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date'),
-    sourceAccountId: sourceValue && !sourceValue.startsWith('goal_') ? sourceValue : null,
-    destinationAccountId: destinationValue && !destinationValue.startsWith('goal_') ? destinationValue : null,
-    goalId: (sourceValue?.startsWith('goal_') ? sourceValue.replace('goal_', '') : (destinationValue?.startsWith('goal_') ? destinationValue.replace('goal_', '') : null)),
+    sourceAccountId: sourceValue && !sourceValue.startsWith('goal-') ? sourceValue : null,
+    destinationAccountId: destinationValue && !destinationValue.startsWith('goal-') ? destinationValue : null,
+    goalId: destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null,
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: formData.get('chargeType') === 'recurring',
     isInstallment: formData.get('chargeType') === 'installment',
@@ -234,3 +244,4 @@ export async function deleteTransaction(prevState: { message: string | null }, f
     return { success: false, message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
 }
+

@@ -94,7 +94,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   
   const allSourcesAndDestinations = [
       ...workspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
-      ...workspaceGoals.map(g => ({ ...g, value: `goal_${g.id}`, name: `Caixinha: ${g.name}` }))
+      ...workspaceGoals.map(g => ({ ...g, value: `goal-${g.id}`, name: `Caixinha: ${g.name}` }))
   ];
   
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';

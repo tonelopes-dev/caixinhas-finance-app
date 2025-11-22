@@ -85,19 +85,19 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
 
   const allSourcesAndDestinations = [
       ...accounts.map(a => ({ ...a, value: a.id, name: a.name })), 
-      ...goals.map(g => ({ ...g, value: `goal_${g.id}`, name: `Caixinha: ${g.name}` }))
+      ...goals.map(g => ({ ...g, value: `goal-${g.id}`, name: `Caixinha: ${g.name}` }))
   ];
   
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
   const getDefaultValue = (accountId: string | null | undefined, goalId: string | null | undefined) => {
-    if (goalId) return `goal_${goalId}`;
+    if (goalId) return `goal-${goalId}`;
     if (accountId) return accountId;
     return undefined;
   };
   
-  const sourceDefaultValue = getDefaultValue(transaction.sourceAccountId, transaction.goalId && transaction.type === 'transfer' && transaction.sourceAccountId === null ? transaction.goalId : null);
-  const destinationDefaultValue = getDefaultValue(transaction.destinationAccountId, transaction.goalId && transaction.type === 'transfer' && transaction.destinationAccountId === null ? transaction.goalId : null);
+  const sourceDefaultValue = getDefaultValue(transaction.sourceAccountId, null);
+  const destinationDefaultValue = getDefaultValue(transaction.destinationAccountId, transaction.goalId);
   
   return (
     <Sheet open={open} onOpenChange={setOpen}>
