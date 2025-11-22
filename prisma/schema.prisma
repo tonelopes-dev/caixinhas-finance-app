@@ -1,5 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Este é o seu arquivo de esquema Prisma,
+// aprenda mais sobre ele na documentação: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -11,77 +12,92 @@ datasource db {
   relationMode = "prisma"
 }
 
+// ======================================
+// MODELOS DE AUTENTICAÇÃO E USUÁRIO
+// ======================================
 model User {
   id                 String    @id @default(cuid())
   name               String
   email              String    @unique
   password           String
   avatarUrl          String?
-  subscriptionStatus String    @default("trial") // e.g., 'trial', 'active', 'inactive'
+  subscriptionStatus String    @default("trial") // ex: trial, active, inactive
   trialExpiresAt     DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  vaultsAsOwner      Vault[]         @relation("VaultOwner")
-  vaultsAsMember     VaultMember[]
-  accounts           Account[]
-  goals              Goal[]
-  transactions       Transaction[]   @relation("TransactionActor")
-  sentInvitations    Invitation[]    @relation("SentInvitations")
-  receivedInvitations Invitation[]   @relation("ReceivedInvitations")
+  ownedVaults       Vault[]           @relation("VaultOwner")
+  vaultMemberships  VaultMember[]
+  ownedAccounts     Account[]
+  ownedGoals        Goal[]            @relation("GoalOwner")
+  transactions      Transaction[]
+  invitationsSent   Invitation[]      @relation("SentInvitations")
+  invitationsReceived Invitation[]    @relation("ReceivedInvitations")
+  notifications     Notification[]
+  categories        Category[]        @relation("CategoryOwner")
   goalParticipations GoalParticipant[]
-  notifications      Notification[]
-  categories         Category[]
 
   @@map("users")
 }
 
+
+// ======================================
+// MODELOS DE COFRE (VAULT) E MEMBROS
+// ======================================
 model Vault {
   id        String   @id @default(cuid())
   name      String
   imageUrl  String?
   ownerId   String
-  owner     User     @relation("VaultOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members      VaultMember[]
-  accounts     Account[]
-  goals        Goal[]
+  owner   User          @relation("VaultOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members VaultMember[]
+  accounts Account[]
+  goals    Goal[]
   transactions Transaction[]
 
+  @@index([ownerId])
   @@map("vaults")
 }
 
 model VaultMember {
-  id        String   @id @default(cuid())
-  vaultId   String
-  userId    String
-  role      String   @default("member") // e.g., 'owner', 'admin', 'member'
-  joinedAt  DateTime @default(now())
+  id      String   @id @default(cuid())
+  userId  String
+  vaultId String
+  role    String   @default("member") // ex: owner, member
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vault   Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  
   updatedAt DateTime? @updatedAt
 
-  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([vaultId, userId])
+  @@unique([userId, vaultId])
+  @@index([userId])
+  @@index([vaultId])
   @@map("vault_members")
 }
 
+// ======================================
+// MODELOS FINANCEIROS
+// ======================================
 model Account {
   id          String   @id @default(cuid())
   name        String
   bank        String
-  type        String // e.g., 'checking', 'savings', 'credit_card', 'investment'
+  type        String   // checking, savings, investment, credit_card
   balance     Float
   creditLimit Float?
   logoUrl     String?
-  scope       String // 'personal' ou um vaultId
-  visibleIn   String[] @default([]) // Para contas pessoais, em quais vaults ela é visível
+  scope       String   // 'personal' ou um vaultId
+  visibleIn   String[] @default([]) // Array de vaultIds onde é visível
+
   ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   vaultId     String?
-  vault       Vault?   @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  owner User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vault Vault? @relation(fields: [vaultId], references: [id], onDelete: Cascade)
 
   sourceTransactions      Transaction[] @relation("SourceAccount")
   destinationTransactions Transaction[] @relation("DestinationAccount")
@@ -97,29 +113,34 @@ model Account {
 model Goal {
   id            String   @id @default(cuid())
   name          String
-  emoji         String
   targetAmount  Float
-  currentAmount Float
-  visibility    String   @default("shared") // 'private' or 'shared'
+  currentAmount Float    @default(0)
+  emoji         String
+  visibility    String   @default("shared") // private, shared
   isFeatured    Boolean  @default(false)
-  userId        String? // Para metas pessoais
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vaultId       String? // Para metas de cofre
-  vault         Vault?   @relation(fields: [vaultId], references: [id], onDelete Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
-  transactions Transaction[]
-  participants GoalParticipant[]
+  ownerType     String // 'user' ou 'vault'
+  userId        String?
+  vaultId       String?
+  
+  user          User?             @relation("GoalOwner", fields: [userId], references: [id], onDelete: Cascade)
+  vault         Vault?            @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  participants  GoalParticipant[]
+  transactions  Transaction[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([vaultId])
   @@map("goals")
 }
 
 model GoalParticipant {
-  id     String @id @default(cuid())
-  goalId String
-  userId String
-  role   String @default("member")
+  id      String   @id @default(cuid())
+  goalId  String
+  userId  String
+  role    String   @default("member")
 
   goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -129,35 +150,39 @@ model GoalParticipant {
 }
 
 model Transaction {
-  id                 String    @id @default(cuid())
+  id                 String   @id @default(cuid())
   date               DateTime
   description        String
   amount             Float
-  type               String // 'income', 'expense', 'transfer'
+  type               String   // income, expense, transfer
   paymentMethod      String?
-  isRecurring        Boolean   @default(false)
-  isInstallment      Boolean   @default(false)
+  isRecurring        Boolean  @default(false)
+  recurringId        String?  // ID para agrupar transações recorrentes
+  isInstallment      Boolean  @default(false)
   installmentNumber  Int?
   totalInstallments  Int?
-  paidInstallments   Int[]     @default([])
-  recurringId        String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  actorId            String
-  actor              User      @relation("TransactionActor", fields: [actorId], references: [id], onDelete: Restrict)
-  userId             String?
-  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vaultId            String?
-  vault              Vault?    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
-  categoryId         String?
-  category           Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  sourceAccountId    String?
-  sourceAccount      Account?  @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: SetNull)
-  destinationAccountId String?
-  destinationAccount Account?  @relation("DestinationAccount", fields: [destinationAccountId], references: [id], onDelete: SetNull)
-  goalId             String?
-  goal               Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  paidInstallments   Int[]    @default([]) // Armazena os números das parcelas pagas
 
+  actorId            String
+  userId             String?
+  vaultId            String?
+  categoryId         String?
+  sourceAccountId    String?
+  destinationAccountId String?
+  goalId             String?
+
+  actor               User      @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  user                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vault               Vault?    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  category            Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  sourceAccount       Account?  @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: SetNull)
+  destinationAccount  Account?  @relation("DestinationAccount", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+  goal                Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([actorId])
   @@index([userId])
   @@index([vaultId])
   @@index([recurringId])
@@ -165,53 +190,63 @@ model Transaction {
 }
 
 model Category {
-  id        String   @id @default(cuid())
-  name      String
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  id      String @id @default(cuid())
+  name    String
+  ownerId String
 
+  owner User   @relation("CategoryOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   @@unique([name, ownerId])
   @@map("categories")
 }
 
+// ======================================
+// MODELOS DE COLABORAÇÃO
+// ======================================
 model Invitation {
   id         String   @id @default(cuid())
-  type       String // 'vault' ou 'goal'
-  targetId   String
+  type       String   // 'vault' ou 'goal'
+  targetId   String   // ID do vault ou goal
   targetName String
   senderId   String
-  sender     User     @relation("SentInvitations", fields: [senderId], references: [id], onDelete: Cascade)
   receiverId String
-  receiver   User     @relation("ReceivedInvitations", fields: [receiverId], references: [id], onDelete: Cascade)
-  status     String   @default("pending") // 'pending', 'accepted', 'declined'
+  status     String   @default("pending") // pending, accepted, declined
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  sender   User @relation("SentInvitations", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedInvitations", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId])
   @@map("invitations")
 }
 
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   message   String
   isRead    Boolean  @default(false)
-  relatedId String? // e.g., transactionId, goalId
+  link      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@map("notifications")
 }
 
+// ======================================
+// MODELOS DE DADOS ADICIONAIS
+// ======================================
 model SavedReport {
   id           String   @id @default(cuid())
-  ownerId      String // Pode ser userId ou vaultId
-  monthYear    String // Ex: "Novembro de 2024"
+  ownerId      String   // userId ou vaultId
+  monthYear    String   // ex: "Novembro de 2024"
   analysisHtml String
   createdAt    DateTime @default(now())
 
