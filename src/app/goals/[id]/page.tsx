@@ -17,10 +17,9 @@ export default async function GoalDetailPage({ params }: PageProps) {
   }
 
   const userId = session.user.id;
-  const id = params.id;
 
   // Agora a função também busca as contas do usuário
-  const data = await getGoalDetails(id, userId);
+  const data = await getGoalDetails(params.id, userId);
 
   if (!data || !data.goal) {
     notFound();
