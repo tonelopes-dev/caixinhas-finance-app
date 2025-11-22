@@ -9,7 +9,7 @@ type PageProps = {
   params: { id: string };
 };
 
-export default async function GoalDetailPage(props: PageProps) {
+export default async function GoalDetailPage({ params }: PageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -17,7 +17,7 @@ export default async function GoalDetailPage(props: PageProps) {
   }
 
   const userId = session.user.id;
-  const { id } = props.params;
+  const id = params.id;
 
   // Agora a função também busca as contas do usuário
   const data = await getGoalDetails(id, userId);
