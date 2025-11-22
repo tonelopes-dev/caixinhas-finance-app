@@ -325,7 +325,11 @@ export function TransactionsPageClient({
                               <div className="flex-1 space-y-0.5">
                                   <div className="flex justify-between">
                                       <p className="font-medium">{t.description}</p>
-                                      <p className={cn("font-medium", {'text-green-600': t.type === 'income','text-foreground': t.type === 'expense','text-muted-foreground': t.type === 'transfer'})}>
+                                      <p className={cn("font-medium", {
+                                        'text-green-600': t.type === 'income',
+                                        'text-red-500': t.type === 'expense',
+                                        'text-muted-foreground': t.type === 'transfer'
+                                      })}>
                                           {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
                                           {formatCurrency(t.amount)}
                                       </p>
@@ -338,6 +342,19 @@ export function TransactionsPageClient({
                                               <span>{paymentMethods[t.paymentMethod!].label}</span>
                                           </div>
                                       )}
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    {t.isRecurring && (
+                                        <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                                            <Repeat className="mr-1 h-3 w-3" />
+                                            Recorrente
+                                        </Badge>
+                                    )}
+                                    {t.isInstallment && (
+                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                                            Parcelado ({t.installmentNumber}/{t.totalInstallments})
+                                        </Badge>
+                                    )}
                                   </div>
                               </div>
                               <DropdownMenu>
@@ -393,6 +410,16 @@ export function TransactionsPageClient({
                                                       <span>{paymentMethods[t.paymentMethod!].label}</span>
                                                   </div>
                                               )}
+                                              {t.isRecurring && (
+                                                  <Badge variant="outline" className="border-purple-300 text-purple-800">
+                                                      Recorrente
+                                                  </Badge>
+                                              )}
+                                              {t.isInstallment && (
+                                                  <Badge variant="outline" className="border-blue-300 text-blue-800">
+                                                      Parcelado ({t.installmentNumber}/{t.totalInstallments})
+                                                  </Badge>
+                                              )}
                                           </div>
                                       </div>
                                   </div>
@@ -418,7 +445,7 @@ export function TransactionsPageClient({
                               <TableCell>{formatDate(t.date)}</TableCell>
                               <TableCell className={cn("text-right font-medium", {
                                   'text-green-600': t.type === 'income',
-                                  'text-foreground': t.type === 'expense',
+                                  'text-red-500': t.type === 'expense',
                                   'text-muted-foreground': t.type === 'transfer'
                               })}>
                                   {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}

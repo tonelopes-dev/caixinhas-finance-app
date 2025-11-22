@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ListFilter, ArrowRight } from 'lucide-react';
+import { ListFilter, ArrowRight, Repeat } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
@@ -83,6 +84,19 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
+                   <div className="flex items-center gap-2 mt-1">
+                    {transaction.isRecurring && (
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                        <Repeat className="mr-1 h-3 w-3" />
+                        Recorrente
+                      </Badge>
+                    )}
+                    {transaction.isInstallment && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                        Parcelado ({transaction.installmentNumber}/{transaction.totalInstallments})
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                     <Badge variant={transaction.type === 'income' ? 'secondary' : 'outline'}>
@@ -90,8 +104,12 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                     </Badge>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{formatDate(transaction.date)}</TableCell>
-                <TableCell className={`text-right font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-foreground'}`}>
-                  {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount)}
+                <TableCell className={cn("text-right font-medium", {
+                    'text-green-600': transaction.type === 'income',
+                    'text-red-500': transaction.type === 'expense',
+                    'text-muted-foreground': transaction.type === 'transfer'
+                })}>
+                  {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''} {formatCurrency(transaction.amount)}
                 </TableCell>
               </TableRow>
             ))}

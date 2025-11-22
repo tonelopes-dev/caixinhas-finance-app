@@ -35,6 +35,7 @@ import {
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '../transactions/delete-transaction-dialog';
 import { InstallmentPurchaseCard } from './installment-purchase-card';
+import { cn } from '@/lib/utils';
 
 
 function formatCurrency(value: number) {
@@ -149,7 +150,11 @@ export function RecurringPageClient({
                     <TableCell className="hidden sm:table-cell">
                       {formatDate(t.date)}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
+                    <TableCell className={cn("text-right font-medium", {
+                        'text-green-600': t.type === 'income',
+                        'text-red-500': t.type === 'expense',
+                        'text-muted-foreground': t.type === 'transfer'
+                    })}>
                       {formatCurrency(t.amount)}
                     </TableCell>
                     <TableCell className="text-right">
