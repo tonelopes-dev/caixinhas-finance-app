@@ -14,6 +14,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { Transaction } from '@/lib/definitions';
 import { updatePaidInstallmentsAction } from '@/app/recurring/actions';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -91,7 +92,15 @@ export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardPro
               const isChecked = paidInstallments.includes(installmentNumber);
 
               return (
-                <div key={index} className="flex items-center space-x-2 rounded-md border p-2">
+                <label
+                  key={index}
+                  htmlFor={`installment-${purchase.id}-${installmentNumber}`}
+                  className={cn(
+                    "flex items-center space-x-2 rounded-md border p-2 transition-colors",
+                    "cursor-pointer hover:bg-muted/50",
+                    isChecked && "bg-primary/10"
+                  )}
+                >
                   <Checkbox
                     id={`installment-${purchase.id}-${installmentNumber}`}
                     checked={isChecked}
@@ -99,13 +108,10 @@ export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardPro
                       handleCheckboxChange(installmentNumber, checked as boolean)
                     }
                   />
-                  <label
-                    htmlFor={`installment-${purchase.id}-${installmentNumber}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
+                  <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Parcela {installmentNumber}/{totalInstallments}
-                  </label>
-                </div>
+                  </span>
+                </label>
               );
             })}
           </div>
@@ -114,3 +120,4 @@ export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardPro
     </Collapsible>
   );
 }
+
