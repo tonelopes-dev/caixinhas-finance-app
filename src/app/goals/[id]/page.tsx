@@ -16,13 +16,21 @@ export default async function GoalDetailPage({ params }: PageProps) {
   }
 
   const userId = session.user.id;
-
   const { id } = params;
-  const data = await getGoalDetails(id);
+
+  // Agora a função também busca as contas do usuário
+  const data = await getGoalDetails(id, userId);
 
   if (!data || !data.goal) {
     notFound();
   }
 
-  return <GoalDetailClient goal={data.goal} transactions={data.transactions} userId={userId} />;
+  return (
+    <GoalDetailClient
+      goal={data.goal}
+      transactions={data.transactions}
+      accounts={data.accounts as any}
+      userId={userId}
+    />
+  );
 }

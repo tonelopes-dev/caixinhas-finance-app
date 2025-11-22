@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import type { Account } from '@/lib/definitions';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -65,19 +66,15 @@ type Transaction = {
 type GoalDetailClientProps = {
   goal: Goal;
   transactions: Transaction[];
+  accounts: Account[];
   userId: string;
 };
 
-export function GoalDetailClient({ goal, transactions, userId }: GoalDetailClientProps) {
+export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalDetailClientProps) {
   const [currentAmount, setCurrentAmount] = useState(goal.currentAmount);
 
-  // Filtrar transações relacionadas à meta
+  // A lógica de filtragem foi movida para a action, aqui só recebemos as transações corretas
   const goalActivity = transactions
-    .filter(
-      (t) =>
-        t.type === 'transfer' &&
-        (t.sourceAccountId === goal.id || t.destinationAccountId === goal.id)
-    )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const progress = (currentAmount / goal.targetAmount) * 100;
@@ -85,6 +82,11 @@ export function GoalDetailClient({ goal, transactions, userId }: GoalDetailClien
   const handleTransactionComplete = () => {
     // Recarregar a página para pegar novos dados
     window.location.reload();
+  };
+
+  const getActor = (actorId: string) => {
+    return goal.participants.find((p) => p.id === actorId) || 
+           { id: 'unknown', name: 'Usuário', avatarUrl: '' };
   };
 
   return (
@@ -141,11 +143,13 @@ export function GoalDetailClient({ goal, transactions, userId }: GoalDetailClien
               <GoalTransactionDialog 
                 type="deposit" 
                 goalId={goal.id}
+                accounts={accounts}
                 onComplete={handleTransactionComplete}
               />
               <GoalTransactionDialog 
                 type="withdrawal" 
                 goalId={goal.id}
+                accounts={accounts}
                 onComplete={handleTransactionComplete}
               />
             </div>
@@ -155,9 +159,8 @@ export function GoalDetailClient({ goal, transactions, userId }: GoalDetailClien
             </h3>
             <div className="space-y-4">
               {goalActivity.map((activity) => {
-                const isDeposit = activity.destinationAccountId === goal.id;
-                const actor = goal.participants.find((p) => p.id === activity.actorId) || 
-                              { name: 'Usuário', avatarUrl: '' };
+                const isDeposit = !activity.sourceAccountId;
+                const actor = getActor(activity.actorId);
                 
                 return (
                   <div key={activity.id} className="flex items-center gap-4">

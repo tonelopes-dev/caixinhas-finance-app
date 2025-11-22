@@ -53,7 +53,6 @@ export class TransactionService {
       return await prisma.transaction.findMany({
         where: {
           goalId: goalId,
-          type: 'transfer',
         },
         include: {
           category: true,
@@ -240,10 +239,13 @@ export class TransactionService {
         if (data.type === 'transfer') {
              // Movimentação entre conta e caixinha
             if (data.goalId) {
-                if (data.sourceAccountId) { // Depósito: Conta -> Caixinha
+                // Depósito: Conta -> Caixinha (sourceAccountId está presente)
+                if (data.sourceAccountId) {
                     await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
                     await GoalService.addToGoal(data.goalId, data.amount);
-                } else if (data.destinationAccountId) { // Retirada: Caixinha -> Conta
+                } 
+                // Retirada: Caixinha -> Conta (destinationAccountId está presente)
+                else if (data.destinationAccountId) {
                     await GoalService.removeFromGoal(data.goalId, data.amount);
                     await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
                 }

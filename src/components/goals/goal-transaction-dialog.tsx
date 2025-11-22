@@ -1,8 +1,7 @@
 
 "use client"
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useRef, useState } from 'react';
 import { depositToGoalAction, withdrawFromGoalAction } from '@/app/goals/actions';
 import {
   Dialog,
@@ -20,36 +19,20 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { AccountService } from '@/services';
 import type { Account } from '@/lib/definitions';
-import { useSession } from 'next-auth/react';
 
 type GoalTransactionDialogProps = {
   type: 'deposit' | 'withdrawal';
   goalId: string;
+  accounts: Account[];
   onComplete?: () => void;
 };
 
-export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransactionDialogProps) {
+export function GoalTransactionDialog({ type, goalId, accounts, onComplete }: GoalTransactionDialogProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    if (open && session?.user?.id) {
-      const fetchAccounts = async () => {
-        // Buscamos todas as contas do usuário para ele poder escolher.
-        const userAccounts = await AccountService.getUserAccounts(session.user.id);
-        const nonCreditAccounts = userAccounts.filter(a => a.type !== 'credit_card');
-        setAccounts(nonCreditAccounts);
-      };
-      fetchAccounts();
-    }
-  }, [open, session]);
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

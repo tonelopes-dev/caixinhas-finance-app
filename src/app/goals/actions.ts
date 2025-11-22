@@ -1,7 +1,7 @@
 
 "use server";
 
-import { GoalService, AuthService, VaultService, TransactionService } from '@/services';
+import { GoalService, AuthService, VaultService, TransactionService, AccountService } from '@/services';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -91,18 +91,22 @@ export async function getUserAllGoals(userId: string) {
 }
 
 /**
- * Busca detalhes de uma meta específica
+ * Busca detalhes de uma meta específica, incluindo contas do usuário
  */
-export async function getGoalDetails(goalId: string) {
+export async function getGoalDetails(goalId: string, userId: string) {
   try {
-    const goal = await GoalService.getGoalById(goalId);
+    const [goal, goalTransactions, userAccounts] = await Promise.all([
+        GoalService.getGoalById(goalId),
+        TransactionService.getTransactionsForGoal(goalId),
+        AccountService.getUserAccounts(userId)
+    ]);
+
 
     if (!goal) {
       return null;
     }
 
-    // Busca transações que estão diretamente relacionadas a esta meta pelo goalId
-    const goalTransactions = await TransactionService.getTransactionsForGoal(goalId);
+    const nonCreditAccounts = userAccounts.filter(a => a.type !== 'credit_card');
     
     return {
       goal: {
@@ -133,12 +137,14 @@ export async function getGoalDetails(goalId: string) {
         sourceAccountId: t.sourceAccountId,
         destinationAccountId: t.destinationAccountId,
       })),
+      accounts: nonCreditAccounts,
     };
   } catch (error) {
     console.error('Erro ao buscar detalhes da meta:', error);
     return null;
   }
 }
+
 
 /**
  * Cria uma nova meta
@@ -300,8 +306,10 @@ export async function depositToGoalAction(
       return { success: false, message: 'Caixinha não encontrada.' };
     }
 
+    // A lógica foi centralizada no TransactionService
+    // A ação agora apenas cria a transação do tipo transferência
     await TransactionService.createTransaction({
-      userId: goal.userId,
+      userId: goal.userId, // Preserva o dono original da transação
       vaultId: goal.vaultId,
       date: new Date(),
       description: description || `Depósito na caixinha ${goal.name}`,
@@ -309,9 +317,8 @@ export async function depositToGoalAction(
       type: 'transfer',
       category: 'Caixinha',
       sourceAccountId,
-      destinationAccountId: null, // O serviço de transação identificará o goalId
-      goalId,
-      actorId: userId,
+      goalId, // Informa ao serviço qual caixinha é o destino
+      actorId: userId, // Quem está realizando a ação
     });
 
     revalidatePath(`/goals/${goalId}`);
@@ -347,6 +354,7 @@ export async function withdrawFromGoalAction(
       return { success: false, message: 'Caixinha não encontrada.' };
     }
 
+    // A lógica foi centralizada no TransactionService
     await TransactionService.createTransaction({
       userId: goal.userId,
       vaultId: goal.vaultId,
@@ -355,9 +363,8 @@ export async function withdrawFromGoalAction(
       amount,
       type: 'transfer',
       category: 'Caixinha',
-      sourceAccountId: null, // O serviço de transação identificará o goalId
+      goalId, // Informa ao serviço qual caixinha é a origem
       destinationAccountId,
-      goalId,
       actorId: userId,
     });
 
@@ -372,6 +379,7 @@ export async function withdrawFromGoalAction(
     return { success: false, message: 'Erro ao realizar retirada.' };
   }
 }
+
 
 /**
  * Busca dados para a página de gerenciar goal
