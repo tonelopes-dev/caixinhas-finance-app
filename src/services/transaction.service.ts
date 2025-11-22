@@ -22,7 +22,7 @@ export class TransactionService {
       return await prisma.transaction.findMany({
         where: whereClause,
         include: {
-          category: true, // Inclui a categoria
+          category: true,
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -64,7 +64,7 @@ export class TransactionService {
       return await prisma.transaction.findMany({
         where: whereClause,
         include: {
-          category: true, // Inclui a categoria
+          category: true,
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -96,7 +96,7 @@ export class TransactionService {
       const result = await prisma.transaction.findUnique({
         where: { id: transactionId },
         include: {
-          category: true, // Inclui a categoria
+          category: true,
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -152,6 +152,15 @@ export class TransactionService {
           totalInstallments: data.totalInstallments,
           actor: { connect: { id: data.actorId } },
         };
+        
+        // Define o owner da transação (user ou vault)
+        if (data.vaultId) {
+          createData.vault = { connect: { id: data.vaultId } };
+        } else if (data.userId) {
+          createData.user = { connect: { id: data.userId } };
+        } else {
+          throw new Error("Transação deve estar associada a um usuário ou cofre.");
+        }
 
         const ownerIdForCategory = data.userId || data.vaultId;
         if (!ownerIdForCategory) {
@@ -163,48 +172,39 @@ export class TransactionService {
                 create: { name: data.category, ownerId: ownerIdForCategory }
             }
         };
-
-        if (data.vaultId) {
-          createData.vault = { connect: { id: data.vaultId } };
-        } else if (data.userId) {
-          createData.user = { connect: { id: data.userId } };
-        } else {
-          throw new Error("Transação deve estar associada a um usuário ou cofre.");
-        }
         
-        if (data.sourceAccountId && !data.sourceAccountId.startsWith('goal-')) {
+        // Conecta as contas e metas, se existirem
+        if (data.sourceAccountId) {
           createData.sourceAccount = { connect: { id: data.sourceAccountId } };
         }
-        
-        if (data.destinationAccountId && !data.destinationAccountId.startsWith('goal-')) {
+        if (data.destinationAccountId) {
           createData.destinationAccount = { connect: { id: data.destinationAccountId } };
         }
-
         if (data.goalId) {
-            createData.goal = { connect: { id: data.goalId } };
+          createData.goal = { connect: { id: data.goalId } };
         }
         
         const transaction = await tx.transaction.create({ data: createData });
 
         // Atualizar saldos
-        if (data.type === 'expense' && data.sourceAccountId && !data.sourceAccountId.startsWith('goal-')) {
+        if (data.type === 'expense' && data.sourceAccountId) {
             await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
         }
-        if (data.type === 'income' && data.destinationAccountId && !data.destinationAccountId.startsWith('goal-')) {
+        if (data.type === 'income' && data.destinationAccountId) {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
             if (data.sourceAccountId) {
-                if (data.sourceAccountId.startsWith('goal-')) {
-                    await GoalService.removeFromGoal(data.sourceAccountId.replace('goal-',''), data.amount);
-                } else {
+                if (data.goalId === data.sourceAccountId) { // Retirada de meta
+                    await GoalService.removeFromGoal(data.goalId, data.amount);
+                } else { // Transferência de conta
                     await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
                 }
             }
             if (data.destinationAccountId) {
-                if (data.destinationAccountId.startsWith('goal-')) {
-                    await GoalService.addToGoal(data.destinationAccountId.replace('goal-',''), data.amount);
-                } else {
+                 if (data.goalId === data.destinationAccountId) { // Depósito em meta
+                    await GoalService.addToGoal(data.goalId, data.amount);
+                } else { // Transferência para conta
                     await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
                 }
             }

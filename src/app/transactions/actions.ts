@@ -32,9 +32,9 @@ const transactionSchema = z.object({
   userId: z.string().optional(),
   vaultId: z.string().optional(),
 }).refine(data => {
-    if (data.type === 'expense' && !data.sourceAccountId && !data.goalId) return false;
-    if (data.type === 'income' && !data.destinationAccountId && !data.goalId) return false;
-    if (data.type === 'transfer' && (!data.sourceAccountId && !data.goalId) && (!data.destinationAccountId && !data.goalId)) return false;
+    if (data.type === 'expense' && !data.sourceAccountId) return false;
+    if (data.type === 'income' && !data.destinationAccountId) return false;
+    if (data.type === 'transfer' && !data.sourceAccountId && !data.destinationAccountId) return false;
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
@@ -59,19 +59,19 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const ownerId = formData.get('ownerId') as string;
   const isPersonal = ownerId === userId;
   
+  const sourceId = formData.get('sourceAccountId') as string | null;
+  const destinationId = formData.get('destinationAccountId') as string | null;
+
   const rawData = {
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date') || new Date().toISOString(),
-    sourceAccountId: formData.get('sourceAccountId') || null,
-    destinationAccountId: formData.get('destinationAccountId') || null,
-    goalId: formData.get('sourceAccountId')?.startsWith('goal-') 
-      ? formData.get('sourceAccountId') 
-      : formData.get('destinationAccountId')?.startsWith('goal-') 
-      ? formData.get('destinationAccountId') 
-      : null,
+    // Lógica corrigida para diferenciar conta de meta
+    sourceAccountId: sourceId && !sourceId.startsWith('goal-') ? sourceId : null,
+    destinationAccountId: destinationId && !destinationId.startsWith('goal-') ? destinationId : null,
+    goalId: (sourceId?.startsWith('goal-') ? sourceId : destinationId?.startsWith('goal-') ? destinationId : null)?.replace('goal-', ''),
     paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
@@ -85,6 +85,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
+    console.log("Validation Errors:", validatedFields.error.flatten().fieldErrors);
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -125,6 +126,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 
   const chargeType = formData.get('chargeType');
   
+  const sourceId = formData.get('sourceAccountId') as string | null;
+  const destinationId = formData.get('destinationAccountId') as string | null;
+
   const rawData = {
     id: formData.get('id'),
     description: formData.get('description'),
@@ -132,13 +136,10 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date'),
-    sourceAccountId: formData.get('sourceAccountId') || null,
-    destinationAccountId: formData.get('destinationAccountId') || null,
-    goalId: formData.get('sourceAccountId')?.startsWith('goal-') 
-      ? formData.get('sourceAccountId') 
-      : formData.get('destinationAccountId')?.startsWith('goal-') 
-      ? formData.get('destinationAccountId') 
-      : null,
+    // Lógica corrigida para diferenciar conta de meta
+    sourceAccountId: sourceId && !sourceId.startsWith('goal-') ? sourceId : null,
+    destinationAccountId: destinationId && !destinationId.startsWith('goal-') ? destinationId : null,
+    goalId: (sourceId?.startsWith('goal-') ? sourceId : destinationId?.startsWith('goal-') ? destinationId : null)?.replace('goal-', ''),
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: chargeType === 'recurring',
     isInstallment: chargeType === 'installment',
