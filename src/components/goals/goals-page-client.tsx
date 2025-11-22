@@ -11,7 +11,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -95,7 +94,7 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
           Todas as Suas Caixinhas
         </CardTitle>
         <CardDescription>
-          Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas aparecerão em destaque no seu painel.
+          Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
         </CardDescription>
       </CardHeader>
       <CardContent>
