@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -30,6 +29,7 @@ const transactionSchema = z.object({
   actorId: z.string().optional(),
   userId: z.string().optional(),
   vaultId: z.string().optional(),
+  projectRecurring: z.boolean().optional(),
 }).refine(data => {
     const hasSource = !!data.sourceAccountId || !!data.goalId;
     const hasDestination = !!data.destinationAccountId || !!data.goalId;
@@ -86,13 +86,11 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
     paidInstallments: formData.get('chargeType') === 'installment' ? 1 : null,
+    projectRecurring: formData.get('projectRecurring') === 'true',
     actorId: userId,
     userId: isPersonal ? userId : undefined,
     vaultId: !isPersonal ? ownerId : undefined,
   };
-  
-  console.log("--- DEBUG: DADOS PROCESSADOS PARA VALIDAÇÃO ---");
-  console.log(JSON.stringify(processedData, null, 2));
   
   const validatedFields = transactionSchema.safeParse(processedData);
 

@@ -1,5 +1,4 @@
 
-
 import { prisma } from './prisma';
 import { AccountService } from './account.service';
 import { GoalService } from './goal.service';
@@ -139,54 +138,69 @@ export class TransactionService {
     installmentNumber?: number;
     totalInstallments?: number;
     paidInstallments?: number;
+    projectRecurring?: boolean;
   }): Promise<any> {
     return prisma.$transaction(async (tx) => {
       try {
-        const createData: any = {
-          date: data.date,
-          description: data.description,
-          amount: data.amount,
-          type: data.type,
-          paymentMethod: data.paymentMethod,
-          isRecurring: data.isRecurring ?? false,
-          isInstallment: data.isInstallment ?? false,
-          installmentNumber: data.installmentNumber,
-          totalInstallments: data.totalInstallments,
-          paidInstallments: data.isInstallment ? 1 : null,
-          actor: { connect: { id: data.actorId } },
-        };
-        
-        if (data.vaultId) {
-          createData.vault = { connect: { id: data.vaultId } };
-        } else if (data.userId) {
-          createData.user = { connect: { id: data.userId } };
-        } else {
-          throw new Error("Transação deve estar associada a um usuário ou cofre.");
-        }
+        const recurringId = data.isRecurring ? require('crypto').randomUUID() : null;
 
-        const ownerIdForCategory = data.userId || data.vaultId;
-        if (!ownerIdForCategory) {
-            throw new Error("Owner ID (user or vault) is required for category context.");
-        }
-        createData.category = {
-            connectOrCreate: {
-                where: { name_ownerId: { name: data.category, ownerId: ownerIdForCategory } },
-                create: { name: data.category, ownerId: ownerIdForCategory }
+        const createSingleTransaction = async (transactionData: typeof data, customDate?: Date) => {
+            const createData: any = {
+                date: customDate || transactionData.date,
+                description: transactionData.description,
+                amount: transactionData.amount,
+                type: transactionData.type,
+                paymentMethod: transactionData.paymentMethod,
+                isRecurring: transactionData.isRecurring ?? false,
+                isInstallment: transactionData.isInstallment ?? false,
+                installmentNumber: transactionData.installmentNumber,
+                totalInstallments: transactionData.totalInstallments,
+                paidInstallments: transactionData.isInstallment ? 1 : null,
+                recurringId: recurringId,
+                actor: { connect: { id: transactionData.actorId } },
+            };
+            
+            if (transactionData.vaultId) {
+                createData.vault = { connect: { id: transactionData.vaultId } };
+            } else if (transactionData.userId) {
+                createData.user = { connect: { id: transactionData.userId } };
+            } else {
+                throw new Error("Transação deve estar associada a um usuário ou cofre.");
             }
-        };
-        
-        if (data.sourceAccountId) {
-          createData.sourceAccount = { connect: { id: data.sourceAccountId } };
-        }
-        if (data.destinationAccountId) {
-          createData.destinationAccount = { connect: { id: data.destinationAccountId } };
-        }
-        if (data.goalId) {
-          createData.goal = { connect: { id: data.goalId } };
-        }
-        
-        const transaction = await tx.transaction.create({ data: createData });
 
+            const ownerIdForCategory = transactionData.userId || transactionData.vaultId;
+            if (!ownerIdForCategory) {
+                throw new Error("Owner ID (user or vault) is required for category context.");
+            }
+            createData.category = {
+                connectOrCreate: {
+                    where: { name_ownerId: { name: transactionData.category, ownerId: ownerIdForCategory } },
+                    create: { name: transactionData.category, ownerId: ownerIdForCategory }
+                }
+            };
+            
+            if (transactionData.sourceAccountId) createData.sourceAccount = { connect: { id: transactionData.sourceAccountId } };
+            if (transactionData.destinationAccountId) createData.destinationAccount = { connect: { id: transactionData.destinationAccountId } };
+            if (transactionData.goalId) createData.goal = { connect: { id: transactionData.goalId } };
+            
+            return await tx.transaction.create({ data: createData });
+        };
+
+        const originalTransaction = await createSingleTransaction(data);
+
+        // Lógica de projeção de recorrência
+        if (data.isRecurring && data.projectRecurring) {
+            const originalDate = new Date(data.date);
+            const year = originalDate.getFullYear();
+            const startMonth = originalDate.getMonth();
+
+            for (let month = startMonth + 1; month < 12; month++) {
+                const futureDate = new Date(year, month, originalDate.getDate());
+                await createSingleTransaction(data, futureDate);
+            }
+        }
+
+        // Lógica de atualização de saldos (executada apenas para a transação original)
         if (data.type === 'expense' && data.sourceAccountId) {
             await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
         }
@@ -194,22 +208,14 @@ export class TransactionService {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
-            if (data.sourceAccountId) {
-                await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
-            }
-            if (data.goalId && !data.destinationAccountId) {
-                 await GoalService.removeFromGoal(data.goalId, data.amount);
-            }
+            if (data.sourceAccountId) await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
+            if (data.goalId && !data.destinationAccountId) await GoalService.removeFromGoal(data.goalId, data.amount);
             
-            if (data.destinationAccountId) {
-                await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
-            }
-            if (data.goalId && !data.sourceAccountId) {
-                await GoalService.addToGoal(data.goalId, data.amount);
-            }
+            if (data.destinationAccountId) await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+            if (data.goalId && !data.sourceAccountId) await GoalService.addToGoal(data.goalId, data.amount);
         }
         
-        return transaction;
+        return originalTransaction;
 
       } catch (error) {
         console.error('Erro ao criar transação:', error);

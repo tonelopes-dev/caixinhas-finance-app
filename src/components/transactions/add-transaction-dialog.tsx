@@ -27,6 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Account, Goal } from '@/lib/definitions';
 import { AddAccountPromptDialog } from '../transactions/add-account-prompt-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Checkbox } from '../ui/checkbox';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -62,10 +63,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   
-  // State for multi-step form
   const [step, setStep] = useState(1);
 
-  // Form fields state
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
@@ -77,6 +76,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const [totalInstallments, setTotalInstallments] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [projectRecurring, setProjectRecurring] = useState(false);
 
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -84,7 +84,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     if (hasNoAccounts) {
       setPromptOpen(true);
     } else {
-      resetFormState(); // Reset on open
+      resetFormState();
       setOpen(true);
     }
   };
@@ -101,6 +101,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
       setInstallmentValue('');
       setTotalInstallments('');
       setAmount('');
+      setProjectRecurring(false);
   }
 
   useEffect(() => {
@@ -120,7 +121,6 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     }
   }, [state, toast, initialChargeType]);
 
-  // Effect for automatic calculation
   useEffect(() => {
     if (chargeType === 'installment') {
         const numInstallments = parseFloat(totalInstallments);
@@ -158,21 +158,19 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     const formData = new FormData();
     formData.append('ownerId', ownerId);
     
-    // Step 1 data
     formData.append('description', description);
     formData.append('category', category);
     
-    // Step 2 data
     formData.append('type', transactionType || '');
     formData.append('date', date?.toISOString() || new Date().toISOString());
     if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
     if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
     
-    // Step 3 data
     if (paymentMethod) formData.append('paymentMethod', paymentMethod);
     formData.append('chargeType', chargeType);
     if (totalInstallments) formData.append('totalInstallments', totalInstallments);
     formData.append('amount', amount);
+    if (projectRecurring) formData.append('projectRecurring', 'true');
     
     dispatch(formData);
   };
@@ -210,6 +208,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     }
   };
 
+  const isDecember = date ? date.getMonth() === 11 : false;
+
   return (
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
@@ -237,7 +237,6 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             </DialogDescription>
           </DialogHeader>
 
-          {/* Progress Indicator */}
           <div className="flex items-center gap-2 py-2">
             {steps.map((s, index) => (
                 <React.Fragment key={s.id}>
@@ -342,6 +341,19 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                             <div className="space-y-1">
                                                 <Label htmlFor="installmentValue">Valor da Parcela</Label>
                                                 <Input id="installmentValue" name="installmentValue" type="number" step="0.01" placeholder="Ex: 99,90" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} />
+                                            </div>
+                                        </div>
+                                    )}
+                                    {chargeType === 'recurring' && !isDecember && (
+                                        <div className="items-top flex space-x-2 pt-3">
+                                            <Checkbox id="projectRecurring" checked={projectRecurring} onCheckedChange={(checked) => setProjectRecurring(checked as boolean)} />
+                                            <div className="grid gap-1.5 leading-none">
+                                                <label htmlFor="projectRecurring" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                    Lançar para os próximos meses deste ano?
+                                                </label>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Cria uma cópia desta transação para cada mês até o final do ano.
+                                                </p>
                                             </div>
                                         </div>
                                     )}
