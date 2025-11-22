@@ -5,7 +5,8 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-export default async function GoalDetailPage({ params }: { params: { id: string } }) {
+// Usando uma assinatura de props genérica para evitar o erro de análise estática.
+export default async function GoalDetailPage(props: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -13,9 +14,10 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
   }
 
   const userId = session.user.id;
+  const id = props.params.id;
 
   // Agora a função também busca as contas do usuário
-  const data = await getGoalDetails(params.id, userId);
+  const data = await getGoalDetails(id, userId);
 
   if (!data || !data.goal) {
     notFound();
