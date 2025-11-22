@@ -377,6 +377,7 @@ export function TransactionsPageClient({
                     <TableHead>Transação</TableHead>
                     <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                     <TableHead className="hidden lg:table-cell">Contas</TableHead>
+                    <TableHead className="hidden xl:table-cell">Frequência</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -400,24 +401,12 @@ export function TransactionsPageClient({
                                       </div>
                                       <div>
                                           <p className="font-medium">{t.description}</p>
-                                          <div className='flex items-center gap-2 text-muted-foreground text-xs'>
-                                              {MethodIcon && (
-                                                  <div className='flex items-center gap-1'>
-                                                      <MethodIcon className="h-3 w-3" />
-                                                      <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                                  </div>
-                                              )}
-                                              {t.isRecurring && (
-                                                  <Badge variant="outline" className="border-purple-300 text-purple-800">
-                                                      Recorrente
-                                                  </Badge>
-                                              )}
-                                              {t.isInstallment && (
-                                                  <Badge variant="outline" className="border-blue-300 text-blue-800">
-                                                      Parcelado ({t.installmentNumber}/{t.totalInstallments})
-                                                  </Badge>
-                                              )}
-                                          </div>
+                                          {MethodIcon && (
+                                            <div className='flex items-center gap-1 text-muted-foreground text-xs'>
+                                                <MethodIcon className="h-3 w-3" />
+                                                <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                            </div>
+                                          )}
                                       </div>
                                   </div>
                               </TableCell>
@@ -438,6 +427,18 @@ export function TransactionsPageClient({
                                           <span>{getAccountName(t.destinationAccountId)}</span>
                                       </div>
                                   )}
+                              </TableCell>
+                              <TableCell className="hidden xl:table-cell">
+                                {t.isRecurring && (
+                                  <Badge variant="outline" className="border-purple-300 text-purple-800">
+                                      Recorrente
+                                  </Badge>
+                                )}
+                                {t.isInstallment && (
+                                  <Badge variant="outline" className="border-blue-300 text-blue-800">
+                                      Parcelado ({t.installmentNumber}/{t.totalInstallments})
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell>{formatDate(t.date)}</TableCell>
                               <TableCell className={cn("text-right font-medium", {

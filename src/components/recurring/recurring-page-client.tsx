@@ -134,7 +134,7 @@ export function RecurringPageClient({
               <TableRow>
                 <TableHead>Descrição</TableHead>
                 <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                <TableHead className="hidden sm:table-cell">Data Próxima</TableHead>
+                <TableHead className="hidden sm:table-cell">Próxima Data</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>

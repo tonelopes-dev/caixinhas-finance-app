@@ -75,6 +75,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             <TableRow>
               <TableHead>Descrição</TableHead>
               <TableHead className="hidden sm:table-cell">Categoria</TableHead>
+              <TableHead className="hidden lg:table-cell">Frequência</TableHead>
               <TableHead className="hidden sm:table-cell">Data</TableHead>
               <TableHead className="text-right">Valor</TableHead>
             </TableRow>
@@ -84,24 +85,27 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
-                   <div className="flex items-center gap-2 mt-1">
-                    {transaction.isRecurring && (
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                        <Repeat className="mr-1 h-3 w-3" />
-                        Recorrente
-                      </Badge>
-                    )}
-                    {transaction.isInstallment && (
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                        Parcelado ({transaction.installmentNumber}/{transaction.totalInstallments})
-                      </Badge>
-                    )}
+                  <div className="text-xs text-muted-foreground">
+                    {/* Payment method can be shown here if needed on mobile */}
                   </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                     <Badge variant={transaction.type === 'income' ? 'secondary' : 'outline'}>
                         {typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category}
                     </Badge>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {transaction.isRecurring && (
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                      <Repeat className="mr-1 h-3 w-3" />
+                      Recorrente
+                    </Badge>
+                  )}
+                  {transaction.isInstallment && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                      Parcelado ({transaction.installmentNumber}/{transaction.totalInstallments})
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{formatDate(transaction.date)}</TableCell>
                 <TableCell className={cn("text-right font-medium", {
@@ -115,7 +119,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             ))}
              {filteredTransactions.length === 0 && (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                         Nenhuma transação encontrada.
                     </TableCell>
                 </TableRow>
