@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -158,14 +159,15 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     const formData = new FormData();
     formData.append('ownerId', ownerId);
     
+    // Hidden fields for all steps
     formData.append('description', description);
     formData.append('category', category);
-    
     formData.append('type', transactionType || '');
     formData.append('date', date?.toISOString() || new Date().toISOString());
     if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
     if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
-    
+
+    // Final step fields
     if (paymentMethod) formData.append('paymentMethod', paymentMethod);
     formData.append('chargeType', chargeType);
     if (totalInstallments) formData.append('totalInstallments', totalInstallments);
@@ -214,21 +216,19 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-            <Button size="sm" onClick={handleTriggerClick}>
-            {initialChargeType === 'recurring' ? (
-                <>
-                <Repeat className="mr-2 h-4 w-4" />
-                Adicionar Recorrência
-                </>
-            ) : (
-                <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Adicionar
-                </>
-            )}
-            </Button>
-        </DialogTrigger>
+        <Button size="sm" onClick={handleTriggerClick}>
+          {initialChargeType === 'recurring' ? (
+            <>
+              <Repeat className="mr-2 h-4 w-4" />
+              Adicionar Recorrência
+            </>
+          ) : (
+            <>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Adicionar
+            </>
+          )}
+        </Button>
         <DialogContent className="flex flex-col">
           <DialogHeader>
             <DialogTitle>Adicionar Transação</DialogTitle>
