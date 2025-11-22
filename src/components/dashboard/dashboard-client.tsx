@@ -20,6 +20,7 @@ type DashboardClientProps = {
   accounts: Account[];
   goals: Goal[];
   transactions: Transaction[];
+  categories: any[];
 };
 
 export function DashboardClient({
@@ -31,6 +32,7 @@ export function DashboardClient({
   accounts,
   goals,
   transactions,
+  categories,
 }: DashboardClientProps) {
   const [transactionFilter, setTransactionFilter] = useState<
     'all' | 'income' | 'expense' | 'transfer'
@@ -87,6 +89,7 @@ export function DashboardClient({
                   transactions={transactions}
                   accounts={accounts}
                   goals={goals}
+                  categories={categories}
                   ownerId={workspaceId}
                   ownerType={isPersonalWorkspace ? 'user' : 'vault'}
                   typeFilter={transactionFilter}

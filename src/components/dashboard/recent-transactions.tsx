@@ -15,14 +15,15 @@ import { useMemo } from 'react';
 type RecentTransactionsProps = {
   transactions: Transaction[];
   accounts: Account[];
-  goals: Goal[]; // Adicionado goals aqui
+  goals: Goal[];
+  categories: any[];
   ownerId: string;
   ownerType: 'user' | 'vault';
   typeFilter: 'all' | 'income' | 'expense' | 'transfer';
   onFilterChange: (filter: 'all' | 'income' | 'expense' | 'transfer') => void;
 };
 
-export default function RecentTransactions({ transactions, accounts, goals, ownerId, ownerType, typeFilter, onFilterChange }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions, accounts, goals, categories, ownerId, ownerType, typeFilter, onFilterChange }: RecentTransactionsProps) {
 
     const baseTransactions = useMemo(() => {
         // Sort by most recent
@@ -64,7 +65,7 @@ export default function RecentTransactions({ transactions, accounts, goals, owne
                     <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
-            <AddTransactionSheet accounts={accounts} goals={goals} ownerId={ownerId} />
+            <AddTransactionSheet accounts={accounts} goals={goals} categories={categories} ownerId={ownerId} />
         </div>
       </CardHeader>
       <CardContent>

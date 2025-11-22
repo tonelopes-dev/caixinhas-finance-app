@@ -7,6 +7,7 @@ import {
   AccountService,
   GoalService,
   TransactionService,
+  CategoryService,
 } from '@/services';
 
 /**
@@ -21,13 +22,14 @@ export async function getDashboardData(userId: string, workspaceId: string) {
     const ownerType = isPersonalWorkspace ? 'user' : 'vault';
 
     // Buscar dados em paralelo
-    const [user, accounts, goals, transactions, vault] =
+    const [user, accounts, goals, transactions, vault, categories] =
       await Promise.all([
         AuthService.getUserById(userId),
         AccountService.getVisibleAccounts(userId, workspaceId),
         GoalService.getGoals(workspaceId, ownerType),
         TransactionService.getCurrentMonthTransactions(workspaceId, ownerType),
         !isPersonalWorkspace ? VaultService.getVaultById(workspaceId) : null,
+        CategoryService.getUserCategories(userId),
       ]);
 
     if (!user) {
@@ -120,6 +122,7 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       accounts: formattedAccounts,
       goals: formattedGoals,
       transactions: formattedTransactions,
+      categories: categories || [],
     };
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);
