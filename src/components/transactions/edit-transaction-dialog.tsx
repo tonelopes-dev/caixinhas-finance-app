@@ -57,6 +57,8 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   // State for multi-step form
   const [step, setStep] = useState(1);
 
+  const isGoalTransaction = !!transaction.goalId;
+
   // Form fields state
   const [description, setDescription] = useState(transaction.description);
   const [amount, setAmount] = useState(transaction.amount.toString());
@@ -64,7 +66,9 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
   const [sourceAccountId, setSourceAccountId] = useState(transaction.sourceAccountId);
   const [destinationAccountId, setDestinationAccountId] = useState(transaction.destinationAccountId);
-  const [category, setCategory] = useState(typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category);
+  const [category, setCategory] = useState(
+    isGoalTransaction ? 'Caixinha' : (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category)
+  );
   const [paymentMethod, setPaymentMethod] = useState<string | null>(transaction.paymentMethod || null);
 
 
@@ -241,14 +245,16 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                             <Input id="description_field" value={description} onChange={(e) => setDescription(e.target.value)} />
                             {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category_field">Categoria</Label>
-                            <Select value={category} onValueChange={setCategory}>
-                                <SelectTrigger id="category_field"><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                                <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
-                            </Select>
-                            {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
-                        </div>
+                        {!isGoalTransaction && (
+                          <div className="space-y-2">
+                              <Label htmlFor="category_field">Categoria</Label>
+                              <Select value={category} onValueChange={setCategory}>
+                                  <SelectTrigger id="category_field"><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                                  <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
+                              </Select>
+                              {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
+                          </div>
+                        )}
                     </motion.div>
                 )}
 
