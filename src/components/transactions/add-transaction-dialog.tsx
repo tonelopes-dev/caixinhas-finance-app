@@ -77,6 +77,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const [chargeType, setChargeType] = useState(initialChargeType);
   const [installmentValue, setInstallmentValue] = useState('');
   const [totalInstallments, setTotalInstallments] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+
 
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -166,19 +168,21 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
       <Dialog open={open} onOpenChange={setOpen}>
-        <Button size="sm" onClick={handleTriggerClick}>
-          {initialChargeType === 'recurring' ? (
-            <>
-              <Repeat className="mr-2 h-4 w-4" />
-              Adicionar Recorrência
-            </>
-          ) : (
-            <>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Adicionar
-            </>
-          )}
-        </Button>
+        <DialogTrigger asChild>
+            <Button size="sm" onClick={handleTriggerClick}>
+            {initialChargeType === 'recurring' ? (
+                <>
+                <Repeat className="mr-2 h-4 w-4" />
+                Adicionar Recorrência
+                </>
+            ) : (
+                <>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Adicionar
+                </>
+            )}
+            </Button>
+        </DialogTrigger>
         <DialogContent className="flex flex-col">
           <DialogHeader>
             <DialogTitle>Adicionar Transação</DialogTitle>
@@ -204,24 +208,33 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
 
           <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
+            {/* Hidden fields to persist data across steps */}
+            <input type="hidden" name="ownerId" value={ownerId} />
+            <input type="hidden" name="description" value={description} />
+            <input type="hidden" name="category" value={category} />
+            <input type="hidden" name="type" value={transactionType} />
+            <input type="hidden" name="date" value={date?.toISOString() || ''} />
+            <input type="hidden" name="sourceAccountId" value={sourceAccountId || ''} />
+            <input type="hidden" name="destinationAccountId" value={destinationAccountId || ''} />
+            <input type="hidden" name="paymentMethod" value={paymentMethod || ''} />
+            <input type="hidden" name="chargeType" value={chargeType} />
+            <input type="hidden" name="totalInstallments" value={totalInstallments} />
+
+
             <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
-              <input type="hidden" name="ownerId" value={ownerId} />
-              <input type="hidden" name="isRecurring" value={chargeType === 'recurring' ? 'on' : ''} />
-              <input type="hidden" name="isInstallment" value={chargeType === 'installment' ? 'on' : ''} />
-              {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
 
               <AnimatePresence mode="wait">
                   {step === 1 && (
                       <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
                           <div className="space-y-2">
-                              <Label htmlFor="description">Descrição</Label>
-                              <Input id="description" name="description" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} />
+                              <Label htmlFor="description_field">Descrição</Label>
+                              <Input id="description_field" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} />
                               {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
                           </div>
                            <div className="space-y-2">
-                                <Label htmlFor="category">Categoria</Label>
-                                <Select name="category" value={category} onValueChange={setCategory}>
-                                    <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                                <Label htmlFor="category_field">Categoria</Label>
+                                <Select value={category} onValueChange={setCategory}>
+                                    <SelectTrigger id="category_field"><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
                                     <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
                                 </Select>
                                 {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
@@ -232,9 +245,9 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                   {step === 2 && (
                        <motion.div key="step2" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="type">Tipo</Label>
-                                <Select name="type" value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
-                                    <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                                <Label htmlFor="type_field">Tipo</Label>
+                                <Select value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
+                                    <SelectTrigger id="type_field"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="expense">Saída</SelectItem>
                                         <SelectItem value="income">Entrada</SelectItem>
@@ -244,24 +257,23 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                 {state?.errors?.type && <p className="text-sm font-medium text-destructive">{state.errors.type[0]}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="date">Data</Label>
+                                <Label htmlFor="date_field">Data</Label>
                                 <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                        <Button id="date_field" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={date} onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }} initialFocus locale={ptBR} /></PopoverContent>
                                 </Popover>
-                                <input type="hidden" name="date" value={date?.toISOString() || ''} />
                                 {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
                             </div>
                            {(transactionType === 'expense' || transactionType === 'transfer') && (
                               <div className="space-y-2">
-                                  <Label htmlFor="sourceAccountId">Origem</Label>
-                                  <Select name="sourceAccountId" value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
-                                      <SelectTrigger><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
+                                  <Label htmlFor="sourceAccountId_field">Origem</Label>
+                                  <Select value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
+                                      <SelectTrigger id="sourceAccountId_field"><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
                                       <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
                                   </Select>
                                   {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
@@ -269,9 +281,9 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                            )}
                            {(transactionType === 'income' || transactionType === 'transfer') && (
                               <div className="space-y-2">
-                                  <Label htmlFor="destinationAccountId">Destino</Label>
-                                  <Select name="destinationAccountId" value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
-                                      <SelectTrigger><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
+                                  <Label htmlFor="destinationAccountId_field">Destino</Label>
+                                  <Select value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
+                                      <SelectTrigger id="destinationAccountId_field"><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
                                       <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
                                   </Select>
                                   {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
@@ -285,7 +297,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                             {(transactionType === 'income' || transactionType === 'expense') && (
                                 <div className="space-y-3 rounded-lg border p-3">
                                     <Label>Tipo de cobrança</Label>
-                                    <RadioGroup name="chargeType" defaultValue={initialChargeType} value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
+                                    <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="single" /><Label htmlFor="single" className="font-normal">Cobrança Única</Label></div>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="recurring" /><Label htmlFor="recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label></div>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="installment" /><Label htmlFor="installment" className="font-normal">Compra Parcelada</Label></div>
@@ -293,8 +305,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                     {chargeType === 'installment' && (
                                         <div className="grid grid-cols-2 gap-4 pt-2">
                                             <div className="space-y-1">
-                                                <Label htmlFor="totalInstallments">Total de Parcelas</Label>
-                                                <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
+                                                <Label htmlFor="totalInstallments_field">Total de Parcelas</Label>
+                                                <Input id="totalInstallments_field" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
                                             </div>
                                             <div className="space-y-1">
                                                 <Label htmlFor="installmentValue">Valor da Parcela</Label>
@@ -313,8 +325,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
                             {transactionType === 'expense' && !isCreditCardTransaction && (
                                 <div className="space-y-2">
-                                    <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                    <Select name="paymentMethod"><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
+                                    <Label htmlFor="paymentMethod_field">Método de Pagamento</Label>
+                                    <Select value={paymentMethod || ''} onValueChange={setPaymentMethod}>
+                                        <SelectTrigger id="paymentMethod_field"><SelectValue placeholder="Selecione o método" /></SelectTrigger>
+                                        <SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent>
+                                    </Select>
                                     {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                                 </div>
                             )}
@@ -332,7 +347,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                 ) : <div />}
 
                 {step < 3 ? (
-                    <Button type="button" onClick={nextStep} disabled={step === 1 ? !isStep1Valid : !isStep2Valid}>
+                    <Button type="button" onClick={nextStep} disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)}>
                         Avançar
                     </Button>
                 ) : (
