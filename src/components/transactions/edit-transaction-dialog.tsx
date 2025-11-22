@@ -51,7 +51,6 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -210,7 +209,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
             ))}
         </div>
 
-        <form ref={formRef} onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
+        <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
 
             <AnimatePresence mode="wait">
@@ -288,7 +287,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
 
                 {step === 3 && (
                     <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                        {(transactionType === 'income' || transactionType === 'expense') && (
+                        {transactionType === 'expense' && (
                           <div className="space-y-3 rounded-lg border p-3">
                                 <Label>Tipo de cobrança</Label>
                                  <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
@@ -355,3 +354,5 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
     </Dialog>
   )
 }
+
+    
