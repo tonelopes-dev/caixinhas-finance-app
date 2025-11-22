@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { TransactionsPageClient } from '@/components/transactions/transactions-page-client';
 import {
   AccountService,
-  GoalService,
   CategoryService,
   TransactionService,
   VaultService,
 } from '@/services';
+import { getUserAllGoals } from '@/app/goals/actions';
 
 export default async function TransactionsPage() {
   const session = await getServerSession(authOptions);
@@ -38,7 +38,7 @@ export default async function TransactionsPage() {
   ] = await Promise.all([
     TransactionService.getTransactions(workspaceId, ownerType),
     AccountService.getUserAccounts(userId), // Todas as contas do usuário
-    GoalService.getUserAllGoals(userId).then(data => data.goals), // Todas as metas do usuário
+    getUserAllGoals(userId).then(data => data.goals), // Todas as metas do usuário
     CategoryService.getUserCategories(userId),
     VaultService.getUserVaults(userId)
   ]);
