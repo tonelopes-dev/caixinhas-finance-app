@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -158,12 +157,18 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     e.preventDefault();
     const formData = new FormData();
     formData.append('ownerId', ownerId);
+    
+    // Step 1 data
     formData.append('description', description);
     formData.append('category', category);
+    
+    // Step 2 data
     formData.append('type', transactionType || '');
     formData.append('date', date?.toISOString() || new Date().toISOString());
     if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
     if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
+    
+    // Step 3 data
     if (paymentMethod) formData.append('paymentMethod', paymentMethod);
     formData.append('chargeType', chargeType);
     if (totalInstallments) formData.append('totalInstallments', totalInstallments);
@@ -183,6 +188,27 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     { id: 2, title: 'A Movimentação' },
     { id: 3, title: 'Valores e Detalhes' },
   ];
+
+  const frequencyLabels = {
+    income: {
+        single: "Recebimento Único",
+        recurring: "Recebimento Fixo (Recorrente)",
+        installment: "Recebimento Parcelado",
+        label: "Frequência do Recebimento"
+    },
+    expense: {
+        single: "Cobrança Única",
+        recurring: "Pagamento Fixo (Recorrente)",
+        installment: "Compra Parcelada",
+        label: "Frequência da Cobrança"
+    },
+    transfer: {
+        label: ""
+    },
+    '': {
+        label: ""
+    }
+  };
 
   return (
     <>
@@ -225,7 +251,6 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                 </React.Fragment>
             ))}
           </div>
-
 
           <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
             <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
@@ -300,13 +325,13 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
                   {step === 3 && (
                       <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                            {transactionType === 'expense' && (
+                            {(transactionType === 'income' || transactionType === 'expense') && (
                                 <div className="space-y-3 rounded-lg border p-3">
-                                    <Label>Tipo de cobrança</Label>
+                                    <Label>{frequencyLabels[transactionType]?.label || 'Frequência'}</Label>
                                     <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="single" /><Label htmlFor="single" className="font-normal">Cobrança Única</Label></div>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="recurring" /><Label htmlFor="recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label></div>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="installment" /><Label htmlFor="installment" className="font-normal">Compra Parcelada</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="single" /><Label htmlFor="single" className="font-normal">{frequencyLabels[transactionType]?.single || 'Único'}</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="recurring" /><Label htmlFor="recurring" className="font-normal">{frequencyLabels[transactionType]?.recurring || 'Recorrente'}</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="installment" /><Label htmlFor="installment" className="font-normal">{frequencyLabels[transactionType]?.installment || 'Parcelado'}</Label></div>
                                     </RadioGroup>
                                     {chargeType === 'installment' && (
                                         <div className="grid grid-cols-2 gap-4 pt-2">
@@ -325,7 +350,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
                              <div className="space-y-2">
                               <Label htmlFor="amount">Valor Total</Label>
-                              <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
+                              <Input id="amount" type="number" step="0.01" placeholder="R$ 0,00" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
                               {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
                             </div>
 
@@ -367,5 +392,3 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     </>
   )
 }
-
-    

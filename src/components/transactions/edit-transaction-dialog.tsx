@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -176,6 +175,27 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
     { id: 3, title: 'Valores e Detalhes' },
   ];
 
+  const frequencyLabels = {
+    income: {
+        single: "Recebimento Único",
+        recurring: "Recebimento Fixo (Recorrente)",
+        installment: "Recebimento Parcelado",
+        label: "Frequência do Recebimento"
+    },
+    expense: {
+        single: "Cobrança Única",
+        recurring: "Pagamento Fixo (Recorrente)",
+        installment: "Compra Parcelada",
+        label: "Frequência da Cobrança"
+    },
+    transfer: {
+        label: ""
+    },
+    '': {
+        label: ""
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -287,13 +307,13 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
 
                 {step === 3 && (
                     <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                        {transactionType === 'expense' && (
-                          <div className="space-y-3 rounded-lg border p-3">
-                                <Label>Tipo de cobrança</Label>
-                                 <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="edit-single" /><Label htmlFor="edit-single" className="font-normal">Cobrança Única</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="edit-recurring" /><Label htmlFor="edit-recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="edit-installment" /><Label htmlFor="edit-installment" className="font-normal">Compra Parcelada</Label></div>
+                        {(transactionType === 'income' || transactionType === 'expense') && (
+                            <div className="space-y-3 rounded-lg border p-3">
+                                <Label>{frequencyLabels[transactionType]?.label || 'Frequência'}</Label>
+                                <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="edit-single" /><Label htmlFor="edit-single" className="font-normal">{frequencyLabels[transactionType]?.single || 'Único'}</Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="edit-recurring" /><Label htmlFor="edit-recurring" className="font-normal">{frequencyLabels[transactionType]?.recurring || 'Recorrente'}</Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="edit-installment" /><Label htmlFor="edit-installment" className="font-normal">{frequencyLabels[transactionType]?.installment || 'Parcelado'}</Label></div>
                                 </RadioGroup>
                                 {chargeType === 'installment' && (
                                     <div className="grid grid-cols-2 gap-4 pt-2">
@@ -354,5 +374,3 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
     </Dialog>
   )
 }
-
-    
