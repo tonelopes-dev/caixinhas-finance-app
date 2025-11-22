@@ -30,21 +30,26 @@ const transactionSchema = z.object({
   userId: z.string().optional(),
   vaultId: z.string().optional(),
 }).refine(data => {
+    // Validação refinada para fontes e destinos
+    const hasSource = !!data.sourceAccountId || !!data.goalId;
+    const hasDestination = !!data.destinationAccountId || !!data.goalId;
+
     if (data.type === 'expense') {
-        return !!data.sourceAccountId;
+        // Saída precisa de uma origem (conta ou meta)
+        return hasSource;
     }
     if (data.type === 'income') {
-        return !!data.destinationAccountId;
+        // Entrada precisa de um destino (conta ou meta)
+        return hasDestination;
     }
     if (data.type === 'transfer') {
-        const hasSource = !!data.sourceAccountId;
-        const hasDestination = !!data.destinationAccountId || !!data.goalId;
+        // Transferência precisa de ambos
         return hasSource && hasDestination;
     }
-    return true;
+    return true; // Para outros tipos (se houver no futuro)
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'],
+    path: ['sourceAccountId'], // O erro será associado a este campo no formulário
 });
 
 
@@ -76,7 +81,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     date: formData.get('date') || new Date().toISOString(),
     sourceAccountId: sourceValue && !sourceValue.startsWith('goal-') ? sourceValue : null,
     destinationAccountId: destinationValue && !destinationValue.startsWith('goal-') ? destinationValue : null,
-    goalId: destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null,
+    goalId: sourceValue?.startsWith('goal-') 
+        ? sourceValue.replace('goal-', '') 
+        : (destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null),
     paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: formData.get('chargeType') === 'recurring',
     isInstallment: formData.get('chargeType') === 'installment',
@@ -87,11 +94,16 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     vaultId: !isPersonal ? ownerId : undefined,
   };
   
+  // LOG DE DEBUG ADICIONADO
+  console.log("--- DEBUG: DADOS PROCESSADOS PARA VALIDAÇÃO ---");
+  console.log(JSON.stringify(processedData, null, 2));
+  
   // 2. Validar os dados já processados
   const validatedFields = transactionSchema.safeParse(processedData);
 
   if (!validatedFields.success) {
-    console.log("Validation Errors:", validatedFields.error.flatten().fieldErrors);
+    console.log("--- DEBUG: ERRO DE VALIDAÇÃO ---");
+    console.log(JSON.stringify(validatedFields.error.flatten().fieldErrors, null, 2));
     return {
       success: false,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -143,7 +155,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     date: formData.get('date'),
     sourceAccountId: sourceValue && !sourceValue.startsWith('goal-') ? sourceValue : null,
     destinationAccountId: destinationValue && !destinationValue.startsWith('goal-') ? destinationValue : null,
-    goalId: destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null,
+    goalId: sourceValue?.startsWith('goal-') 
+        ? sourceValue.replace('goal-', '') 
+        : (destinationValue?.startsWith('goal-') ? destinationValue.replace('goal-', '') : null),
     paymentMethod: formData.get('paymentMethod'),
     isRecurring: formData.get('chargeType') === 'recurring',
     isInstallment: formData.get('chargeType') === 'installment',
@@ -242,3 +256,6 @@ export async function deleteTransaction(prevState: { message: string | null }, f
 }
 
 
+
+
+    
