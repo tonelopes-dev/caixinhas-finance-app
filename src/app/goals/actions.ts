@@ -164,8 +164,7 @@ export async function createGoalAction(
   }
   const userId = session.user.id;
 
-  const cookieStore = cookies();
-  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+  const workspaceId = cookies().get('CAIXINHAS_VAULT_ID')?.value || userId;
 
   const validatedFields = createGoalSchema.safeParse({
     name: formData.get('name'),
