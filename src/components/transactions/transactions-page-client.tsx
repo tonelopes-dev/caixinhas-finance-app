@@ -34,13 +34,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat } from 'lucide-react';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -72,10 +73,10 @@ const months = [
 ];
 
 const paymentMethods: Record<string, { label: string, icon: React.ElementType }> = {
-    pix: { label: 'Pix', icon: ArrowRightLeft },
+    pix: { label: 'Pix', icon: ArrowRight },
     credit_card: { label: 'Crédito', icon: CreditCard },
     debit_card: { label: 'Débito', icon: CreditCard },
-    transfer: { label: 'Transferência', icon: ArrowRightLeft },
+    transfer: { label: 'Transferência', icon: ArrowRight },
     boleto: { label: 'Boleto', icon: Banknote },
     cash: { label: 'Dinheiro', icon: Banknote },
 }
@@ -233,15 +234,31 @@ export function TransactionsPageClient({
                             <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
                         </div>
                     </motion.div>
-                    <motion.div variants={summaryItemVariants(0.4)} className={cardBaseClasses} onClick={() => router.push('/recurring')}>
-                        <div className="rounded-full bg-purple-500/10 p-3">
-                            <Repeat className="h-6 w-6 text-purple-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Recorrentes e Parcelas</p>
-                            <p className="text-xl font-bold">{recurringSummary.recurringCount + recurringSummary.installmentsCount}</p>
-                        </div>
-                    </motion.div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <motion.div
+                            variants={summaryItemVariants(0.4)}
+                            className={cn(cardBaseClasses, "group justify-between hover:bg-muted/50")}
+                            onClick={() => router.push('/recurring')}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="rounded-full bg-purple-500/10 p-3">
+                                <Repeat className="h-6 w-6 text-purple-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Recorrentes e Parcelas</p>
+                                <p className="text-xl font-bold">{recurringSummary.recurringCount + recurringSummary.installmentsCount}</p>
+                              </div>
+                            </div>
+                            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                          </motion.div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ver detalhes de recorrências e parcelas</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                 </motion.div>
             </CardContent>
         </Card>
@@ -340,7 +357,7 @@ export function TransactionsPageClient({
                                                   Recorrente
                                               </Badge>
                                           )}
-                                          {t.isInstallment && (
+                                          {t.isInstallment && t.totalInstallments && (
                                               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
                                                   ({t.paidInstallments.length}/{t.totalInstallments})
                                               </Badge>
@@ -434,7 +451,7 @@ export function TransactionsPageClient({
                                       Recorrente
                                   </Badge>
                                 )}
-                                {t.isInstallment && (
+                                {t.isInstallment && t.totalInstallments && (
                                   <Badge variant="outline" className="border-blue-300 text-blue-800">
                                       Parcelado ({t.paidInstallments.length}/{t.totalInstallments})
                                   </Badge>
