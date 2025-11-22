@@ -103,7 +103,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                   )}
                   {transaction.isInstallment && (
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                      Parcelado ({transaction.paidInstallments}/{transaction.totalInstallments})
+                      Parcelado ({transaction.paidInstallments.length}/{transaction.totalInstallments})
                     </Badge>
                   )}
                 </TableCell>

@@ -342,7 +342,7 @@ export function TransactionsPageClient({
                                             )}
                                             {t.isInstallment && (
                                                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                                                    ({t.paidInstallments}/{t.totalInstallments})
+                                                    ({t.paidInstallments.length}/{t.totalInstallments})
                                                 </Badge>
                                             )}
                                             {MethodIcon && (
@@ -436,7 +436,7 @@ export function TransactionsPageClient({
                                 )}
                                 {t.isInstallment && (
                                   <Badge variant="outline" className="border-blue-300 text-blue-800">
-                                      Parcelado ({t.paidInstallments}/{t.totalInstallments})
+                                      Parcelado ({t.paidInstallments.length}/{t.totalInstallments})
                                   </Badge>
                                 )}
                               </TableCell>
