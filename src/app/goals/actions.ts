@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const createGoalSchema = z.object({
   name: z.string().min(1, { message: 'O nome da caixinha é obrigatório.' }),
@@ -153,16 +155,17 @@ export async function createGoalAction(
   prevState: GoalActionState,
   formData: FormData
 ): Promise<GoalActionState> {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
-
-  if (!userId || !workspaceId) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     return {
       message: 'Usuário não autenticado',
       errors: {},
     };
   }
+  const userId = session.user.id;
+
+  const cookieStore = cookies();
+  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
 
   const validatedFields = createGoalSchema.safeParse({
     name: formData.get('name'),
@@ -211,10 +214,8 @@ export async function updateGoalAction(
   prevState: GoalActionState,
   formData: FormData,
 ): Promise<GoalActionState> {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-  
-  if (!userId) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     return { message: 'Usuário não autenticado' };
   }
 
@@ -291,14 +292,13 @@ export async function toggleFeaturedGoalAction(goalId: string) {
  * Adiciona valor a uma meta (depósito)
  */
 export async function depositToGoalAction(goalId: string, amount: number, description: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+  const userId = session.user.id;
+
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-
-    if (!userId) {
-      return { success: false, message: 'Usuário não autenticado' };
-    }
-
     // Adicionar valor à meta
     await GoalService.addToGoal(goalId, amount);
 
@@ -332,14 +332,13 @@ export async function depositToGoalAction(goalId: string, amount: number, descri
  * Remove valor de uma meta (retirada)
  */
 export async function withdrawFromGoalAction(goalId: string, amount: number, description: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+  const userId = session.user.id;
+  
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-
-    if (!userId) {
-      return { success: false, message: 'Usuário não autenticado' };
-    }
-
     // Remover valor da meta
     await GoalService.removeFromGoal(goalId, amount);
 
@@ -374,12 +373,11 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
  */
 export async function getGoalManageData(goalId: string) {
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-    
-    if (!userId) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return null;
     }
+    const userId = session.user.id;
 
     const goal = await GoalService.getGoalById(goalId);
     if (!goal) {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
@@ -19,6 +20,8 @@ import { ArrowLeft, Lock, PiggyBank, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const commonEmojis = [
   '✈️', '🏡', '🚗', '🎓', '💍', '👶',
@@ -35,11 +38,19 @@ function SubmitButton() {
 }
 
 export default function NewGoalPage() {
+  const { status } = useSession();
+  const router = useRouter();
   const initialState: GoalActionState = {};
   const [state, dispatch] = useActionState(createGoalAction, initialState);
   const { toast } = useToast();
   const [visibility, setVisibility] = useState('shared');
   const [selectedEmoji, setSelectedEmoji] = useState('');
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -61,6 +72,14 @@ export default function NewGoalPage() {
 
   const handleCustomEmojiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedEmoji(e.target.value);
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
   }
 
   return (
