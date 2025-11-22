@@ -109,7 +109,7 @@ export async function getGoalDetails(goalId: string) {
 
     // Filtrar transações que envolvem esta meta
     const goalTransactions = transactions.filter(
-      (t) => t.goalId === goalId
+      (t) => t.goalId === goalId || t.sourceAccountId === goalId || t.destinationAccountId === goalId
     );
     
     return {
@@ -288,9 +288,14 @@ export async function toggleFeaturedGoalAction(goalId: string) {
 }
 
 /**
- * Adiciona valor a uma meta (depósito)
+ * Adiciona valor a uma meta (depósito) criando uma transação.
  */
-export async function depositToGoalAction(goalId: string, amount: number, description: string) {
+export async function depositToGoalAction(
+  goalId: string,
+  amount: number,
+  sourceAccountId: string,
+  description: string
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { success: false, message: 'Usuário não autenticado' };
@@ -298,27 +303,29 @@ export async function depositToGoalAction(goalId: string, amount: number, descri
   const userId = session.user.id;
 
   try {
-    // Adicionar valor à meta
-    await GoalService.addToGoal(goalId, amount);
-
-    // Criar transação de registro
     const goal = await GoalService.getGoalById(goalId);
-    if (goal) {
-      await TransactionService.createTransaction({
-        userId: goal.userId,
-        vaultId: goal.vaultId,
-        date: new Date(),
-        description: description || `Depósito na caixinha ${goal.name}`,
-        amount,
-        type: 'transfer',
-        category: 'savings',
-        destinationAccountId: goalId,
-        actorId: userId,
-      });
+    if (!goal) {
+      return { success: false, message: 'Caixinha não encontrada.' };
     }
+
+    await TransactionService.createTransaction({
+      userId: goal.userId,
+      vaultId: goal.vaultId,
+      date: new Date(),
+      description: description || `Depósito na caixinha ${goal.name}`,
+      amount,
+      type: 'transfer',
+      category: 'Caixinha',
+      sourceAccountId,
+      destinationAccountId: null, // O serviço de transação identificará o goalId
+      goalId,
+      actorId: userId,
+    });
 
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
+    revalidatePath('/accounts');
+    revalidatePath('/patrimonio');
 
     return { success: true, message: 'Depósito realizado com sucesso!' };
   } catch (error) {
@@ -328,9 +335,14 @@ export async function depositToGoalAction(goalId: string, amount: number, descri
 }
 
 /**
- * Remove valor de uma meta (retirada)
+ * Remove valor de uma meta (retirada) criando uma transação.
  */
-export async function withdrawFromGoalAction(goalId: string, amount: number, description: string) {
+export async function withdrawFromGoalAction(
+  goalId: string,
+  amount: number,
+  destinationAccountId: string,
+  description: string
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { success: false, message: 'Usuário não autenticado' };
@@ -338,28 +350,30 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
   const userId = session.user.id;
   
   try {
-    // Remover valor da meta
-    await GoalService.removeFromGoal(goalId, amount);
-
-    // Criar transação de registro
     const goal = await GoalService.getGoalById(goalId);
-    if (goal) {
-      await TransactionService.createTransaction({
-        userId: goal.userId,
-        vaultId: goal.vaultId,
-        date: new Date(),
-        description: description || `Retirada da caixinha ${goal.name}`,
-        amount,
-        type: 'transfer',
-        category: 'savings',
-        sourceAccountId: goalId,
-        actorId: userId,
-      });
+    if (!goal) {
+      return { success: false, message: 'Caixinha não encontrada.' };
     }
+
+    await TransactionService.createTransaction({
+      userId: goal.userId,
+      vaultId: goal.vaultId,
+      date: new Date(),
+      description: description || `Retirada da caixinha ${goal.name}`,
+      amount,
+      type: 'transfer',
+      category: 'Caixinha',
+      sourceAccountId: null, // O serviço de transação identificará o goalId
+      destinationAccountId,
+      goalId,
+      actorId: userId,
+    });
 
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
-
+    revalidatePath('/accounts');
+    revalidatePath('/patrimonio');
+    
     return { success: true, message: 'Retirada realizada com sucesso!' };
   } catch (error) {
     console.error('Erro ao retirar da meta:', error);

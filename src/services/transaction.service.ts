@@ -208,11 +208,19 @@ export class TransactionService {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
-            if (data.sourceAccountId) await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
-            if (data.goalId && !data.destinationAccountId) await GoalService.removeFromGoal(data.goalId, data.amount);
-            
-            if (data.destinationAccountId) await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
-            if (data.goalId && !data.sourceAccountId) await GoalService.addToGoal(data.goalId, data.amount);
+             // Movimentação entre conta e caixinha
+            if (data.goalId) {
+                if (data.sourceAccountId) { // Depósito: Conta -> Caixinha
+                    await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
+                    await GoalService.addToGoal(data.goalId, data.amount);
+                } else if (data.destinationAccountId) { // Retirada: Caixinha -> Conta
+                    await GoalService.removeFromGoal(data.goalId, data.amount);
+                    await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+                }
+            } else if (data.sourceAccountId && data.destinationAccountId) { // Transferência entre contas
+                await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
+                await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+            }
         }
         
         return originalTransaction;

@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useEffect, useRef, useState as useStateReact } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { depositToGoalAction, withdrawFromGoalAction } from '@/app/goals/actions';
 import {
@@ -16,18 +17,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-
-function SubmitButton({ type }: { type: 'deposit' | 'withdrawal' }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} variant={type === 'withdrawal' ? 'destructive' : 'default'}>
-      {pending ? 'Salvando...' : type === 'deposit' ? 'Guardar' : 'Retirar'}
-    </Button>
-  );
-}
+import { AccountService } from '@/services';
+import type { Account } from '@/lib/definitions';
+import { useSession } from 'next-auth/react';
 
 type GoalTransactionDialogProps = {
   type: 'deposit' | 'withdrawal';
@@ -38,8 +33,23 @@ type GoalTransactionDialogProps = {
 export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransactionDialogProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [open, setOpen] = useStateReact(false);
-  const [isSubmitting, setIsSubmitting] = useStateReact(false);
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (open && session?.user?.id) {
+      const fetchAccounts = async () => {
+        // Buscamos todas as contas do usuário para ele poder escolher.
+        const userAccounts = await AccountService.getUserAccounts(session.user.id);
+        const nonCreditAccounts = userAccounts.filter(a => a.type !== 'credit_card');
+        setAccounts(nonCreditAccounts);
+      };
+      fetchAccounts();
+    }
+  }, [open, session]);
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,13 +58,20 @@ export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransact
     const formData = new FormData(e.currentTarget);
     const amount = parseFloat(formData.get('amount') as string);
     const description = formData.get('description') as string || '';
+    const accountId = formData.get('accountId') as string;
+
+    if (!accountId) {
+        toast({ title: "Erro", description: "Por favor, selecione uma conta.", variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+    }
 
     try {
       let result;
       if (type === 'deposit') {
-        result = await depositToGoalAction(goalId, amount, description);
+        result = await depositToGoalAction(goalId, amount, accountId, description);
       } else {
-        result = await withdrawFromGoalAction(goalId, amount, description);
+        result = await withdrawFromGoalAction(goalId, amount, accountId, description);
       }
 
       if (result.success) {
@@ -84,9 +101,10 @@ export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransact
   };
 
   const title = type === 'deposit' ? 'Guardar Dinheiro' : 'Retirar Dinheiro';
-  const description = type === 'deposit' ? 'Quanto você quer guardar na sua caixinha?' : 'Quanto você quer retirar da sua caixinha?';
+  const description = type === 'deposit' ? 'Mova dinheiro de uma conta para a sua caixinha.' : 'Resgate dinheiro da sua caixinha para uma conta.';
   const buttonText = type === 'deposit' ? 'Guardar Dinheiro' : 'Retirar Dinheiro';
   const ButtonIcon = type === 'deposit' ? ArrowDown : ArrowUp;
+  const accountLabel = type === 'deposit' ? 'De qual conta vai sair o dinheiro?' : 'Para qual conta vai o dinheiro?';
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -106,16 +124,31 @@ export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransact
         <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-right">
+                  <Label htmlFor="amount">
                       Valor
                   </Label>
                   <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-right">
+                    <Label htmlFor="accountId">{accountLabel}</Label>
+                    <Select name="accountId" required>
+                        <SelectTrigger id="accountId">
+                            <SelectValue placeholder="Selecione a conta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {accounts.map(account => (
+                                <SelectItem key={account.id} value={account.id}>
+                                    {account.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">
                       Descrição (opcional)
                   </Label>
-                  <Input id="description" name="description" type="text" placeholder="Ex: Mesada de janeiro" />
+                  <Input id="description" name="description" type="text" placeholder="Ex: Adiantamento do 13º" />
                 </div>
             </div>
             <DialogFooter>
@@ -123,7 +156,7 @@ export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransact
                     <Button type="button" variant="ghost">Cancelar</Button>
                 </DialogClose>
                 <Button type="submit" disabled={isSubmitting} variant={type === 'withdrawal' ? 'destructive' : 'default'}>
-                  {isSubmitting ? 'Salvando...' : type === 'deposit' ? 'Guardar' : 'Retirar'}
+                  {isSubmitting ? 'Salvando...' : buttonText}
                 </Button>
             </DialogFooter>
         </form>
