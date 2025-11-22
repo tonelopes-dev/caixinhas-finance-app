@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlusCircle, Users, Lock, Eye, EyeOff, Star } from 'lucide-react';
+import { ArrowRight, PlusCircle, Users, Lock, Eye, EyeOff, Heart } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
@@ -51,8 +51,8 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
       <CardHeader>
         <div className="flex items-start justify-between">
             <div>
-                <CardTitle className="font-headline">Caixinhas de Sonhos</CardTitle>
-                <CardDescription>Metas e sonhos de <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
+                <CardTitle className="font-headline">Caixinhas em Destaque</CardTitle>
+                <CardDescription>Suas metas favoritas de <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
             </div>
             <Button
                 variant="ghost"
@@ -74,7 +74,7 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
-                     {goal.isFeatured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400" />}
+                     {goal.isFeatured && <Heart className="h-4 w-4 text-[#ff6b7b] fill-[#ff6b7b]" />}
                     <p className="font-semibold">{goal.name}</p>
                   </div>
                    <p className="text-sm font-bold text-primary flex items-center gap-1">

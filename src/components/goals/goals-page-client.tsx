@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -94,8 +95,7 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
           Todas as Suas Caixinhas
         </CardTitle>
         <CardDescription>
-          Acompanhe e gerencie o progresso de todos os seus sonhos,
-          pessoais e compartilhados.
+          Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas aparecerão em destaque no seu painel.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Star, ChevronsRight, Users, Lock } from 'lucide-react';
+import { Heart, ChevronsRight, Users, Lock } from 'lucide-react';
 import { vaults } from '@/lib/data';
 
 import { Button } from '@/components/ui/button';
@@ -80,20 +80,20 @@ export function GoalCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground transition-colors hover:text-yellow-500"
+                className="h-8 w-8 text-muted-foreground transition-colors hover:text-[#ff6b7b]"
                 onClick={() => onToggleFeatured(goal.id)}
               >
-                <Star
+                <Heart
                   className={cn(
                     'h-5 w-5',
-                    goal.isFeatured && 'fill-yellow-400 text-yellow-500'
+                    goal.isFeatured && 'fill-[#ff6b7b] text-[#ff6b7b]'
                   )}
                 />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>
-                {goal.isFeatured ? 'Remover dos destaques' : 'Destacar no painel'}
+                {goal.isFeatured ? 'Remover dos favoritos' : 'Favoritar no painel'}
               </p>
             </TooltipContent>
           </Tooltip>
