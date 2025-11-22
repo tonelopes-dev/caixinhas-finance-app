@@ -5,8 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-// Usando uma assinatura de props genérica para evitar o erro de análise estática.
-export default async function GoalDetailPage(props: { params: { id: string } }) {
+export default async function GoalDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -14,10 +13,9 @@ export default async function GoalDetailPage(props: { params: { id: string } }) 
   }
 
   const userId = session.user.id;
-  const id = props.params.id;
 
-  // Agora a função também busca as contas do usuário
-  const data = await getGoalDetails(id, userId);
+  // Busca os dados da meta e as contas do usuário diretamente usando params.id
+  const data = await getGoalDetails(params.id, userId);
 
   if (!data || !data.goal) {
     notFound();
