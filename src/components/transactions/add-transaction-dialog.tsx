@@ -69,7 +69,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [sourceAccountId, setSourceAccountId] = useState<string | null>(null);
   const [destinationAccountId, setDestinationAccountId] = useState<string | null>(null);
   const [chargeType, setChargeType] = useState(initialChargeType);
@@ -95,7 +95,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
       setDescription('');
       setCategory('');
       setTransactionType('');
-      setDate(undefined);
+      setDate(new Date());
       setSourceAccountId(null);
       setDestinationAccountId(null);
       setChargeType(initialChargeType);
