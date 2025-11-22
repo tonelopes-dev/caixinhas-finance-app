@@ -168,7 +168,7 @@ export class TransactionService {
                 throw new Error("Transação deve estar associada a um usuário ou cofre.");
             }
 
-            const ownerIdForCategory = transactionData.userId || transactionData.vaultId;
+            const ownerIdForCategory = transactionData.actorId;
             if (!ownerIdForCategory) {
                 throw new Error("Owner ID (user or vault) is required for category context.");
             }
