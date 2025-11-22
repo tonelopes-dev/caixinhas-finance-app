@@ -60,12 +60,23 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
     return accounts.find(a => a.id === transaction.sourceAccountId) || null;
   });
   
-  const getChargeType = () => {
+  const getInitialChargeType = () => {
     if (transaction.isInstallment) return 'installment';
     if (transaction.isRecurring) return 'recurring';
     return 'single';
   }
-  const [chargeType, setChargeType] = useState(getChargeType());
+  const [chargeType, setChargeType] = useState(getInitialChargeType());
+  
+  // State for installment calculation
+  const [installmentValue, setInstallmentValue] = useState(() => {
+      if (transaction.isInstallment && transaction.totalInstallments) {
+          return (transaction.amount / transaction.totalInstallments).toFixed(2);
+      }
+      return '';
+  });
+  const [totalInstallments, setTotalInstallments] = useState(transaction.totalInstallments?.toString() || '');
+  const [totalAmount, setTotalAmount] = useState(transaction.amount.toString());
+
 
   useEffect(() => {
     if (state.success) {
@@ -82,6 +93,21 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
       });
     }
   }, [state, toast]);
+
+    // Effect for automatic calculation
+  useEffect(() => {
+    if (chargeType === 'installment') {
+        const numInstallments = parseFloat(totalInstallments);
+        const valPerInstallment = parseFloat(installmentValue);
+
+        if (!isNaN(numInstallments) && numInstallments > 0 && !isNaN(valPerInstallment) && valPerInstallment > 0) {
+            const calculatedTotal = (numInstallments * valPerInstallment);
+            setTotalAmount(calculatedTotal.toFixed(2));
+        } else {
+             // Don't clear if user is editing total amount directly now. Let's just calculate.
+        }
+    }
+  }, [installmentValue, totalInstallments, chargeType]);
 
   const allSourcesAndDestinations = [
       ...accounts.map(a => ({ ...a, value: a.id, name: a.name })), 
@@ -142,11 +168,6 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                         <Label htmlFor="description">Descrição</Label>
                         <Input id="description" name="description" defaultValue={transaction.description} />
                         {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="amount">Valor</Label>
-                        <Input id="amount" name="amount" type="number" step="0.01" defaultValue={transaction.amount} />
-                        {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -243,7 +264,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                     {(transactionType === 'income' || transactionType === 'expense') && (
                       <div className="space-y-3 rounded-lg border p-3">
                             <Label>Tipo de cobrança</Label>
-                             <RadioGroup name="chargeType" value={chargeType} onValueChange={setChargeType}>
+                             <RadioGroup name="chargeType" value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="single" id="edit-single" />
                                     <Label htmlFor="edit-single" className="font-normal">Cobrança Única</Label>
@@ -264,18 +285,23 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                                     <input type="hidden" name="isInstallment" value="on" />
                                     <div className="grid grid-cols-2 gap-4 pt-2">
                                         <div className="space-y-1">
-                                            <Label htmlFor="edit-installmentNumber">Parcela N°</Label>
-                                            <Input id="edit-installmentNumber" name="installmentNumber" type="number" defaultValue={transaction.installmentNumber || ''} placeholder="Ex: 2" />
+                                            <Label htmlFor="totalInstallments">Total de Parcelas</Label>
+                                            <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
                                         </div>
                                          <div className="space-y-1">
-                                            <Label htmlFor="edit-totalInstallments">De (Total)</Label>
-                                            <Input id="edit-totalInstallments" name="totalInstallments" type="number" defaultValue={transaction.totalInstallments || ''} placeholder="Ex: 12" />
+                                            <Label htmlFor="installmentValue">Valor da Parcela</Label>
+                                            <Input id="installmentValue" name="installmentValue" type="number" step="0.01" placeholder="Ex: 99,90" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} />
                                         </div>
                                     </div>
                                 </>
                             )}
                         </div>
                     )}
+                    <div className="space-y-2">
+                        <Label htmlFor="amount">Valor {chargeType === 'installment' ? 'Total (Calculado)' : ''}</Label>
+                        <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} readOnly={chargeType === 'installment'} />
+                        {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                    </div>
                 </>
             )}
 

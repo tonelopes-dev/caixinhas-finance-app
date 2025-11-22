@@ -69,6 +69,11 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   const [sourceAccount, setSourceAccount] = useState<Account | null>(null);
   const [chargeType, setChargeType] = useState(initialChargeType);
   
+  // State for installment calculation
+  const [installmentValue, setInstallmentValue] = useState('');
+  const [totalInstallments, setTotalInstallments] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
+
   const hasNoAccounts = workspaceAccounts.length === 0;
 
   const handleTriggerClick = () => {
@@ -79,6 +84,18 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
       setOpen(true);
     }
   };
+  
+  const resetFormState = () => {
+      formRef.current?.reset();
+      setTransactionType('');
+      setSourceAccount(null);
+      setChargeType(initialChargeType);
+      setDate(undefined);
+      setInstallmentValue('');
+      setTotalInstallments('');
+      setTotalAmount('');
+      setOpen(false);
+  }
 
   useEffect(() => {
     if (state.success === true) {
@@ -86,12 +103,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
         title: "Sucesso!",
         description: state.message,
       });
-      formRef.current?.reset();
-      setTransactionType('');
-      setSourceAccount(null);
-      setChargeType(initialChargeType);
-      setDate(undefined);
-      setOpen(false);
+      resetFormState();
     } else if (state.success === false && state.message) {
       toast({
         title: "Erro",
@@ -100,6 +112,24 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
       });
     }
   }, [state, toast, initialChargeType]);
+
+  // Effect for automatic calculation
+  useEffect(() => {
+    if (chargeType === 'installment') {
+        const numInstallments = parseFloat(totalInstallments);
+        const valPerInstallment = parseFloat(installmentValue);
+
+        if (!isNaN(numInstallments) && numInstallments > 0 && !isNaN(valPerInstallment) && valPerInstallment > 0) {
+            const calculatedTotal = (numInstallments * valPerInstallment);
+            setTotalAmount(calculatedTotal.toFixed(2));
+        } else {
+            setTotalAmount('');
+        }
+    } else {
+        setTotalAmount(''); // Clear if not installment
+    }
+  }, [installmentValue, totalInstallments, chargeType]);
+
   
   const allSourcesAndDestinations = [
       ...workspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
@@ -157,11 +187,6 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                           <Label htmlFor="description">Descrição</Label>
                           <Input id="description" name="description" placeholder="Ex: Jantar de aniversário" />
                           {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="amount">Valor</Label>
-                          <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 150,00" />
-                          {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
                       </div>
 
                       <div className="space-y-2">
@@ -258,7 +283,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                       {(transactionType === 'income' || transactionType === 'expense') && (
                         <div className="space-y-3 rounded-lg border p-3">
                             <Label>Tipo de cobrança</Label>
-                             <RadioGroup name="chargeType" defaultValue={initialChargeType} value={chargeType} onValueChange={setChargeType}>
+                             <RadioGroup name="chargeType" defaultValue={initialChargeType} value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="single" id="single" />
                                     <Label htmlFor="single" className="font-normal">Cobrança Única</Label>
@@ -279,12 +304,12 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                                     <input type="hidden" name="isInstallment" value="on" />
                                     <div className="grid grid-cols-2 gap-4 pt-2">
                                         <div className="space-y-1">
-                                            <Label htmlFor="installmentNumber">Parcela N°</Label>
-                                            <Input id="installmentNumber" name="installmentNumber" type="number" placeholder="Ex: 2" />
+                                            <Label htmlFor="totalInstallments">Total de Parcelas</Label>
+                                            <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
                                         </div>
                                          <div className="space-y-1">
-                                            <Label htmlFor="totalInstallments">De (Total)</Label>
-                                            <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" />
+                                            <Label htmlFor="installmentValue">Valor da Parcela</Label>
+                                            <Input id="installmentValue" name="installmentValue" type="number" step="0.01" placeholder="Ex: 99,90" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} />
                                         </div>
                                     </div>
                                 </>
@@ -292,6 +317,11 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                         </div>
                       )}
 
+                      <div className="space-y-2">
+                          <Label htmlFor="amount">Valor {chargeType === 'installment' ? 'Total (Calculado)' : ''}</Label>
+                          <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} readOnly={chargeType === 'installment'} />
+                          {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                      </div>
                   </>
               )}
 
