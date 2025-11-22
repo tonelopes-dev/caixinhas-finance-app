@@ -131,8 +131,40 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const prevStep = () => setStep(s => s - 1);
   
   const isStep1Valid = description.trim() !== '' && category !== '';
-  const isStep2Valid = transactionType !== '' && date;
+  const isStep2Valid = transactionType !== '' && date && (
+    transactionType === 'income' ? !!destinationAccountId :
+    transactionType === 'expense' ? !!sourceAccountId :
+    !!sourceAccountId && !!destinationAccountId
+  );
 
+  const handleFinalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    
+    // Hidden fields
+    formData.append('id', transaction.id);
+    formData.append('ownerId', transaction.ownerId);
+
+    // Step 1
+    formData.append('description', description);
+    formData.append('category', category);
+
+    // Step 2
+    formData.append('type', transactionType || '');
+    formData.append('date', date?.toISOString() || '');
+    if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
+    if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
+
+    // Step 3
+    formData.append('chargeType', chargeType);
+    if (totalInstallments) formData.append('totalInstallments', totalInstallments);
+    if (transaction.paidInstallments) formData.append('paidInstallments', transaction.paidInstallments.toString());
+    formData.append('amount', amount);
+    if (paymentMethod) formData.append('paymentMethod', paymentMethod);
+
+    dispatch(formData);
+  };
+  
   const formVariants = {
     hidden: { opacity: 0, x: 30 },
     visible: { opacity: 1, x: 0 },
@@ -178,20 +210,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
             ))}
         </div>
 
-        <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
-            {/* Hidden fields to persist data across steps */}
-            <input type="hidden" name="id" value={transaction.id} />
-            <input type="hidden" name="ownerId" value={transaction.ownerId} />
-            <input type="hidden" name="description" value={description} />
-            <input type="hidden" name="category" value={category} />
-            <input type="hidden" name="type" value={transactionType} />
-            <input type="hidden" name="date" value={date?.toISOString() || ''} />
-            <input type="hidden" name="sourceAccountId" value={sourceAccountId || ''} />
-            <input type="hidden" name="destinationAccountId" value={destinationAccountId || ''} />
-            <input type="hidden" name="paymentMethod" value={paymentMethod || ''} />
-            <input type="hidden" name="chargeType" value={chargeType} />
-            <input type="hidden" name="totalInstallments" value={totalInstallments} />
-
+        <form ref={formRef} onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
 
             <AnimatePresence mode="wait">

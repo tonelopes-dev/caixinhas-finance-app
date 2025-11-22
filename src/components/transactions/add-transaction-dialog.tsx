@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -68,17 +69,16 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
   // Form fields state
   const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
   const [sourceAccountId, setSourceAccountId] = useState<string | null>(null);
   const [destinationAccountId, setDestinationAccountId] = useState<string | null>(null);
-  const [category, setCategory] = useState('');
   const [chargeType, setChargeType] = useState(initialChargeType);
   const [installmentValue, setInstallmentValue] = useState('');
   const [totalInstallments, setTotalInstallments] = useState('');
+  const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-
 
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -95,15 +95,15 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
       formRef.current?.reset();
       setStep(1);
       setDescription('');
-      setAmount('');
+      setCategory('');
       setTransactionType('');
       setDate(undefined);
       setSourceAccountId(null);
       setDestinationAccountId(null);
-      setCategory('');
       setChargeType(initialChargeType);
       setInstallmentValue('');
       setTotalInstallments('');
+      setAmount('');
   }
 
   useEffect(() => {
@@ -150,7 +150,29 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const prevStep = () => setStep(s => s - 1);
   
   const isStep1Valid = description.trim() !== '' && category !== '';
-  const isStep2Valid = transactionType !== '' && date;
+  const isStep2Valid = transactionType !== '' && date && (
+    transactionType === 'income' ? !!destinationAccountId :
+    transactionType === 'expense' ? !!sourceAccountId :
+    !!sourceAccountId && !!destinationAccountId
+  );
+  
+  const handleFinalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('ownerId', ownerId);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('type', transactionType || '');
+    formData.append('date', date?.toISOString() || new Date().toISOString());
+    if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
+    if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
+    if (paymentMethod) formData.append('paymentMethod', paymentMethod);
+    formData.append('chargeType', chargeType);
+    if (totalInstallments) formData.append('totalInstallments', totalInstallments);
+    formData.append('amount', amount);
+    
+    dispatch(formData);
+  };
   
   const formVariants = {
     hidden: { opacity: 0, x: 30 },
@@ -207,22 +229,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
           </div>
 
 
-          <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
-            {/* Hidden fields to persist data across steps */}
-            <input type="hidden" name="ownerId" value={ownerId} />
-            <input type="hidden" name="description" value={description} />
-            <input type="hidden" name="category" value={category} />
-            <input type="hidden" name="type" value={transactionType} />
-            <input type="hidden" name="date" value={date?.toISOString() || ''} />
-            <input type="hidden" name="sourceAccountId" value={sourceAccountId || ''} />
-            <input type="hidden" name="destinationAccountId" value={destinationAccountId || ''} />
-            <input type="hidden" name="paymentMethod" value={paymentMethod || ''} />
-            <input type="hidden" name="chargeType" value={chargeType} />
-            <input type="hidden" name="totalInstallments" value={totalInstallments} />
-
-
+          <form ref={formRef} onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
             <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
-
               <AnimatePresence mode="wait">
                   {step === 1 && (
                       <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
