@@ -160,14 +160,7 @@ async function main() {
     
     // Convite para um usuário existente
     await VaultService.createInvitation(businessVault.id, mainUser.id, additionalUsers[1].email);
-
-    // Convite para um email que ainda não é usuário (vai dar erro com a regra atual, o que é esperado)
-    try {
-        await VaultService.createInvitation(businessVault.id, mainUser.id, 'novo_usuario@naoexiste.com');
-    } catch(error: any) {
-        console.log(`ℹ️  (Esperado) Falha ao convidar usuário não existente: ${error.message}`);
-    }
-
+    
     // Criar um convite para o usuário 'Carlos' para o cofre da família
     await prisma.invitation.create({
         data: {
