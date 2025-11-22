@@ -13,17 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -35,10 +24,10 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { createCategory, updateCategory, deleteCategory, type CategoryActionState } from '@/app/accounts/actions';
+import { createCategory, updateCategory, type CategoryActionState } from '@/app/accounts/actions';
 import type { Category } from '@/services/category.service';
 import { Skeleton } from '../ui/skeleton';
-import { cn } from '@/lib/utils';
+import { DeleteCategoryDialog } from './delete-category-dialog';
 
 function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
@@ -90,63 +79,12 @@ function EditCategoryDialog({ category }: { category: Category }) {
   );
 }
 
-function DeleteCategoryDialog({ category, onDeleting }: { category: Category; onDeleting: (id: string | null) => void }) {
-  const { toast } = useToast();
-  const initialState: CategoryActionState = {};
-  const [state, formAction] = useActionState(deleteCategory, initialState);
-  const { pending } = useFormStatus();
-
-  useEffect(() => {
-    if (pending) {
-      onDeleting(category.id);
-    } else {
-      onDeleting(null);
-    }
-  }, [pending, onDeleting, category.id]);
-
-  useEffect(() => {
-    if (state?.success) {
-      toast({ title: 'Sucesso!', description: state.message });
-    } else if (state?.message) {
-      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
-    }
-  }, [state, toast]);
-
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
-          <Trash2 className="h-3 w-3" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <form action={formAction}>
-          <input type="hidden" name="id" value={category.id} />
-          <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso excluirá permanentemente a categoria{' '}
-              <span className="font-bold text-foreground">{category.name}</span>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction type="submit" variant="destructive" disabled={pending}>
-              {pending ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </form>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 export function CategoriesManagement({ initialCategories }: { initialCategories: Category[] }) {
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
   const initialState: CategoryActionState = {};
   const [state, formAction] = useActionState(createCategory, initialState);
-  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (state?.success) {
@@ -193,37 +131,20 @@ export function CategoriesManagement({ initialCategories }: { initialCategories:
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {initialCategories.map((category) => {
-            const isDeleting = deletingCategoryId === category.id;
-            const isAnyDeleting = deletingCategoryId !== null;
-
-            if (isDeleting) {
-              return null; // Don't render the item being deleted
-            }
-
-            if (isAnyDeleting) {
-              return (
-                <Skeleton key={category.id} className="h-8 w-32 rounded-full" />
-              );
-            }
-            
-            return (
-              <div
-                key={category.id}
-                className={cn(
-                  "group inline-flex items-center gap-1 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50",
-                  deletingCategoryId && "opacity-50 pointer-events-none"
-                )}
-              >
-                <span>{category.name}</span>
-                <div className="flex items-center">
-                  <EditCategoryDialog category={category} />
-                  <DeleteCategoryDialog category={category} onDeleting={setDeletingCategoryId} />
-                </div>
+          {isDeleting && initialCategories.map(c => <Skeleton key={c.id} className="h-8 w-32 rounded-full" />)}
+          {!isDeleting && initialCategories.map((category) => (
+            <div
+              key={category.id}
+              className="group inline-flex items-center gap-1 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50"
+            >
+              <span>{category.name}</span>
+              <div className="flex items-center">
+                <EditCategoryDialog category={category} />
+                <DeleteCategoryDialog category={category} onSubmitting={setIsDeleting} />
               </div>
-            );
-          })}
-          {initialCategories.length === 0 && !deletingCategoryId && (
+            </div>
+          ))}
+          {!isDeleting && initialCategories.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhuma categoria personalizada criada.</p>
           )}
         </div>
