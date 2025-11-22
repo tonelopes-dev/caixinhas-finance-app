@@ -18,6 +18,7 @@
     "db:clear:safe": "node scripts/clear-database-interactive.js",
     "db:reset": "npm run db:clear && npm run db:seed",
     "prisma:reset": "prisma migrate reset",
+    "db:reset:force": "prisma migrate reset --force && npm run db:seed",
     "db:push": "prisma db push",
     "db:switch:postgres": "node scripts/switch-db.js postgres",
     "db:switch:sqlite": "node scripts/switch-db.js sqlite"
