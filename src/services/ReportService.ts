@@ -1,3 +1,4 @@
+
 import { prisma } from '@/services/prisma';
 import type { SavedReport } from '@/lib/definitions';
 
@@ -78,8 +79,8 @@ export class ReportService {
         console.log(`Cache invalidation skipped: Report for ${monthYear} did not exist.`);
         return true; // Consider it a success because the report is gone.
       }
+      // For any other error, log it and re-throw so the calling action knows something went wrong.
       console.error('Erro ao deletar relatório:', error);
-      // Re-throw other errors so they can be caught upstream.
       throw error;
     }
   }
@@ -303,3 +304,5 @@ export class ReportService {
     }
   }
 }
+
+    
