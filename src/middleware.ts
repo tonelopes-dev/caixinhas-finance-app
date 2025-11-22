@@ -2,6 +2,8 @@ import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import { AuthService } from '@/services';
 
+export const runtime = 'nodejs'; // Força o middleware a rodar no runtime Node.js
+
 export default withAuth(
     async function middleware(req) {
         const token = req.nextauth.token;
