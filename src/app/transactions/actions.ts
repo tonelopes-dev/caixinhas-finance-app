@@ -3,9 +3,12 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { TransactionService } from '@/services';
+import { TransactionService, AccountService, GoalService, CategoryService } from '@/services';
 import { invalidateReportCache } from '../reports/actions';
 import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
 
 const transactionSchema = z.object({
   id: z.string().optional(),
@@ -46,12 +49,11 @@ export type TransactionState = {
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-  
-  if (!userId) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
     return { success: false, message: 'Usuário não autenticado.' };
   }
+  const userId = session.user.id;
 
   const chargeType = formData.get('chargeType');
   const ownerId = formData.get('ownerId') as string;
@@ -92,13 +94,19 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   
   try {
     await TransactionService.createTransaction(validatedFields.data as any);
-    await invalidateReportCache(validatedFields.data.date, ownerId);
-
-    revalidatePath('/');
-    revalidatePath('/transactions');
-    revalidatePath('/reports');
-    if (validatedFields.data.goalId) {
-        revalidatePath(`/goals/${validatedFields.data.goalId}`);
+    
+    // As operações de invalidação e revalidação são secundárias, mas importantes.
+    // As encapsulamos em um try/catch para não quebrar a experiência principal.
+    try {
+        await invalidateReportCache(validatedFields.data.date, ownerId);
+        revalidatePath('/');
+        revalidatePath('/transactions');
+        revalidatePath('/reports');
+        if (validatedFields.data.goalId) {
+            revalidatePath(`/goals/${validatedFields.data.goalId}`);
+        }
+    } catch (secondaryError) {
+        console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
     }
     
     return { success: true, message: 'Transação adicionada com sucesso!' };
@@ -110,15 +118,12 @@ export async function addTransaction(prevState: TransactionState, formData: Form
 }
 
 export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('CAIXINHAS_USER_ID')?.value;
-
-  if (!userId) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
     return { success: false, message: 'Usuário não autenticado.' };
   }
 
   const chargeType = formData.get('chargeType');
-  const ownerId = formData.get('ownerId') as string;
   
   const rawData = {
     id: formData.get('id'),
@@ -165,16 +170,20 @@ export async function updateTransaction(prevState: TransactionState, formData: F
 
     await TransactionService.updateTransaction(id, data as any);
     
-    await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.vaultId || originalTransaction.userId);
-    if(data.date && originalTransaction.date.toISOString() !== data.date) {
-        await invalidateReportCache(data.date, originalTransaction.vaultId || originalTransaction.userId);
+    try {
+        await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.vaultId || originalTransaction.userId);
+        if(data.date && originalTransaction.date.toISOString() !== data.date) {
+            await invalidateReportCache(data.date, originalTransaction.vaultId || originalTransaction.userId);
+        }
+        
+        revalidatePath('/');
+        revalidatePath('/transactions');
+        revalidatePath('/reports');
+        if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
+        if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
+    } catch (secondaryError) {
+        console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
     }
-    
-    revalidatePath('/');
-    revalidatePath('/transactions');
-    revalidatePath('/reports');
-    if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
-    if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
     
     return { success: true, message: 'Transação atualizada com sucesso!' };
 
@@ -184,7 +193,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   }
 }
 
-export async function deleteTransaction(prevState: { message: string | null }, formData: FormData): Promise<{ message: string | null }> {
+export async function deleteTransaction(prevState: { message: string | null }, formData: FormData): Promise<{ message: string | null, success: boolean }> {
   const deleteTransactionSchema = z.object({
     id: z.string(),
   });
@@ -194,6 +203,7 @@ export async function deleteTransaction(prevState: { message: string | null }, f
 
   if (!validatedFields.success) {
     return {
+      success: false,
       message: 'ID da transação inválido.',
     };
   }
@@ -203,19 +213,23 @@ export async function deleteTransaction(prevState: { message: string | null }, f
   try {
     const deletedTransaction = await TransactionService.getTransactionById(id);
     if (deletedTransaction) {
-        await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.vaultId || deletedTransaction.userId);
         await TransactionService.deleteTransaction(id);
         
-        revalidatePath('/');
-        revalidatePath('/transactions');
-        revalidatePath('/reports');
-        if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
+        try {
+            await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.vaultId || deletedTransaction.userId);
+            revalidatePath('/');
+            revalidatePath('/transactions');
+            revalidatePath('/reports');
+            if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
+        } catch (secondaryError) {
+            console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
+        }
 
-        return { message: 'Transação excluída com sucesso!' };
+        return { success: true, message: 'Transação excluída com sucesso!' };
     }
-    return { message: 'Erro: Transação não encontrada.' };
+    return { success: false, message: 'Erro: Transação não encontrada.' };
   } catch (error) {
     console.error('Erro ao deletar transação:', error);
-    return { message: 'Ocorreu um erro no servidor ao deletar a transação.' };
+    return { success: false, message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
 }

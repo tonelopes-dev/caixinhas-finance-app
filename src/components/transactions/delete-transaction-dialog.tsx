@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -11,7 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -23,15 +24,18 @@ import { cn } from '@/lib/utils';
 export function DeleteTransactionDialog({ transactionId }: { transactionId: string }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [state, dispatch] = useActionState(deleteTransaction, { message: null });
+  const [state, dispatch] = useActionState(deleteTransaction, { message: null, success: false });
 
   useEffect(() => {
     if (state?.message) {
       toast({
-        title: "Sucesso",
+        title: state.success ? "Sucesso" : "Erro",
         description: state.message,
+        variant: state.success ? "default" : "destructive",
       });
-      setOpen(false);
+      if (state.success) {
+        setOpen(false);
+      }
     }
   }, [state, toast]);
 
