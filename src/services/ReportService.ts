@@ -71,16 +71,15 @@ export class ReportService {
           },
         },
       });
-      console.log(`Cache for report ${ownerId}-${monthYear} invalidated.`);
       return true;
     } catch (error: any) {
       // Prisma's P2025 error code means "Record to delete does not exist."
-      // We can safely ignore this error, as the goal (to not have a report) is met.
+      // We can safely treat this as a success case for cache invalidation.
       if (error.code === 'P2025') {
         console.log(`Cache invalidation skipped: Report for ${monthYear} did not exist.`);
-        return true; // Consider it a success because the report is gone.
+        return true; // <<< THIS IS THE FIX: Return true to indicate success.
       }
-      // For any other error, log it and re-throw so the calling action knows something went wrong.
+      // For any other error, log it and re-throw.
       console.error('Erro ao deletar relatório:', error);
       throw error;
     }
