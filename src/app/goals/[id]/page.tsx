@@ -36,7 +36,6 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
   }
 
   const userId = session.user.id;
-  const goalId = params.id;
 
-  return <GoalDetailFetcher goalId={goalId} userId={userId} />;
+  return <GoalDetailFetcher goalId={params.id} userId={userId} />;
 }
