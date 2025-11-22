@@ -49,8 +49,10 @@ export default async function RecurringPage() {
           </Link>
         </Button>
         <RecurringPageClient
-          recurring={recurringData.recurring}
-          installments={recurringData.installments}
+          recurringExpenses={recurringData.recurringExpenses}
+          recurringIncomes={recurringData.recurringIncomes}
+          installmentExpenses={recurringData.installmentExpenses}
+          installmentIncomes={recurringData.installmentIncomes}
           allAccounts={allAccounts}
           allGoals={allGoals}
           allCategories={allCategories}

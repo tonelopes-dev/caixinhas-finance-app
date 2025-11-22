@@ -26,19 +26,19 @@ function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-interface InstallmentPurchaseCardProps {
-  purchase: Transaction & { paidInstallments: number[] };
+interface InstallmentCardProps {
+  transaction: Transaction & { paidInstallments: number[] };
   allAccounts: Account[];
   allGoals: Goal[];
   allCategories: any[];
 }
 
-export function InstallmentPurchaseCard({
-  purchase,
+export function InstallmentCard({
+  transaction: purchase,
   allAccounts,
   allGoals,
   allCategories,
-}: InstallmentPurchaseCardProps) {
+}: InstallmentCardProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
 

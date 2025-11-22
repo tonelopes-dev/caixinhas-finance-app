@@ -8,20 +8,31 @@ import { revalidatePath } from 'next/cache';
 export async function getRecurringData(
   workspaceId: string,
   ownerType: 'user' | 'vault'
-): Promise<{ recurring: Transaction[]; installments: Transaction[] }> {
+): Promise<{ 
+    recurringExpenses: Transaction[];
+    recurringIncomes: Transaction[];
+    installmentExpenses: Transaction[];
+    installmentIncomes: Transaction[];
+}> {
   try {
     const allTransactions = await TransactionService.getTransactions(workspaceId, ownerType);
 
-    const recurring = allTransactions.filter((t: any) => t.isRecurring);
-    const installments = allTransactions.filter((t: any) => t.isInstallment);
+    const recurringExpenses = allTransactions.filter((t: any) => t.isRecurring && t.type === 'expense');
+    const recurringIncomes = allTransactions.filter((t: any) => t.isRecurring && t.type === 'income');
+    
+    const installmentExpenses = allTransactions.filter((t: any) => t.isInstallment && t.type === 'expense');
+    const installmentIncomes = allTransactions.filter((t: any) => t.isInstallment && t.type === 'income');
+
 
     return {
-      recurring: recurring as Transaction[],
-      installments: installments as Transaction[],
+      recurringExpenses: recurringExpenses as Transaction[],
+      recurringIncomes: recurringIncomes as Transaction[],
+      installmentExpenses: installmentExpenses as Transaction[],
+      installmentIncomes: installmentIncomes as Transaction[],
     };
   } catch (error) {
     console.error('Erro ao buscar dados recorrentes:', error);
-    return { recurring: [], installments: [] };
+    return { recurringExpenses: [], recurringIncomes: [], installmentExpenses: [], installmentIncomes: [] };
   }
 }
 

@@ -21,6 +21,8 @@ import {
   Repeat,
   Repeat1,
   MoreHorizontal,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { Badge } from '../ui/badge';
@@ -33,7 +35,7 @@ import {
 } from '../ui/dropdown-menu';
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '../transactions/delete-transaction-dialog';
-import { InstallmentPurchaseCard } from './installment-purchase-card';
+import { InstallmentCard } from './installment-purchase-card';
 import { cn } from '@/lib/utils';
 
 
@@ -46,8 +48,10 @@ function formatDate(dateString: string) {
 }
 
 interface RecurringPageClientProps {
-  recurring: Transaction[];
-  installments: Transaction[];
+  recurringExpenses: Transaction[];
+  recurringIncomes: Transaction[];
+  installmentExpenses: Transaction[];
+  installmentIncomes: Transaction[];
   allAccounts: Account[];
   allGoals: Goal[];
   allCategories: any[];
@@ -55,8 +59,10 @@ interface RecurringPageClientProps {
 }
 
 export function RecurringPageClient({
-  recurring,
-  installments,
+  recurringExpenses,
+  recurringIncomes,
+  installmentExpenses,
+  installmentIncomes,
   allAccounts,
   allGoals,
   allCategories,
@@ -64,19 +70,23 @@ export function RecurringPageClient({
 }: RecurringPageClientProps) {
   const router = useRouter();
 
-  // Agrupa as transações de parcelamento pela descrição
-  const groupedInstallments = useMemo(() => {
-    const groups: Record<string, Transaction[]> = {};
-    installments.forEach((t) => {
-      // Usa a descrição como chave, mas normaliza para evitar problemas
-      const key = t.description.trim().toLowerCase();
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(t);
-    });
-    return Object.values(groups).map(group => group[0]); // Retorna apenas o primeiro item de cada grupo como "representante"
-  }, [installments]);
+  const groupedInstallmentExpenses = useMemo(() => {
+    return Object.values(installmentExpenses.reduce((acc: Record<string, Transaction[]>, t) => {
+        const key = t.description.trim().toLowerCase();
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(t);
+        return acc;
+      }, {})).map(group => group[0]);
+  }, [installmentExpenses]);
+
+  const groupedInstallmentIncomes = useMemo(() => {
+    return Object.values(installmentIncomes.reduce((acc: Record<string, Transaction[]>, t) => {
+        const key = t.description.trim().toLowerCase();
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(t);
+        return acc;
+      }, {})).map(group => group[0]);
+  }, [installmentIncomes]);
 
   return (
     <div className="space-y-8">
@@ -84,7 +94,7 @@ export function RecurringPageClient({
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 font-headline">
-              <Repeat1 className="h-6 w-6 text-primary" />
+              <TrendingDown className="h-6 w-6 text-primary" />
               Pagamentos Parcelados
             </CardTitle>
             <CardDescription>
@@ -101,11 +111,11 @@ export function RecurringPageClient({
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {groupedInstallments.length > 0 ? (
-              groupedInstallments.map((installment) => (
-                <InstallmentPurchaseCard
+            {groupedInstallmentExpenses.length > 0 ? (
+              groupedInstallmentExpenses.map((installment) => (
+                <InstallmentCard
                   key={installment.id}
-                  purchase={installment as Transaction}
+                  transaction={installment as Transaction}
                   allAccounts={allAccounts}
                   allGoals={allGoals}
                   allCategories={allCategories}
@@ -119,16 +129,56 @@ export function RecurringPageClient({
           </div>
         </CardContent>
       </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              Entradas Parceladas
+            </CardTitle>
+            <CardDescription>
+              Gerencie todos os seus recebimentos parcelados.
+            </CardDescription>
+          </div>
+           <AddTransactionDialog
+            accounts={allAccounts}
+            goals={allGoals}
+            categories={allCategories}
+            ownerId={workspaceId}
+            chargeType="installment"
+          />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {groupedInstallmentIncomes.length > 0 ? (
+              groupedInstallmentIncomes.map((installment) => (
+                <InstallmentCard
+                  key={installment.id}
+                  transaction={installment as Transaction}
+                  allAccounts={allAccounts}
+                  allGoals={allGoals}
+                  allCategories={allCategories}
+                />
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhum recebimento parcelado encontrado.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 font-headline">
               <Repeat className="h-6 w-6 text-primary" />
-              Pagamentos Recorrentes
+              Transações Recorrentes
             </CardTitle>
             <CardDescription>
-              Gerencie suas assinaturas e pagamentos mensais.
+              Gerencie suas assinaturas e pagamentos/recebimentos mensais.
             </CardDescription>
           </div>
           <AddTransactionDialog
@@ -151,8 +201,8 @@ export function RecurringPageClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recurring.length > 0 ? (
-                recurring.map((t) => (
+              {[...recurringExpenses, ...recurringIncomes].length > 0 ? (
+                [...recurringExpenses, ...recurringIncomes].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((t) => (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.description}</TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -191,7 +241,7 @@ export function RecurringPageClient({
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-24">
-                    Nenhum pagamento recorrente encontrado.
+                    Nenhuma transação recorrente encontrada.
                   </TableCell>
                 </TableRow>
               )}
