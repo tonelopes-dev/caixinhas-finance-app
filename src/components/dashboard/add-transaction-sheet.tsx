@@ -1,17 +1,15 @@
-
-
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
 import { addTransaction, type TransactionState } from '@/app/transactions/actions';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -47,7 +45,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-interface AddTransactionSheetProps {
+interface AddTransactionDialogProps {
   accounts: Account[];
   goals: Goal[];
   ownerId: string;
@@ -55,7 +53,7 @@ interface AddTransactionSheetProps {
   chargeType?: 'single' | 'recurring' | 'installment';
 }
 
-export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionSheetProps) {
+export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionDialogProps) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -166,7 +164,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   return (
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <Button size="sm" onClick={handleTriggerClick}>
           {initialChargeType === 'recurring' ? (
             <>
@@ -180,13 +178,13 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
             </>
           )}
         </Button>
-        <SheetContent className="flex flex-col">
-          <SheetHeader>
-            <SheetTitle>Adicionar Transação</SheetTitle>
-            <SheetDescription>
+        <DialogContent className="flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Adicionar Transação</DialogTitle>
+            <DialogDescription>
               Registre uma nova entrada, saída ou transferência.
-            </SheetDescription>
-          </SheetHeader>
+            </DialogDescription>
+          </DialogHeader>
 
           {/* Progress Indicator */}
           <div className="flex items-center gap-2 py-2">
@@ -321,7 +319,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                   )}
               </AnimatePresence>
             </div>
-            <SheetFooter className='mt-auto pt-4 border-t'>
+            <DialogFooter className='mt-auto pt-4 border-t'>
               <div className="w-full flex justify-between items-center">
                 {step > 1 ? (
                     <Button type="button" variant="ghost" onClick={prevStep}>
@@ -338,10 +336,10 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                     <SubmitButton />
                 )}
               </div>
-            </SheetFooter>
+            </DialogFooter>
           </form>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

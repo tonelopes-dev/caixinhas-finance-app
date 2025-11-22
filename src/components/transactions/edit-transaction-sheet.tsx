@@ -1,19 +1,17 @@
-
-
-'use client';
+"use client";
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { updateTransaction, type TransactionState } from '@/app/transactions/actions';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-} from "@/components/ui/sheet"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -147,22 +145,22 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
   ];
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-        <SheetTrigger asChild>
+        <DialogTrigger asChild>
             <button className='flex w-full items-center gap-2'>
                 <Edit className="h-4 w-4" />
                 Editar
             </button>
-        </SheetTrigger>
+        </DialogTrigger>
       </DropdownMenuItem>
-      <SheetContent className="flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Editar Transação</SheetTitle>
-          <SheetDescription>
+      <DialogContent className="flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Editar Transação</DialogTitle>
+          <DialogDescription>
             Atualize os detalhes da sua transação.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Progress Indicator */}
         <div className="flex items-center gap-2 py-2">
@@ -302,7 +300,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
             </AnimatePresence>
 
           </div>
-          <SheetFooter className="mt-auto pt-4 border-t">
+          <DialogFooter className="mt-auto pt-4 border-t">
             <div className="w-full flex justify-between items-center">
               {step > 1 ? (
                   <Button type="button" variant="ghost" onClick={prevStep}>
@@ -319,9 +317,9 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                   <SubmitButton />
               )}
             </div>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
