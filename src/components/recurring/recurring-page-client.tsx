@@ -11,10 +11,6 @@ function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit', timeZone: 'UTC' });
-}
-
 interface RecurringPageClientProps {
   recurring: Transaction[];
   installments: Transaction[];
@@ -23,6 +19,7 @@ interface RecurringPageClientProps {
 export function RecurringPageClient({ recurring, installments }: RecurringPageClientProps) {
   
   const groupedInstallments = installments.reduce((acc, t) => {
+    // Usamos a descrição como chave para agrupar parcelas da mesma compra
     const key = t.description;
     if (!acc[key]) {
       acc[key] = [];
@@ -46,10 +43,12 @@ export function RecurringPageClient({ recurring, installments }: RecurringPageCl
         <CardContent>
           <div className="space-y-6">
             {Object.entries(groupedInstallments).map(([description, group]) => {
-              const totalInstallments = group[0].totalInstallments || 1;
+              // Assume que todas as parcelas do grupo têm o mesmo total de parcelas e valor
+              const totalInstallments = group[0].totalInstallments || group.length;
               const paidInstallments = group.length;
               const progress = (paidInstallments / totalInstallments) * 100;
-              const totalAmount = group[0].amount * totalInstallments;
+              const installmentAmount = group[0].amount;
+              const totalAmount = installmentAmount * totalInstallments;
               const paidAmount = group.reduce((sum, t) => sum + t.amount, 0);
 
               return (

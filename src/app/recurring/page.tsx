@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecurringPageClient } from '@/components/recurring/recurring-page-client';
 import { getRecurringData } from './actions';
+import { cookies } from 'next/headers';
 
 export default async function RecurringPage() {
   const session = await getServerSession(authOptions);
@@ -16,9 +17,12 @@ export default async function RecurringPage() {
   }
 
   const userId = session.user.id;
-  const workspaceId = userId; // Por enquanto usando userId como workspaceId
+  const cookieStore = cookies();
+  const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+  const isPersonal = workspaceId === userId;
+  const ownerType = isPersonal ? 'user' : 'vault';
 
-  const data = await getRecurringData(userId, workspaceId);
+  const data = await getRecurringData(workspaceId, ownerType);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
