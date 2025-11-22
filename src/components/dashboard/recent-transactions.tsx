@@ -100,7 +100,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                     <Badge variant={transaction.type === 'income' ? 'secondary' : 'outline'}>
-                        {transaction.category}
+                        {typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category}
                     </Badge>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{formatDate(transaction.date)}</TableCell>

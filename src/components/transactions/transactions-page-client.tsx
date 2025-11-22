@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +23,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
@@ -74,10 +72,10 @@ const months = [
 ];
 
 const paymentMethods: Record<string, { label: string, icon: React.ElementType }> = {
-    pix: { label: 'Pix', icon: ArrowRight },
+    pix: { label: 'Pix', icon: ArrowRightLeft },
     credit_card: { label: 'Crédito', icon: CreditCard },
     debit_card: { label: 'Débito', icon: CreditCard },
-    transfer: { label: 'Transferência', icon: ArrowRight },
+    transfer: { label: 'Transferência', icon: ArrowRightLeft },
     boleto: { label: 'Boleto', icon: Banknote },
     cash: { label: 'Dinheiro', icon: Banknote },
 }
@@ -336,25 +334,24 @@ export function TransactionsPageClient({
                                   </div>
                                   <div className="flex justify-between text-xs text-muted-foreground">
                                       <span>{formatDate(t.date)}</span>
-                                      {MethodIcon && (
-                                          <div className='flex items-center gap-1'>
-                                              <MethodIcon className="h-3 w-3" />
-                                              <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                          </div>
-                                      )}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    {t.isRecurring && (
-                                        <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                                            <Repeat className="mr-1 h-3 w-3" />
-                                            Recorrente
-                                        </Badge>
-                                    )}
-                                    {t.isInstallment && (
-                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                                            Parcelado ({t.installmentNumber}/{t.totalInstallments})
-                                        </Badge>
-                                    )}
+                                      <div className='flex items-center gap-2'>
+                                            {t.isRecurring && (
+                                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                                                    Recorrente
+                                                </Badge>
+                                            )}
+                                            {t.isInstallment && (
+                                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                                                    ({t.installmentNumber}/{t.totalInstallments})
+                                                </Badge>
+                                            )}
+                                            {MethodIcon && (
+                                                <div className='flex items-center gap-1'>
+                                                    <MethodIcon className="h-3 w-3" />
+                                                    <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                                </div>
+                                            )}
+                                      </div>
                                   </div>
                               </div>
                               <DropdownMenu>
@@ -377,12 +374,12 @@ export function TransactionsPageClient({
               <Table className="hidden md:table">
               <TableHeader>
                   <TableRow>
-                  <TableHead>Transação</TableHead>
-                  <TableHead className="hidden lg:table-cell">Categoria</TableHead>
-                  <TableHead className="hidden lg:table-cell">Contas</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                    <TableHead>Transação</TableHead>
+                    <TableHead className="hidden lg:table-cell">Categoria</TableHead>
+                    <TableHead className="hidden lg:table-cell">Contas</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
               </TableHeader>
               <motion.tbody
@@ -401,7 +398,7 @@ export function TransactionsPageClient({
                                       <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
                                           <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
                                       </div>
-                                      <div className='flex-1'>
+                                      <div>
                                           <p className="font-medium">{t.description}</p>
                                           <div className='flex items-center gap-2 text-muted-foreground text-xs'>
                                               {MethodIcon && (

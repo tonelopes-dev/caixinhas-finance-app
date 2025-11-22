@@ -134,9 +134,9 @@ export function RecurringPageClient({
               <TableRow>
                 <TableHead>Descrição</TableHead>
                 <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                <TableHead className="hidden sm:table-cell">Data</TableHead>
+                <TableHead className="hidden sm:table-cell">Data Próxima</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
-                <TableHead className="w-[80px] text-right">Ações</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -145,7 +145,7 @@ export function RecurringPageClient({
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.description}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary">{typeof t.category === 'object' ? t.category.name : t.category}</Badge>
+                      <Badge variant="secondary">{typeof t.category === 'object' ? (t.category as any).name : t.category}</Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {formatDate(t.date)}
@@ -155,7 +155,7 @@ export function RecurringPageClient({
                         'text-red-500': t.type === 'expense',
                         'text-muted-foreground': t.type === 'transfer'
                     })}>
-                      {formatCurrency(t.amount)}
+                      {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
