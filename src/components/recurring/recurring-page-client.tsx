@@ -26,13 +26,13 @@ import {
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { AddTransactionSheet } from '../dashboard/add-transaction-sheet';
+import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { EditTransactionSheet } from '../transactions/edit-transaction-sheet';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '../transactions/delete-transaction-dialog';
 import { InstallmentPurchaseCard } from './installment-purchase-card';
 
@@ -119,7 +119,7 @@ export function RecurringPageClient({
               Gerencie suas assinaturas e pagamentos mensais.
             </CardDescription>
           </div>
-          <AddTransactionSheet
+          <AddTransactionDialog
             accounts={allAccounts}
             goals={allGoals}
             categories={allCategories}
@@ -144,7 +144,7 @@ export function RecurringPageClient({
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.description}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary">{t.category.name}</Badge>
+                      <Badge variant="secondary">{typeof t.category === 'object' ? t.category.name : t.category}</Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {formatDate(t.date)}
@@ -160,7 +160,7 @@ export function RecurringPageClient({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <EditTransactionSheet
+                          <EditTransactionDialog
                             transaction={t}
                             accounts={allAccounts}
                             goals={allGoals}

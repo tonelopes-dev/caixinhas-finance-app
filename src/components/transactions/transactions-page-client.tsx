@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { AddTransactionSheet } from '@/components/dashboard/add-transaction-sheet';
+import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import {
   Select,
   SelectContent,
@@ -39,7 +39,7 @@ import {
 import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { EditTransactionSheet } from '@/components/transactions/edit-transaction-sheet';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -306,7 +306,7 @@ export function TransactionsPageClient({
                     </SelectContent>
                   </Select>
                   <div className="hidden md:block">
-                      <AddTransactionSheet accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
+                      <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
                   </div>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export function TransactionsPageClient({
                                       </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                      <EditTransactionSheet transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                      <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
                                       <DeleteTransactionDialog transactionId={t.id} />
                                   </DropdownMenuContent>
                               </DropdownMenu>
@@ -432,7 +432,7 @@ export function TransactionsPageClient({
                                           </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end">
-                                          <EditTransactionSheet transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                          <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
                                           <DeleteTransactionDialog transactionId={t.id} />
                                       </DropdownMenuContent>
                                   </DropdownMenu>
@@ -452,7 +452,7 @@ export function TransactionsPageClient({
           </Card>
       </motion.div>
       <div className="fixed bottom-6 right-6 md:hidden">
-          <AddTransactionSheet accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
+          <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
       </div>
     </>
   );

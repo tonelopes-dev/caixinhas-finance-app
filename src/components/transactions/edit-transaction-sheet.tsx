@@ -1,324 +1,458 @@
+'use client';
 
-"use client";
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-import React, { useEffect, useRef, useState, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { updateTransaction, type TransactionState } from '@/app/transactions/actions';
+import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Edit, ArrowLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { Calendar } from '../ui/calendar';
-import { ptBR } from 'date-fns/locale';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { DropdownMenuItem } from '../ui/dropdown-menu';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { motion, AnimatePresence } from 'framer-motion';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
+import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
+import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full">
-      {pending ? 'Salvando...' : 'Salvar Alterações'}
-    </Button>
-  );
+function formatCurrency(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 }
 
-const paymentMethods = [
-    { value: 'credit_card', label: 'Cartão de Crédito' },
-    { value: 'debit_card', label: 'Cartão de Débito' },
-    { value: 'pix', label: 'Pix' },
-    { value: 'boleto', label: 'Boleto' },
-    { value: 'transfer', label: 'Transferência Bancária' },
-    { value: 'cash', label: 'Dinheiro' },
-]
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+}
 
-export function EditTransactionDialog({ transaction, accounts, goals, categories }: { transaction: Transaction; accounts: Account[]; goals: Goal[], categories: any[] }) {
-  const initialState: TransactionState = { success: false };
-  const [state, dispatch] = useActionState(updateTransaction, initialState);
-  const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [open, setOpen] = useState(false);
-  const [popoverOpen, setPopoverOpen] = useState(false);
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+const months = [
+    { value: 'all', label: 'Todos os meses' },
+    { value: '1', label: 'Janeiro' },
+    { value: '2', label: 'Fevereiro' },
+    { value: '3', label: 'Março' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Maio' },
+    { value: '6', label: 'Junho' },
+    { value: '7', label: 'Julho' },
+    { value: '8', 'label': 'Agosto' },
+    { value: '9', label: 'Setembro' },
+    { value: '10', label: 'Outubro' },
+    { value: '11', label: 'Novembro' },
+    { value: '12', label: 'Dezembro' },
+];
 
-  // State for multi-step form
-  const [step, setStep] = useState(1);
+const paymentMethods: Record<string, { label: string, icon: React.ElementType }> = {
+    pix: { label: 'Pix', icon: ArrowRight },
+    credit_card: { label: 'Crédito', icon: CreditCard },
+    debit_card: { label: 'Débito', icon: CreditCard },
+    transfer: { label: 'Transferência', icon: ArrowRight },
+    boleto: { label: 'Boleto', icon: Banknote },
+    cash: { label: 'Dinheiro', icon: Banknote },
+}
 
-  // Form fields state
-  const [description, setDescription] = useState(transaction.description);
-  const [amount, setAmount] = useState(transaction.amount.toString());
-  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>(transaction.type);
-  const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
-  const [sourceAccountId, setSourceAccountId] = useState(transaction.sourceAccountId);
-  const [destinationAccountId, setDestinationAccountId] = useState(transaction.destinationAccountId);
-  const [category, setCategory] = useState(typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category);
+const getTypeDisplay = (type: Transaction['type']) => {
+    switch (type) {
+        case 'income': return { label: 'Entrada', icon: TrendingUp, color: 'text-green-500', bgColor: 'bg-green-500/10' };
+        case 'expense': return { label: 'Saída', icon: TrendingDown, color: 'text-red-500', bgColor: 'bg-red-500/10' };
+        case 'transfer': return { label: 'Transferência', icon: ArrowRightLeft, color: 'text-blue-500', bgColor: 'bg-blue-500/10' };
+    }
+}
 
-  const getInitialChargeType = () => {
-    if (transaction.isInstallment) return 'installment';
-    if (transaction.isRecurring) return 'recurring';
-    return 'single';
+type TransactionsPageClientProps = {
+  initialTransactions: any[];
+  allAccounts: Account[];
+  allGoals: Goal[];
+  allCategories: any[];
+  workspaceId: string;
+};
+
+export function TransactionsPageClient({
+  initialTransactions,
+  allAccounts,
+  allGoals,
+  allCategories,
+  workspaceId,
+}: TransactionsPageClientProps) {
+  const router = useRouter();
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  
+  useEffect(() => {
+    setMonthFilter((new Date().getMonth() + 1).toString());
+    setYearFilter(new Date().getFullYear().toString());
+  }, []);
+
+  const getAccountName = (id: string) => {
+    if (id.startsWith('goal')) {
+        const goal = allGoals.find(g => g.id === id);
+        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
+    }
+    const account = allAccounts.find(a => a.id === id);
+    return account ? account.name : 'Conta desconhecida';
   }
-  const [chargeType, setChargeType] = useState(getInitialChargeType());
-  
-  const [installmentValue, setInstallmentValue] = useState(() => {
-    if (transaction.isInstallment && transaction.totalInstallments) {
-        return (transaction.amount / transaction.totalInstallments).toFixed(2);
-    }
-    return '';
+
+  const filteredTransactions = useMemo(() => {
+    return initialTransactions.filter((transaction) => {
+      const transactionDate = new Date(transaction.date);
+      
+      const searchMatch = searchQuery === '' || 
+        transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.amount.toString().includes(searchQuery);
+
+      const typeMatch = typeFilter === 'all' || transaction.type === typeFilter;
+      
+      const monthMatch =
+        monthFilter === 'all' ||
+        transactionDate.getMonth() + 1 === parseInt(monthFilter);
+      
+      const yearMatch =
+        yearFilter === 'all' ||
+        transactionDate.getFullYear() === parseInt(yearFilter);
+        
+      return searchMatch && typeMatch && monthMatch && yearMatch;
+    });
+  }, [initialTransactions, searchQuery, typeFilter, monthFilter, yearFilter]);
+
+  const summary = useMemo(() => {
+    const income = filteredTransactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const expenses = filteredTransactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const transfers = filteredTransactions
+      .filter((t) => t.type === 'transfer')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const balance = income - expenses;
+    return { income, expenses, balance, transfers };
+  }, [filteredTransactions]);
+
+  const recurringSummary = useMemo(() => {
+    const recurring = initialTransactions.filter(t => t.isRecurring);
+    const installments = initialTransactions.filter(t => t.isInstallment);
+    
+    return {
+      recurringCount: recurring.length,
+      installmentsCount: installments.length
+    };
+  }, [initialTransactions]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { ease: 'easeOut', duration: 0.3 } },
+  };
+
+  const summaryItemVariants = (delay: number) => ({
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { ease: 'easeOut', duration: 0.5, delay } },
   });
-  const [totalInstallments, setTotalInstallments] = useState(transaction.totalInstallments?.toString() || '');
 
-  useEffect(() => {
-    if (state.success) {
-      toast({
-        title: "Sucesso!",
-        description: state.message,
-      });
-      setOpen(false);
-    } else if (state.message) {
-      toast({
-        title: "Erro",
-        description: state.message,
-        variant: "destructive",
-      });
-    }
-  }, [state, toast]);
-
-  useEffect(() => {
-    if (chargeType === 'installment') {
-        const numInstallments = parseFloat(totalInstallments);
-        const valPerInstallment = parseFloat(installmentValue);
-        if (!isNaN(numInstallments) && numInstallments > 0 && !isNaN(valPerInstallment) && valPerInstallment > 0) {
-            setAmount((numInstallments * valPerInstallment).toFixed(2));
-        }
-    }
-  }, [installmentValue, totalInstallments, chargeType]);
-
-  const allSourcesAndDestinations = [
-      ...accounts.map(a => ({ ...a, value: a.id, name: a.name })), 
-      ...goals.map(g => ({ ...g, value: `goal-${g.id}`, name: `Caixinha: ${g.name}` }))
-  ];
-  
-  const sourceAccount = accounts.find(a => a.id === sourceAccountId) || null;
-  const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
-
-  const getDefaultValue = (accountId: string | null | undefined, goalId: string | null | undefined) => {
-    if (goalId) return `goal-${goalId}`;
-    if (accountId) return accountId;
-    return undefined;
-  };
-  
-  const sourceDefaultValue = getDefaultValue(transaction.sourceAccountId, null);
-  const destinationDefaultValue = getDefaultValue(transaction.destinationAccountId, (transaction as any).goalId);
-  
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
-  
-  const isStep1Valid = description.trim() !== '' && category !== '';
-  const isStep2Valid = transactionType !== '' && date;
-
-  const formVariants = {
-    hidden: { opacity: 0, x: 30 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -30 },
-  };
-
-  const steps = [
-    { id: 1, title: 'O Essencial' },
-    { id: 2, title: 'A Movimentação' },
-    { id: 3, title: 'Valores e Detalhes' },
-  ];
+  const cardBaseClasses = "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center gap-4 rounded-lg border p-4";
+  const activeClasses = "ring-2 ring-primary shadow-md scale-[1.02]";
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-        <DialogTrigger asChild>
-            <button className='flex w-full items-center gap-2'>
-                <Edit className="h-4 w-4" />
-                Editar
-            </button>
-        </DialogTrigger>
-      </DropdownMenuItem>
-      <DialogContent className="flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Editar Transação</DialogTitle>
-          <DialogDescription>
-            Atualize os detalhes da sua transação.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Progress Indicator */}
-        <div className="flex items-center gap-2 py-2">
-            {steps.map((s, index) => (
-                <React.Fragment key={s.id}>
-                    <div className="flex items-center gap-2">
-                        <div className={cn("flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold", step >= s.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                            {s.id}
+    <>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="mb-8"
+      >
+        <Card>
+            <CardHeader>
+                <CardTitle className='font-headline'>Resumo do Período</CardTitle>
+                <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <motion.div className="grid gap-4 md:grid-cols-4" initial="hidden" animate="visible" variants={containerVariants}>
+                    <motion.div variants={summaryItemVariants(0.1)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
+                        <div className="rounded-full bg-primary/10 p-3">
+                            <Wallet className="h-6 w-6 text-primary" />
                         </div>
-                        <span className={cn("text-sm font-medium", step >= s.id ? "text-foreground" : "text-muted-foreground")}>{s.title}</span>
-                    </div>
-                    {index < steps.length - 1 && <div className="flex-1 h-px bg-border" />}
-                </React.Fragment>
-            ))}
-        </div>
-
-        <form ref={formRef} action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
-          <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
-            <input type="hidden" name="id" value={transaction.id} />
-            <input type="hidden" name="ownerId" value={transaction.ownerId} />
-            {isCreditCardTransaction && <input type="hidden" name="paymentMethod" value="credit_card" />}
-
-            <AnimatePresence mode="wait">
-                {step === 1 && (
-                    <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Descrição</Label>
-                            <Input id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-                            {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Categoria</Label>
-                            <Select name="category" value={category} onValueChange={setCategory}>
-                                <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                                <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
-                            </Select>
-                            {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
+                        <div>
+                            <p className="text-sm text-muted-foreground">Saldo Líquido</p>
+                            <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
                         </div>
                     </motion.div>
-                )}
-
-                {step === 2 && (
-                    <motion.div key="step2" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                         <div className="space-y-2">
-                          <Label htmlFor="type">Tipo</Label>
-                          <Select name="type" value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
-                            <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="expense">Saída</SelectItem>
-                              <SelectItem value="income">Entrada</SelectItem>
-                              <SelectItem value="transfer">Transferência</SelectItem>
-                            </SelectContent>
-                          </Select>
-                           {state?.errors?.type && <p className="text-sm font-medium text-destructive">{state.errors.type[0]}</p>}
+                    <motion.div variants={summaryItemVariants(0.2)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
+                        <div className="rounded-full bg-green-500/10 p-3">
+                            <TrendingUp className="h-6 w-6 text-green-500" />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="date">Data</Label>
-                            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={date} onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }} initialFocus locale={ptBR} />
-                                </PopoverContent>
-                            </Popover>
-                            <input type="hidden" name="date" value={date?.toISOString() || ''} />
-                             {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                        <div>
+                            <p className="text-sm text-muted-foreground">Entradas</p>
+                            <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
                         </div>
-                        {(transactionType === 'expense' || transactionType === 'transfer') && (
-                             <div className="space-y-2">
-                                <Label htmlFor="sourceAccountId">Origem</Label>
-                                <Select name="sourceAccountId" defaultValue={sourceDefaultValue} onValueChange={(value) => {
-                                    setSourceAccountId(value);
-                                }}>
-                                    <SelectTrigger><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
-                                    <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
-                                </Select>
-                                {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
-                            </div>
-                        )}
-                        {(transactionType === 'income' || transactionType === 'transfer') && (
-                            <div className="space-y-2">
-                                <Label htmlFor="destinationAccountId">Destino</Label>
-                                <Select name="destinationAccountId" defaultValue={destinationDefaultValue} onValueChange={(value) => setDestinationAccountId(value)}>
-                                    <SelectTrigger><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
-                                    <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
-                                </Select>
-                                 {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
-                            </div>
-                        )}
                     </motion.div>
-                )}
-
-                {step === 3 && (
-                    <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                        {(transactionType === 'income' || transactionType === 'expense') && (
-                          <div className="space-y-3 rounded-lg border p-3">
-                                <Label>Tipo de cobrança</Label>
-                                 <RadioGroup name="chargeType" value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="edit-single" /><Label htmlFor="edit-single" className="font-normal">Cobrança Única</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="edit-recurring" /><Label htmlFor="edit-recurring" className="font-normal">Pagamento Fixo (Recorrente)</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="edit-installment" /><Label htmlFor="edit-installment" className="font-normal">Compra Parcelada</Label></div>
-                                </RadioGroup>
-                                {chargeType === 'installment' && (
-                                    <div className="grid grid-cols-2 gap-4 pt-2">
-                                        <div className="space-y-1">
-                                            <Label htmlFor="totalInstallments">Total de Parcelas</Label>
-                                            <Input id="totalInstallments" name="totalInstallments" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
-                                        </div>
-                                         <div className="space-y-1">
-                                            <Label htmlFor="installmentValue">Valor da Parcela</Label>
-                                            <Input id="installmentValue" name="installmentValue" type="number" step="0.01" placeholder="Ex: 99,90" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="space-y-2">
-                            <Label htmlFor="amount">Valor Total</Label>
-                            <Input id="amount" name="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
-                            {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                    <motion.div variants={summaryItemVariants(0.3)} className={cn(cardBaseClasses, typeFilter === 'expense' && activeClasses)} onClick={() => setTypeFilter('expense')}>
+                        <div className="rounded-full bg-red-500/10 p-3">
+                            <TrendingDown className="h-6 w-6 text-red-500" />
                         </div>
-
-                        {transactionType === 'expense' && !isCreditCardTransaction && (
-                            <div className="space-y-2">
-                                <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                <Select name="paymentMethod" defaultValue={transaction.paymentMethod}><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
-                                 {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
-                            </div>
-                        )}
+                        <div>
+                            <p className="text-sm text-muted-foreground">Saídas</p>
+                            <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
+                        </div>
                     </motion.div>
-                )}
-            </AnimatePresence>
+                    <motion.div variants={summaryItemVariants(0.4)} className={cardBaseClasses} onClick={() => router.push('/recurring')}>
+                        <div className="rounded-full bg-purple-500/10 p-3">
+                            <Repeat className="h-6 w-6 text-purple-500" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Recorrentes e Parcelas</p>
+                            <p className="text-xl font-bold">{recurringSummary.recurringCount + recurringSummary.installmentsCount}</p>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            </CardContent>
+        </Card>
+      </motion.div>
 
-          </div>
-          <DialogFooter className="mt-auto pt-4 border-t">
-            <div className="w-full flex justify-between items-center">
-              {step > 1 ? (
-                  <Button type="button" variant="ghost" onClick={prevStep}>
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Voltar
-                  </Button>
-              ) : <div />}
+      <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+      >
+          <Card>
+          <CardHeader>
+              <div>
+              <CardTitle className="font-headline text-2xl">
+                  Histórico de Transações
+              </CardTitle>
+              <CardDescription>
+                  Seu histórico financeiro completo e detalhado.
+              </CardDescription>
+              </div>
+              <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-center">
+                <div className='relative flex-1'>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Buscar por nome ou valor..."
+                    className="pl-10 w-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className='text-sm font-medium sr-only md:not-sr-only'>Filtros:</span>
 
-              {step < 3 ? (
-                  <Button type="button" onClick={nextStep} disabled={step === 1 ? !isStep1Valid : !isStep2Valid}>
-                      Avançar
-                  </Button>
-              ) : (
-                  <SubmitButton />
+                  <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="income">Entradas</SelectItem>
+                        <SelectItem value="expense">Saídas</SelectItem>
+                        <SelectItem value="transfer">Transferências</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger className="w-full md:w-auto">
+                        <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <div className="hidden md:block">
+                      <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
+                  </div>
+                </div>
+              </div>
+          </CardHeader>
+          <CardContent className='overflow-hidden p-0 md:p-6'>
+              {/* Mobile View */}
+              <motion.div className="space-y-4 md:hidden p-4" variants={containerVariants} initial="hidden" animate="visible">
+                  {filteredTransactions.map(t => {
+                      const typeInfo = getTypeDisplay(t.type);
+                      const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
+                      return (
+                          <motion.div variants={itemVariants} key={t.id} className="flex items-center gap-3 border-b pb-3 last:border-b-0">
+                              <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
+                                  <typeInfo.icon className={cn("h-5 w-5", typeInfo.color)}/>
+                              </div>
+                              <div className="flex-1 space-y-0.5">
+                                  <div className="flex justify-between">
+                                      <p className="font-medium">{t.description}</p>
+                                      <p className={cn("font-medium", {'text-green-600': t.type === 'income','text-foreground': t.type === 'expense','text-muted-foreground': t.type === 'transfer'})}>
+                                          {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                                          {formatCurrency(t.amount)}
+                                      </p>
+                                  </div>
+                                  <div className="flex justify-between text-xs text-muted-foreground">
+                                      <span>{formatDate(t.date)}</span>
+                                      {MethodIcon && (
+                                          <div className='flex items-center gap-1'>
+                                              <MethodIcon className="h-3 w-3" />
+                                              <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                          </div>
+                                      )}
+                                  </div>
+                              </div>
+                              <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                      <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                      <DeleteTransactionDialog transactionId={t.id} />
+                                  </DropdownMenuContent>
+                              </DropdownMenu>
+                          </motion.div>
+                      );
+                  })}
+              </motion.div>
+
+              {/* Desktop View */}
+              <Table className="hidden md:table">
+              <TableHeader>
+                  <TableRow>
+                  <TableHead>Transação</TableHead>
+                  <TableHead className="hidden lg:table-cell">Categoria</TableHead>
+                  <TableHead className="hidden lg:table-cell">Contas</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+              </TableHeader>
+              <motion.tbody
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+              >
+                  {filteredTransactions.map((t) => {
+                      const typeInfo = getTypeDisplay(t.type);
+                      const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod!]?.icon : null;
+
+                      return (
+                          <motion.tr variants={itemVariants} key={t.id}>
+                              <TableCell>
+                                  <div className='flex items-center gap-3'>
+                                      <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
+                                          <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
+                                      </div>
+                                      <div className='flex-1'>
+                                          <p className="font-medium">{t.description}</p>
+                                          <div className='flex items-center gap-2 text-muted-foreground text-xs'>
+                                              {MethodIcon && (
+                                                  <div className='flex items-center gap-1'>
+                                                      <MethodIcon className="h-3 w-3" />
+                                                      <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                                  </div>
+                                              )}
+                                          </div>
+                                      </div>
+                                  </div>
+                              </TableCell>
+                              <TableCell className="hidden lg:table-cell">
+                                  <Badge variant="outline">{t.category?.name || 'Sem categoria'}</Badge>
+                              </TableCell>
+                              <TableCell className="hidden lg:table-cell text-xs">
+                                  {t.sourceAccountId && (
+                                      <div className='flex items-center gap-1 text-muted-foreground'>
+                                          <Landmark className="h-3 w-3 text-red-500" />
+                                          <span>{getAccountName(t.sourceAccountId)}</span>
+                                      </div>
+
+                                  )}
+                                  {t.destinationAccountId && (
+                                      <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                                          {t.destinationAccountId.startsWith('goal') ? <PiggyBank className="h-3 w-3 text-green-500"/> : <Landmark className="h-3 w-3 text-green-500" />}
+                                          <span>{getAccountName(t.destinationAccountId)}</span>
+                                      </div>
+                                  )}
+                              </TableCell>
+                              <TableCell>{formatDate(t.date)}</TableCell>
+                              <TableCell className={cn("text-right font-medium", {
+                                  'text-green-600': t.type === 'income',
+                                  'text-foreground': t.type === 'expense',
+                                  'text-muted-foreground': t.type === 'transfer'
+                              })}>
+                                  {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                                  {formatCurrency(t.amount)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                  <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="icon">
+                                              <MoreHorizontal className="h-4 w-4" />
+                                          </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                          <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                          <DeleteTransactionDialog transactionId={t.id} />
+                                      </DropdownMenuContent>
+                                  </DropdownMenu>
+                              </TableCell>
+                          </motion.tr>
+                      )
+                  })}
+              </motion.tbody>
+              </Table>
+
+               {filteredTransactions.length === 0 && (
+                  <div className="py-12 text-center text-muted-foreground">
+                      Nenhuma transação encontrada para os filtros selecionados.
+                  </div>
               )}
-            </div>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
+          </CardContent>
+          </Card>
+      </motion.div>
+      <div className="fixed bottom-6 right-6 md:hidden">
+          <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
+      </div>
+    </>
+  );
 }

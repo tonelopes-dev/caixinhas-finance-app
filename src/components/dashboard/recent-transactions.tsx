@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { AddTransactionSheet } from './add-transaction-sheet';
+import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ListFilter, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -65,7 +65,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                     <SelectItem value="transfer">Transferências</SelectItem>
                 </SelectContent>
             </Select>
-            <AddTransactionSheet accounts={accounts} goals={goals} categories={categories} ownerId={ownerId} />
+            <AddTransactionDialog accounts={accounts} goals={goals} categories={categories} ownerId={ownerId} />
         </div>
       </CardHeader>
       <CardContent>
