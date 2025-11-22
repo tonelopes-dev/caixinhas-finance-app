@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createAccount, updateAccount, deleteAccount } from '@/app/accounts/actions';
@@ -60,6 +60,95 @@ function formatCurrency(value: number) {
     style: 'currency',
     currency: 'BRL',
   });
+}
+
+function AccountItem({ account, userVaults, currentUserId }: { account: Account, userVaults: Vault[], currentUserId: string }) {
+    const isOwner = account.ownerId === currentUserId;
+    const canEdit = isOwner;
+    const canDelete = isOwner;
+    const isCreditCard = account.type === 'credit_card';
+
+    const visibleInArray = React.useMemo(() => {
+        if (Array.isArray(account.visibleIn)) {
+            return account.visibleIn;
+        }
+        if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
+            return account.visibleIn.split(',');
+        }
+        return [];
+    }, [account.visibleIn]);
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+            ease: "easeOut",
+            duration: 0.4,
+            },
+        },
+    };
+
+    return (
+        <motion.div variants={itemVariants} className="rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 flex-1">
+                    <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
+                        {account.logoUrl ? (
+                            <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover rounded-full" />
+                        ) : (
+                            isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
+                        )}
+                    </div>
+                    <div className='flex-1'>
+                        <p className="font-medium">{account.name}</p>
+                        <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
+                    </div>
+                </div>
+                <div className='flex items-center gap-4'>
+                    <div className='text-right'>
+                        {isCreditCard ? (
+                            <>
+                                <p className="font-medium text-red-500">
+                                    <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    de {formatCurrency(account.creditLimit || 0)}
+                                </p>
+                            </>
+                        ) : (
+                            <p className={cn("font-medium text-lg", account.balance >= 0 ? 'text-green-600' : 'text-red-500')}>
+                               <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                            </p>
+                        )}
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                        <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
+                        <DeleteAccountDialog 
+                            account={account} 
+                            disabled={!canDelete} 
+                            currentUserId={currentUserId}
+                        />
+                    </div>
+                </div>
+            </div>
+            {isOwner && visibleInArray.length > 0 && (
+                <div className="border-t pt-3 mt-3 flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Eye className="h-3 w-3" />
+                        <span>Visível em:</span>
+                    </div>
+                    {visibleInArray.map(vaultId => {
+                        const vault = userVaults.find(v => v.id === vaultId);
+                        return vault ? (
+                            <Badge key={vaultId} variant="secondary">{vault.name}</Badge>
+                        ) : null;
+                    })}
+                </div>
+            )}
+        </motion.div>
+    );
 }
 
 
@@ -156,13 +245,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                     <Switch 
                                         id={`visible-${vault.id}`} 
                                         name={`visible-${vault.id}`}
-                                        checked={visibleInArray.includes(vault.id)}
-                                        onCheckedChange={(checked) => {
-                                            const newVisibleIn = checked
-                                            ? [...visibleInArray, vault.id]
-                                            : visibleInArray.filter((id) => id !== vault.id);
-                                            // Este estado local é apenas para a UI, o formulário envia o valor do switch.
-                                        }}
+                                        defaultChecked={visibleInArray.includes(vault.id)}
                                     />
                                  </div>
                              ))}
@@ -324,18 +407,6 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             opacity: 1,
             transition: {
             staggerChildren: 0.1,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: {
-            ease: "easeOut",
-            duration: 0.4,
             },
         },
     };
@@ -503,79 +574,14 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             initial="hidden"
             animate="visible"
         >
-          {accounts.map((account) => {
-            const isOwner = account.ownerId === currentUserId;
-            const canEdit = isOwner;
-            const canDelete = isOwner;
-            const visibleInArray = React.useMemo(() => {
-                if (Array.isArray(account.visibleIn)) return account.visibleIn;
-                if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
-                    return account.visibleIn.split(',');
-                }
-                return [];
-            }, [account.visibleIn]);
-            const isCreditCard = account.type === 'credit_card';
-
-            return (
-                <motion.div key={account.id} variants={itemVariants} className="rounded-lg border p-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
-                            <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
-                                {account.logoUrl ? (
-                                    <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover rounded-full" />
-                                ) : (
-                                    isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
-                                )}
-                            </div>
-                            <div className='flex-1'>
-                                <p className="font-medium">{account.name}</p>
-                                <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
-                            </div>
-                        </div>
-                        <div className='flex items-center gap-4'>
-                            <div className='text-right'>
-                                {isCreditCard ? (
-                                    <>
-                                        <p className="font-medium text-red-500">
-                                            <AnimatedCounter value={account.balance} formatter={formatCurrency} />
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            de {formatCurrency(account.creditLimit || 0)}
-                                        </p>
-                                    </>
-                                ) : (
-                                    <p className={cn("font-medium text-lg", account.balance >= 0 ? 'text-green-600' : 'text-red-500')}>
-                                       <AnimatedCounter value={account.balance} formatter={formatCurrency} />
-                                    </p>
-                                )}
-                            </div>
-                            <div className='flex gap-1 items-center'>
-                                <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
-                                <DeleteAccountDialog 
-                                    account={account} 
-                                    disabled={!canDelete} 
-                                    currentUserId={currentUserId}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    {isOwner && visibleInArray.length > 0 && (
-                        <div className="border-t pt-3 mt-3 flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Eye className="h-3 w-3" />
-                                <span>Visível em:</span>
-                            </div>
-                            {visibleInArray.map(vaultId => {
-                                const vault = userVaults.find(v => v.id === vaultId);
-                                return vault ? (
-                                    <Badge key={vaultId} variant="secondary">{vault.name}</Badge>
-                                ) : null;
-                            })}
-                        </div>
-                    )}
-                </motion.div>
-            )
-          })}
+          {accounts.map((account) => (
+            <AccountItem 
+                key={account.id} 
+                account={account} 
+                userVaults={userVaults} 
+                currentUserId={currentUserId}
+            />
+          ))}
            {accounts.length === 0 && (
             <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma conta ou cartão cadastrado.</p>
            )}
