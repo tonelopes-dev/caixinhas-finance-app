@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -82,22 +81,34 @@ export function RecurringPageClient({
   return (
     <div className="space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline">
-            <Repeat1 className="h-6 w-6 text-primary" />
-            Pagamentos Parcelados
-          </CardTitle>
-          <CardDescription>
-            Acompanhe o andamento de todas as suas compras parceladas.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <Repeat1 className="h-6 w-6 text-primary" />
+              Pagamentos Parcelados
+            </CardTitle>
+            <CardDescription>
+              Acompanhe o andamento de todas as suas compras parceladas.
+            </CardDescription>
+          </div>
+           <AddTransactionDialog
+            accounts={allAccounts}
+            goals={allGoals}
+            categories={allCategories}
+            ownerId={workspaceId}
+            chargeType="installment"
+          />
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             {groupedInstallments.length > 0 ? (
               groupedInstallments.map((installment) => (
-                <InstallmentPurchaseCard 
-                  key={installment.id} 
-                  purchase={installment as Transaction} 
+                <InstallmentPurchaseCard
+                  key={installment.id}
+                  purchase={installment as Transaction}
+                  allAccounts={allAccounts}
+                  allGoals={allGoals}
+                  allCategories={allCategories}
                 />
               ))
             ) : (
