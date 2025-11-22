@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -166,7 +167,7 @@ export function GoalDetailClient({ goal, transactions, accounts }: GoalDetailCli
             </h3>
             <div className="space-y-4">
               {goalActivity.map((activity) => {
-                const isDeposit = !!activity.destinationAccountId;
+                const isDeposit = !!activity.sourceAccountId;
                 const actor = getActor(activity.actorId);
                 
                 return (
