@@ -71,6 +71,7 @@ export class ReportService {
           },
         },
       });
+      console.log(`Cache for report ${ownerId}-${monthYear} invalidated.`);
       return true;
     } catch (error: any) {
       // Prisma's P2025 error code means "Record to delete does not exist."
