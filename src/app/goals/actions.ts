@@ -258,14 +258,13 @@ export async function updateGoalAction(
 export async function deleteGoalAction(goalId: string) {
   try {
     await GoalService.deleteGoal(goalId);
-
-    revalidatePath('/goals');
-    revalidatePath('/dashboard');
-
-    return { success: true, message: 'Caixinha excluída com sucesso!' };
   } catch (error) {
     console.error('Erro ao deletar meta:', error);
-    return { success: false, message: 'Erro ao excluir caixinha.' };
+    // Mesmo se falhar, tentamos redirecionar para um lugar seguro
+  } finally {
+    revalidatePath('/goals');
+    revalidatePath('/dashboard');
+    redirect('/goals');
   }
 }
 

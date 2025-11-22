@@ -12,13 +12,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { deleteGoalAction } from '@/app/goals/actions';
-import { cn } from '@/lib/utils';
+import React from 'react';
 
 export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: string, goalName: string, disabled?: boolean }) {
   
+  const [isPending, startTransition] = React.useTransition();
+
+  const handleDelete = () => {
+    startTransition(() => {
+      deleteGoalAction(goalId);
+    });
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -28,7 +36,6 @@ export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: strin
        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <form action={() => deleteGoalAction(goalId)}>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -38,9 +45,10 @@ export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: strin
           </AlertDialogHeader>
           <AlertDialogFooter className='mt-4'>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction type="submit" className={cn(buttonVariants({ variant: "destructive" }))}>Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} disabled={isPending} variant="destructive">
+                {isPending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
           </AlertDialogFooter>
-        </form>
       </AlertDialogContent>
     </AlertDialog>
   );
