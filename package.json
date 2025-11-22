@@ -11,7 +11,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate dev --name sync-schema",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "db:clear": "node scripts/clear-database.js",
