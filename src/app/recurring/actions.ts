@@ -1,7 +1,9 @@
+
 'use server';
 
 import { TransactionService } from '@/services';
 import type { Transaction } from '@/lib/definitions';
+import { revalidatePath } from 'next/cache';
 
 export async function getRecurringData(
   workspaceId: string,
@@ -20,5 +22,19 @@ export async function getRecurringData(
   } catch (error) {
     console.error('Erro ao buscar dados recorrentes:', error);
     return { recurring: [], installments: [] };
+  }
+}
+
+export async function updatePaidInstallmentsAction(
+  transactionId: string,
+  paidCount: number
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    await TransactionService.updatePaidInstallments(transactionId, paidCount);
+    revalidatePath('/recurring');
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao atualizar parcelas pagas:', error);
+    return { success: false, message: 'Não foi possível atualizar o status das parcelas.' };
   }
 }

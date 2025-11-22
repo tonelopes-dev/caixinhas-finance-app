@@ -151,10 +151,10 @@ export class TransactionService {
           isInstallment: data.isInstallment ?? false,
           installmentNumber: data.installmentNumber,
           totalInstallments: data.totalInstallments,
+          paidInstallments: data.isInstallment ? 1 : null, // Nova lógica
           actor: { connect: { id: data.actorId } },
         };
         
-        // Define o owner da transação (user ou vault)
         if (data.vaultId) {
           createData.vault = { connect: { id: data.vaultId } };
         } else if (data.userId) {
@@ -174,7 +174,6 @@ export class TransactionService {
             }
         };
         
-        // Conecta as contas e metas, se existirem
         if (data.sourceAccountId) {
           createData.sourceAccount = { connect: { id: data.sourceAccountId } };
         }
@@ -187,10 +186,6 @@ export class TransactionService {
         
         const transaction = await tx.transaction.create({ data: createData });
 
-        // ATENÇÃO: Lógica de atualização de saldo movida para cá para ser transacional.
-        // A lógica de `goal_` vs account é tratada na server action antes de chegar aqui.
-
-        // Atualizar saldos
         if (data.type === 'expense' && data.sourceAccountId) {
             await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
         }
@@ -198,19 +193,17 @@ export class TransactionService {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
-            // Saída
             if (data.sourceAccountId) {
                 await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
             }
-            if (data.goalId && !data.destinationAccountId) { // Retirada de meta para uma conta
+            if (data.goalId && !data.destinationAccountId) {
                  await GoalService.removeFromGoal(data.goalId, data.amount);
             }
             
-            // Entrada
             if (data.destinationAccountId) {
                 await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
             }
-            if (data.goalId && !data.sourceAccountId) { // Depósito em meta
+            if (data.goalId && !data.sourceAccountId) {
                 await GoalService.addToGoal(data.goalId, data.amount);
             }
         }
@@ -243,11 +236,9 @@ export class TransactionService {
       isInstallment: boolean;
       installmentNumber: number;
       totalInstallments: number;
+      paidInstallments: number;
     }>
   ): Promise<any> {
-    // A lógica de transação para atualização é mais complexa
-    // pois precisamos reverter o efeito da transação antiga antes de aplicar o novo.
-    // Por simplicidade, esta função apenas atualiza os dados da transação sem ajustar os saldos.
     try {
       const updateData: any = { ...data };
 
@@ -292,11 +283,26 @@ export class TransactionService {
   }
 
   /**
+   * Atualiza o número de parcelas pagas de uma transação.
+   */
+  static async updatePaidInstallments(transactionId: string, paidCount: number): Promise<any> {
+    try {
+      // Como o grupo é representado por uma única transação, atualizamos ela.
+      return await prisma.transaction.update({
+        where: { id: transactionId },
+        data: { paidInstallments: paidCount },
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar parcelas pagas:', error);
+      throw new Error('Não foi possível atualizar o número de parcelas pagas.');
+    }
+  }
+
+
+  /**
    * Deleta uma transação do banco de dados.
    */
   static async deleteTransaction(transactionId: string): Promise<void> {
-    // Similar à atualização, a exclusão em uma transação real
-    // deveria reverter o impacto da transação nos saldos das contas/metas.
     try {
       await prisma.transaction.delete({
         where: { id: transactionId },

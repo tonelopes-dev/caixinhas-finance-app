@@ -24,32 +24,29 @@ const transactionSchema = z.object({
   paymentMethod: z.enum(['pix', 'credit_card', 'debit_card', 'transfer', 'boleto', 'cash']).optional().nullable(),
   isRecurring: z.boolean().optional(),
   isInstallment: z.boolean().optional(),
-  installmentNumber: z.coerce.number().optional(),
-  totalInstallments: z.coerce.number().optional(),
+  installmentNumber: z.coerce.number().optional().nullable(),
+  totalInstallments: z.coerce.number().optional().nullable(),
+  paidInstallments: z.coerce.number().optional().nullable(),
   actorId: z.string().optional(),
   userId: z.string().optional(),
   vaultId: z.string().optional(),
 }).refine(data => {
-    // Validação refinada para fontes e destinos
     const hasSource = !!data.sourceAccountId || !!data.goalId;
     const hasDestination = !!data.destinationAccountId || !!data.goalId;
 
     if (data.type === 'expense') {
-        // Saída precisa de uma origem (conta ou meta)
         return hasSource;
     }
     if (data.type === 'income') {
-        // Entrada precisa de um destino (conta ou meta)
         return hasDestination;
     }
     if (data.type === 'transfer') {
-        // Transferência precisa de ambos
         return hasSource && hasDestination;
     }
-    return true; // Para outros tipos (se houver no futuro)
+    return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'], // O erro será associado a este campo no formulário
+    path: ['sourceAccountId'],
 });
 
 
@@ -72,7 +69,6 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const sourceValue = formData.get('sourceAccountId') as string | null;
   const destinationValue = formData.get('destinationAccountId') as string | null;
 
-  // 1. Processar os dados primeiro para determinar os IDs corretos
   const processedData = {
     description: formData.get('description'),
     amount: formData.get('amount'),
@@ -89,16 +85,15 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
+    paidInstallments: formData.get('chargeType') === 'installment' ? 1 : null,
     actorId: userId,
     userId: isPersonal ? userId : undefined,
     vaultId: !isPersonal ? ownerId : undefined,
   };
   
-  // LOG DE DEBUG ADICIONADO
   console.log("--- DEBUG: DADOS PROCESSADOS PARA VALIDAÇÃO ---");
   console.log(JSON.stringify(processedData, null, 2));
   
-  // 2. Validar os dados já processados
   const validatedFields = transactionSchema.safeParse(processedData);
 
   if (!validatedFields.success) {
@@ -112,7 +107,6 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   }
   
   try {
-    // 3. Chamar o serviço com os dados validados
     await TransactionService.createTransaction(validatedFields.data as any);
     
     try {
@@ -163,6 +157,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
+    paidInstallments: formData.get('paidInstallments')
   };
 
   const validatedFields = transactionSchema.safeParse(rawData);
@@ -254,8 +249,3 @@ export async function deleteTransaction(prevState: { message: string | null }, f
     return { success: false, message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
 }
-
-
-
-
-    

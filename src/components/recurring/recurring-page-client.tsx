@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardHeader,
@@ -24,7 +25,6 @@ import {
 } from 'lucide-react';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { Badge } from '../ui/badge';
-import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 import { AddTransactionSheet } from '../dashboard/add-transaction-sheet';
 import {
@@ -34,8 +34,8 @@ import {
 } from '../ui/dropdown-menu';
 import { EditTransactionSheet } from '../transactions/edit-transaction-sheet';
 import { DeleteTransactionDialog } from '../transactions/delete-transaction-dialog';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { InstallmentPurchaseCard } from './installment-purchase-card';
+
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -48,7 +48,6 @@ function formatDate(dateString: string) {
 interface RecurringPageClientProps {
   recurring: Transaction[];
   installments: Transaction[];
-  // Props para os componentes de ação
   allAccounts: Account[];
   allGoals: Goal[];
   allCategories: any[];
@@ -63,24 +62,21 @@ export function RecurringPageClient({
   allCategories,
   workspaceId,
 }: RecurringPageClientProps) {
-  const [isSheetOpen, setSheetOpen] = useState(false);
-  const { data: session, status } = useSession();
   const router = useRouter();
 
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return null;
-  }
-  
-  const groupedInstallments = installments.reduce((acc, t) => {
-    // Usamos a descrição como chave para agrupar parcelas da mesma compra
-    const key = t.description;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(t);
-    return acc;
-  }, {} as Record<string, Transaction[]>);
+  // Agrupa as transações de parcelamento pela descrição
+  const groupedInstallments = useMemo(() => {
+    const groups: Record<string, Transaction[]> = {};
+    installments.forEach((t) => {
+      // Usa a descrição como chave, mas normaliza para evitar problemas
+      const key = t.description.trim().toLowerCase();
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(t);
+    });
+    return Object.values(groups).map(group => group[0]); // Retorna apenas o primeiro item de cada grupo como "representante"
+  }, [installments]);
 
   return (
     <div className="space-y-8">
@@ -96,35 +92,13 @@ export function RecurringPageClient({
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {Object.keys(groupedInstallments).length > 0 ? (
-              Object.entries(groupedInstallments).map(
-                ([description, group]) => {
-                  const totalInstallments = group[0].totalInstallments || group.length;
-                  const paidInstallments = group.length;
-                  const progress = (paidInstallments / totalInstallments) * 100;
-                  const installmentAmount = group[0].amount;
-                  const totalAmount = installmentAmount * totalInstallments;
-                  const paidAmount = group.reduce((sum, t) => sum + t.amount, 0);
-
-                  return (
-                    <div key={description} className="rounded-lg border p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold">{description}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {formatCurrency(paidAmount)} /{' '}
-                            {formatCurrency(totalAmount)}
-                          </p>
-                        </div>
-                        <Badge variant="outline">
-                          {paidInstallments} de {totalInstallments} pagas
-                        </Badge>
-                      </div>
-                      <Progress value={progress} className="mt-2" />
-                    </div>
-                  );
-                }
-              )
+            {groupedInstallments.length > 0 ? (
+              groupedInstallments.map((installment) => (
+                <InstallmentPurchaseCard 
+                  key={installment.id} 
+                  purchase={installment} 
+                />
+              ))
             ) : (
               <p className="text-center text-muted-foreground py-4">
                 Nenhuma compra parcelada encontrada.
