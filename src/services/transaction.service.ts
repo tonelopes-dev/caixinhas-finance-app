@@ -229,7 +229,7 @@ export class TransactionService {
             }
         }
 
-        // Lógica de atualização de saldos (executada apenas para a transação original)
+        // --- ATUALIZAÇÃO DE SALDOS ---
         if (data.type === 'expense' && data.sourceAccountId) {
             await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
         }
@@ -237,19 +237,21 @@ export class TransactionService {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
-             // Movimentação entre conta e caixinha
+             // Movimentação de/para uma caixinha
             if (data.goalId) {
-                // Depósito: Conta -> Caixinha (sourceAccountId está presente)
+                // Depósito: Conta -> Caixinha
                 if (data.sourceAccountId) {
                     await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
                     await GoalService.addToGoal(data.goalId, data.amount);
                 } 
-                // Retirada: Caixinha -> Conta (destinationAccountId está presente)
+                // Retirada: Caixinha -> Conta
                 else if (data.destinationAccountId) {
                     await GoalService.removeFromGoal(data.goalId, data.amount);
                     await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
                 }
-            } else if (data.sourceAccountId && data.destinationAccountId) { // Transferência entre contas
+            } 
+            // Transferência entre contas bancárias
+            else if (data.sourceAccountId && data.destinationAccountId) {
                 await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
                 await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
             }

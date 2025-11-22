@@ -136,6 +136,7 @@ export async function getGoalDetails(goalId: string, userId: string) {
         actorId: t.actorId,
         sourceAccountId: t.sourceAccountId,
         destinationAccountId: t.destinationAccountId,
+        ownerId: t.userId || t.vaultId,
       })),
       accounts: nonCreditAccounts,
     };
@@ -317,8 +318,9 @@ export async function depositToGoalAction(
       type: 'transfer',
       category: 'Caixinha',
       sourceAccountId,
-      goalId, // Informa ao serviço qual caixinha é o destino
-      actorId: userId, // Quem está realizando a ação
+      destinationAccountId: null, // O destino é a caixinha
+      goalId,
+      actorId: userId,
     });
 
     revalidatePath(`/goals/${goalId}`);
@@ -363,7 +365,8 @@ export async function withdrawFromGoalAction(
       amount,
       type: 'transfer',
       category: 'Caixinha',
-      goalId, // Informa ao serviço qual caixinha é a origem
+      sourceAccountId: null, // A origem é a caixinha
+      goalId,
       destinationAccountId,
       actorId: userId,
     });

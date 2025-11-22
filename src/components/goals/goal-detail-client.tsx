@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,12 +11,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import type { Account } from '@/lib/definitions';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
+import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -61,6 +69,7 @@ type Transaction = {
   actorId: string;
   sourceAccountId: string | null;
   destinationAccountId: string | null;
+  ownerId: string;
 };
 
 type GoalDetailClientProps = {
@@ -70,17 +79,15 @@ type GoalDetailClientProps = {
   userId: string;
 };
 
-export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalDetailClientProps) {
+export function GoalDetailClient({ goal, transactions, accounts }: GoalDetailClientProps) {
   const [currentAmount, setCurrentAmount] = useState(goal.currentAmount);
 
-  // A lógica de filtragem foi movida para a action, aqui só recebemos as transações corretas
   const goalActivity = transactions
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const progress = (currentAmount / goal.targetAmount) * 100;
 
   const handleTransactionComplete = () => {
-    // Recarregar a página para pegar novos dados
     window.location.reload();
   };
 
@@ -94,9 +101,9 @@ export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalD
       <div className="w-full max-w-2xl">
         <div className="mb-4 flex items-center justify-between">
           <Button asChild variant="ghost">
-            <Link href="/dashboard">
+            <Link href="/goals">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para o Painel
+              Voltar para Caixinhas
             </Link>
           </Button>
           <Button asChild variant="outline" size="icon">
@@ -134,7 +141,7 @@ export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalD
                 % completo
               </span>
               <span>
-                Faltam {formatCurrency(goal.targetAmount - currentAmount)}
+                Faltam <AnimatedCounter value={Math.max(0, goal.targetAmount - currentAmount)} formatter={formatCurrency} />
               </span>
             </div>
           </CardHeader>
@@ -159,11 +166,11 @@ export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalD
             </h3>
             <div className="space-y-4">
               {goalActivity.map((activity) => {
-                const isDeposit = !activity.sourceAccountId;
+                const isDeposit = !!activity.destinationAccountId;
                 const actor = getActor(activity.actorId);
                 
                 return (
-                  <div key={activity.id} className="flex items-center gap-4">
+                  <div key={activity.id} className="flex items-center gap-4 group">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={actor.avatarUrl} alt={actor.name} />
                       <AvatarFallback>{actor.name.charAt(0)}</AvatarFallback>
@@ -190,6 +197,22 @@ export function GoalDetailClient({ goal, transactions, accounts, userId }: GoalD
                         {activity.description}
                       </p>
                     </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <EditTransactionDialog 
+                              transaction={activity as any} 
+                              accounts={accounts} 
+                              goals={[goal as any]} 
+                              categories={[]} 
+                            />
+                            <DeleteTransactionDialog transactionId={activity.id} />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 );
               })}
