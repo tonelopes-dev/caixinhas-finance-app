@@ -27,10 +27,10 @@ export async function getRecurringData(
 
 export async function updatePaidInstallmentsAction(
   transactionId: string,
-  paidCount: number
+  paidInstallments: number[]
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    await TransactionService.updatePaidInstallments(transactionId, paidCount);
+    await TransactionService.updatePaidInstallments(transactionId, paidInstallments);
     revalidatePath('/recurring');
     return { success: true };
   } catch (error) {

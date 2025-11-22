@@ -20,58 +20,39 @@ function formatCurrency(value: number) {
 }
 
 interface InstallmentPurchaseCardProps {
-  purchase: Transaction;
+  purchase: Transaction & { paidInstallments: number[] };
 }
 
 export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  
-  // Calcula o número de parcelas que já deveriam ter sido pagas
-  const calculateDefaultPaid = () => {
-    const startDate = new Date(purchase.date);
-    const now = new Date();
-    // Diferença em meses
-    let monthsDiff = (now.getFullYear() - startDate.getFullYear()) * 12;
-    monthsDiff -= startDate.getMonth();
-    monthsDiff += now.getMonth();
-    monthsDiff = Math.max(0, monthsDiff); // Garante que não seja negativo
 
-    // O número de parcelas pagas é a diferença em meses + 1 (para incluir o mês da compra)
-    // Limitado ao número total de parcelas
-    return Math.min(purchase.totalInstallments || 1, monthsDiff + 1);
-  };
-  
-  // Usa o valor do DB se existir, senão calcula o padrão
-  const initialPaidCount = purchase.paidInstallments ?? calculateDefaultPaid();
-  const [paidCount, setPaidCount] = useState(initialPaidCount);
+  // O estado agora é um array com os números das parcelas pagas
+  const [paidInstallments, setPaidInstallments] = useState<number[]>(purchase.paidInstallments || []);
 
   useEffect(() => {
-    // Atualiza o estado se a prop inicial mudar
-    setPaidCount(purchase.paidInstallments ?? calculateDefaultPaid());
+    setPaidInstallments(purchase.paidInstallments || []);
   }, [purchase]);
 
   const totalInstallments = purchase.totalInstallments || 1;
   const installmentAmount = totalInstallments > 0 ? purchase.amount / totalInstallments : 0;
   const totalAmount = purchase.amount;
-  const paidAmount = paidCount * installmentAmount;
-  const progress = (paidCount / totalInstallments) * 100;
+  const paidAmount = paidInstallments.length * installmentAmount;
+  const progress = (paidInstallments.length / totalInstallments) * 100;
 
   const handleCheckboxChange = async (installmentNumber: number, checked: boolean) => {
-    // Para simplificar, a lógica de "marcar" apenas conta quantos estão marcados
-    const newPaidCount = checked
-      ? Math.min(totalInstallments, paidCount + 1) // Encontra o próximo desmarcado e marca
-      : Math.max(0, paidCount - 1); // Desmarca o último marcado
+    const newPaidInstallments = checked
+      ? [...paidInstallments, installmentNumber]
+      : paidInstallments.filter((p) => p !== installmentNumber);
 
     // Atualiza a UI otimisticamente
-    const tempPaidCount = Array.from({ length: totalInstallments }, (_, i) => i < newPaidCount).filter(Boolean).length;
-    setPaidCount(tempPaidCount);
+    setPaidInstallments(newPaidInstallments);
 
-    const result = await updatePaidInstallmentsAction(purchase.id, tempPaidCount);
+    const result = await updatePaidInstallmentsAction(purchase.id, newPaidInstallments);
 
     if (!result.success) {
       // Reverte em caso de erro
-      setPaidCount(paidCount);
+      setPaidInstallments(paidInstallments);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a alteração.',
@@ -93,7 +74,7 @@ export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardPro
             </div>
             <div className='flex items-center gap-4'>
                 <p className="text-sm font-medium text-primary">
-                    {paidCount} de {totalInstallments} pagas
+                    {paidInstallments.length} de {totalInstallments} pagas
                 </p>
                 <Button variant="ghost" size="sm" className="w-9 p-0">
                 {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -107,7 +88,7 @@ export function InstallmentPurchaseCard({ purchase }: InstallmentPurchaseCardPro
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {Array.from({ length: totalInstallments }).map((_, index) => {
               const installmentNumber = index + 1;
-              const isChecked = installmentNumber <= paidCount;
+              const isChecked = paidInstallments.includes(installmentNumber);
 
               return (
                 <div key={index} className="flex items-center space-x-2 rounded-md border p-2">

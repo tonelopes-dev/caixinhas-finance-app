@@ -137,7 +137,7 @@ export class TransactionService {
     isInstallment?: boolean;
     installmentNumber?: number;
     totalInstallments?: number;
-    paidInstallments?: number;
+    paidInstallments?: number[];
     projectRecurring?: boolean;
   }): Promise<any> {
     return prisma.$transaction(async (tx) => {
@@ -155,7 +155,7 @@ export class TransactionService {
                 isInstallment: transactionData.isInstallment ?? false,
                 installmentNumber: transactionData.installmentNumber,
                 totalInstallments: transactionData.totalInstallments,
-                paidInstallments: transactionData.isInstallment ? 1 : null,
+                paidInstallments: transactionData.isInstallment ? [1] : [],
                 recurringId: recurringId,
                 actor: { connect: { id: transactionData.actorId } },
             };
@@ -243,7 +243,7 @@ export class TransactionService {
       isInstallment: boolean;
       installmentNumber: number;
       totalInstallments: number;
-      paidInstallments: number;
+      paidInstallments: number[];
     }>
   ): Promise<any> {
     try {
@@ -251,7 +251,7 @@ export class TransactionService {
 
       if(data.category) {
         const tx = await prisma.transaction.findUnique({where: {id: transactionId}});
-        const ownerId = tx?.userId || tx?.vaultId;
+        const ownerId = tx?.actorId;
         if(ownerId) {
             updateData.category = {
                 connectOrCreate: {
@@ -292,12 +292,12 @@ export class TransactionService {
   /**
    * Atualiza o número de parcelas pagas de uma transação.
    */
-  static async updatePaidInstallments(transactionId: string, paidCount: number): Promise<any> {
+  static async updatePaidInstallments(transactionId: string, paidInstallments: number[]): Promise<any> {
     try {
       // Como o grupo é representado por uma única transação, atualizamos ela.
       return await prisma.transaction.update({
         where: { id: transactionId },
-        data: { paidInstallments: paidCount },
+        data: { paidInstallments: paidInstallments },
       });
     } catch (error) {
       console.error('Erro ao atualizar parcelas pagas:', error);
