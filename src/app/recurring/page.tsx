@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { RecurringPageClient } from '@/components/recurring/recurring-page-client';
 import { getRecurringData } from './actions';
 import { cookies } from 'next/headers';
+import { AccountService, CategoryService, GoalService, VaultService } from '@/services';
+import { getUserAllGoals } from '../goals/actions';
 
 export default async function RecurringPage() {
   const session = await getServerSession(authOptions);
@@ -17,12 +19,25 @@ export default async function RecurringPage() {
   }
 
   const userId = session.user.id;
-  const cookieStore = await cookies(); // FIX: Await the cookies() call
+  const cookieStore = await cookies();
   const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
   const isPersonal = workspaceId === userId;
   const ownerType = isPersonal ? 'user' : 'vault';
 
-  const data = await getRecurringData(workspaceId, ownerType);
+  // Fetch all necessary data for the page and its actions
+  const [
+    recurringData, 
+    allAccounts, 
+    allGoalsData, 
+    allCategories
+  ] = await Promise.all([
+    getRecurringData(workspaceId, ownerType),
+    AccountService.getUserAccounts(userId),
+    getUserAllGoals(userId),
+    CategoryService.getUserCategories(userId)
+  ]);
+  const allGoals = allGoalsData.goals;
+
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -33,7 +48,14 @@ export default async function RecurringPage() {
             Voltar para Transações
           </Link>
         </Button>
-        <RecurringPageClient recurring={data.recurring} installments={data.installments} />
+        <RecurringPageClient
+          recurring={recurringData.recurring}
+          installments={recurringData.installments}
+          allAccounts={allAccounts}
+          allGoals={allGoals}
+          allCategories={allCategories}
+          workspaceId={workspaceId}
+        />
       </div>
     </div>
   );

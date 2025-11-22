@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, PlusCircle } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
@@ -48,7 +48,15 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories }: { accounts: Account[], goals: Goal[], ownerId: string, categories: any[] }) {
+interface AddTransactionSheetProps {
+  accounts: Account[];
+  goals: Goal[];
+  ownerId: string;
+  categories: any[];
+  chargeType?: 'single' | 'recurring' | 'installment';
+}
+
+export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionSheetProps) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -59,7 +67,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>('');
   const [date, setDate] = useState<Date>();
   const [sourceAccount, setSourceAccount] = useState<Account | null>(null);
-  const [chargeType, setChargeType] = useState('single');
+  const [chargeType, setChargeType] = useState(initialChargeType);
   
   const hasNoAccounts = workspaceAccounts.length === 0;
 
@@ -67,6 +75,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
     if (hasNoAccounts) {
       setPromptOpen(true);
     } else {
+      setChargeType(initialChargeType); // Reseta para o tipo inicial ao abrir
       setOpen(true);
     }
   };
@@ -80,7 +89,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
       formRef.current?.reset();
       setTransactionType('');
       setSourceAccount(null);
-      setChargeType('single');
+      setChargeType(initialChargeType);
       setDate(undefined);
       setOpen(false);
     } else if (state.success === false && state.message) {
@@ -90,7 +99,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
         variant: "destructive",
       });
     }
-  }, [state, toast]);
+  }, [state, toast, initialChargeType]);
   
   const allSourcesAndDestinations = [
       ...workspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
@@ -104,8 +113,17 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
       <Sheet open={open} onOpenChange={setOpen}>
         <Button size="sm" onClick={handleTriggerClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Adicionar
+          {initialChargeType === 'recurring' ? (
+            <>
+              <Repeat className="mr-2 h-4 w-4" />
+              Adicionar Recorrência
+            </>
+          ) : (
+            <>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Adicionar
+            </>
+          )}
         </Button>
         <SheetContent className="flex flex-col">
           <SheetHeader>
@@ -240,7 +258,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                       {(transactionType === 'income' || transactionType === 'expense') && (
                         <div className="space-y-3 rounded-lg border p-3">
                             <Label>Tipo de cobrança</Label>
-                             <RadioGroup name="chargeType" defaultValue="single" value={chargeType} onValueChange={setChargeType}>
+                             <RadioGroup name="chargeType" defaultValue={initialChargeType} value={chargeType} onValueChange={setChargeType}>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="single" id="single" />
                                     <Label htmlFor="single" className="font-normal">Cobrança Única</Label>
