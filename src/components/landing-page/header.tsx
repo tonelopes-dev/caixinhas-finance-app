@@ -73,9 +73,11 @@ export function Header() {
             Entrar
             </Link>
           </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
-            <span className="relative z-10">Assinar Agora</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
+            <Link href="#planos">
+                <span className="relative z-10">Assinar Agora</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            </Link>
           </Button>
         </div>
 
@@ -102,43 +104,44 @@ export function Header() {
         }`}
       >
         <nav className="container mx-auto px-4 py-6 flex flex-col space-y-4">
-          <a
+          <Link
             href="#recursos"
             onClick={handleNavClick}
             className="text-foreground/70 hover:text-primary transition-colors text-lg py-2 border-b border-border/50"
           >
             Recursos
-          </a>
-          <a
+          </Link>
+          <Link
             href="#como-funciona"
             onClick={handleNavClick}
             className="text-foreground/70 hover:text-primary transition-colors text-lg py-2 border-b border-border/50"
           >
             Como Funciona
-          </a>
-          <a
+          </Link>
+          <Link
             href="#historia"
             onClick={handleNavClick}
             className="text-foreground/70 hover:text-primary transition-colors text-lg py-2 border-b border-border/50"
           >
             História
-          </a>
-          <a
+          </Link>
+          <Link
             href="#planos"
             onClick={handleNavClick}
             className="text-foreground/70 hover:text-primary transition-colors text-lg py-2 border-b border-border/50"
           >
             Planos
-          </a>
+          </Link>
           <div className="flex flex-col gap-3 pt-4">
             <Button
               variant="ghost"
               className="text-foreground text-lg hover:bg-primary/10 transition-all w-full"
+              asChild
             >
-              Entrar
+              <Link href="/login" onClick={handleNavClick}>Entrar</Link>
             </Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold w-full">
-              Assinar Agora
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold w-full">
+              <Link href="#planos" onClick={handleNavClick}>Assinar Agora</Link>
             </Button>
           </div>
         </nav>
