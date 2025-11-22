@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat } from 'lucide-react';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
