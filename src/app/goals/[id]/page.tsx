@@ -5,11 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-type PageProps = {
-  params: { id: string };
-};
-
-export default async function GoalDetailPage({ params }: PageProps) {
+export default async function GoalDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
