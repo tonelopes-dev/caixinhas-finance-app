@@ -1,5 +1,4 @@
 
-
 import { prisma } from '@/services/prisma';
 import type { SavedReport } from '@/lib/definitions';
 
@@ -60,7 +59,7 @@ export class ReportService {
 
   /**
    * Remove um relatório específico (para invalidar cache).
-   * Agora não lança erro se o relatório não existir.
+   * Agora trata o erro P2025 (registro não encontrado) como um sucesso silencioso.
    */
   static async deleteReport(ownerId: string, monthYear: string): Promise<boolean> {
     try {
