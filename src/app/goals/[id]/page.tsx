@@ -1,3 +1,4 @@
+
 import { redirect, notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -8,7 +9,7 @@ type PageProps = {
   params: { id: string };
 };
 
-export default async function GoalDetailPage({ params }: PageProps) {
+export default async function GoalDetailPage(props: PageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -16,7 +17,7 @@ export default async function GoalDetailPage({ params }: PageProps) {
   }
 
   const userId = session.user.id;
-  const { id } = params;
+  const { id } = props.params;
 
   // Agora a função também busca as contas do usuário
   const data = await getGoalDetails(id, userId);
