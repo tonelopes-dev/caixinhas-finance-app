@@ -1,4 +1,6 @@
 
+'use server';
+
 import { redirect, notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -6,11 +8,17 @@ import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 import React from 'react';
 
-/**
- * Componente intermediário para buscar dados.
- * Isso ajuda a contornar problemas de análise estática do Next.js.
- */
-async function GoalDetailFetcher({ goalId, userId }: { goalId: string, userId: string }) {
+
+export default async function GoalDetailPage({ params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const userId = session.user.id;
+  const goalId = params.id;
+
   const data = await getGoalDetails(goalId, userId);
 
   if (!data || !data.goal) {
@@ -25,17 +33,4 @@ async function GoalDetailFetcher({ goalId, userId }: { goalId: string, userId: s
       userId={userId}
     />
   );
-}
-
-
-export default async function GoalDetailPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-
-  return <GoalDetailFetcher goalId={params.id} userId={userId} />;
 }
