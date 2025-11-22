@@ -14,10 +14,7 @@ import { authOptions } from '@/lib/auth';
 const transactionSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, { message: 'A descrição é obrigatória.' }),
-  amount: z.string()
-    .min(1, { message: 'Valor é obrigatório.' })
-    .transform((val) => parseFloat(val))
-    .refine((val) => !isNaN(val) && val > 0, { message: 'O valor deve ser positivo.' }),
+  amount: z.coerce.number().positive({ message: 'O valor deve ser positivo.' }),
   type: z.enum(['income', 'expense', 'transfer'], { required_error: 'O tipo é obrigatório.' }),
   category: z.string().min(1, { message: 'A categoria é obrigatória.' }),
   date: z.string().optional(),
@@ -40,8 +37,6 @@ const transactionSchema = z.object({
         return !!data.destinationAccountId;
     }
     if (data.type === 'transfer') {
-        // For a transfer, we need a source AND a destination.
-        // The destination can be either another account OR a goal.
         const hasSource = !!data.sourceAccountId;
         const hasDestination = !!data.destinationAccountId || !!data.goalId;
         return hasSource && hasDestination;
@@ -49,7 +44,7 @@ const transactionSchema = z.object({
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
-    path: ['sourceAccountId'], // This error can apply to either field, but Zod requires one path.
+    path: ['sourceAccountId'],
 });
 
 
@@ -72,7 +67,8 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   const sourceValue = formData.get('sourceAccountId') as string | null;
   const destinationValue = formData.get('destinationAccountId') as string | null;
 
-  const rawData = {
+  // 1. Processar os dados primeiro para determinar os IDs corretos
+  const processedData = {
     description: formData.get('description'),
     amount: formData.get('amount'),
     type: formData.get('type'),
@@ -90,8 +86,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     userId: isPersonal ? userId : undefined,
     vaultId: !isPersonal ? ownerId : undefined,
   };
-
-  const validatedFields = transactionSchema.safeParse(rawData);
+  
+  // 2. Validar os dados já processados
+  const validatedFields = transactionSchema.safeParse(processedData);
 
   if (!validatedFields.success) {
     console.log("Validation Errors:", validatedFields.error.flatten().fieldErrors);
@@ -103,10 +100,9 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   }
   
   try {
+    // 3. Chamar o serviço com os dados validados
     await TransactionService.createTransaction(validatedFields.data as any);
     
-    // Invalidação e revalidação são secundárias, mas importantes.
-    // As encapsulamos para não quebrar a experiência principal.
     try {
         await invalidateReportCache(validatedFields.data.date, ownerId);
         revalidatePath('/', 'layout');
@@ -244,4 +240,5 @@ export async function deleteTransaction(prevState: { message: string | null }, f
     return { success: false, message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
 }
+
 
