@@ -42,6 +42,7 @@ async function main() {
     await prisma.vaultMember.deleteMany({});
     await prisma.vault.deleteMany({});
     await prisma.user.deleteMany({});
+    await prisma.category.deleteMany({});
     
     console.log('✅ Banco limpo');
 
@@ -142,19 +143,78 @@ async function main() {
     console.log('🎯 Criando caixinhas/metas...');
     
     const personalGoals = await Promise.all([
-      GoalService.createGoal({ name: 'Viagem para Europa', targetAmount: 20000.00, emoji: '✈️', visibility: 'private', ownerId: mainUser.id, ownerType: 'user' }),
-      GoalService.createGoal({ name: 'Novo Notebook', targetAmount: 8000.00, emoji: '💻', visibility: 'shared', ownerId: mainUser.id, ownerType: 'user' })
+      GoalService.createGoal({ name: 'Viagem para Europa', targetAmount: 20000.00, emoji: '✈️', visibility: 'private', ownerId: mainUser.id, ownerType: 'user', currentAmount: 2500 }),
+      GoalService.createGoal({ name: 'Novo Notebook', targetAmount: 8000.00, emoji: '💻', visibility: 'shared', ownerId: mainUser.id, ownerType: 'user', currentAmount: 1200 })
     ]);
 
     const vaultGoals = await Promise.all([
-      GoalService.createGoal({ name: 'Reforma da Casa', targetAmount: 50000.00, emoji: '🏠', visibility: 'shared', ownerId: familyVault.id, ownerType: 'vault' }),
-      GoalService.createGoal({ name: 'Investimento Coletivo', targetAmount: 100000.00, emoji: '📈', visibility: 'shared', ownerId: businessVault.id, ownerType: 'vault' })
+      GoalService.createGoal({ name: 'Reforma da Casa', targetAmount: 50000.00, emoji: '🏠', visibility: 'shared', ownerId: familyVault.id, ownerType: 'vault', currentAmount: 15000 }),
+      GoalService.createGoal({ name: 'Investimento Coletivo', targetAmount: 100000.00, emoji: '📈', visibility: 'shared', ownerId: businessVault.id, ownerType: 'vault', currentAmount: 75000 })
     ]);
 
     console.log(`✅ ${personalGoals.length + vaultGoals.length} caixinhas criadas`);
     
     // ============================================
-    // 8. CRIAR CONVITES (VAULT SERVICE)
+    // 8. CRIAR TRANSAÇÕES (TRANSACTION SERVICE)
+    // ============================================
+    console.log('💸 Criando transações de exemplo...');
+
+    await TransactionService.createTransaction({
+      userId: mainUser.id,
+      date: new Date(),
+      description: 'Salário de Novembro',
+      amount: 7500,
+      type: 'income',
+      category: 'Salário',
+      actorId: mainUser.id,
+      destinationAccountId: mainUserAccounts[0].id,
+      isRecurring: true,
+    });
+
+    await TransactionService.createTransaction({
+      vaultId: familyVault.id,
+      date: new Date(),
+      description: 'Aluguel do Apartamento',
+      amount: 2800,
+      type: 'expense',
+      category: 'Moradia',
+      actorId: mainUser.id,
+      sourceAccountId: vaultAccounts[0].id,
+      isRecurring: true,
+    });
+
+    await TransactionService.createTransaction({
+      userId: mainUser.id,
+      date: new Date(),
+      description: 'Compra do Celular Novo',
+      amount: 4800,
+      type: 'expense',
+      category: 'Eletrônicos',
+      actorId: mainUser.id,
+      sourceAccountId: mainUserAccounts[3].id, // Cartão de Crédito
+      isInstallment: true,
+      totalInstallments: 12,
+      installmentNumber: 1, // Representa a compra inicial
+      paidInstallments: 1,
+    });
+    
+    await TransactionService.createTransaction({
+      userId: mainUser.id,
+      date: new Date(),
+      description: 'Depósito na Caixinha da Viagem',
+      amount: 500,
+      type: 'transfer',
+      category: 'Caixinha',
+      actorId: mainUser.id,
+      sourceAccountId: mainUserAccounts[0].id,
+      goalId: personalGoals[0].id,
+    });
+
+    console.log('✅ Transações criadas');
+
+
+    // ============================================
+    // 9. CRIAR CONVITES (VAULT SERVICE)
     // ============================================
     console.log('📧 Criando convites...');
     
@@ -177,7 +237,7 @@ async function main() {
 
 
     // ============================================
-    // 9. ESTATÍSTICAS FINAIS
+    // 10. ESTATÍSTICAS FINAIS
     // ============================================
     console.log('\n📊 RESUMO DO SEED:');
     console.log('==================');
@@ -188,6 +248,8 @@ async function main() {
       accounts: await prisma.account.count(),
       goals: await prisma.goal.count(),
       invitations: await prisma.invitation.count(),
+      transactions: await prisma.transaction.count(),
+      categories: await prisma.category.count(),
     };
 
     Object.entries(stats).forEach(([key, count]) => {
