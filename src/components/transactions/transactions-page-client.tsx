@@ -321,9 +321,9 @@ export function TransactionsPageClient({
                                   <typeInfo.icon className={cn("h-5 w-5", typeInfo.color)}/>
                               </div>
                               <div className="flex-1 space-y-0.5">
-                                  <div className="flex justify-between">
-                                      <p className="font-medium">{t.description}</p>
-                                      <p className={cn("font-medium", {
+                                  <div className="flex justify-between items-start">
+                                      <p className="font-medium flex-1 pr-2">{t.description}</p>
+                                      <p className={cn("font-medium whitespace-nowrap", {
                                         'text-green-600': t.type === 'income',
                                         'text-red-500': t.type === 'expense',
                                         'text-muted-foreground': t.type === 'transfer'
@@ -332,25 +332,25 @@ export function TransactionsPageClient({
                                           {formatCurrency(t.amount)}
                                       </p>
                                   </div>
-                                  <div className="flex justify-between text-xs text-muted-foreground">
+                                  <div className="flex justify-between items-center text-xs text-muted-foreground">
                                       <span>{formatDate(t.date)}</span>
                                       <div className='flex items-center gap-2'>
-                                            {t.isRecurring && (
-                                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                                                    Recorrente
-                                                </Badge>
-                                            )}
-                                            {t.isInstallment && (
-                                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                                                    ({t.paidInstallments.length}/{t.totalInstallments})
-                                                </Badge>
-                                            )}
-                                            {MethodIcon && (
-                                                <div className='flex items-center gap-1'>
-                                                    <MethodIcon className="h-3 w-3" />
-                                                    <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                                </div>
-                                            )}
+                                          {t.isRecurring && (
+                                              <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                                                  Recorrente
+                                              </Badge>
+                                          )}
+                                          {t.isInstallment && (
+                                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                                                  ({t.paidInstallments.length}/{t.totalInstallments})
+                                              </Badge>
+                                          )}
+                                          {MethodIcon && (
+                                              <div className='flex items-center gap-1'>
+                                                  <MethodIcon className="h-3 w-3" />
+                                                  <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                              </div>
+                                          )}
                                       </div>
                                   </div>
                               </div>

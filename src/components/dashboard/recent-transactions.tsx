@@ -75,7 +75,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             <TableRow>
               <TableHead>Descrição</TableHead>
               <TableHead className="hidden sm:table-cell">Categoria</TableHead>
-              <TableHead className="hidden lg:table-cell">Frequência</TableHead>
+              <TableHead className="hidden xl:table-cell">Frequência</TableHead>
               <TableHead className="hidden sm:table-cell">Data</TableHead>
               <TableHead className="text-right">Valor</TableHead>
             </TableRow>
@@ -94,15 +94,14 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                         {typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category}
                     </Badge>
                 </TableCell>
-                <TableCell className="hidden lg:table-cell">
+                <TableCell className="hidden xl:table-cell">
                   {transaction.isRecurring && (
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                      <Repeat className="mr-1 h-3 w-3" />
+                    <Badge variant="outline" className="border-purple-300 text-purple-800">
                       Recorrente
                     </Badge>
                   )}
                   {transaction.isInstallment && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                    <Badge variant="outline" className="border-blue-300 text-blue-800">
                       Parcelado ({transaction.paidInstallments.length}/{transaction.totalInstallments})
                     </Badge>
                   )}
