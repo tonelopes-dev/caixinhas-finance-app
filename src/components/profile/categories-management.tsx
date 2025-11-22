@@ -37,6 +37,8 @@ import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { createCategory, updateCategory, deleteCategory, type CategoryActionState } from '@/app/accounts/actions';
 import type { Category } from '@/services/category.service';
+import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
 
 function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
@@ -88,10 +90,19 @@ function EditCategoryDialog({ category }: { category: Category }) {
   );
 }
 
-function DeleteCategoryDialog({ category }: { category: Category }) {
+function DeleteCategoryDialog({ category, onDeleting }: { category: Category; onDeleting: (id: string | null) => void }) {
   const { toast } = useToast();
   const initialState: CategoryActionState = {};
   const [state, formAction] = useActionState(deleteCategory, initialState);
+  const { pending } = useFormStatus();
+
+  useEffect(() => {
+    if (pending) {
+      onDeleting(category.id);
+    } else {
+      onDeleting(null);
+    }
+  }, [pending, onDeleting, category.id]);
 
   useEffect(() => {
     if (state?.success) {
@@ -120,7 +131,9 @@ function DeleteCategoryDialog({ category }: { category: Category }) {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction type="submit" variant="destructive">Excluir</AlertDialogAction>
+            <AlertDialogAction type="submit" variant="destructive" disabled={pending}>
+              {pending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </form>
       </AlertDialogContent>
@@ -133,6 +146,7 @@ export function CategoriesManagement({ initialCategories }: { initialCategories:
   const { toast } = useToast();
   const initialState: CategoryActionState = {};
   const [state, formAction] = useActionState(createCategory, initialState);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (state?.success) {
@@ -179,16 +193,37 @@ export function CategoriesManagement({ initialCategories }: { initialCategories:
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {initialCategories.map((category) => (
-            <div key={category.id} className="group inline-flex items-center gap-1 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50">
-              <span>{category.name}</span>
-              <div className="flex items-center">
-                <EditCategoryDialog category={category} />
-                <DeleteCategoryDialog category={category} />
+          {initialCategories.map((category) => {
+            const isDeleting = deletingCategoryId === category.id;
+            const isAnyDeleting = deletingCategoryId !== null;
+
+            if (isDeleting) {
+              return null; // Don't render the item being deleted
+            }
+
+            if (isAnyDeleting) {
+              return (
+                <Skeleton key={category.id} className="h-8 w-32 rounded-full" />
+              );
+            }
+            
+            return (
+              <div
+                key={category.id}
+                className={cn(
+                  "group inline-flex items-center gap-1 rounded-full border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/50",
+                  deletingCategoryId && "opacity-50 pointer-events-none"
+                )}
+              >
+                <span>{category.name}</span>
+                <div className="flex items-center">
+                  <EditCategoryDialog category={category} />
+                  <DeleteCategoryDialog category={category} onDeleting={setDeletingCategoryId} />
+                </div>
               </div>
-            </div>
-          ))}
-          {initialCategories.length === 0 && (
+            );
+          })}
+          {initialCategories.length === 0 && !deletingCategoryId && (
             <p className="text-sm text-muted-foreground">Nenhuma categoria personalizada criada.</p>
           )}
         </div>
