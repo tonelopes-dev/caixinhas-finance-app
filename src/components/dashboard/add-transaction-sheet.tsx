@@ -92,7 +92,10 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
     }
   }, [state, toast]);
   
-  const allSourcesAndDestinations = [...workspaceAccounts, ...workspaceGoals.map(g => ({ ...g, id: g.id, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [
+      ...workspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
+      ...workspaceGoals.map(g => ({ ...g, value: `goal_${g.id}`, name: `Caixinha: ${g.name}` }))
+  ];
   
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
@@ -162,7 +165,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                                   <Calendar
                                   mode="single"
                                   selected={date}
-                                  onSelect={(newDate) => { setDate(newDate); setPopoverOpen(false); }}
+                                  onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }}
                                   initialFocus
                                   locale={ptBR}
                                   />
@@ -176,12 +179,15 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                       {(transactionType === 'expense' || transactionType === 'transfer') && (
                           <div className="space-y-2">
                               <Label htmlFor="sourceAccountId">Origem</Label>
-                              <Select name="sourceAccountId" onValueChange={(id) => setSourceAccount(workspaceAccounts.find(a => a.id === id) || null)}>
+                              <Select name="sourceAccountId" onValueChange={(value) => {
+                                const account = workspaceAccounts.find(a => a.id === value) || null;
+                                setSourceAccount(account);
+                              }}>
                                   <SelectTrigger>
                                   <SelectValue placeholder="De onde saiu o dinheiro?" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}
                                   </SelectContent>
                               </Select>
                               {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
@@ -196,7 +202,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                                   <SelectValue placeholder="Para onde foi o dinheiro?" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                      {allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}
                                   </SelectContent>
                               </Select>
                               {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -34,7 +35,7 @@ const transactionSchema = z.object({
 }).refine(data => {
     if (data.type === 'expense' && !data.sourceAccountId) return false;
     if (data.type === 'income' && !data.destinationAccountId) return false;
-    if (data.type === 'transfer' && !data.sourceAccountId && !data.destinationAccountId) return false;
+    if (data.type === 'transfer' && (!data.sourceAccountId || !data.destinationAccountId)) return false;
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
@@ -55,12 +56,11 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   }
   const userId = session.user.id;
 
-  const chargeType = formData.get('chargeType');
   const ownerId = formData.get('ownerId') as string;
   const isPersonal = ownerId === userId;
   
-  const sourceId = formData.get('sourceAccountId') as string | null;
-  const destinationId = formData.get('destinationAccountId') as string | null;
+  const sourceValue = formData.get('sourceAccountId') as string | null;
+  const destinationValue = formData.get('destinationAccountId') as string | null;
 
   const rawData = {
     description: formData.get('description'),
@@ -68,13 +68,12 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date') || new Date().toISOString(),
-    // Lógica corrigida para diferenciar conta de meta
-    sourceAccountId: sourceId && !sourceId.startsWith('goal-') ? sourceId : null,
-    destinationAccountId: destinationId && !destinationId.startsWith('goal-') ? destinationId : null,
-    goalId: (sourceId?.startsWith('goal-') ? sourceId : destinationId?.startsWith('goal-') ? destinationId : null)?.replace('goal-', ''),
+    sourceAccountId: sourceValue && !sourceValue.startsWith('goal_') ? sourceValue : null,
+    destinationAccountId: destinationValue && !destinationValue.startsWith('goal_') ? destinationValue : null,
+    goalId: (sourceValue?.startsWith('goal_') ? sourceValue.replace('goal_', '') : (destinationValue?.startsWith('goal_') ? destinationValue.replace('goal_', '') : null)),
     paymentMethod: formData.get('paymentMethod') || null,
-    isRecurring: chargeType === 'recurring',
-    isInstallment: chargeType === 'installment',
+    isRecurring: formData.get('chargeType') === 'recurring',
+    isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
     actorId: userId,
@@ -96,12 +95,13 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   try {
     await TransactionService.createTransaction(validatedFields.data as any);
     
-    // As operações de invalidação e revalidação são secundárias, mas importantes.
-    // As encapsulamos em um try/catch para não quebrar a experiência principal.
+    // Invalidação e revalidação são secundárias, mas importantes.
+    // As encapsulamos para não quebrar a experiência principal.
     try {
         await invalidateReportCache(validatedFields.data.date, ownerId);
-        revalidatePath('/');
+        revalidatePath('/', 'layout');
         revalidatePath('/transactions');
+        revalidatePath('/dashboard');
         revalidatePath('/reports');
         if (validatedFields.data.goalId) {
             revalidatePath(`/goals/${validatedFields.data.goalId}`);
@@ -124,10 +124,9 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     return { success: false, message: 'Usuário não autenticado.' };
   }
 
-  const chargeType = formData.get('chargeType');
-  
-  const sourceId = formData.get('sourceAccountId') as string | null;
-  const destinationId = formData.get('destinationAccountId') as string | null;
+  const ownerId = formData.get('ownerId') as string;
+  const sourceValue = formData.get('sourceAccountId') as string | null;
+  const destinationValue = formData.get('destinationAccountId') as string | null;
 
   const rawData = {
     id: formData.get('id'),
@@ -136,13 +135,12 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     type: formData.get('type'),
     category: formData.get('category'),
     date: formData.get('date'),
-    // Lógica corrigida para diferenciar conta de meta
-    sourceAccountId: sourceId && !sourceId.startsWith('goal-') ? sourceId : null,
-    destinationAccountId: destinationId && !destinationId.startsWith('goal-') ? destinationId : null,
-    goalId: (sourceId?.startsWith('goal-') ? sourceId : destinationId?.startsWith('goal-') ? destinationId : null)?.replace('goal-', ''),
+    sourceAccountId: sourceValue && !sourceValue.startsWith('goal_') ? sourceValue : null,
+    destinationAccountId: destinationValue && !destinationValue.startsWith('goal_') ? destinationValue : null,
+    goalId: (sourceValue?.startsWith('goal_') ? sourceValue.replace('goal_', '') : (destinationValue?.startsWith('goal_') ? destinationValue.replace('goal_', '') : null)),
     paymentMethod: formData.get('paymentMethod'),
-    isRecurring: chargeType === 'recurring',
-    isInstallment: chargeType === 'installment',
+    isRecurring: formData.get('chargeType') === 'recurring',
+    isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
   };
@@ -172,13 +170,14 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     await TransactionService.updateTransaction(id, data as any);
     
     try {
-        await invalidateReportCache(originalTransaction.date.toISOString(), originalTransaction.vaultId || originalTransaction.userId);
+        await invalidateReportCache(originalTransaction.date.toISOString(), ownerId);
         if(data.date && originalTransaction.date.toISOString() !== data.date) {
-            await invalidateReportCache(data.date, originalTransaction.vaultId || originalTransaction.userId);
+            await invalidateReportCache(data.date, ownerId);
         }
         
-        revalidatePath('/');
+        revalidatePath('/', 'layout');
         revalidatePath('/transactions');
+        revalidatePath('/dashboard');
         revalidatePath('/reports');
         if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
         if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
@@ -220,6 +219,7 @@ export async function deleteTransaction(prevState: { message: string | null }, f
             await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.vaultId || deletedTransaction.userId);
             revalidatePath('/');
             revalidatePath('/transactions');
+            revalidatePath('/dashboard');
             revalidatePath('/reports');
             if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
         } catch (secondaryError) {

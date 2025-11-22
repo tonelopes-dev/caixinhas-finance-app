@@ -83,9 +83,22 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
     }
   }, [state, toast]);
 
-  const allSourcesAndDestinations = [...accounts, ...goals.map(g => ({ ...g, id: g.id, name: `Caixinha: ${g.name}`, type: 'goal' }))];
+  const allSourcesAndDestinations = [
+      ...accounts.map(a => ({ ...a, value: a.id, name: a.name })), 
+      ...goals.map(g => ({ ...g, value: `goal_${g.id}`, name: `Caixinha: ${g.name}` }))
+  ];
+  
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
+  const getDefaultValue = (accountId: string | null | undefined, goalId: string | null | undefined) => {
+    if (goalId) return `goal_${goalId}`;
+    if (accountId) return accountId;
+    return undefined;
+  };
+  
+  const sourceDefaultValue = getDefaultValue(transaction.sourceAccountId, transaction.goalId && transaction.type === 'transfer' && transaction.sourceAccountId === null ? transaction.goalId : null);
+  const destinationDefaultValue = getDefaultValue(transaction.destinationAccountId, transaction.goalId && transaction.type === 'transfer' && transaction.destinationAccountId === null ? transaction.goalId : null);
+  
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -155,7 +168,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                                 <Calendar
                                 mode="single"
                                 selected={date}
-                                onSelect={(newDate) => { setDate(newDate); setPopoverOpen(false); }}
+                                onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }}
                                 initialFocus
                                 locale={ptBR}
                                 />
@@ -169,12 +182,15 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                     {(transactionType === 'expense' || transactionType === 'transfer') && (
                          <div className="space-y-2">
                             <Label htmlFor="sourceAccountId">Origem</Label>
-                            <Select name="sourceAccountId" defaultValue={transaction.sourceAccountId ?? undefined} onValueChange={(id) => setSourceAccount(accounts.find(a => a.id === id) || null)}>
+                            <Select name="sourceAccountId" defaultValue={sourceDefaultValue} onValueChange={(value) => {
+                                const account = accounts.find(a => a.id === value) || null;
+                                setSourceAccount(account);
+                            }}>
                                 <SelectTrigger>
                                 <SelectValue placeholder="De onde saiu o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                    {allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
@@ -184,12 +200,12 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                     {(transactionType === 'income' || transactionType === 'transfer') && (
                         <div className="space-y-2">
                             <Label htmlFor="destinationAccountId">Destino</Label>
-                            <Select name="destinationAccountId" defaultValue={transaction.destinationAccountId ?? undefined}>
+                            <Select name="destinationAccountId" defaultValue={destinationDefaultValue}>
                                 <SelectTrigger>
                                 <SelectValue placeholder="Para onde foi o dinheiro?" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                     {allSourcesAndDestinations.map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                     {allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                              {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}

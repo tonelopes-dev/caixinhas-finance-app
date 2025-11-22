@@ -1,4 +1,5 @@
 
+
 import { prisma } from './prisma';
 import { AccountService } from './account.service';
 import { GoalService } from './goal.service';
@@ -186,6 +187,9 @@ export class TransactionService {
         
         const transaction = await tx.transaction.create({ data: createData });
 
+        // ATENÇÃO: Lógica de atualização de saldo movida para cá para ser transacional.
+        // A lógica de `goal_` vs account é tratada na server action antes de chegar aqui.
+
         // Atualizar saldos
         if (data.type === 'expense' && data.sourceAccountId) {
             await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
@@ -194,19 +198,20 @@ export class TransactionService {
             await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
         }
         if (data.type === 'transfer') {
+            // Saída
             if (data.sourceAccountId) {
-                if (data.goalId === data.sourceAccountId) { // Retirada de meta
-                    await GoalService.removeFromGoal(data.goalId, data.amount);
-                } else { // Transferência de conta
-                    await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
-                }
+                await AccountService.updateBalance(data.sourceAccountId, data.amount, 'expense');
             }
+            if (data.goalId && !data.destinationAccountId) { // Retirada de meta para uma conta
+                 await GoalService.removeFromGoal(data.goalId, data.amount);
+            }
+            
+            // Entrada
             if (data.destinationAccountId) {
-                 if (data.goalId === data.destinationAccountId) { // Depósito em meta
-                    await GoalService.addToGoal(data.goalId, data.amount);
-                } else { // Transferência para conta
-                    await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
-                }
+                await AccountService.updateBalance(data.destinationAccountId, data.amount, 'income');
+            }
+            if (data.goalId && !data.sourceAccountId) { // Depósito em meta
+                await GoalService.addToGoal(data.goalId, data.amount);
             }
         }
         
