@@ -26,15 +26,7 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
   
-  // A LÓGICA FOI ALTERADA AQUI:
-  // Agora, filtramos APENAS as metas que são "featured" (favoritadas com o coração).
-  const goalsToShow = goals
-    .filter(g => g.isFeatured && g.currentAmount < g.targetAmount)
-    .sort((a, b) => { // Ordena as favoritas pelo progresso
-      const progressA = a.currentAmount / a.targetAmount;
-      const progressB = b.currentAmount / b.targetAmount;
-      return progressB - progressA;
-    });
+  const goalsToShow = goals.filter(g => g.isFeatured && g.currentAmount < g.targetAmount);
   
   const PrivacyBlur = ({ as: Component = 'span', className }: { as?: React.ElementType, className?: string }) => <Component className={className}>R$ ••••••</Component>;
   const PrivacyBlurPercent = () => <span>••%</span>;
@@ -105,7 +97,7 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
           );
         })}
          {goalsToShow.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">Nenhuma caixinha foi favoritada. Clique na estrela na página de caixinhas para destacá-las aqui!</p>
+          <p className="text-center text-muted-foreground py-4">Nenhuma caixinha foi favoritada. Clique no coração na página de caixinhas para destacá-las aqui!</p>
         )}
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-2 border-t pt-6 md:flex-row">
