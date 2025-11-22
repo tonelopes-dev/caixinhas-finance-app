@@ -138,6 +138,7 @@ export class TransactionService {
     isInstallment?: boolean;
     installmentNumber?: number;
     totalInstallments?: number;
+    paidInstallments?: number;
   }): Promise<any> {
     return prisma.$transaction(async (tx) => {
       try {
@@ -151,7 +152,7 @@ export class TransactionService {
           isInstallment: data.isInstallment ?? false,
           installmentNumber: data.installmentNumber,
           totalInstallments: data.totalInstallments,
-          paidInstallments: data.isInstallment ? 1 : null, // Nova lógica
+          paidInstallments: data.isInstallment ? 1 : null,
           actor: { connect: { id: data.actorId } },
         };
         
