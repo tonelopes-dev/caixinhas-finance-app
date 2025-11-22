@@ -44,6 +44,36 @@ export class TransactionService {
       throw new Error('Não foi possível buscar as transações');
     }
   }
+
+  /**
+   * Busca transações para uma meta específica.
+   */
+  static async getTransactionsForGoal(goalId: string): Promise<any[]> {
+    try {
+      return await prisma.transaction.findMany({
+        where: {
+          goalId: goalId,
+          type: 'transfer',
+        },
+        include: {
+          category: true,
+          actor: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar transações da meta:', error);
+      throw new Error('Não foi possível buscar as transações da meta');
+    }
+  }
   
   /**
    * Busca transações do mês atual para um determinado contexto.

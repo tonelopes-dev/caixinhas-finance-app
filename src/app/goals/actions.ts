@@ -101,16 +101,8 @@ export async function getGoalDetails(goalId: string) {
       return null;
     }
 
-    // Buscar transações relacionadas à meta
-    const transactions = await TransactionService.getTransactions(
-      goal.userId || goal.vaultId,
-      goal.userId ? 'user' : 'vault'
-    );
-
-    // Filtrar transações que envolvem esta meta
-    const goalTransactions = transactions.filter(
-      (t) => t.goalId === goalId || t.sourceAccountId === goalId || t.destinationAccountId === goalId
-    );
+    // Busca transações que estão diretamente relacionadas a esta meta pelo goalId
+    const goalTransactions = await TransactionService.getTransactionsForGoal(goalId);
     
     return {
       goal: {
@@ -136,7 +128,7 @@ export async function getGoalDetails(goalId: string) {
         description: t.description,
         amount: t.amount,
         type: t.type as 'income' | 'expense' | 'transfer',
-        category: t.category,
+        category: t.category.name,
         actorId: t.actorId,
         sourceAccountId: t.sourceAccountId,
         destinationAccountId: t.destinationAccountId,

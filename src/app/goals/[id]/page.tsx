@@ -5,7 +5,7 @@ import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
 export default async function GoalDetailPage({ params }: PageProps) {
@@ -17,7 +17,7 @@ export default async function GoalDetailPage({ params }: PageProps) {
 
   const userId = session.user.id;
 
-  const { id } = await params;
+  const { id } = params;
   const data = await getGoalDetails(id);
 
   if (!data || !data.goal) {
