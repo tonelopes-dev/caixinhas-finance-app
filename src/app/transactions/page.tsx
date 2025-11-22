@@ -4,7 +4,6 @@
 
 import Link from 'next/link';
 import { ArrowLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
-import { transactions as allTransactions, accounts as allAccounts, goals as allGoals, users } from '@/lib/data';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -54,6 +53,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { getAccountsData } from '../accounts/actions';
+import { transactions as allTransactions } from '@/lib/data';
 
 
 function formatCurrency(value: number) {
@@ -117,6 +117,7 @@ export default function TransactionsPage() {
   const [monthFilter, setMonthFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -126,25 +127,37 @@ export default function TransactionsPage() {
       return;
     }
 
-    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || session.user.id;
     const userId = session.user.id;
+    const selectedWorkspaceId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
     setWorkspaceId(selectedWorkspaceId);
 
     const isPersonal = selectedWorkspaceId === userId;
     const ownerType = isPersonal ? 'user' : 'vault';
 
-    setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId && t.ownerType === ownerType));
-    
-    // Na página de transações, precisamos de TODAS as contas e metas para resolver os nomes
-    setAccounts(allAccounts);
-    setGoals(allGoals);
+    async function fetchData() {
+        setIsLoadingData(true);
+        try {
+            // Unificar a busca de dados
+            const data = await getAccountsData(userId);
+            // Na página de transações, precisamos de TODAS as contas e metas do usuário para resolver nomes,
+            // independentemente do workspace selecionado.
+            setAccounts(data.accounts as Account[]);
+            setCategories(data.categories);
+            
+            // TODO: A busca de goals precisa ser unificada também. Por enquanto, usaremos um placeholder.
+            // setGoals(data.goals) 
+            setGoals([]); // Placeholder
 
-    // Fetch categories
-    async function fetchCategories() {
-        const data = await getAccountsData(userId);
-        setCategories(data.categories);
+            // As transações são filtradas pelo workspace atual
+            setTransactions(allTransactions.filter(t => t.ownerId === selectedWorkspaceId));
+        } catch (error) {
+            console.error("Erro ao buscar dados da página de transações:", error);
+        } finally {
+            setIsLoadingData(false);
+        }
     }
-    fetchCategories();
+
+    fetchData();
 
     // Set filters to current month and year on initial load
     setMonthFilter((new Date().getMonth() + 1).toString());
@@ -248,7 +261,7 @@ export default function TransactionsPage() {
   const cardBaseClasses = "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center gap-4 rounded-lg border p-4";
   const activeClasses = "ring-2 ring-primary shadow-md scale-[1.02]";
 
-  if (!workspaceId) {
+  if (isLoadingData || !workspaceId) {
      return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -543,3 +556,4 @@ export default function TransactionsPage() {
     </div>
   );
 }
+
