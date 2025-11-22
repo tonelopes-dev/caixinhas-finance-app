@@ -97,7 +97,7 @@ export function RecurringPageClient({
               groupedInstallments.map((installment) => (
                 <InstallmentPurchaseCard 
                   key={installment.id} 
-                  purchase={installment} 
+                  purchase={installment as Transaction} 
                 />
               ))
             ) : (

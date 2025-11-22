@@ -81,7 +81,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTransactions.slice(0, 5).map((transaction) => (
+            {filteredTransactions.slice(0, 5).map((transaction: any) => (
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
@@ -103,7 +103,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                   )}
                   {transaction.isInstallment && (
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                      Parcelado ({transaction.installmentNumber}/{transaction.totalInstallments})
+                      Parcelado ({transaction.paidInstallments}/{transaction.totalInstallments})
                     </Badge>
                   )}
                 </TableCell>
