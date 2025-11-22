@@ -17,7 +17,7 @@ export default async function RecurringPage() {
   }
 
   const userId = session.user.id;
-  const cookieStore = cookies();
+  const cookieStore = await cookies(); // FIX: Await the cookies() call
   const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
   const isPersonal = workspaceId === userId;
   const ownerType = isPersonal ? 'user' : 'vault';

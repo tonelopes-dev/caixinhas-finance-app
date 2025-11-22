@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -98,7 +99,7 @@ export function RecurringPageClient({ recurring, installments }: RecurringPageCl
               {recurring.map(t => (
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.description}</TableCell>
-                  <TableCell><Badge variant="secondary">{t.category}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary">{t.category.name}</Badge></TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(t.amount)}</TableCell>
                 </TableRow>
               ))}
