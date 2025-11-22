@@ -57,7 +57,8 @@ export class ReportService {
   }
 
   /**
-   * Remove um relatório específico (para invalidar cache)
+   * Remove um relatório específico (para invalidar cache).
+   * Agora não lança erro se o relatório não existir.
    */
   static async deleteReport(ownerId: string, monthYear: string): Promise<boolean> {
     try {
@@ -69,11 +70,17 @@ export class ReportService {
           }
         }
       });
-
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      // Prisma's P2025 error code means "Record to delete does not exist."
+      // We can safely ignore this error, as the goal (to not have a report) is met.
+      if (error.code === 'P2025') {
+        console.log(`Cache invalidation skipped: Report for ${monthYear} did not exist.`);
+        return true; // Consider it a success because the report is gone.
+      }
       console.error('Erro ao deletar relatório:', error);
-      return false;
+      // Re-throw other errors so they can be caught upstream.
+      throw error;
     }
   }
 
