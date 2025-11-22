@@ -102,7 +102,7 @@ export async function getDashboardData(userId: string, workspaceId: string) {
       description: transaction.description,
       amount: transaction.amount,
       type: transaction.type as 'income' | 'expense' | 'transfer',
-      category: transaction.category,
+      category: transaction.category?.name || 'Sem Categoria', // Usa o nome da categoria
       paymentMethod: transaction.paymentMethod as 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash' | undefined,
       sourceAccountId: transaction.sourceAccountId,
       destinationAccountId: transaction.destinationAccountId,

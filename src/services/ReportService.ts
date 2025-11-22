@@ -67,9 +67,9 @@ export class ReportService {
         where: {
           ownerId_monthYear: {
             ownerId,
-            monthYear
-          }
-        }
+            monthYear,
+          },
+        },
       });
       return true;
     } catch (error: any) {
@@ -304,5 +304,3 @@ export class ReportService {
     }
   }
 }
-
-    

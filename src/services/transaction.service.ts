@@ -1,5 +1,4 @@
 
-
 import { prisma } from './prisma';
 import { AccountService } from './account.service';
 import { GoalService } from './goal.service';
@@ -23,6 +22,7 @@ export class TransactionService {
       return await prisma.transaction.findMany({
         where: whereClause,
         include: {
+          category: true, // Inclui a categoria
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -64,6 +64,7 @@ export class TransactionService {
       return await prisma.transaction.findMany({
         where: whereClause,
         include: {
+          category: true, // Inclui a categoria
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -95,6 +96,7 @@ export class TransactionService {
       const result = await prisma.transaction.findUnique({
         where: { id: transactionId },
         include: {
+          category: true, // Inclui a categoria
           sourceAccount: true,
           destinationAccount: true,
           goal: true,
@@ -143,18 +145,23 @@ export class TransactionService {
           description: data.description,
           amount: data.amount,
           type: data.type,
-          category: {
-            connectOrCreate: {
-                where: { name_ownerId: { name: data.category, ownerId: data.userId || data.vaultId! } },
-                create: { name: data.category, ownerId: data.userId || data.vaultId! }
-            }
-          },
           paymentMethod: data.paymentMethod,
           isRecurring: data.isRecurring ?? false,
           isInstallment: data.isInstallment ?? false,
           installmentNumber: data.installmentNumber,
           totalInstallments: data.totalInstallments,
           actor: { connect: { id: data.actorId } },
+        };
+
+        const ownerIdForCategory = data.userId || data.vaultId;
+        if (!ownerIdForCategory) {
+            throw new Error("Owner ID (user or vault) is required for category context.");
+        }
+        createData.category = {
+            connectOrCreate: {
+                where: { name_ownerId: { name: data.category, ownerId: ownerIdForCategory } },
+                create: { name: data.category, ownerId: ownerIdForCategory }
+            }
         };
 
         if (data.vaultId) {
@@ -240,7 +247,8 @@ export class TransactionService {
       const updateData: any = { ...data };
 
       if(data.category) {
-        const ownerId = (await prisma.transaction.findUnique({where: {id: transactionId}}))?.userId;
+        const tx = await prisma.transaction.findUnique({where: {id: transactionId}});
+        const ownerId = tx?.userId || tx?.vaultId;
         if(ownerId) {
             updateData.category = {
                 connectOrCreate: {
@@ -248,6 +256,8 @@ export class TransactionService {
                     create: { name: data.category, ownerId }
                 }
             };
+        } else {
+            delete updateData.category;
         }
       }
 
