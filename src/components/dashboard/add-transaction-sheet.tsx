@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -53,7 +54,7 @@ interface AddTransactionDialogProps {
   chargeType?: 'single' | 'recurring' | 'installment';
 }
 
-export function AddTransactionSheet({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionDialogProps) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -146,7 +147,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
   
-  const isStep1Valid = description.trim() !== '' && parseFloat(amount) > 0;
+  const isStep1Valid = description.trim() !== '' && category !== '';
   const isStep2Valid = transactionType !== '' && date;
   
   const formVariants = {
@@ -158,7 +159,7 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
   const steps = [
     { id: 1, title: 'O Essencial' },
     { id: 2, title: 'A Movimentação' },
-    { id: 3, title: 'Detalhes' },
+    { id: 3, title: 'Valores e Detalhes' },
   ];
 
   return (
@@ -217,11 +218,14 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                               <Input id="description" name="description" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} />
                               {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
                           </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="amount">Valor</Label>
-                              <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                              {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
-                          </div>
+                           <div className="space-y-2">
+                                <Label htmlFor="category">Categoria</Label>
+                                <Select name="category" value={category} onValueChange={setCategory}>
+                                    <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                                    <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                                {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
+                            </div>
                       </motion.div>
                   )}
 
@@ -278,21 +282,6 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
 
                   {step === 3 && (
                       <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="category">Categoria</Label>
-                                <Select name="category" value={category} onValueChange={setCategory}>
-                                    <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                                    <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
-                                </Select>
-                                {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
-                            </div>
-                            {transactionType === 'expense' && !isCreditCardTransaction && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                    <Select name="paymentMethod"><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
-                                    {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
-                                </div>
-                            )}
                             {(transactionType === 'income' || transactionType === 'expense') && (
                                 <div className="space-y-3 rounded-lg border p-3">
                                     <Label>Tipo de cobrança</Label>
@@ -313,6 +302,20 @@ export function AddTransactionSheet({ accounts: workspaceAccounts, goals: worksp
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                             <div className="space-y-2">
+                              <Label htmlFor="amount">Valor Total</Label>
+                              <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
+                              {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                            </div>
+
+                            {transactionType === 'expense' && !isCreditCardTransaction && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+                                    <Select name="paymentMethod"><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
+                                    {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                                 </div>
                             )}
                       </motion.div>

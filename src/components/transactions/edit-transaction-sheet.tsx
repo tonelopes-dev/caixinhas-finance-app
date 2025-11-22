@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef, useState, useActionState } from 'react';
@@ -46,7 +47,7 @@ const paymentMethods = [
     { value: 'cash', label: 'Dinheiro' },
 ]
 
-export function EditTransactionSheet({ transaction, accounts, goals, categories }: { transaction: Transaction; accounts: Account[]; goals: Goal[], categories: any[] }) {
+export function EditTransactionDialog({ transaction, accounts, goals, categories }: { transaction: Transaction; accounts: Account[]; goals: Goal[], categories: any[] }) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
@@ -64,7 +65,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
   const [sourceAccountId, setSourceAccountId] = useState(transaction.sourceAccountId);
   const [destinationAccountId, setDestinationAccountId] = useState(transaction.destinationAccountId);
-  const [category, setCategory] = useState(transaction.category);
+  const [category, setCategory] = useState(typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category);
 
   const getInitialChargeType = () => {
     if (transaction.isInstallment) return 'installment';
@@ -103,8 +104,6 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
         const valPerInstallment = parseFloat(installmentValue);
         if (!isNaN(numInstallments) && numInstallments > 0 && !isNaN(valPerInstallment) && valPerInstallment > 0) {
             setAmount((numInstallments * valPerInstallment).toFixed(2));
-        } else {
-             // Don't clear if user is editing total amount directly now
         }
     }
   }, [installmentValue, totalInstallments, chargeType]);
@@ -129,7 +128,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
   
-  const isStep1Valid = description.trim() !== '' && parseFloat(amount) > 0;
+  const isStep1Valid = description.trim() !== '' && category !== '';
   const isStep2Valid = transactionType !== '' && date;
 
   const formVariants = {
@@ -141,7 +140,7 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
   const steps = [
     { id: 1, title: 'O Essencial' },
     { id: 2, title: 'A Movimentação' },
-    { id: 3, title: 'Detalhes' },
+    { id: 3, title: 'Valores e Detalhes' },
   ];
 
   return (
@@ -192,9 +191,12 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                             {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Valor</Label>
-                            <Input id="amount" name="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                            {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                            <Label htmlFor="category">Categoria</Label>
+                            <Select name="category" value={category} onValueChange={setCategory}>
+                                <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                                <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                            {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
                         </div>
                     </motion.div>
                 )}
@@ -234,8 +236,6 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                                 <Label htmlFor="sourceAccountId">Origem</Label>
                                 <Select name="sourceAccountId" defaultValue={sourceDefaultValue} onValueChange={(value) => {
                                     setSourceAccountId(value);
-                                    const acc = accounts.find(a => a.id === value) || null;
-                                    // setSourceAccount(acc);
                                 }}>
                                     <SelectTrigger><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
                                     <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
@@ -258,21 +258,6 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
 
                 {step === 3 && (
                     <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Categoria</Label>
-                            <Select name="category" value={typeof category === 'object' ? (category as any)?.name : category} onValueChange={setCategory}>
-                                <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                                <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
-                            </Select>
-                            {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
-                        </div>
-                        {transactionType === 'expense' && !isCreditCardTransaction && (
-                            <div className="space-y-2">
-                                <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                <Select name="paymentMethod" defaultValue={transaction.paymentMethod}><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
-                                 {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
-                            </div>
-                        )}
                         {(transactionType === 'income' || transactionType === 'expense') && (
                           <div className="space-y-3 rounded-lg border p-3">
                                 <Label>Tipo de cobrança</Label>
@@ -293,6 +278,20 @@ export function EditTransactionSheet({ transaction, accounts, goals, categories 
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        <div className="space-y-2">
+                            <Label htmlFor="amount">Valor Total</Label>
+                            <Input id="amount" name="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
+                            {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                        </div>
+
+                        {transactionType === 'expense' && !isCreditCardTransaction && (
+                            <div className="space-y-2">
+                                <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+                                <Select name="paymentMethod" defaultValue={transaction.paymentMethod}><SelectTrigger><SelectValue placeholder="Selecione o método" /></SelectTrigger><SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent></Select>
+                                 {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                             </div>
                         )}
                     </motion.div>
