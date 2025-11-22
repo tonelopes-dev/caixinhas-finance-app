@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlusCircle, Users, Lock, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, PlusCircle, Users, Lock, Eye, EyeOff, Star } from 'lucide-react';
 import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
 import { AnimatedCounter } from '../ui/animated-counter';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -72,16 +73,17 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
               <div className="text-4xl transition-transform group-hover:scale-110">{goal.emoji}</div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex items-center gap-2">
+                     {goal.isFeatured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400" />}
                     <p className="font-semibold">{goal.name}</p>
-                     <p className="text-sm text-muted-foreground">
-                        {isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
-                    </p>
                   </div>
                    <p className="text-sm font-bold text-primary flex items-center gap-1">
                         {isPrivate ? <PrivacyBlurPercent /> : <><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</>}
                     </p>
                 </div>
+                 <p className={cn("text-sm text-muted-foreground", goal.isFeatured && "pl-6")}>
+                    {isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
+                </p>
                 <Progress value={isPrivate ? undefined : progress} className="h-3 mt-2" />
                 <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-1">
