@@ -1,11 +1,12 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { cookies } from 'next/headers';
 import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
-import { getGoalsPageData } from './actions'; // Atualizado para usar a nova função
-import { Button } from '@/components/ui/button';
+import { getGoalsPageData } from './actions';
+import { VaultService } from '@/services';
+
 
 export default async function GoalsPage() {
   const session = await getServerSession(authOptions);
@@ -15,26 +16,24 @@ export default async function GoalsPage() {
   }
 
   const userId = session.user.id;
+  const cookieStore = cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
 
-  // Utiliza a nova função que respeita o contexto do workspace
-  const { goals, vaults } = await getGoalsPageData(userId);
+  let workspaceId = userId;
+  if (vaultId) {
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      workspaceId = vaultId;
+    }
+  }
+
+  const data = await getGoalsPageData(userId, workspaceId);
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-4xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Painel
-          </Link>
-        </Button>
-
-        <GoalsPageClient 
-          goals={goals} 
-          vaults={vaults}
-          userId={userId}
-        />
-      </div>
-    </div>
+    <GoalsPageClient 
+      goals={data.goals} 
+      vaults={data.vaults} 
+      currentWorkspaceId={workspaceId}
+    />
   );
 }

@@ -1,60 +1,38 @@
 
-
-'use server';
-
-import Link from 'next/link';
+import { getServerSession } from 'next-auth';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { cookies } from 'next/headers';
+
+import { authOptions } from '@/lib/auth';
 import { getGoalManageData } from '@/app/goals/actions';
 import { ManageGoalClient } from '@/components/goals/manage-goal-client';
-
+import { VaultService } from '@/services';
 
 export default async function ManageGoalPage({ params }: { params: { id: string } }) {
-  const data = await getGoalManageData(params.id);
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+  
+  const userId = session.user.id;
+  const goalId = params.id;
+
+  const cookieStore = cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+
+  let workspaceId = userId;
+  if (vaultId) {
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      workspaceId = vaultId;
+    }
+  }
+
+  const data = await getGoalManageData(goalId, userId, workspaceId);
 
   if (!data) {
     notFound();
   }
 
-  return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-2xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href={`/goals/${data.goal.id}`}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para a Caixinha
-          </Link>
-        </Button>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl">
-              Gerenciar Caixinha
-            </CardTitle>
-            <CardDescription>
-              Ajuste o nome, ícone, visibilidade, participantes e
-              outras opções da sua caixinha.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ManageGoalClient 
-              goal={data.goal}
-              currentUser={data.currentUser}
-              currentVault={data.currentVault}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+  return <ManageGoalClient goal={data.goal} initialParticipants={data.participants} />;
 }
-

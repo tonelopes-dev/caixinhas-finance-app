@@ -1,12 +1,12 @@
 
-'use server';
-
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
-import React from 'react';
+import { VaultService } from '@/services';
 
 
 export default async function GoalDetailPage({ params }: { params: { id: string } }) {
@@ -19,9 +19,20 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
   const userId = session.user.id;
   const goalId = params.id;
 
-  const data = await getGoalDetails(goalId, userId);
+  const cookieStore = cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
 
-  if (!data || !data.goal) {
+  let workspaceId = userId;
+  if (vaultId) {
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      workspaceId = vaultId;
+    }
+  }
+
+  const data = await getGoalDetails(goalId, userId, workspaceId);
+
+  if (!data) {
     notFound();
   }
 
@@ -29,8 +40,8 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
     <GoalDetailClient
       goal={data.goal}
       transactions={data.transactions}
-      accounts={data.accounts as any}
-      vaults={data.vaults as any} // Passando os vaults para o cliente
+      accounts={data.accounts}
+      vaults={data.vaults}
       userId={userId}
     />
   );

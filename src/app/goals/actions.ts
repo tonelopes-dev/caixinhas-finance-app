@@ -29,12 +29,10 @@ export type GoalActionState = {
   success?: boolean;
 };
 
-// Funções de Busca de Dados
+// Funções de Busca de Dados (Refatoradas para não usar cookies() diretamente)
 
-export async function getGoalsPageData(userId: string) {
+export async function getGoalsPageData(userId: string, workspaceId: string) {
   try {
-    const cookieStore = cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
     const isPersonalWorkspace = workspaceId === userId;
     const [goalsForWorkspace, userVaults] = await Promise.all([
       isPersonalWorkspace ? GoalService.getUserGoals(userId) : GoalService.getVaultGoals(workspaceId),
@@ -47,10 +45,8 @@ export async function getGoalsPageData(userId: string) {
   } catch (error) { console.error(error); return { goals: [], vaults: [] }; }
 }
 
-export async function getGoalDetails(goalId: string, userId: string) {
+export async function getGoalDetails(goalId: string, userId: string, workspaceId: string) {
   try {
-    const cookieStore = cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
     const goal = await GoalService.getGoalById(goalId);
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
 
@@ -68,11 +64,8 @@ export async function getGoalDetails(goalId: string, userId: string) {
   } catch (error) { console.error(error); return null; }
 }
 
-export async function getGoalManageData(goalId: string, userId: string) {
+export async function getGoalManageData(goalId: string, userId: string, workspaceId: string) {
   try {
-      const cookieStore = cookies();
-      const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
-
       const goal = await GoalService.getGoalById(goalId);
       if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
 
@@ -85,7 +78,7 @@ export async function getGoalManageData(goalId: string, userId: string) {
   } catch (error) { console.error(error); return null; }
 }
 
-// Ações (CRUD)
+// Ações (CRUD) - Estas podem usar cookies() pois são chamadas por formulários, não no render da rota
 
 export async function createGoalAction(prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const session = await getServerSession(authOptions);
