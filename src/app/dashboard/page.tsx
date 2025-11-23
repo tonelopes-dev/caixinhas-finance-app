@@ -1,3 +1,4 @@
+
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { cookies } from 'next/headers';
@@ -13,9 +14,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
   
-  // Corrigido DESTA VEZ: `await` é necessário para usar a função cookies()
-  const cookieStore = await cookies();
-
+  const cookieStore = cookies();
   const userId = session.user.id;
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
 
@@ -30,24 +29,36 @@ export default async function DashboardPage() {
       workspaceId = vaultId;
     } else {
       // Se não for membro, é um cookie inválido/antigo.
-      // Limpamos o cookie e redirecionamos para a página de seleção para evitar um loop ou erro.
-      cookieStore.delete('CAIXINHAS_VAULT_ID');
-      redirect('/vaults');
+      // Ignoramos o cookie e usamos o workspace pessoal como padrão.
+      workspaceId = userId;
     }
   } else {
-    // Se não há cookie de cofre, o contexto é a conta pessoal do usuário.
-    // O workspaceId, nesse caso, é o próprio ID do usuário.
+    // Se não há cookie, o workspace é o pessoal.
     workspaceId = userId;
   }
 
-  // Buscamos os dados do dashboard usando o workspaceId correto.
-  const data = await getDashboardData(userId, workspaceId);
+  // Agora, buscamos os dados para o workspace determinado.
+  const dashboardData = await getDashboardData(workspaceId, userId);
 
-  if (!data) {
-    // Se por algum motivo não for possível carregar os dados (ex: cofre deletado),
-    // é mais seguro enviar o usuário para a seleção de workspace do que para o login.
-    redirect('/vaults');
-  }
+  // Também buscamos todos os cofres do usuário para o seletor de workspace.
+  const userVaults = await VaultService.getUserVaults(userId);
 
-  return <DashboardClient {...data as any} />;
+  const workspaceName =
+    workspaceId === userId
+      ? session.user.name || 'Pessoal'
+      : userVaults.find((v) => v.id === workspaceId)?.name || 'Cofre';
+
+  return (
+    <DashboardClient
+      workspaceId={workspaceId}
+      workspaceName={workspaceName}
+      isVault={workspaceId !== userId}
+      userVaults={userVaults}
+      featuredGoals={dashboardData.featuredGoals}
+      recentTransactions={dashboardData.recentTransactions}
+      balanceSummary={dashboardData.balanceSummary}
+      // A IA ainda não está implementada, então passamos um valor nulo.
+      monthlySummary={null}
+    />
+  );
 }

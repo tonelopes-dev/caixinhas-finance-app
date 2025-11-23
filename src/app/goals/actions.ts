@@ -9,13 +9,15 @@ import { cookies } from 'next/headers';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const createGoalSchema = z.object({
-  name: z.string().min(1, { message: 'O nome da caixinha é obrigatório.' }),
-  targetAmount: z.coerce.number().positive({ message: 'O valor deve ser maior que zero.' }),
-  emoji: z.string().min(1, { message: 'Selecione um emoji para a caixinha.' }),
-  visibility: z.enum(['private', 'shared'], { message: 'Visibilidade inválida.' }),
+// Schemas
+const goalSchema = z.object({
+  name: z.string().min(1, { message: 'O nome é obrigatório.' }),
+  targetAmount: z.coerce.number().positive({ message: 'O valor alvo deve ser positivo.' }),
+  emoji: z.string().min(1, { message: 'O emoji é obrigatório.' }),
+  visibility: z.enum(['private', 'shared'])
 });
 
+// Tipos de Estado
 export type GoalActionState = {
   message?: string | null;
   errors?: {
@@ -27,274 +29,170 @@ export type GoalActionState = {
   success?: boolean;
 };
 
+// Funções de Busca de Dados
+
 export async function getGoalsPageData(userId: string) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
     const isPersonalWorkspace = workspaceId === userId;
-
-    let goalsForWorkspace = [];
-    if (isPersonalWorkspace) {
-      goalsForWorkspace = await GoalService.getUserGoals(userId);
-    } else {
-      goalsForWorkspace = await GoalService.getVaultGoals(workspaceId);
-    }
-
-    const userVaults = await VaultService.getUserVaults(userId);
-
-    const formattedGoals = goalsForWorkspace.map((goal) => ({
-      id: goal.id,
-      name: goal.name,
-      emoji: goal.emoji,
-      targetAmount: goal.targetAmount,
-      currentAmount: goal.currentAmount,
-      visibility: goal.visibility as 'private' | 'shared',
-      isFeatured: goal.isFeatured,
-      ownerId: goal.userId || goal.vaultId,
-      ownerType: goal.userId ? 'user' : 'vault',
-      createdAt: goal.createdAt, // Passando a data de criação
-      participants: goal.participants?.map((p: any) => ({
-        id: p.user.id,
-        name: p.user.name,
-        avatarUrl: p.user.avatarUrl || '',
-        role: p.role,
-      })) || [],
-    }));
-
-    const formattedVaults = userVaults.map((vault) => ({
-      id: vault.id,
-      name: vault.name,
-      imageUrl: vault.imageUrl || '',
-      ownerId: vault.ownerId,
-    }));
-
+    const [goalsForWorkspace, userVaults] = await Promise.all([
+      isPersonalWorkspace ? GoalService.getUserGoals(userId) : GoalService.getVaultGoals(workspaceId),
+      VaultService.getUserVaults(userId)
+    ]);
     return {
-      goals: formattedGoals,
-      vaults: formattedVaults,
+      goals: goalsForWorkspace.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
+      vaults: userVaults.map(v => ({ ...v, members: v.members || [] }))
     };
-  } catch (error) {
-    console.error('Erro ao buscar dados da página de caixinhas:', error);
-    return { goals: [], vaults: [] };
-  }
+  } catch (error) { console.error(error); return { goals: [], vaults: [] }; }
 }
 
 export async function getGoalDetails(goalId: string, userId: string) {
   try {
-    const cookieStore = await cookies();
-    const workspaceId = cookieStore.get('CAIXINhas_VAULT_ID')?.value || userId;
-
+    const cookieStore = cookies();
+    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
     const goal = await GoalService.getGoalById(goalId);
-    if (!goal) return null;
+    if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
 
-    const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
-    if (!isOwner) return null;
-
-    const [goalTransactions, userAccounts, userVaults] = await Promise.all([
+    const [transactions, accounts, vaults] = await Promise.all([
       TransactionService.getTransactionsForGoal(goalId),
       AccountService.getUserAccounts(userId),
       VaultService.getUserVaults(userId)
     ]);
-
-    const nonCreditAccounts = userAccounts.filter(a => a.type !== 'credit_card');
-
-    const formattedGoal = {
-      id: goal.id,
-      name: goal.name,
-      emoji: goal.emoji,
-      targetAmount: goal.targetAmount,
-      currentAmount: goal.currentAmount,
-      visibility: goal.visibility as 'private' | 'shared',
-      isFeatured: goal.isFeatured,
-      ownerId: goal.userId || goal.vaultId,
-      ownerType: goal.userId ? 'user' : 'vault',
-      createdAt: goal.createdAt.toISOString(),
-      participants: goal.participants?.map((p: any) => ({
-        id: p.user.id,
-        name: p.user.name,
-        avatarUrl: p.user.avatarUrl || '',
-        role: p.role,
-      })) || [],
-    };
-
-    const formattedTransactions = goalTransactions.map((t:any) => ({
-      id: t.id,
-      date: t.date.toISOString(),
-      description: t.description,
-      amount: t.amount,
-      type: t.type as 'income' | 'expense' | 'transfer',
-      category: t.category.name,
-      actorId: t.actorId,
-      sourceAccountId: t.sourceAccountId,
-      destinationAccountId: t.destinationAccountId,
-      ownerId: t.userId || t.vaultId,
-    }));
-
-    const formattedVaults = userVaults.map((vault) => ({
-      id: vault.id,
-      name: vault.name,
-      imageUrl: vault.imageUrl || '',
-    }));
-
     return {
-      goal: formattedGoal,
-      transactions: formattedTransactions,
-      accounts: nonCreditAccounts,
-      vaults: formattedVaults,
+      goal: { ...goal, ownerType: goal.userId ? 'user' : 'vault', ownerId: goal.userId || goal.vaultId, createdAt: goal.createdAt.toISOString(), participants: goal.participants || [] },
+      transactions: transactions.map(t => ({...t, date: t.date.toISOString()})),
+      accounts: accounts.filter(a => a.type !== 'credit_card'),
+      vaults,
     };
-  } catch (error) {
-    console.error('Erro ao buscar detalhes da meta:', error);
-    return null;
-  }
+  } catch (error) { console.error(error); return null; }
 }
+
+export async function getGoalManageData(goalId: string, userId: string) {
+  try {
+      const cookieStore = cookies();
+      const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+
+      const goal = await GoalService.getGoalById(goalId);
+      if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
+
+      const participants = goal.participants?.map(p => ({ ...p.user, role: p.role })) || [];
+
+      return {
+          goal: { ...goal, ownerType: goal.userId ? 'user' : 'vault', ownerId: goal.userId || goal.vaultId },
+          participants,
+      };
+  } catch (error) { console.error(error); return null; }
+}
+
+// Ações (CRUD)
 
 export async function createGoalAction(prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
-  if (!userId) return { message: 'Usuário não autenticado' };
+  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+  const userId = session.user.id;
 
-  const validatedFields = createGoalSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!validatedFields.success) {
-    return { errors: validatedFields.error.flatten().fieldErrors, message: 'Falha na validação.' };
-  }
+  const validatedFields = goalSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!validatedFields.success) return { errors: validatedFields.error.flatten().fieldErrors };
 
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
-    const isPersonal = workspaceId === userId;
+    await GoalService.createGoal({ ...validatedFields.data, ownerId: workspaceId, ownerType: workspaceId === userId ? 'user' : 'vault' });
+  } catch (error) { console.error(error); return { message: 'Erro ao criar caixinha.' }; }
 
-    await GoalService.createGoal({
-      ...validatedFields.data,
-      ownerId: workspaceId,
-      ownerType: isPersonal ? 'user' : 'vault',
-    });
-
-    revalidatePath('/goals');
-    revalidatePath('/dashboard');
-  } catch (error) {
-    console.error('Erro ao criar meta:', error);
-    return { message: 'Erro ao criar caixinha. Tente novamente.' };
-  }
-
+  revalidatePath('/goals');
+  revalidatePath('/dashboard');
   redirect('/goals');
 }
 
-export async function depositToGoalAction(goalId: string, amount: number, sourceAccountId: string, description: string) {
+export async function updateGoalAction(goalId: string, prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado' };
+  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+  const userId = session.user.id;
+
+  const validatedFields = goalSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!validatedFields.success) return { errors: validatedFields.error.flatten().fieldErrors };
+
+  try {
+      const goal = await GoalService.getGoalById(goalId);
+      if (!goal || (goal.userId !== userId && !await VaultService.isMember(goal.vaultId, userId))) return { message: 'Permissão negada.' };
+      await GoalService.updateGoal(goalId, validatedFields.data);
+  } catch (error) { console.error(error); return { message: 'Erro ao atualizar caixinha.' }; }
+
+  revalidatePath(`/goals/${goalId}`)
+  revalidatePath(`/goals/${goalId}/manage`)
+  revalidatePath('/goals');
+  return { success: true, message: 'Caixinha atualizada com sucesso!' };
+}
+
+export async function deleteGoalAction(goalId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
   const userId = session.user.id;
 
   try {
-    const cookieStore = await cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
-
     const goal = await GoalService.getGoalById(goalId);
-    if (!goal) return { success: false, message: 'Caixinha não encontrada.' };
+    if (!goal || (goal.userId !== userId && !await VaultService.isOwner(goal.vaultId, userId))) return { message: 'Permissão negada.' };
+    await GoalService.deleteGoal(goalId);
+  } catch (error) { console.error(error); return { message: 'Erro ao apagar caixinha.' }; }
 
-    const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
-    if (!isOwner) return { success: false, message: 'Você não tem permissão para depositar nesta caixinha.' };
+  revalidatePath('/goals');
+  revalidatePath('/dashboard');
+  redirect('/goals');
+}
 
-    await TransactionService.createTransaction({
-      userId: goal.userId,
-      vaultId: goal.vaultId,
-      date: new Date(),
-      description: description || `Depósito na caixinha ${goal.name}`,
-      amount,
-      type: 'transfer',
-      category: 'Caixinha',
-      sourceAccountId,
-      destinationAccountId: null,
-      goalId,
-      actorId: userId,
-    });
+// Ações de Transação e Destaque
 
+export async function depositToGoalAction(goalId: string, amount: number, sourceAccountId: string, description: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { success: false, message: 'Não autenticado' };
+  const userId = session.user.id;
+
+  try {
+    const goal = await GoalService.getGoalById(goalId);
+    const workspaceId = cookies().get('CAIXINHAS_VAULT_ID')?.value || userId;
+    if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
+
+    await TransactionService.createTransaction({ userId: goal.userId, vaultId: goal.vaultId, date: new Date(), description: description || `Depósito na caixinha ${goal.name}`, amount, type: 'transfer', category: 'Caixinha', sourceAccountId, destinationAccountId: null, goalId, actorId: userId });
+    
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
-    revalidatePath('/accounts');
-    revalidatePath('/patrimonio');
-
-    return { success: true, message: 'Depósito realizado com sucesso!' };
-  } catch (error) {
-    console.error('Erro ao depositar na meta:', error);
-    return { success: false, message: 'Erro ao realizar depósito.' };
-  }
+    return { success: true };
+  } catch (error) { console.error(error); return { success: false, message: 'Erro no depósito.' }; }
 }
 
 export async function withdrawFromGoalAction(goalId: string, amount: number, destinationAccountId: string, description: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado' };
+  if (!session?.user?.id) return { success: false, message: 'Não autenticado' };
   const userId = session.user.id;
-  
+
   try {
-    const cookieStore = await cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
-
     const goal = await GoalService.getGoalById(goalId);
-    if (!goal) return { success: false, message: 'Caixinha não encontrada.' };
+    const workspaceId = cookies().get('CAIXINHAS_VAULT_ID')?.value || userId;
+    if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
+    if (goal.currentAmount < amount) return { success: false, message: 'Saldo insuficiente.' };
 
-    const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
-    if (!isOwner) return { success: false, message: 'Você não tem permissão para retirar desta caixinha.' };
-
-    if (goal.currentAmount < amount) return { success: false, message: 'Saldo insuficiente na caixinha.' };
-
-    await TransactionService.createTransaction({
-      userId: goal.userId,
-      vaultId: goal.vaultId,
-      date: new Date(),
-      description: description || `Retirada da caixinha ${goal.name}`,
-      amount,
-      type: 'transfer',
-      category: 'Caixinha',
-      sourceAccountId: null,
-      goalId,
-      destinationAccountId,
-      actorId: userId,
-    });
-
+    await TransactionService.createTransaction({ userId: goal.userId, vaultId: goal.vaultId, date: new Date(), description: description || `Retirada da caixinha ${goal.name}`, amount, type: 'transfer', category: 'Caixinha', sourceAccountId: null, destinationAccountId, goalId, actorId: userId });
+    
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
-    revalidatePath('/accounts');
-    revalidatePath('/patrimonio');
-    
-    return { success: true, message: 'Retirada realizada com sucesso!' };
-  } catch (error) {
-    console.error('Erro ao retirar da meta:', error);
-    return { success: false, message: 'Erro ao realizar retirada.' };
-  }
+    return { success: true };
+  } catch (error) { console.error(error); return { success: false, message: 'Erro na retirada.' }; }
 }
-
-// AÇÃO FINALMENTE REINSERIDA
 
 export async function toggleFeaturedGoalAction(goalId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return { success: false, message: 'Usuário não autenticado' };
-  }
+  if (!session?.user?.id) return { success: false, message: 'Não autenticado' };
   const userId = session.user.id;
 
   try {
     const goal = await GoalService.getGoalById(goalId);
-    if (!goal) {
-      return { success: false, message: 'Caixinha não encontrada.' };
-    }
-
-    // Garante que o usuário só pode favoritar uma caixinha pessoal
-    // ou uma caixinha de um cofre do qual ele é membro.
-    const isPersonalGoal = goal.userId === userId;
-    const isVaultGoal = goal.vaultId ? await VaultService.isMember(goal.vaultId, userId) : false;
-
-    if (!isPersonalGoal && !isVaultGoal) {
-      return { success: false, message: 'Você não tem permissão para favoritar esta caixinha.' };
-    }
+    if (!goal || (goal.userId !== userId && !await VaultService.isMember(goal.vaultId, userId))) return { success: false, message: 'Permissão negada.' };
 
     await GoalService.updateGoal(goalId, { isFeatured: !goal.isFeatured });
-
     revalidatePath('/goals');
     revalidatePath('/dashboard');
-
     return { success: true };
-
-  } catch (error) {
-    console.error('Erro ao favoritar/desfavoritar a meta:', error);
-    return { success: false, message: 'Ocorreu um erro ao atualizar a caixinha.' };
-  }
+  } catch (error) { console.error(error); return { success: false, message: 'Erro ao favoritar.' }; }
 }
