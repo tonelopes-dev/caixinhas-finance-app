@@ -21,26 +21,18 @@ export default async function DashboardPage() {
   let workspaceId: string;
 
   if (vaultId) {
-    // Se um ID de cofre está no cookie, primeiro verificamos se o usuário realmente é membro.
     const isMember = await VaultService.isMember(vaultId, userId);
     
     if (isMember) {
-      // Se for membro, o workspaceId é o ID do cofre.
       workspaceId = vaultId;
     } else {
-      // Se não for membro, é um cookie inválido/antigo.
-      // Ignoramos o cookie e usamos o workspace pessoal como padrão.
       workspaceId = userId;
     }
   } else {
-    // Se não há cookie, o workspace é o pessoal.
     workspaceId = userId;
   }
 
-  // Agora, buscamos os dados para o workspace determinado.
-  const dashboardData = await getDashboardData(workspaceId, userId);
-
-  // Também buscamos todos os cofres do usuário para o seletor de workspace.
+  const dashboardData = await getDashboardData(userId, workspaceId);
   const userVaults = await VaultService.getUserVaults(userId);
 
   const workspaceName =
@@ -50,14 +42,15 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      userName={session.user.name || 'Usuário'}
       workspaceId={workspaceId}
       workspaceName={workspaceName}
       isVault={workspaceId !== userId}
       userVaults={userVaults}
+      accounts={dashboardData.accounts}
       featuredGoals={dashboardData.featuredGoals}
       recentTransactions={dashboardData.recentTransactions}
       balanceSummary={dashboardData.balanceSummary}
-      // A IA ainda não está implementada, então passamos um valor nulo.
       monthlySummary={null}
     />
   );
