@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
-import { setWorkspaceAction, setVaultWorkspaceAction } from '@/app/vaults/workspace-actions';
+import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,13 +50,13 @@ function WorkspaceCard({
   name,
   imageUrl,
   members,
-  action
+  isPersonal = false,
 }: {
   id: string;
   name: string;
   imageUrl: string;
   members: User[];
-  action: (formData: FormData) => Promise<void>;
+  isPersonal?: boolean;
 }) {
   return (
     <motion.div
@@ -67,12 +67,10 @@ function WorkspaceCard({
       transition={{ duration: 0.3 }}
       className="h-full"
     >
-      <form action={action} className="h-full">
+      <form action={setWorkspaceAction} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
-        <button
-          type="submit"
-          className="h-full w-full text-left"
-        >
+        <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
+        <button type="submit" className="h-full w-full text-left">
           <Card className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full">
             <CardHeader className="p-0">
               <div className="relative h-40 w-full">
@@ -209,7 +207,6 @@ export function VaultsPageClient({
   };
 
   const handleInvitationAction = () => {
-    // Recarregar a página para atualizar os dados
     router.refresh();
   };
 
@@ -263,7 +260,6 @@ export function VaultsPageClient({
             )}
           </AnimatePresence>
 
-
           <div>
             <h3 className="text-xl font-semibold mb-4">Seus Espaços</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -273,7 +269,7 @@ export function VaultsPageClient({
                 name="Minha Conta Pessoal"
                 imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
                 members={[currentUser]}
-                action={setWorkspaceAction}
+                isPersonal={true}
               />
 
               {/* Vault Cards */}
@@ -285,12 +281,11 @@ export function VaultsPageClient({
                     name={vault.name}
                     imageUrl={vault.imageUrl}
                     members={vault.members}
-                    action={setVaultWorkspaceAction}
+                    isPersonal={false}
                   />
                 ))}
               </AnimatePresence>
               
-
               {/* Create New Vault Card */}
               <Card
                 onClick={() => setCreateVaultOpen(true)}
