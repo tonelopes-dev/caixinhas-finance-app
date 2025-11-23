@@ -28,7 +28,7 @@ export default async function InvitePage() {
             Voltar para o Painel
           </Link>
         </Button>
-        <InviteForm userVaults={formattedVaults} />
+        <InviteForm userVaults={formattedVaults} userId={session.user.id} />
       </div>
     </div>
   );

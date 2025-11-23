@@ -37,9 +37,10 @@ function SubmitButton() {
 
 type InviteFormProps = {
   userVaults: { id: string; name: string }[];
+  userId: string;
 };
 
-export function InviteForm({ userVaults }: InviteFormProps) {
+export function InviteForm({ userVaults, userId }: InviteFormProps) {
   const initialState: GenericState = {};
   const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
   const { toast } = useToast();
@@ -61,6 +62,7 @@ export function InviteForm({ userVaults }: InviteFormProps) {
   return (
     <Card>
       <form action={dispatch} ref={formRef}>
+        <input type="hidden" name="userId" value={userId} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-headline">
             <Mail className="h-6 w-6 text-primary" />
@@ -86,9 +88,9 @@ export function InviteForm({ userVaults }: InviteFormProps) {
                 ))}
               </SelectContent>
             </Select>
-            {state?.errors?.vaultName && (
+            {state?.errors?.vaultId && (
               <p className="text-sm font-medium text-destructive">
-                {state.errors.vaultName[0]}
+                {state.errors.vaultId[0]}
               </p>
             )}
           </div>
