@@ -24,6 +24,7 @@ export type GoalActionState = {
     emoji?: string[];
     visibility?: string[];
   };
+  success?: boolean;
 };
 
 export async function getGoalsPageData(userId: string) {
@@ -51,6 +52,7 @@ export async function getGoalsPageData(userId: string) {
       isFeatured: goal.isFeatured,
       ownerId: goal.userId || goal.vaultId,
       ownerType: goal.userId ? 'user' : 'vault',
+      createdAt: goal.createdAt, // Passando a data de criação
       participants: goal.participants?.map((p: any) => ({
         id: p.user.id,
         name: p.user.name,
@@ -64,12 +66,6 @@ export async function getGoalsPageData(userId: string) {
       name: vault.name,
       imageUrl: vault.imageUrl || '',
       ownerId: vault.ownerId,
-      members: vault.members?.map((m: any) => ({
-        id: m.user.id,
-        name: m.user.name,
-        email: m.user.email,
-        avatarUrl: m.user.avatarUrl || '',
-      })) || [],
     }));
 
     return {
@@ -88,19 +84,15 @@ export async function getGoalDetails(goalId: string, userId: string) {
     const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
 
     const goal = await GoalService.getGoalById(goalId);
-    if (!goal) {
-      return null;
-    }
+    if (!goal) return null;
 
     const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
-    if (!isOwner) {
-      return null;
-    }
+    if (!isOwner) return null;
 
     const [goalTransactions, userAccounts, userVaults] = await Promise.all([
       TransactionService.getTransactionsForGoal(goalId),
       AccountService.getUserAccounts(userId),
-      VaultService.getUserVaults(userId) // Adicionado para obter os nomes dos cofres
+      VaultService.getUserVaults(userId)
     ]);
 
     const nonCreditAccounts = userAccounts.filter(a => a.type !== 'credit_card');
@@ -115,6 +107,7 @@ export async function getGoalDetails(goalId: string, userId: string) {
       isFeatured: goal.isFeatured,
       ownerId: goal.userId || goal.vaultId,
       ownerType: goal.userId ? 'user' : 'vault',
+      createdAt: goal.createdAt.toISOString(),
       participants: goal.participants?.map((p: any) => ({
         id: p.user.id,
         name: p.user.name,
@@ -146,7 +139,7 @@ export async function getGoalDetails(goalId: string, userId: string) {
       goal: formattedGoal,
       transactions: formattedTransactions,
       accounts: nonCreditAccounts,
-      vaults: formattedVaults, // Retornado para o cliente
+      vaults: formattedVaults,
     };
   } catch (error) {
     console.error('Erro ao buscar detalhes da meta:', error);
@@ -154,24 +147,14 @@ export async function getGoalDetails(goalId: string, userId: string) {
   }
 }
 
-// ... (createGoalAction e outras ações permanecem as mesmas)
-
-export async function createGoalAction(
-  prevState: GoalActionState,
-  formData: FormData
-): Promise<GoalActionState> {
+export async function createGoalAction(prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  if (!userId) {
-    return { message: 'Usuário não autenticado' };
-  }
+  if (!userId) return { message: 'Usuário não autenticado' };
 
   const validatedFields = createGoalSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação.',
-    };
+    return { errors: validatedFields.error.flatten().fieldErrors, message: 'Falha na validação.' };
   }
 
   try {
@@ -193,4 +176,90 @@ export async function createGoalAction(
   }
 
   redirect('/goals');
+}
+
+// AÇÕES REINSERIDAS E CORRIGIDAS
+
+export async function depositToGoalAction(goalId: string, amount: number, sourceAccountId: string, description: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado' };
+  const userId = session.user.id;
+
+  try {
+    const cookieStore = await cookies();
+    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) return { success: false, message: 'Caixinha não encontrada.' };
+
+    const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
+    if (!isOwner) return { success: false, message: 'Você não tem permissão para depositar nesta caixinha.' };
+
+    await TransactionService.createTransaction({
+      userId: goal.userId,
+      vaultId: goal.vaultId,
+      date: new Date(),
+      description: description || `Depósito na caixinha ${goal.name}`,
+      amount,
+      type: 'transfer',
+      category: 'Caixinha',
+      sourceAccountId,
+      destinationAccountId: null,
+      goalId,
+      actorId: userId,
+    });
+
+    revalidatePath(`/goals/${goalId}`);
+    revalidatePath('/dashboard');
+    revalidatePath('/accounts');
+    revalidatePath('/patrimonio');
+
+    return { success: true, message: 'Depósito realizado com sucesso!' };
+  } catch (error) {
+    console.error('Erro ao depositar na meta:', error);
+    return { success: false, message: 'Erro ao realizar depósito.' };
+  }
+}
+
+export async function withdrawFromGoalAction(goalId: string, amount: number, destinationAccountId: string, description: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado' };
+  const userId = session.user.id;
+  
+  try {
+    const cookieStore = await cookies();
+    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) return { success: false, message: 'Caixinha não encontrada.' };
+
+    const isOwner = goal.userId === workspaceId || goal.vaultId === workspaceId;
+    if (!isOwner) return { success: false, message: 'Você não tem permissão para retirar desta caixinha.' };
+
+    if (goal.currentAmount < amount) return { success: false, message: 'Saldo insuficiente na caixinha.' };
+
+    await TransactionService.createTransaction({
+      userId: goal.userId,
+      vaultId: goal.vaultId,
+      date: new Date(),
+      description: description || `Retirada da caixinha ${goal.name}`,
+      amount,
+      type: 'transfer',
+      category: 'Caixinha',
+      sourceAccountId: null,
+      goalId,
+      destinationAccountId,
+      actorId: userId,
+    });
+
+    revalidatePath(`/goals/${goalId}`);
+    revalidatePath('/dashboard');
+    revalidatePath('/accounts');
+    revalidatePath('/patrimonio');
+    
+    return { success: true, message: 'Retirada realizada com sucesso!' };
+  } catch (error) {
+    console.error('Erro ao retirar da meta:', error);
+    return { success: false, message: 'Erro ao realizar retirada.' };
+  }
 }
