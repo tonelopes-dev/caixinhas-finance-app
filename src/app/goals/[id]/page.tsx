@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
-import { VaultService } from '@/services';
+import { VaultService } from '@/services/vault.service';
 
 
 export default async function GoalDetailPage({ params }: { params: { id: string } }) {

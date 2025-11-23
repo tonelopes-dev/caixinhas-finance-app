@@ -130,112 +130,110 @@ export default function RegisterPage() {
             </div>
             <div className="flex flex-col justify-center bg-background p-8 md:p-12">
                 <Card className="w-full max-w-md border-0 shadow-none">
-                    <form action={dispatch}>
-                        <CardHeader className="text-center px-0">
-                            <div className="mx-auto mb-4">
-                                <Logo className="h-12 w-12" />
+                    <CardHeader className="text-center px-0">
+                        <div className="mx-auto mb-4">
+                            <Logo className="h-12 w-12" />
+                        </div>
+                        <CardTitle className="text-3xl font-headline">Realize seus sonhos em casal.</CardTitle>
+                        <CardDescription className="text-base">
+                            Comece a planejar e economizar para seus objetivos compartilhados hoje mesmo.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 px-0">
+                        {/* Botão do Google */}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full py-6 text-lg"
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                        >
+                            <FcGoogle className="mr-2 h-5 w-5" />
+                            Continuar com Google
+                        </Button>
+                        
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
                             </div>
-                            <CardTitle className="text-3xl font-headline">Realize seus sonhos em casal.</CardTitle>
-                            <CardDescription className="text-base">
-                                Comece a planejar e economizar para seus objetivos compartilhados hoje mesmo.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-4 px-0">
-                            {/* Botão do Google */}
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full py-6 text-lg"
-                                onClick={handleGoogleSignIn}
-                                disabled={isLoading}
-                            >
-                                <FcGoogle className="mr-2 h-5 w-5" />
-                                Continuar com Google
-                            </Button>
-                            
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t" />
-                                </div>
-                                <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-background px-2 text-muted-foreground">Ou</span>
-                                </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">Ou</span>
                             </div>
+                        </div>
 
-                            <form onSubmit={handleSubmit} className="grid gap-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Seu Nome</Label>
-                                    <Input 
-                                        id="name" 
-                                        name="name" 
-                                        placeholder="Como podemos te chamar?" 
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        required 
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">E-mail</Label>
-                                    <Input 
-                                        id="email" 
-                                        name="email" 
-                                        type="email" 
-                                        placeholder="seu.melhor@email.com" 
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        required 
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password">Crie uma Senha</Label>
-                                    <Input 
-                                        id="password" 
-                                        name="password" 
-                                        type="password" 
-                                        placeholder="Pelo menos 6 caracteres" 
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        required 
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                                    <Input 
-                                        id="confirmPassword" 
-                                        name="confirmPassword" 
-                                        type="password" 
-                                        placeholder="Digite a senha novamente" 
-                                        value={formData.confirmPassword}
-                                        onChange={handleInputChange}
-                                        required 
-                                    />
-                                </div>
-                                {error && (
-                                    <p className="text-sm font-medium text-destructive">{error}</p>
-                                )}
-                                {success && (
-                                    <p className="text-sm font-medium text-green-600">{success}</p>
-                                )}
-                                <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={isLoading}>
-                                    {isLoading ? 'Criando conta...' : 'Criar conta gratuitamente'}
-                                </Button>
-                            </form>
-                        </CardContent>
-                        <CardFooter className="flex-col items-center justify-center text-sm px-0">
-                            <p className="text-center text-muted-foreground">
-                                Ao se cadastrar, você concorda com nossos{' '}
-                                <Link href="/terms" className="underline hover:text-primary">
-                                    Termos de Serviço
-                                </Link>.
-                            </p>
-                            <p className="mt-4">
-                                Já tem uma conta?{' '}
-                                <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
-                                    Faça Login
-                                </Link>
-                            </p>
-                        </CardFooter>
-                    </form>
+                        <form onSubmit={handleSubmit} className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Seu Nome</Label>
+                                <Input 
+                                    id="name" 
+                                    name="name" 
+                                    placeholder="Como podemos te chamar?" 
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    required 
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">E-mail</Label>
+                                <Input 
+                                    id="email" 
+                                    name="email" 
+                                    type="email" 
+                                    placeholder="seu.melhor@email.com" 
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required 
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="password">Crie uma Senha</Label>
+                                <Input 
+                                    id="password" 
+                                    name="password" 
+                                    type="password" 
+                                    placeholder="Pelo menos 6 caracteres" 
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    required 
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                                <Input 
+                                    id="confirmPassword" 
+                                    name="confirmPassword" 
+                                    type="password" 
+                                    placeholder="Digite a senha novamente" 
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
+                                    required 
+                                />
+                            </div>
+                            {error && (
+                                <p className="text-sm font-medium text-destructive">{error}</p>
+                            )}
+                            {success && (
+                                <p className="text-sm font-medium text-green-600">{success}</p>
+                            )}
+                            <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={isLoading}>
+                                {isLoading ? 'Criando conta...' : 'Criar conta gratuitamente'}
+                            </Button>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex-col items-center justify-center text-sm px-0">
+                        <p className="text-center text-muted-foreground">
+                            Ao se cadastrar, você concorda com nossos{' '}
+                            <Link href="/terms" className="underline hover:text-primary">
+                                Termos de Serviço
+                            </Link>.
+                        </p>
+                        <p className="mt-4">
+                            Já tem uma conta?{' '}
+                            <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+                                Faça Login
+                            </Link>
+                        </p>
+                    </CardFooter>
                 </Card>
             </div>
         </div>

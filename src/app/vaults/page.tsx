@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { AuthService } from '@/services';
+import { AuthService } from '@/services/auth.service';
 
 export default async function VaultSelectionPage() {
   const session = await getServerSession(authOptions);

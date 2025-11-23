@@ -2,7 +2,8 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { AuthService, VaultService } from '@/services';
+import { AuthService } from '@/services/auth.service';
+import { VaultService } from '@/services/vault.service';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';

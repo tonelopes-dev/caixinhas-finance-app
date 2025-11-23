@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import { authOptions } from '@/lib/auth';
 import { getGoalManageData } from '@/app/goals/actions';
 import { ManageGoalClient } from '@/components/goals/manage-goal-client';
-import { VaultService } from '@/services';
+import { VaultService } from '@/services/vault.service';
 
 export default async function ManageGoalPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

@@ -1,7 +1,11 @@
 
 "use server";
 
-import { GoalService, AuthService, VaultService, TransactionService, AccountService } from '@/services';
+import { GoalService } from '@/services/goal.service';
+import { AuthService } from '@/services/auth.service';
+import { VaultService } from '@/services/vault.service';
+import { TransactionService } from '@/services/transaction.service';
+import { AccountService } from '@/services/account.service';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -43,6 +47,23 @@ export async function getGoalsPageData(userId: string, workspaceId: string) {
       vaults: userVaults.map(v => ({ ...v, members: v.members || [] }))
     };
   } catch (error) { console.error(error); return { goals: [], vaults: [] }; }
+}
+
+export async function getUserAllGoals(userId: string) {
+    try {
+        const [personalGoals, vaults] = await Promise.all([
+            GoalService.getUserGoals(userId),
+            VaultService.getUserVaults(userId)
+        ]);
+        const vaultGoals = await Promise.all(vaults.map(v => GoalService.getVaultGoals(v.id)));
+
+        return {
+            goals: [...personalGoals, ...vaultGoals.flat()].map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] }))
+        };
+    } catch (error) {
+        console.error('Erro ao buscar todas as metas do usuário (pessoais e de cofres):', error);
+        return { goals: [] };
+    }
 }
 
 export async function getGoalDetails(goalId: string, userId: string, workspaceId: string) {
