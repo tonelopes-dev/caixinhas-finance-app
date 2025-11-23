@@ -30,6 +30,7 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
       goal={data.goal}
       transactions={data.transactions}
       accounts={data.accounts as any}
+      vaults={data.vaults as any} // Passando os vaults para o cliente
       userId={userId}
     />
   );

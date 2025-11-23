@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
-import { getUserAllGoals } from './actions';
+import { getGoalsPageData } from './actions'; // Atualizado para usar a nova função
 import { Button } from '@/components/ui/button';
 
 export default async function GoalsPage() {
@@ -16,7 +16,8 @@ export default async function GoalsPage() {
 
   const userId = session.user.id;
 
-  const { goals, vaults } = await getUserAllGoals(userId);
+  // Utiliza a nova função que respeita o contexto do workspace
+  const { goals, vaults } = await getGoalsPageData(userId);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">

@@ -3,7 +3,6 @@
 
 import Link from 'next/link';
 import { Heart, ChevronsRight, Users, Lock } from 'lucide-react';
-import { vaults } from '@/lib/data';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -68,7 +67,11 @@ export function GoalCard({
           <span className="text-5xl">{goal.emoji}</span>
           <div className="flex-1">
             <CardTitle>{goal.name}</CardTitle>
-            <CardDescription>
+            {/* Informação de Contexto Adicionada para Clareza */}
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-600">
+              {goal.ownerType === 'vault' ? `Cofre: ${ownerName}` : 'Caixinha Pessoal'}
+            </p>
+            <CardDescription className="pt-1">
               <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de{' '}
               {formatCurrency(goal.targetAmount)}
             </CardDescription>
@@ -147,6 +150,7 @@ export function GoalCard({
               : 'Apenas você'}
           </span>
         </div>
+        {/* O link para o cofre permanece no rodapé para funcionalidade */}
         {ownerVault ? (
           <TooltipProvider>
             <Tooltip>
