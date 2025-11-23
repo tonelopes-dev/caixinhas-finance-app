@@ -8,11 +8,13 @@ import { VaultService } from '@/services/vault.service';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
-  const cookieStore = cookies();
-
+  
   if (!session?.user) {
     redirect('/login');
   }
+  
+  // Corrigido DESTA VEZ: `await` é necessário para usar a função cookies()
+  const cookieStore = await cookies();
 
   const userId = session.user.id;
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
@@ -21,7 +23,6 @@ export default async function DashboardPage() {
 
   if (vaultId) {
     // Se um ID de cofre está no cookie, primeiro verificamos se o usuário realmente é membro.
-    // Isso evita erros caso o usuário tenha sido removido do cofre mas o cookie ainda exista.
     const isMember = await VaultService.isMember(vaultId, userId);
     
     if (isMember) {
