@@ -1,3 +1,5 @@
+'use client';
+
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
@@ -15,6 +17,9 @@ export default withAuth(
         if (pathname === '/') {
             return NextResponse.redirect(new URL(token ? '/vaults' : '/landing', req.url));
         }
+
+        // A lógica de verificação de trial/assinatura foi movida para a página /vaults.
+        // O middleware agora apenas protege as rotas.
 
         return NextResponse.next();
     },

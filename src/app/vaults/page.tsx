@@ -9,13 +9,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AuthService } from '@/services';
 
-type VaultsPageProps = {
-  searchParams?: {
-    status?: string;
-  };
-};
-
-export default async function VaultSelectionPage({ searchParams }: VaultsPageProps) {
+export default async function VaultSelectionPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -29,7 +23,8 @@ export default async function VaultSelectionPage({ searchParams }: VaultsPagePro
   ]);
 
   if (!data || !user) {
-    redirect('/login');
+    // Se não encontrar o usuário no banco, desloga por segurança
+    redirect('/login?error=user_not_found');
   }
 
   const hasActiveSubscription = user.subscriptionStatus === 'active';
@@ -51,7 +46,11 @@ export default async function VaultSelectionPage({ searchParams }: VaultsPagePro
             </AlertDescription>
           </Alert>
         )}
-        <VaultsPageClient {...data} />
+        <VaultsPageClient 
+          currentUser={data.currentUser as any}
+          userVaults={data.userVaults}
+          userInvitations={data.userInvitations}
+        />
       </div>
     </div>
   );

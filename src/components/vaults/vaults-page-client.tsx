@@ -63,39 +63,41 @@ function WorkspaceCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
+      className="h-full"
     >
       <form action={setWorkspaceAction} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
-        <Card
-          as="button"
+        <button
           type="submit"
-          className="cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full text-left"
+          className="h-full w-full text-left"
         >
-          <CardHeader className="p-0">
-            <div className="relative h-40 w-full">
-              <Image src={imageUrl} alt={name} fill className="object-cover rounded-t-lg" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 flex-grow flex flex-col justify-between">
-            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
-              {name}
-            </CardTitle>
-            {members && (
-              <div className="flex -space-x-2 overflow-hidden mt-2">
-                {members.map((member) => (
-                  <Avatar
-                    key={member.id}
-                    className="inline-block h-6 w-6 rounded-full border-2 border-card"
-                  >
-                    <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                ))}
+          <Card className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full">
+            <CardHeader className="p-0">
+              <div className="relative h-40 w-full">
+                <Image src={imageUrl} alt={name} fill className="object-cover rounded-t-lg" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-4 flex-grow flex flex-col justify-between">
+              <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
+                {name}
+              </CardTitle>
+              {members && (
+                <div className="flex -space-x-2 overflow-hidden mt-2">
+                  {members.map((member) => (
+                    <Avatar
+                      key={member.id}
+                      className="inline-block h-6 w-6 rounded-full border-2 border-card"
+                    >
+                      <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </button>
       </form>
     </motion.div>
   );
@@ -210,8 +212,7 @@ export function VaultsPageClient({
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-4xl">
+    <>
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
             <Logo className="h-8 w-8" />
@@ -304,7 +305,6 @@ export function VaultsPageClient({
           onOpenChange={setCreateVaultOpen}
           currentUser={currentUser}
         />
-      </div>
-    </div>
+    </>
   );
 }
