@@ -81,7 +81,7 @@ export async function getGoalsPageData(userId: string) {
 export async function getGoalDetails(goalId: string, userId: string) {
   try {
     const cookieStore = await cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+    const workspaceId = cookieStore.get('CAIXINhas_VAULT_ID')?.value || userId;
 
     const goal = await GoalService.getGoalById(goalId);
     if (!goal) return null;
@@ -178,8 +178,6 @@ export async function createGoalAction(prevState: GoalActionState, formData: For
   redirect('/goals');
 }
 
-// AÇÕES REINSERIDAS E CORRIGIDAS
-
 export async function depositToGoalAction(goalId: string, amount: number, sourceAccountId: string, description: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado' };
@@ -261,5 +259,42 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
   } catch (error) {
     console.error('Erro ao retirar da meta:', error);
     return { success: false, message: 'Erro ao realizar retirada.' };
+  }
+}
+
+// AÇÃO FINALMENTE REINSERIDA
+
+export async function toggleFeaturedGoalAction(goalId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+  const userId = session.user.id;
+
+  try {
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) {
+      return { success: false, message: 'Caixinha não encontrada.' };
+    }
+
+    // Garante que o usuário só pode favoritar uma caixinha pessoal
+    // ou uma caixinha de um cofre do qual ele é membro.
+    const isPersonalGoal = goal.userId === userId;
+    const isVaultGoal = goal.vaultId ? await VaultService.isMember(goal.vaultId, userId) : false;
+
+    if (!isPersonalGoal && !isVaultGoal) {
+      return { success: false, message: 'Você não tem permissão para favoritar esta caixinha.' };
+    }
+
+    await GoalService.updateGoal(goalId, { isFeatured: !goal.isFeatured });
+
+    revalidatePath('/goals');
+    revalidatePath('/dashboard');
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('Erro ao favoritar/desfavoritar a meta:', error);
+    return { success: false, message: 'Ocorreu um erro ao atualizar a caixinha.' };
   }
 }
