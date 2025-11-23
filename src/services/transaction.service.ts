@@ -12,6 +12,41 @@ import { GoalService } from './goal.service';
  * Para análises e cálculos, use TransactionAnalysisService.
  */
 export class TransactionService {
+
+  /**
+   * Busca as transações mais recentes de um contexto (usuário ou vault).
+   * Adicionado para corrigir o erro no dashboard.
+   */
+  static async getRecentTransactions(ownerId: string, ownerType: 'user' | 'vault', limit: number): Promise<any[]> {
+    try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      return await prisma.transaction.findMany({
+        where: whereClause,
+        take: limit,
+        include: {
+          category: true,
+          sourceAccount: true,
+          destinationAccount: true,
+          goal: true,
+          actor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatarUrl: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar transações recentes:', error);
+      throw new Error('Não foi possível buscar as transações recentes');
+    }
+  }
+
   /**
    * Busca transações de um contexto (usuário ou vault)
    * Este é o método principal para leitura de listas de transações.
