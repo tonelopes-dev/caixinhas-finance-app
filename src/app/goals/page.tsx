@@ -17,7 +17,8 @@ export default async function GoalsPage() {
 
   const userId = session.user.id;
   const cookieStore = cookies();
-  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+  const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+  const vaultId = vaultIdCookie?.value;
 
   let workspaceId = userId;
   if (vaultId) {
@@ -30,10 +31,11 @@ export default async function GoalsPage() {
   const data = await getGoalsPageData(userId, workspaceId);
 
   return (
-    <GoalsPageClient 
-      goals={data.goals} 
-      vaults={data.vaults} 
-      currentWorkspaceId={workspaceId}
-    />
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Metas</h2>
+      </div>
+      <GoalsPageClient data={data} />
+    </div>
   );
 }

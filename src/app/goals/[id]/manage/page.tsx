@@ -18,7 +18,8 @@ export default async function ManageGoalPage({ params }: { params: { id: string 
   const goalId = params.id;
 
   const cookieStore = cookies();
-  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+  const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+  const vaultId = vaultIdCookie?.value;
 
   let workspaceId = userId;
   if (vaultId) {
