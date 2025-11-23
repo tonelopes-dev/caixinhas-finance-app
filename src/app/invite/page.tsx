@@ -1,3 +1,4 @@
+
 'use server';
 
 import Link from 'next/link';
@@ -6,7 +7,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
 import { authOptions } from '@/lib/auth';
-import { VaultService } from '@/services';
+import { VaultService } from '@/services/vault.service';
 import { InviteForm } from '@/components/invite/invite-form';
 import { Button } from '@/components/ui/button';
 

@@ -1,7 +1,8 @@
+
 'use server';
 
 import { z } from 'zod';
-import { VaultService } from '@/services';
+import { VaultService } from '@/services/vault.service';
 import type { GenericState } from '@/app/auth/actions';
 
 const inviteSchema = z.object({
