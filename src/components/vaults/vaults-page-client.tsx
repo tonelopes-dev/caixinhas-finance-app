@@ -50,13 +50,11 @@ function WorkspaceCard({
   name,
   imageUrl,
   members,
-  onSelect,
 }: {
   id: string;
   name: string;
   imageUrl: string;
   members: User[];
-  onSelect: (formData: FormData) => void;
 }) {
   return (
     <motion.div
@@ -66,7 +64,7 @@ function WorkspaceCard({
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
     >
-      <form action={onSelect} className="h-full">
+      <form action={setWorkspaceAction} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <Card
           as="button"
@@ -195,15 +193,6 @@ export function VaultsPageClient({
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
 
-  const handleSelectWorkspace = async (formData: FormData) => {
-    const workspaceId = formData.get('workspaceId') as string;
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('CAIXINHAS_VAULT_ID', workspaceId);
-      localStorage.setItem('CAIXINHAS_USER_ID', currentUser.id);
-    }
-    await setWorkspaceAction(formData);
-  };
-
   const handleLogout = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('CAIXINHAS_USER_ID');
@@ -281,7 +270,6 @@ export function VaultsPageClient({
                 name="Minha Conta Pessoal"
                 imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
                 members={[currentUser]}
-                onSelect={handleSelectWorkspace}
               />
 
               {/* Vault Cards */}
@@ -293,7 +281,6 @@ export function VaultsPageClient({
                     name={vault.name}
                     imageUrl={vault.imageUrl}
                     members={vault.members}
-                    onSelect={handleSelectWorkspace}
                   />
                 ))}
               </AnimatePresence>
