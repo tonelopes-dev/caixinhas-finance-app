@@ -5,38 +5,43 @@ import { NextResponse } from 'next/server';
 
 export default withAuth(
     function middleware(req) {
-        const { token } = req.nextauth;
+        // O middleware agora está configurado para rodar apenas em rotas protegidas.
+        // Se chegar aqui, o usuário já foi validado pelo `withAuth`.
+        // A lógica principal é redirecionar da raiz para o dashboard se estiver logado.
         const { pathname } = req.nextUrl;
-
-        // Se o usuário está logado e tenta acessar /landing ou /register, redireciona para /vaults
-        if (token && (pathname.startsWith('/landing') || pathname.startsWith('/register'))) {
-            return NextResponse.redirect(new URL('/vaults', req.url));
-        }
-
-        // Se o usuário está na raiz, redireciona para /vaults se logado, ou /landing se não logado
         if (pathname === '/') {
-            return NextResponse.redirect(new URL(token ? '/vaults' : '/landing', req.url));
+            return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
-        // O middleware agora apenas protege as rotas. 
-        // A lógica de verificação de trial/assinatura foi movida para a página /vaults.
         return NextResponse.next();
     },
     {
         callbacks: {
+            // Se o token não existir, o withAuth redirecionará para a `signIn` page.
             authorized: ({ token }) => !!token,
         },
         pages: {
-            signIn: '/login',
+            signIn: '/login', // Página de login para onde os usuários não autenticados são enviados.
         },
     }
 );
 
 
+// O matcher agora define explicitamente quais rotas são PROTEGIDAS.
+// Rotas como /login, /register, /landing não estão na lista e são públicas por padrão.
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|logo-caixinhas.png|icons|manifest.json|screenshots|photos|gradient-underline.svg|login|register|terms|auth).*)',
     '/',
-    '/landing',
+    '/dashboard/:path*',
+    '/profile/:path*',
+    '/accounts/:path*',
+    '/goals/:path*',
+    '/transactions/:path*',
+    '/reports/:path*',
+    '/invite/:path*',
+    '/patrimonio/:path*',
+    '/recurring/:path*',
+    '/tutorial/:path*',
+    '/vaults/:path*',
   ],
 };
