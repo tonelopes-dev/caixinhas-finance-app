@@ -4,45 +4,35 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 /**
- * Define o workspace atual e redireciona para o dashboard
+ * Define o workspace atual (pessoal ou cofre) e redireciona para o dashboard.
+ * A página de dashboard será responsável por carregar os dados corretos
+ * com base na presença ou ausência do cookie 'CAIXINHAS_VAULT_ID'.
  */
 export async function setWorkspaceAction(formData: FormData) {
   const workspaceId = formData.get('workspaceId') as string;
+  const isPersonal = formData.get('isPersonal') === 'true';
 
   if (!workspaceId) {
     throw new Error('Workspace ID não fornecido');
   }
 
   const cookieStore = cookies();
-  
-  // Limpa o cookie do cofre, já que estamos no workspace pessoal
-  if (cookieStore.has('CAIXINHAS_VAULT_ID')) {
+
+  if (isPersonal) {
+    // Para o workspace pessoal, garantimos que o cookie do cofre seja removido.
+    // A ausência deste cookie sinaliza que o contexto é a conta do usuário.
     cookieStore.delete('CAIXINHAS_VAULT_ID');
+  } else {
+    // Para um cofre, definimos o cookie com o ID do cofre.
+    cookieStore.set('CAIXINHAS_VAULT_ID', workspaceId, {
+      httpOnly: false, // Permitir acesso no client-side se necessário
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      path: '/',
+    });
   }
 
+  // Redireciona SEMPRE para o dashboard, que irá interpretar o contexto.
   redirect('/dashboard');
-}
-
-/**
- * Define o cofre atual como workspace e redireciona para a página do cofre
- */
-export async function setVaultWorkspaceAction(formData: FormData) {
-  const workspaceId = formData.get('workspaceId') as string;
-
-  if (!workspaceId) {
-    throw new Error('Workspace ID não fornecido');
-  }
-
-  const cookieStore = cookies();
-  
-  // Salva o workspace no cookie (expires em 7 dias)
-  cookieStore.set('CAIXINHAS_VAULT_ID', workspaceId, {
-    httpOnly: false, // Permite acesso via JavaScript para compatibilidade
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7, // 7 dias
-    path: '/',
-  });
-
-  redirect(`/vaults/${workspaceId}`);
 }
