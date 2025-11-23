@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -9,8 +10,7 @@ function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // A lógica de redirecionamento agora é centralizada no middleware.
-    // Esta página apenas decide qual componente renderizar.
+    // Redireciona com base no status da autenticação
     if (status === 'unauthenticated') {
       router.replace('/landing');
     } else if (status === 'authenticated') {
