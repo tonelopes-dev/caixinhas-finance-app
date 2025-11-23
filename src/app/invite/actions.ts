@@ -8,7 +8,7 @@ import type { GenericState } from '@/app/auth/actions';
 
 const inviteSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
-  vaultId: z.string().min(1, { message: 'ID do cofre é necessário.' }),
+  vaultId: z.string().min(1, { message: 'Selecione um cofre para convidar.' }),
 });
 
 export async function sendPartnerInvite(

@@ -1,83 +1,23 @@
-'use client';
+'use server';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Send } from 'lucide-react';
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { useToast } from '@/hooks/use-toast';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { sendPartnerInvite } from './actions';
-import type { GenericState } from '@/app/auth/actions';
+import { ArrowLeft } from 'lucide-react';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+
+import { authOptions } from '@/lib/auth';
 import { VaultService } from '@/services';
+import { InviteForm } from '@/components/invite/invite-form';
+import { Button } from '@/components/ui/button';
 
+export default async function InvitePage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button disabled={pending}>
-            <Send className="mr-2 h-4 w-4" />
-            {pending ? 'Enviando...' : 'Enviar Convite'}
-        </Button>
-    )
-}
-
-export default function InvitePage() {
-  const initialState: GenericState = {};
-  const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
-  const { toast } = useToast();
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [workspaceName, setWorkspaceName] = useState('');
-  const [workspaceId, setWorkspaceId] = useState('');
-
-  useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (!session?.user) {
-      router.push('/login');
-      return;
-    }
-
-    const userId = session.user.id;
-    const vaultId = sessionStorage.getItem('CAIXINHAS_VAULT_ID') || userId;
-    setWorkspaceId(vaultId);
-    
-    async function fetchVaultName() {
-        if (vaultId && vaultId !== userId) {
-            const vault = await VaultService.getVaultById(vaultId);
-            if (vault) {
-                setWorkspaceName(vault.name);
-            }
-        } else {
-            setWorkspaceName('seu cofre pessoal');
-        }
-    }
-
-    fetchVaultName();
-
-  }, [session, status, router]);
-
-  useEffect(() => {
-    if(state.message && !state.errors) {
-        toast({ title: "Sucesso!", description: state.message });
-        formRef.current?.reset();
-    } else if (state.message && state.errors) {
-        toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
-    }
-  }, [state, toast]);
+  const userVaults = await VaultService.getUserVaults(session.user.id);
+  const formattedVaults = userVaults.map(v => ({ id: v.id, name: v.name }));
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
@@ -88,35 +28,7 @@ export default function InvitePage() {
             Voltar para o Painel
           </Link>
         </Button>
-        <Card>
-            <form action={dispatch} ref={formRef}>
-                <input type="hidden" name="vaultId" value={workspaceId} />
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline">
-                    <Mail className="h-6 w-6 text-primary" />
-                    Convidar para o Cofre
-                    </CardTitle>
-                    <CardDescription>
-                     Envie um convite para que outra pessoa possa participar do cofre <span className='font-bold text-primary'>{workspaceName}</span>.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                    <div className="space-y-2">
-                    <Label htmlFor="email">E-mail do Convidado(a)</Label>
-                    <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="nome@example.com"
-                    />
-                    {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
-                    </div>
-                </CardContent>
-                <CardFooter>
-                    <SubmitButton />
-                </CardFooter>
-            </form>
-        </Card>
+        <InviteForm userVaults={formattedVaults} />
       </div>
     </div>
   );
