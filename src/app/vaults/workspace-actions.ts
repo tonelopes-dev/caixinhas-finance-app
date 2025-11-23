@@ -16,7 +16,7 @@ export async function setWorkspaceAction(formData: FormData) {
     throw new Error('Workspace ID não fornecido');
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   if (isPersonal) {
     // Para o workspace pessoal, garantimos que o cookie do cofre seja removido.
