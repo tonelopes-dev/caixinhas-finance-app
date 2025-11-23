@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
-import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
+import { setWorkspaceAction, setVaultWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,11 +50,13 @@ function WorkspaceCard({
   name,
   imageUrl,
   members,
+  action
 }: {
   id: string;
   name: string;
   imageUrl: string;
   members: User[];
+  action: (formData: FormData) => Promise<void>;
 }) {
   return (
     <motion.div
@@ -65,7 +67,7 @@ function WorkspaceCard({
       transition={{ duration: 0.3 }}
       className="h-full"
     >
-      <form action={setWorkspaceAction} className="h-full">
+      <form action={action} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <button
           type="submit"
@@ -220,7 +222,7 @@ export function VaultsPageClient({
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium">{currentUser.name}</p>
+              <p className="font-semibold">{currentUser.name}</p>
               <p className="text-xs text-muted-foreground">{currentUser.email}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -271,6 +273,7 @@ export function VaultsPageClient({
                 name="Minha Conta Pessoal"
                 imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
                 members={[currentUser]}
+                action={setWorkspaceAction}
               />
 
               {/* Vault Cards */}
@@ -282,6 +285,7 @@ export function VaultsPageClient({
                     name={vault.name}
                     imageUrl={vault.imageUrl}
                     members={vault.members}
+                    action={setVaultWorkspaceAction}
                   />
                 ))}
               </AnimatePresence>

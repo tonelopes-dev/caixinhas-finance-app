@@ -8,7 +8,26 @@ import { redirect } from 'next/navigation';
  */
 export async function setWorkspaceAction(formData: FormData) {
   const workspaceId = formData.get('workspaceId') as string;
-  const userId = (await cookies().get('CAIXINHAS_USER_ID')?.value) || '';
+
+  if (!workspaceId) {
+    throw new Error('Workspace ID não fornecido');
+  }
+
+  const cookieStore = cookies();
+  
+  // Limpa o cookie do cofre, já que estamos no workspace pessoal
+  if (cookieStore.has('CAIXINHAS_VAULT_ID')) {
+    cookieStore.delete('CAIXINHAS_VAULT_ID');
+  }
+
+  redirect('/dashboard');
+}
+
+/**
+ * Define o cofre atual como workspace e redireciona para a página do cofre
+ */
+export async function setVaultWorkspaceAction(formData: FormData) {
+  const workspaceId = formData.get('workspaceId') as string;
 
   if (!workspaceId) {
     throw new Error('Workspace ID não fornecido');
@@ -25,16 +44,5 @@ export async function setWorkspaceAction(formData: FormData) {
     path: '/',
   });
 
-  // Também salva o userId se ainda não estiver salvo
-  if (!cookieStore.get('CAIXINHAS_USER_ID')?.value && userId) {
-    cookieStore.set('CAIXINHAS_USER_ID', userId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
-      path: '/',
-    });
-  }
-
-  redirect('/dashboard');
+  redirect(`/vaults/${workspaceId}`);
 }
