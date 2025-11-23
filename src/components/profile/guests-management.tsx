@@ -136,15 +136,15 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId }: Guest
               >
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage src={member.avatarUrl} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={member.avatarUrl} alt={member.name ?? 'Usuário'} />
+                    <AvatarFallback>{member.name ? member.name.charAt(0) : 'U'}</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">{member.name} {isSelf && '(Você)'}</p>
                     <p className="text-xs text-muted-foreground">{isOwner ? 'Proprietário(a)' : 'Membro'}</p>
                   </div>
                 </div>
-                <DeleteGuestDialog guestName={member.name} disabled={!canBeRemoved} />
+                <DeleteGuestDialog guestName={member.name ?? 'Convidado'} disabled={!canBeRemoved} />
               </div>
             )
           }) : (
