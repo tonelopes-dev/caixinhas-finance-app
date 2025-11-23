@@ -8,63 +8,27 @@ export default withAuth(
         const token = req.nextauth.token;
         const { pathname } = req.nextUrl;
 
-        // Se o usuário está logado, redireciona de /landing para /vaults
+        // Se o usuário está logado, redireciona de /landing para /dashboard
         if (token && pathname.startsWith('/landing')) {
-            return NextResponse.redirect(new URL('/vaults', req.url));
+            return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
         // Se o usuário não está logado, redireciona da raiz para /landing
-        // Se estiver logado, redireciona da raiz para /vaults
+        // Se estiver logado, redireciona da raiz para /dashboard
         if (pathname === '/') {
-            const targetUrl = token ? '/vaults' : '/landing';
+            const targetUrl = token ? '/dashboard' : '/landing';
             return NextResponse.redirect(new URL(targetUrl, req.url));
         }
 
-        // Se não há token e a rota não é pública, o `authorized` callback vai redirecionar
-        // para a página de login definida em `pages`.
-        if (!token) {
-            // A função withAuth já cuida do redirecionamento para a página de login
-            // com base na configuração 'pages'.
-            // Nenhuma ação explícita é necessária aqui.
-        }
-
-        // Lógica de verificação de assinatura/trial para rotas protegidas
-        // Vamos assumir que todas as rotas, exceto /vaults, são protegidas por assinatura
-        const isProtectedRoute = !pathname.startsWith('/vaults');
-
-        if (token && isProtectedRoute) {
-            try {
-                const user = await AuthService.getUserById(token.id as string);
-
-                if (user) {
-                    const hasActiveSubscription = user.subscriptionStatus === 'active';
-                    const hasActiveTrial = AuthService.isTrialActive(user);
-
-                    if (!hasActiveSubscription && !hasActiveTrial) {
-                        // Se o trial expirou e não há assinatura, redireciona para /vaults com aviso
-                        const url = new URL('/vaults', req.url);
-                        url.searchParams.set('status', 'expired');
-                        return NextResponse.redirect(url);
-                    }
-                }
-            } catch (error) {
-                console.error("Erro ao verificar status do usuário no middleware:", error);
-                // Em caso de erro, talvez redirecionar para uma página de erro ou login
-                return NextResponse.redirect(new URL('/login?error=session_error', req.url));
-            }
-        }
-
-        // Se nenhuma das condições acima for atendida, permite que a requisição continue.
+        // Permite acesso a todas as rotas autenticadas sem verificação de assinatura
+        // (verificação de assinatura pode ser feita nas páginas específicas se necessário)
         return NextResponse.next();
     },
     {
         callbacks: {
-            // Este callback é invocado para decidir se o middleware principal deve ser executado.
-            // Retorna `true` se o usuário estiver logado (token existe), permitindo o acesso.
+            // Permite acesso se o usuário tiver um token válido
             authorized: ({ token }) => !!token,
         },
-        // Se `authorized` retornar `false` (usuário não logado), o NextAuth redirecionará
-        // para a página de login especificada aqui.
         pages: {
             signIn: '/login',
         },

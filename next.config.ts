@@ -3,6 +3,10 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    // Habilita o suporte para src/app directory
+    turbo: {},
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
