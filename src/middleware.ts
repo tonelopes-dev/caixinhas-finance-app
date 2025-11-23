@@ -18,9 +18,8 @@ export default withAuth(
             return NextResponse.redirect(new URL(token ? '/vaults' : '/landing', req.url));
         }
 
+        // O middleware agora apenas protege as rotas. 
         // A lógica de verificação de trial/assinatura foi movida para a página /vaults.
-        // O middleware agora apenas protege as rotas.
-
         return NextResponse.next();
     },
     {
