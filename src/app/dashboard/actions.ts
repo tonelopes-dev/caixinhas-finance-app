@@ -1,14 +1,9 @@
 
 "use server";
 
-import {
-  AuthService,
-  VaultService,
-  AccountService,
-  GoalService,
-  TransactionService,
-  CategoryService,
-} from '@/services';
+import { AccountService } from '@/services/account.service';
+import { GoalService } from '@/services/goal.service';
+import { TransactionService } from '@/services/transaction.service';
 
 /**
  * Busca todos os dados necessários para o dashboard
@@ -25,21 +20,21 @@ export async function getDashboardData(userId: string, workspaceId: string) {
     };
 
     const [accounts, featuredGoals, recentTransactions, balanceSummary] = await Promise.all([
-      AccountService.getUserAccounts(userId), // Buscar as contas do usuário
-      GoalService.getFeaturedGoals(owner),
-      TransactionService.getRecentTransactions(owner, 5),
-      AccountService.getAccountBalances(owner),
+      AccountService.getUserAccounts(userId),
+      // Corrigido: Passar argumentos desestruturados
+      GoalService.getFeaturedGoals(owner.ownerId, owner.ownerType),
+      TransactionService.getRecentTransactions(owner.ownerId, owner.ownerType, 5),
+      AccountService.getAccountBalances(owner.ownerId, owner.ownerType),
     ]);
 
     return {
-      accounts, // Retornar as contas
+      accounts,
       featuredGoals,
       recentTransactions,
       balanceSummary,
     };
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);
-    // Retornar um estado de erro ou valores padrão para evitar que a página quebre
     return {
       accounts: [],
       featuredGoals: [],

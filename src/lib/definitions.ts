@@ -73,7 +73,8 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  avatarUrl: string;
+  // Corrigido: avatarUrl pode ser nulo
+  avatarUrl: string | null;
   subscriptionStatus: 'active' | 'inactive' | 'trial';
 };
 

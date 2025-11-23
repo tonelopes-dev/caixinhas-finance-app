@@ -6,8 +6,12 @@ import { cookies } from 'next/headers';
 import { authOptions } from '@/lib/auth';
 import { getDashboardData } from './actions';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
-import { VaultService, CategoryService, GoalService, AuthService } from '@/services';
-import type { User, VaultWithMembers } from '@/lib/definitions';
+import { VaultService } from '@/services/vault.service';
+import { CategoryService } from '@/services/category.service';
+import { GoalService } from '@/services/goal.service';
+import { AuthService } from '@/services/auth.service';
+// Corrigido: O tipo correto é Vault, não o inexistente VaultWithMembers
+import type { User, Vault } from '@/lib/definitions';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -17,13 +21,13 @@ export default async function DashboardPage() {
 
   const userId = session.user.id;
 
-  // 1. Buscar o objeto User completo
   const currentUser: User | null = await AuthService.getUserById(userId);
   if (!currentUser) {
-    redirect('/login'); // Se o utilizador não for encontrado na DB, redirecionar
+    redirect('/login');
   }
 
-  const cookieStore = cookies();
+  // Corrigido: Adicionado 'await' para resolver a Promise de cookies
+  const cookieStore = await cookies(); 
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
 
   let workspaceId = userId;
@@ -39,22 +43,22 @@ export default async function DashboardPage() {
   const [dashboardData, userVaults, allGoals, categories] = await Promise.all([
     getDashboardData(userId, workspaceId),
     VaultService.getUserVaults(userId),
-    GoalService.getGoals(owner),
-    CategoryService.getCategories(owner),
+    GoalService.getGoals(owner.ownerId, owner.ownerType),
+    // Corrigido: Nome do método e argumentos
+    CategoryService.getUserCategories(owner.ownerId, owner.ownerType),
   ]);
 
-  // 2. Adicionar tipo explícito para 'v'
+  // Corrigido: Tipo explícito para 'v' é Vault
   const workspaceName =
     workspaceId === userId
       ? 'Pessoal'
-      : userVaults.find((v: VaultWithMembers) => v.id === workspaceId)?.name || 'Cofre';
+      : userVaults.find((v: Vault) => v.id === workspaceId)?.name || 'Cofre';
 
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
-  // 3. Passar o 'currentUser' completo
   return (
     <DashboardClient
-      currentUser={currentUser} 
+      currentUser={currentUser}
       partner={null}
       workspaceId={workspaceId}
       workspaceName={workspaceName}
