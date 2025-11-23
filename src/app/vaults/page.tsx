@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { AuthService } from '@/services';
 
 type VaultsPageProps = {
   searchParams?: {
@@ -22,13 +23,18 @@ export default async function VaultSelectionPage({ searchParams }: VaultsPagePro
   }
 
   const userId = session.user.id;
-  const data = await getUserVaultsData(userId);
+  const [data, user] = await Promise.all([
+    getUserVaultsData(userId),
+    AuthService.getUserById(userId),
+  ]);
 
-  if (!data) {
+  if (!data || !user) {
     redirect('/login');
   }
 
-  const showExpiredAlert = searchParams?.status === 'expired';
+  const hasActiveSubscription = user.subscriptionStatus === 'active';
+  const hasActiveTrial = AuthService.isTrialActive(user);
+  const showExpiredAlert = !hasActiveSubscription && !hasActiveTrial;
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
