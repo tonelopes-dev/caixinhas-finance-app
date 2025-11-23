@@ -244,4 +244,61 @@ export class AccountService {
         return 0;
     }
   }
+
+  /**
+   * Busca os balanços agregados por tipo de conta
+   */
+  static async getAccountBalances(userId: string, scope: string): Promise<{
+    liquid: number;
+    invested: number;
+    creditCardDebt: number;
+  }> {
+    try {
+      const whereClause: any = {};
+
+      if (scope === userId) { // Personal scope
+        whereClause.ownerId = userId;
+        whereClause.scope = 'personal';
+      } else { // Vault scope
+        whereClause.OR = [
+          { vaultId: scope },
+          { ownerId: userId, visibleIn: { has: scope } }
+        ];
+      }
+
+      const balancesByType = await prisma.account.groupBy({
+        by: ['type'],
+        _sum: {
+          balance: true,
+        },
+        where: whereClause,
+      });
+
+      let liquid = 0;
+      let invested = 0;
+      let creditCardDebt = 0;
+
+      for (const group of balancesByType) {
+        const balance = group._sum.balance ?? 0;
+        switch (group.type) {
+          case 'checking':
+          case 'savings':
+            liquid += balance;
+            break;
+          case 'investment':
+            invested += balance;
+            break;
+          case 'credit':
+            creditCardDebt += balance;
+            break;
+        }
+      }
+      
+      return { liquid, invested, creditCardDebt };
+
+    } catch (error) {
+        console.error('Erro ao buscar balanços das contas:', error);
+        return { liquid: 0, invested: 0, creditCardDebt: 0 };
+    }
+  }
 }
