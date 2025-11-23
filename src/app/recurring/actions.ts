@@ -1,7 +1,7 @@
 
 'use server';
 
-import { TransactionService } from '@/services';
+import { TransactionService } from '@/services/transaction.service';
 import type { Transaction } from '@/lib/definitions';
 import { revalidatePath } from 'next/cache';
 

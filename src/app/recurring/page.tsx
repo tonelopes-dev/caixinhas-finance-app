@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { RecurringPageClient } from '@/components/recurring/recurring-page-client';
 import { getRecurringData } from './actions';
 import { cookies } from 'next/headers';
-import { AccountService, CategoryService, GoalService, VaultService } from '@/services';
+import { AccountService } from '@/services/account.service';
+import { CategoryService } from '@/services/category.service';
 import { getUserAllGoals } from '../goals/actions';
 
 export default async function RecurringPage() {
