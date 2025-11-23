@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -57,7 +56,7 @@ function WorkspaceCard({
   name: string;
   imageUrl: string;
   members: User[];
-  onSelect: (id: string) => void;
+  onSelect: (formData: FormData) => void;
 }) {
   return (
     <motion.div
@@ -67,35 +66,39 @@ function WorkspaceCard({
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
     >
-      <Card
-        onClick={() => onSelect(id)}
-        className="cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col"
-      >
-        <CardHeader className="p-0">
-          <div className="relative h-40 w-full">
-            <Image src={imageUrl} alt={name} fill className="object-cover rounded-t-lg" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 flex-grow flex flex-col justify-between">
-          <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
-            {name}
-          </CardTitle>
-          {members && (
-            <div className="flex -space-x-2 overflow-hidden mt-2">
-              {members.map((member) => (
-                <Avatar
-                  key={member.id}
-                  className="inline-block h-6 w-6 rounded-full border-2 border-card"
-                >
-                  <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
-                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-              ))}
+      <form action={onSelect} className="h-full">
+        <input type="hidden" name="workspaceId" value={id} />
+        <Card
+          as="button"
+          type="submit"
+          className="cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full text-left"
+        >
+          <CardHeader className="p-0">
+            <div className="relative h-40 w-full">
+              <Image src={imageUrl} alt={name} fill className="object-cover rounded-t-lg" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="p-4 flex-grow flex flex-col justify-between">
+            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
+              {name}
+            </CardTitle>
+            {members && (
+              <div className="flex -space-x-2 overflow-hidden mt-2">
+                {members.map((member) => (
+                  <Avatar
+                    key={member.id}
+                    className="inline-block h-6 w-6 rounded-full border-2 border-card"
+                  >
+                    <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
+                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </form>
     </motion.div>
   );
 }
@@ -192,15 +195,13 @@ export function VaultsPageClient({
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
 
-  const handleSelectWorkspace = async (workspaceId: string) => {
-    // Salvar no sessionStorage para compatibilidade com código existente
+  const handleSelectWorkspace = async (formData: FormData) => {
+    const workspaceId = formData.get('workspaceId') as string;
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('CAIXINHAS_VAULT_ID', workspaceId);
       localStorage.setItem('CAIXINHAS_USER_ID', currentUser.id);
     }
-    
-    // Salvar no cookie e redirecionar via Server Action
-    await setWorkspaceAction(workspaceId, currentUser.id);
+    await setWorkspaceAction(formData);
   };
 
   const handleLogout = async () => {
