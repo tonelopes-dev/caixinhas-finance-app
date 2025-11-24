@@ -35,21 +35,24 @@ function formatCurrency(value: number) {
 interface GoalCardProps {
   goal: Goal;
   userVaults: Vault[];
+  userId: string;
   onToggleFeatured: (goalId: string) => void;
-  onGoToVault: (vaultId: string) => void;
+  onGoToWorkspace: (workspaceId: string) => void;
 }
 
 export function GoalCard({
   goal,
   userVaults,
+  userId,
   onToggleFeatured,
-  onGoToVault,
+  onGoToWorkspace,
 }: GoalCardProps) {
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
   let ownerName = 'Pessoal';
+  let isPersonal = goal.ownerType === 'user';
   let ownerVault: Vault | undefined;
 
-  if (goal.ownerType === 'vault') {
+  if (!isPersonal) {
     ownerVault = userVaults.find((v) => v.id === goal.ownerId);
     ownerName = ownerVault?.name || 'Cofre Desconhecido';
   }
@@ -67,9 +70,8 @@ export function GoalCard({
           <span className="text-5xl">{goal.emoji}</span>
           <div className="flex-1">
             <CardTitle>{goal.name}</CardTitle>
-            {/* Informação de Contexto Adicionada para Clareza */}
             <p className="text-sm font-medium text-amber-800 dark:text-amber-600">
-              {goal.ownerType === 'vault' ? `Cofre: ${ownerName}` : 'Caixinha Pessoal'}
+              {isPersonal ? 'Caixinha Pessoal' : `Cofre: ${ownerName}`}
             </p>
             <CardDescription className="pt-1">
               <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de{' '}
@@ -150,28 +152,23 @@ export function GoalCard({
               : 'Apenas você'}
           </span>
         </div>
-        {/* O link para o cofre permanece no rodapé para funcionalidade */}
-        {ownerVault ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onGoToVault(ownerVault!.id)}
-                >
-                  <span className="text-xs">{ownerName}</span>
-                  <ChevronsRight className="ml-1 h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Ir para o cofre {ownerName}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-            <span className="text-xs text-muted-foreground">{ownerName}</span>
-        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onGoToWorkspace(isPersonal ? userId : ownerVault!.id)}
+              >
+                <span className="text-xs">{ownerName}</span>
+                <ChevronsRight className="ml-1 h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Ir para o {isPersonal ? 'espaço pessoal' : `cofre ${ownerName}`}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </CardFooter>
     </Card>
   );

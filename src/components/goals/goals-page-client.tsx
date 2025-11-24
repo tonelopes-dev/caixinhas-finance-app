@@ -49,18 +49,17 @@ type Vault = {
 };
 
 type GoalsPageClientProps = {
-  goals: Goal[];
-  vaults: Vault[];
+  data: {
+    goals: Goal[];
+    vaults: Vault[];
+  };
   userId: string;
 };
 
-export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPageClientProps) {
+export function GoalsPageClient({ data, userId }: GoalsPageClientProps) {
   const { toast } = useToast();
-  const [goals, setGoals] = useState(initialGoals);
-
-  console.log('🎯 GoalsPageClient - Goals:', goals?.length, goals);
-  console.log('🎯 GoalsPageClient - Vaults:', vaults?.length);
-  console.log('🎯 GoalsPageClient - UserId:', userId);
+  const [goals, setGoals] = useState(data.goals || []);
+  const vaults = data.vaults || [];
 
   const toggleFeatured = async (goalId: string) => {
     // Atualização otimista
@@ -87,37 +86,66 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
     }
   };
 
-  const handleGoToVault = (vaultId: string) => {
-    document.cookie = `CAIXINHAS_VAULT_ID=${vaultId}; path=/`;
+  const handleGoToWorkspace = (workspaceId: string) => {
+    if (workspaceId === userId) {
+      // Remove o cookie para voltar ao workspace pessoal
+      document.cookie = 'CAIXINHAS_VAULT_ID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    } else {
+      // Define o cookie para o ID do cofre
+      document.cookie = `CAIXINHAS_VAULT_ID=${workspaceId}; path=/`;
+    }
     window.location.href = '/';
   };
 
+  if (!goals) {
+    return <div>Carregando...</div>;
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline text-2xl">
-          Todas as Suas Caixinhas
-        </CardTitle>
-        <CardDescription>
-          Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <GoalList
-          goals={goals as any}
-          userVaults={vaults as any}
-          onToggleFeatured={toggleFeatured}
-          onGoToVault={handleGoToVault}
-        />
-      </CardContent>
-      <CardFooter className="border-t pt-6">
-        <Button variant="outline" className="w-full" asChild>
-          <Link href="/goals/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Criar Nova Caixinha
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+    <>
+    {goals.length === 0 ? (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center text-muted-foreground">
+            <p className="mb-4">Parece que algo correu mal ou ainda não foram criadas metas.</p>
+            <Button asChild>
+              <Link href="/goals/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Criar Primeira Caixinha
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ) : (
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline text-2xl">
+            Todas as Suas Caixinhas
+          </CardTitle>
+          <CardDescription>
+            Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GoalList
+            goals={goals as any}
+            userVaults={vaults as any}
+            userId={userId}
+            onToggleFeatured={toggleFeatured}
+            onGoToWorkspace={handleGoToWorkspace}
+          />
+        </CardContent>
+        <CardFooter className="border-t pt-6">
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/goals/new">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Criar Nova Caixinha
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    )}
+    </>
   );
 }
