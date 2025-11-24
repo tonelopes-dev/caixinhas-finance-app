@@ -11,19 +11,11 @@ import { getGoalsPageData } from './actions';
 export default async function GoalsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
   const data = await getGoalsPageData(session.user.id);
-
-  if (!data) {
-    return (
-      <div className="container max-w-5xl mx-auto p-4 md:p-8">
-        <p className="text-center text-muted-foreground">Erro ao carregar dados. Por favor, tente novamente.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="container max-w-5xl mx-auto p-4 md:p-8">
@@ -39,7 +31,7 @@ export default async function GoalsPage() {
           <Button>Nova Caixinha</Button>
         </Link>
       </div>
-      <GoalsPageClient goals={data.goals} vaults={data.vaults} userId={session.user.id} />
+      <GoalsPageClient data={data} userId={session.user.id} />
     </div>
   );
 }
