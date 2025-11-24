@@ -34,7 +34,7 @@ export type GoalActionState = {
 };
 
 async function getWorkspaceId(userId: string): Promise<string> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
   if (vaultId) {
     const isMember = await VaultService.isMember(vaultId, userId);
