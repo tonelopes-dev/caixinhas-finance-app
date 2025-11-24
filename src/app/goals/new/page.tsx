@@ -22,6 +22,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { VaultService } from '@/services/vault.service'; // Usaremos para buscar cofres no client-side
+
+type Vault = { id: string; name: string };
 
 const commonEmojis = [
   '✈️', '🏡', '🚗', '🎓', '💍', '👶',
@@ -38,19 +42,50 @@ function SubmitButton() {
 }
 
 export default function NewGoalPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const initialState: GoalActionState = {};
   const [state, dispatch] = useActionState(createGoalAction, initialState);
   const { toast } = useToast();
-  const [visibility, setVisibility] = useState('shared');
+  
+  const [ownerType, setOwnerType] = useState('user');
+  const [ownerId, setOwnerId] = useState('');
+  const [visibility, setVisibility] = useState('private');
   const [selectedEmoji, setSelectedEmoji] = useState('💰');
+  const [userVaults, setUserVaults] = useState<Vault[]>([]);
+  const [isLoadingVaults, setIsLoadingVaults] = useState(true);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [status, router]);
+    if (status === 'authenticated' && session?.user?.id) {
+      setOwnerId(session.user.id); // Default to personal
+      
+      const fetchVaults = async () => {
+        setIsLoadingVaults(true);
+        try {
+          const vaults = await VaultService.getUserVaults(session.user.id);
+          setUserVaults(vaults.map(v => ({ id: v.id, name: v.name })));
+        } catch (error) {
+          console.error("Erro ao buscar cofres:", error);
+        } finally {
+          setIsLoadingVaults(false);
+        }
+      };
+      fetchVaults();
+    }
+  }, [status, router, session]);
+  
+  useEffect(() => {
+    if (ownerType === 'user') {
+        if(session?.user?.id) setOwnerId(session.user.id);
+        setVisibility('private');
+    } else {
+        setOwnerId(''); // Reset when switching to vault
+        setVisibility('shared');
+    }
+  }, [ownerType, session]);
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -74,7 +109,7 @@ export default function NewGoalPage() {
     setSelectedEmoji(e.target.value);
   }
 
-  if (status === 'loading') {
+  if (status === 'loading' || isLoadingVaults) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -93,6 +128,10 @@ export default function NewGoalPage() {
         </Button>
         <Card>
           <form action={dispatch}>
+            <input type="hidden" name="emoji" value={selectedEmoji} />
+            <input type="hidden" name="ownerId" value={ownerId} />
+            <input type="hidden" name="ownerType" value={ownerType} />
+
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-headline">
                 <PiggyBank className="h-6 w-6 text-primary" />
@@ -103,7 +142,35 @@ export default function NewGoalPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6">
-              <input type="hidden" name="emoji" value={selectedEmoji} />
+              
+              <div className="space-y-3">
+                <Label>Onde esta caixinha ficará?</Label>
+                 <RadioGroup value={ownerType} onValueChange={setOwnerType} className="grid grid-cols-2 gap-4">
+                    <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", ownerType === 'user' && "border-primary")}>
+                      <RadioGroupItem value="user" id="ownerUser" className="sr-only" />
+                      <Lock className="mb-3 h-6 w-6" />
+                      Minha Conta Pessoal
+                    </Label>
+                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", ownerType === 'vault' && "border-primary")}>
+                      <RadioGroupItem value="vault" id="ownerVault" className="sr-only" />
+                      <Users className="mb-3 h-6 w-6" />
+                      Um Cofre Compartilhado
+                    </Label>
+                </RadioGroup>
+              </div>
+
+              {ownerType === 'vault' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="vault-select">Selecione o Cofre</Label>
+                    <Select value={ownerId} onValueChange={setOwnerId} required>
+                      <SelectTrigger id="vault-select"><SelectValue placeholder="Selecione um cofre..." /></SelectTrigger>
+                      <SelectContent>
+                        {userVaults.map(vault => <SelectItem key={vault.id} value={vault.id}>{vault.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="name">Nome do Sonho</Label>
                 <Input
@@ -147,20 +214,24 @@ export default function NewGoalPage() {
                 <Input
                   id="targetAmount"
                   name="targetAmount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  placeholder="20000.00"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="20.000,00"
                   required
+                  onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      const numberValue = Number(value) / 100;
+                      e.target.value = numberValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  }}
                 />
                 {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
               </div>
 
                <div className="space-y-3">
                 <Label>Visibilidade</Label>
-                 <RadioGroup name="visibility" defaultValue="shared" className="grid grid-cols-2 gap-4" onValueChange={setVisibility}>
+                 <RadioGroup name="visibility" value={visibility} className="grid grid-cols-2 gap-4" onValueChange={setVisibility}>
                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", visibility === 'shared' && "border-primary")}>
-                      <RadioGroupItem value="shared" id="shared" className="sr-only" />
+                      <RadioGroupItem value="shared" id="shared" className="sr-only" disabled={ownerType === 'user'}/>
                       <Users className="mb-3 h-6 w-6" />
                       Compartilhada
                     </Label>
@@ -173,11 +244,10 @@ export default function NewGoalPage() {
                 <p className="text-sm text-muted-foreground">
                   {visibility === 'shared' 
                     ? 'Todos os membros do cofre podem ver e contribuir.' 
-                    : 'Apenas você poderá ver e gerenciar esta caixinha.'}
+                    : 'Apenas você (ou convidados) poderá ver esta caixinha.'}
                 </p>
                  {state?.errors?.visibility && <p className="text-sm font-medium text-destructive">{state.errors.visibility[0]}</p>}
               </div>
-
 
             </CardContent>
             <CardFooter>
