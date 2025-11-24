@@ -34,7 +34,7 @@ export type GoalActionState = {
 };
 
 async function getWorkspaceId(userId: string): Promise<string> {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
   if (vaultId) {
     const isMember = await VaultService.isMember(vaultId, userId);
@@ -48,14 +48,10 @@ async function getWorkspaceId(userId: string): Promise<string> {
 // Funções de Busca de Dados
 export async function getGoalsPageData(userId: string) {
   try {
-    const [personalGoals, userVaults] = await Promise.all([
-        GoalService.getUserGoals(userId),
-        VaultService.getUserVaults(userId)
+    const [allGoals, userVaults] = await Promise.all([
+      GoalService.getUserAllGoals(userId), 
+      VaultService.getUserVaults(userId)
     ]);
-
-    const vaultGoals = await Promise.all(userVaults.map(v => GoalService.getVaultGoals(v.id)));
-
-    const allGoals = [...personalGoals, ...vaultGoals.flat()];
 
     return {
       goals: allGoals.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
