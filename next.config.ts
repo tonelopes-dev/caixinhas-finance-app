@@ -1,5 +1,5 @@
 
-import type {NextConfig} from 'next';
+import { type NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -51,9 +51,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Adicionado para permitir avatares gerados dinamicamente
       {
         protocol: 'https',
-        hostname: 'caixinhas-finance-app.s3.us-east-1.amazonaws.com',}
+        hostname: 'api.dicebear.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
