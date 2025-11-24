@@ -111,7 +111,8 @@ export async function createGoalAction(prevState: GoalActionState, formData: For
 
   try {
     const cookieStore = cookies();
-    const workspaceId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value || userId;
+    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+    const workspaceId = vaultIdCookie?.value || userId;
     await GoalService.createGoal({ ...validatedFields.data, ownerId: workspaceId, ownerType: workspaceId === userId ? 'user' : 'vault' });
   } catch (error) { console.error(error); return { message: 'Erro ao criar caixinha.' }; }
 
@@ -165,7 +166,9 @@ export async function depositToGoalAction(goalId: string, amount: number, source
 
   try {
     const goal = await GoalService.getGoalById(goalId);
-    const workspaceId = cookies().get('CAIXINHAS_VAULT_ID')?.value || userId;
+    const cookieStore = cookies();
+    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+    const workspaceId = vaultIdCookie?.value || userId;
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
 
     await TransactionService.createTransaction({ userId: goal.userId, vaultId: goal.vaultId, date: new Date(), description: description || `Depósito na caixinha ${goal.name}`, amount, type: 'transfer', category: 'Caixinha', sourceAccountId, destinationAccountId: null, goalId, actorId: userId });
@@ -183,7 +186,9 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
 
   try {
     const goal = await GoalService.getGoalById(goalId);
-    const workspaceId = cookies().get('CAIXINHAS_VAULT_ID')?.value || userId;
+    const cookieStore = cookies();
+    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+    const workspaceId = vaultIdCookie?.value || userId;
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
     if (goal.currentAmount < amount) return { success: false, message: 'Saldo insuficiente.' };
 

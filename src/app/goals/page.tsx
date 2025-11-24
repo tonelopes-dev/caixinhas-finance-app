@@ -15,7 +15,9 @@ export default async function GoalsPage() {
   }
 
   const userId = session.user.id;
-  const vaultId = cookies().get('CAIXINHAS_VAULT_ID')?.value;
+  const cookieStore = cookies();
+  const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
+  const vaultId = vaultIdCookie?.value;
 
   let workspaceId = userId;
   if (vaultId) {
