@@ -48,10 +48,17 @@ async function getWorkspaceId(userId: string): Promise<string> {
 // Funções de Busca de Dados
 export async function getGoalsPageData(userId: string) {
   try {
-    const [allGoals, userVaults] = await Promise.all([
-      GoalService.getUserAllGoals(userId), 
-      VaultService.getUserVaults(userId)
+    const userVaults = await VaultService.getUserVaults(userId);
+
+    const personalGoalsPromise = GoalService.getGoals(userId, 'user');
+    const vaultGoalsPromises = userVaults.map(vault => GoalService.getGoals(vault.id, 'vault'));
+
+    const [personalGoals, ...vaultsGoals] = await Promise.all([
+      personalGoalsPromise,
+      ...vaultGoalsPromises
     ]);
+
+    const allGoals = [...personalGoals, ...vaultsGoals.flat()];
 
     return {
       goals: allGoals.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
