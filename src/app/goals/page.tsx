@@ -31,7 +31,7 @@ export default async function GoalsPage() {
           <Button>Nova Caixinha</Button>
         </Link>
       </div>
-      <GoalsPageClient data={data} />
+      <GoalsPageClient {...data} userId={session.user.id} />
     </div>
   );
 }

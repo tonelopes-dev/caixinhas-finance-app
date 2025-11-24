@@ -34,7 +34,7 @@ export type GoalActionState = {
 };
 
 async function getWorkspaceId(userId: string): Promise<string> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
   if (vaultId) {
     const isMember = await VaultService.isMember(vaultId, userId);
@@ -49,6 +49,7 @@ async function getWorkspaceId(userId: string): Promise<string> {
 export async function getGoalsPageData(userId: string) {
   try {
     const userVaults = await VaultService.getUserVaults(userId);
+    console.log('🔍 User Vaults:', userVaults.length);
 
     const personalGoalsPromise = GoalService.getGoals(userId, 'user');
     const vaultGoalsPromises = userVaults.map(vault => GoalService.getGoals(vault.id, 'vault'));
@@ -59,6 +60,9 @@ export async function getGoalsPageData(userId: string) {
     ]);
 
     const allGoals = [...personalGoals, ...vaultsGoals.flat()];
+    console.log('🔍 Personal Goals:', personalGoals.length);
+    console.log('🔍 Vault Goals:', vaultsGoals.flat().length);
+    console.log('🔍 All Goals:', allGoals.length);
 
     return {
       goals: allGoals.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
@@ -107,20 +111,44 @@ export async function getGoalManageData(goalId: string, userId: string) {
 
 // Ações (CRUD)
 export async function createGoalAction(prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
+  console.log('🎯 createGoalAction - Iniciando...');
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+  if (!session?.user?.id) {
+    console.log('❌ createGoalAction - Usuário não autenticado');
+    return { message: 'Usuário não autenticado' };
+  }
   const userId = session.user.id;
+  console.log('✅ createGoalAction - UserId:', userId);
 
   const validatedFields = goalSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!validatedFields.success) return { errors: validatedFields.error.flatten().fieldErrors };
+  if (!validatedFields.success) {
+    console.log('❌ createGoalAction - Validação falhou:', validatedFields.error);
+    return { errors: validatedFields.error.flatten().fieldErrors };
+  }
+  console.log('✅ createGoalAction - Dados validados:', validatedFields.data);
 
   try {
     const workspaceId = await getWorkspaceId(userId);
-    await GoalService.createGoal({ ...validatedFields.data, ownerId: workspaceId, ownerType: workspaceId === userId ? 'user' : 'vault' });
-  } catch (error) { console.error(error); return { message: 'Erro ao criar caixinha.' }; }
+    console.log('✅ createGoalAction - WorkspaceId:', workspaceId);
+    
+    const goalData = { 
+      ...validatedFields.data, 
+      ownerId: workspaceId, 
+      ownerType: workspaceId === userId ? 'user' : 'vault' 
+    };
+    console.log('✅ createGoalAction - Criando caixinha com dados:', goalData);
+    
+    await GoalService.createGoal(goalData);
+    console.log('✅ createGoalAction - Caixinha criada com sucesso!');
+  } catch (error) { 
+    console.error('❌ createGoalAction - Erro ao criar:', error); 
+    return { message: 'Erro ao criar caixinha.' }; 
+  }
 
+  console.log('✅ createGoalAction - Revalidando paths...');
   revalidatePath('/goals');
   revalidatePath('/dashboard');
+  console.log('✅ createGoalAction - Redirecionando para /goals');
   redirect('/goals');
 }
 

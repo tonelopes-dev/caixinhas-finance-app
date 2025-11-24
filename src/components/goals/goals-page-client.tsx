@@ -58,6 +58,10 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
   const { toast } = useToast();
   const [goals, setGoals] = useState(initialGoals);
 
+  console.log('🎯 GoalsPageClient - Goals:', goals?.length, goals);
+  console.log('🎯 GoalsPageClient - Vaults:', vaults?.length);
+  console.log('🎯 GoalsPageClient - UserId:', userId);
+
   const toggleFeatured = async (goalId: string) => {
     // Atualização otimista
     setGoals((prevGoals: Goal[]) =>
