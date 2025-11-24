@@ -8,7 +8,6 @@ import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 import { VaultService } from '@/services/vault.service';
 
-
 export default async function GoalDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
@@ -19,9 +18,7 @@ export default async function GoalDetailPage({ params }: { params: { id: string 
   const userId = session.user.id;
   const goalId = params.id;
 
-  const cookieStore = cookies();
-  const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
-  const vaultId = vaultIdCookie?.value;
+  const vaultId = cookies().get('CAIXINHAS_VAULT_ID')?.value;
 
   let workspaceId = userId;
   if (vaultId) {

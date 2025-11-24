@@ -13,13 +13,11 @@ export default async function ManageGoalPage({ params }: { params: { id: string 
   if (!session?.user) {
     redirect('/login');
   }
-  
+
   const userId = session.user.id;
   const goalId = params.id;
 
-  const cookieStore = cookies();
-  const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
-  const vaultId = vaultIdCookie?.value;
+  const vaultId = cookies().get('CAIXINHAS_VAULT_ID')?.value;
 
   let workspaceId = userId;
   if (vaultId) {
