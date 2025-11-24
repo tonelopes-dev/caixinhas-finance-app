@@ -9,88 +9,153 @@ import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
-// Tipos para o estado da ação do formulário
+// --- Tipos de Estado para Actions ---
 export type GoalFormState = {
   success?: boolean;
   message?: string;
-  errors?: {
-    name?: string[];
-    emoji?: string[];
-    targetAmount?: string[];
-    visibility?: string[];
-    ownerType?: string[];
-    ownerId?: string[];
-  };
+  errors?: { [key: string]: string[] | undefined };
 };
 
-// Esquema de validação para a criação de metas usando preprocess para robustez
+export type TransactionFormState = GoalFormState;
+
+// --- Esquemas de Validação com Zod ---
+
+const currencyPreprocess = (val: unknown) => {
+  if (typeof val === 'string' && val) {
+    const sanitizedString = val.replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(sanitizedString);
+    return isNaN(num) ? val : num;
+  }
+  if (val === '' || val === null) return 0; 
+  return val;
+};
+
 const goalSchema = z.object({
   name: z.string().min(1, 'O nome da caixinha é obrigatório.'),
   emoji: z.string().min(1, 'O emoji é obrigatório.'),
-  targetAmount: z.preprocess(
-    (val) => {
-      // Trata formatos monetários brasileiros como "1.500,00"
-      if (typeof val === 'string' && val) {
-        const sanitizedString = val.replace(/\./g, '').replace(',', '.');
-        return parseFloat(sanitizedString);
-      }
-      if (val === '') return 0; // Trata string vazia como 0 para ser pego pelo .positive()
-      return val;
-    },
-    z.number({
-      invalid_type_error: 'O valor da meta deve ser um número.',
-    }).positive('O valor alvo deve ser positivo.')
-  ),
-  visibility: z.enum(['private', 'shared'], {
-    errorMap: () => ({ message: 'Visibilidade inválida.' }),
-  }),
-  ownerType: z.enum(['user', 'vault'], {
-    errorMap: () => ({ message: 'Tipo de proprietário inválido.' }),
-  }),
+  targetAmount: z.preprocess(currencyPreprocess, z.number().positive('O valor alvo deve ser positivo.')),
+  visibility: z.enum(['private', 'shared']),
+  ownerType: z.enum(['user', 'vault']),
   ownerId: z.string().min(1, 'O proprietário é obrigatório.'),
 });
 
-// Função para criar uma nova meta, compatível com useActionState
+const transactionSchema = z.object({
+    goalId: z.string().min(1),
+    amount: z.preprocess(currencyPreprocess, z.number().positive('O valor da transação deve ser positivo.')),
+    description: z.string().optional(),
+});
+
+
+// --- Actions para Metas (Goals) ---
+
 export async function createGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
-  console.log('🎯 createGoalAction - Iniciando...');
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return { message: 'Usuário não autenticado' };
-  }
+  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
 
-  const rawFormData = Object.fromEntries(formData.entries());
-
-  const validatedFields = goalSchema.safeParse(rawFormData);
+  const validatedFields = goalSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (!validatedFields.success) {
-    const fieldErrors = validatedFields.error.flatten().fieldErrors;
-    console.log('❌ createGoalAction - Validação falhou:', fieldErrors);
-    return { errors: fieldErrors };
+    return { errors: validatedFields.error.flatten().fieldErrors };
   }
 
   try {
-    await GoalService.createGoal({
-      ...validatedFields.data,
-      userId: session.user.id, 
-    });
-    console.log('✅ createGoalAction - Meta criada com sucesso.');
+    await GoalService.createGoal({ ...validatedFields.data, userId: session.user.id });
   } catch (error) {
-    console.error('❌ createGoalAction - Erro ao criar meta:', error);
     return { message: 'Ocorreu um erro ao criar a caixinha.' };
   }
 
   revalidatePath('/goals');
   revalidatePath('/dashboard');
+  // O redirect é melhor tratado no client-side após a confirmação de sucesso.
   return { success: true };
 }
 
-// Função para obter todos os dados necessários para a página de metas
+export async function deleteGoalAction(goalId: string): Promise<{ success: boolean; message: string }> {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado.' };
+    
+    try {
+      await GoalService.deleteGoal(goalId, session.user.id); // Adicionar verificação de permissão
+      revalidatePath('/goals');
+      revalidatePath('/dashboard');
+    } catch (error) {
+      return { success: false, message: 'Erro ao excluir caixinha.' };
+    }
+    
+    redirect('/goals');
+}
+
+export async function toggleFeaturedGoalAction(goalId: string) {
+    try {
+      await GoalService.toggleFeatured(goalId);
+      revalidatePath('/dashboard');
+      revalidatePath('/goals');
+      return { success: true, message: 'Status de destaque da meta alterado.' };
+    } catch (error) {
+      return { success: false, message: 'Erro ao alterar o status de destaque da meta.' };
+    }
+}
+
+
+// --- Actions para Transações (Depósito/Retirada) ---
+
+export async function depositToGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+
+    const validatedFields = transactionSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    try {
+        await GoalService.createTransaction({
+            ...validatedFields.data,
+            type: 'deposit',
+            userId: session.user.id
+        });
+        revalidatePath(`/goals/${validatedFields.data.goalId}`);
+        revalidatePath('/dashboard');
+        return { success: true };
+    } catch (error) {
+        return { message: 'Falha ao realizar o depósito.' };
+    }
+}
+
+export async function withdrawFromGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+
+    const validatedFields = transactionSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    try {
+        await GoalService.createTransaction({
+            ...validatedFields.data,
+            type: 'withdrawal',
+            userId: session.user.id
+        });
+        revalidatePath(`/goals/${validatedFields.data.goalId}`);
+        revalidatePath('/dashboard');
+        return { success: true };
+    } catch (error: any) {
+        // Captura o erro específico de saldo insuficiente
+        if (error.code === 'INSUFFICIENT_BALANCE') {
+            return { errors: { amount: [error.message] } };
+        }
+        return { message: 'Falha ao realizar a retirada.' };
+    }
+}
+
+// --- Funções de Busca de Dados ---
+
 export async function getGoalsPageData(userId: string) {
-  console.log(`🔍 getGoalsPageData - Iniciando busca para userId: ${userId}`);
   try {
     const userVaults = await VaultService.getUserVaults(userId);
-    console.log(`  - Encontrados ${userVaults.length} cofres para o usuário.`);
-
     const personalGoalsPromise = GoalService.getGoals(userId, 'user');
     const vaultGoalsPromises = userVaults.map(vault => GoalService.getGoals(vault.id, 'vault'));
 
@@ -98,70 +163,30 @@ export async function getGoalsPageData(userId: string) {
       personalGoalsPromise,
       ...vaultGoalsPromises,
     ]);
-    console.log(`  - Encontradas ${personalGoals.length} metas pessoais.`);
     
     const allVaultGoals = vaultGoalsArrays.flat();
-    console.log(`  - Total de metas de cofres encontradas: ${allVaultGoals.length}`);
-
     const allGoals = [...personalGoals, ...allVaultGoals];
-    console.log(`  - Total de metas combinadas: ${allGoals.length}`);
 
-    return {
-      goals: allGoals,
-      vaults: userVaults,
-    };
+    return { goals: allGoals, vaults: userVaults };
   } catch (error) {
-    console.error('❌ getGoalsPageData - Erro ao buscar dados:', error);
     return { goals: [], vaults: [] };
   }
 }
 
 export async function getGoalDetails(goalId: string, userId: string) {
-  const goal = await GoalService.getGoalById(goalId);
-
-  if (!goal) return null;
-
-  // Basic permission check
-  const isOwner = goal.ownerType === 'user' && goal.ownerId === userId;
-  const isVaultMember = goal.ownerType === 'vault' && await VaultService.isUserInVault(userId, goal.ownerId);
-
-  if (!isOwner && !isVaultMember) {
-    return null; 
-  }
-
-  const [transactions, accounts, vaults] = await Promise.all([
-    GoalService.getGoalTransactions(goalId),
-    [], // Placeholder for accounts
-    VaultService.getUserVaults(userId)
-  ]);
-
-  return { goal, transactions, accounts, vaults };
-}
-
-
-// Função para alternar o status de 'destaque' de uma meta
-export async function toggleFeaturedGoalAction(goalId: string) {
-  try {
-    await GoalService.toggleFeatured(goalId);
-    revalidatePath('/dashboard');
-    revalidatePath('/goals');
-    return { success: true, message: 'Status de destaque da meta alterado.' };
-  } catch (error) {
-    return { success: false, message: 'Erro ao alterar o status de destaque da meta.' };
-  }
-}
-
-export async function deleteGoalAction(goalId: string): Promise<{ success: boolean; message: string }> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado.' };
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) return null;
   
-  try {
-    // Adicionar verificação de permissão aqui se necessário
-    await GoalService.deleteGoal(goalId);
-    revalidatePath('/goals');
-  } catch (error) {
-    return { success: false, message: 'Erro ao excluir caixinha.' };
-  }
+    const isOwner = goal.ownerType === 'user' && goal.ownerId === userId;
+    const isVaultMember = goal.ownerType === 'vault' && await VaultService.isUserInVault(userId, goal.ownerId);
   
-  redirect('/goals');
+    if (!isOwner && !isVaultMember) return null;
+
+    const [transactions, accounts, vaults] = await Promise.all([
+      GoalService.getGoalTransactions(goalId),
+      [], // Placeholder
+      VaultService.getUserVaults(userId)
+    ]);
+  
+    return { goal, transactions, accounts, vaults };
 }
