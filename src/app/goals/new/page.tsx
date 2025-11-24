@@ -4,7 +4,13 @@
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
-import { createGoalAction, type GoalActionState } from '@/app/goals/actions';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useToast } from '@/hooks/use-toast';
+import { createGoalAction } from '@/app/goals/actions';
+import { VaultService } from '@/services/vault.service';
+import { cn } from '@/lib/utils';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,21 +22,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Lock, PiggyBank, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { cn } from '@/lib/utils';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { VaultService } from '@/services/vault.service'; // Usaremos para buscar cofres no client-side
+import { ArrowLeft, Lock, PiggyBank, Users } from 'lucide-react';
 
 type Vault = { id: string; name: string };
+type GoalFormState = { errors?: { name?: string[]; emoji?: string[]; targetAmount?: string[]; ownerId?: string[] }; message?: string };
 
-const commonEmojis = [
-  '✈️', '🏡', '🚗', '🎓', '💍', '👶',
-  '🛠️', '🎁', '🎮', '❤️', '💼', '💰'
-];
+const commonEmojis = ['✈️', '🏡', '🚗', '🎓', '💍', '👶', '🛠️', '🎁', '🎮', '❤️', '💼', '💰'];
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -44,72 +43,66 @@ function SubmitButton() {
 export default function NewGoalPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const initialState: GoalActionState = {};
-  const [state, dispatch] = useActionState(createGoalAction, initialState);
   const { toast } = useToast();
   
+  const initialState: GoalFormState = {};
+  const [state, dispatch] = useActionState(createGoalAction, initialState);
+
   const [ownerType, setOwnerType] = useState('user');
   const [ownerId, setOwnerId] = useState('');
-  const [visibility, setVisibility] = useState('private');
   const [selectedEmoji, setSelectedEmoji] = useState('💰');
   const [userVaults, setUserVaults] = useState<Vault[]>([]);
-  const [isLoadingVaults, setIsLoadingVaults] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
     if (status === 'authenticated' && session?.user?.id) {
-      setOwnerId(session.user.id); // Default to personal
+      const currentUserId = session.user.id;
+      // Define o proprietário padrão como o usuário logado
+      setOwnerId(currentUserId);
       
       const fetchVaults = async () => {
-        setIsLoadingVaults(true);
         try {
-          const vaults = await VaultService.getUserVaults(session.user.id);
+          const vaults = await VaultService.getUserVaults(currentUserId);
           setUserVaults(vaults.map(v => ({ id: v.id, name: v.name })));
         } catch (error) {
           console.error("Erro ao buscar cofres:", error);
+          toast({ title: 'Erro', description: 'Não foi possível carregar seus cofres.', variant: 'destructive' });
         } finally {
-          setIsLoadingVaults(false);
+          setIsLoading(false);
         }
       };
       fetchVaults();
     }
-  }, [status, router, session]);
-  
+  }, [status, router, session, toast]);
+
   useEffect(() => {
+    // Atualiza o ownerId quando o tipo de proprietário muda
     if (ownerType === 'user') {
-        if(session?.user?.id) setOwnerId(session.user.id);
-        setVisibility('private');
+      if (session?.user?.id) setOwnerId(session.user.id);
     } else {
-        setOwnerId(''); // Reset when switching to vault
-        setVisibility('shared');
+      // Se houver cofres, define o primeiro como padrão, senão limpa
+      setOwnerId(userVaults.length > 0 ? userVaults[0].id : '');
     }
-  }, [ownerType, session]);
+  }, [ownerType, session, userVaults]);
 
   useEffect(() => {
-    if (state.message && state.errors) {
+    if (state.message || state.errors) {
       toast({
-        title: "Erro de Validação",
-        description: state.message,
-        variant: "destructive",
+        title: state.errors ? "Erro de Validação" : "Aviso",
+        description: state.message || 'Verifique os campos do formulário.',
+        variant: 'destructive',
       });
+    } else if(state.success) {
+        toast({ title: 'Sucesso!', description: 'Sua caixinha foi criada.' });
+        router.push('/goals');
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
-  const handleEmojiSelect = (emoji: string) => {
-    setSelectedEmoji(emoji);
-    const customEmojiInput = document.getElementById('emoji-custom') as HTMLInputElement;
-    if (customEmojiInput) {
-      customEmojiInput.value = '';
-    }
-  }
 
-  const handleCustomEmojiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedEmoji(e.target.value);
-  }
-
-  if (status === 'loading' || isLoadingVaults) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -121,16 +114,19 @@ export default function NewGoalPage() {
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <Button asChild variant="ghost" className="mb-4">
-          <Link href="/dashboard">
+          <Link href="/goals">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Painel
+            Voltar
           </Link>
         </Button>
         <Card>
           <form action={dispatch}>
+            {/* Campos ocultos que serão gerenciados pelo estado do componente */}
             <input type="hidden" name="emoji" value={selectedEmoji} />
             <input type="hidden" name="ownerId" value={ownerId} />
             <input type="hidden" name="ownerType" value={ownerType} />
+            {/* A visibilidade agora é definida na action do servidor */}
+            <input type="hidden" name="visibility" value={ownerType === 'user' ? 'private' : 'shared'} />
 
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-headline">
@@ -138,23 +134,23 @@ export default function NewGoalPage() {
                 Criar Nova Caixinha
               </CardTitle>
               <CardDescription>
-                Defina um novo objetivo para vocês economizarem juntos ou um objetivo pessoal.
+                Decida onde sua nova meta será guardada: em seu espaço pessoal ou em um cofre compartilhado.
               </CardDescription>
             </CardHeader>
+
             <CardContent className="grid gap-6">
-              
               <div className="space-y-3">
-                <Label>Onde esta caixinha ficará?</Label>
+                <Label>Onde guardar a caixinha?</Label>
                  <RadioGroup value={ownerType} onValueChange={setOwnerType} className="grid grid-cols-2 gap-4">
                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", ownerType === 'user' && "border-primary")}>
                       <RadioGroupItem value="user" id="ownerUser" className="sr-only" />
                       <Lock className="mb-3 h-6 w-6" />
-                      Minha Conta Pessoal
+                      Pessoal (Só eu vejo)
                     </Label>
                      <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", ownerType === 'vault' && "border-primary")}>
                       <RadioGroupItem value="vault" id="ownerVault" className="sr-only" />
                       <Users className="mb-3 h-6 w-6" />
-                      Um Cofre Compartilhado
+                      Cofre (Compartilhado)
                     </Label>
                 </RadioGroup>
               </div>
@@ -163,22 +159,24 @@ export default function NewGoalPage() {
                   <div className="space-y-2">
                     <Label htmlFor="vault-select">Selecione o Cofre</Label>
                     <Select value={ownerId} onValueChange={setOwnerId} required>
-                      <SelectTrigger id="vault-select"><SelectValue placeholder="Selecione um cofre..." /></SelectTrigger>
+                      <SelectTrigger id="vault-select">
+                        <SelectValue placeholder={userVaults.length > 0 ? "Selecione um cofre..." : "Nenhum cofre encontrado"} />
+                      </SelectTrigger>
                       <SelectContent>
-                        {userVaults.map(vault => <SelectItem key={vault.id} value={vault.id}>{vault.name}</SelectItem>)}
+                        {userVaults.length > 0 ? (
+                          userVaults.map(vault => <SelectItem key={vault.id} value={vault.id}>{vault.name}</SelectItem>)
+                        ) : (
+                          <SelectItem value="" disabled>Você não participa de nenhum cofre</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    {state?.errors?.ownerId && <p className="text-sm font-medium text-destructive">{state.errors.ownerId[0]}</p>}
                   </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="name">Nome do Sonho</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Ex: Viagem dos Sonhos"
-                  required
-                />
+                <Label htmlFor="name">Nome da Meta</Label>
+                <Input id="name" name="name" placeholder="Ex: Viagem dos Sonhos" required />
                 {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
               </div>
 
@@ -189,11 +187,8 @@ export default function NewGoalPage() {
                     <button
                       key={emoji}
                       type="button"
-                      onClick={() => handleEmojiSelect(emoji)}
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-lg border-2 text-2xl transition-all",
-                        selectedEmoji === emoji ? "border-primary bg-primary/10" : "border-border bg-muted/50"
-                      )}
+                      onClick={() => setSelectedEmoji(emoji)}
+                      className={cn("flex h-12 w-12 items-center justify-center rounded-lg border-2 text-2xl transition-all", selectedEmoji === emoji ? "border-primary bg-primary/10" : "border-border bg-muted/50")}
                     >
                       {emoji}
                     </button>
@@ -204,49 +199,31 @@ export default function NewGoalPage() {
                   placeholder="Ou digite um emoji aqui"
                   maxLength={2}
                   className="mt-2 text-center"
-                  onChange={handleCustomEmojiChange}
+                  onChange={(e) => setSelectedEmoji(e.target.value)}
                 />
                 {state?.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="targetAmount">Valor da Meta</Label>
+                <Label htmlFor="targetAmount">Valor da Meta (R$)</Label>
                 <Input
                   id="targetAmount"
                   name="targetAmount"
                   type="text"
                   inputMode="decimal"
-                  placeholder="20.000,00"
+                  placeholder="R$ 20.000,00"
                   required
                   onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      const numberValue = Number(value) / 100;
-                      e.target.value = numberValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                      let value = e.target.value.replace(/\D/g, '');
+                      if (value) {
+                        const numberValue = Number(value) / 100;
+                        e.target.value = numberValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                      } else {
+                        e.target.value = '';
+                      }
                   }}
                 />
                 {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
-              </div>
-
-               <div className="space-y-3">
-                <Label>Visibilidade</Label>
-                 <RadioGroup name="visibility" value={visibility} className="grid grid-cols-2 gap-4" onValueChange={setVisibility}>
-                    <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", visibility === 'shared' && "border-primary")}>
-                      <RadioGroupItem value="shared" id="shared" className="sr-only" disabled={ownerType === 'user'}/>
-                      <Users className="mb-3 h-6 w-6" />
-                      Compartilhada
-                    </Label>
-                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", visibility === 'private' && "border-primary")}>
-                      <RadioGroupItem value="private" id="private" className="sr-only" />
-                      <Lock className="mb-3 h-6 w-6" />
-                      Privada
-                    </Label>
-                </RadioGroup>
-                <p className="text-sm text-muted-foreground">
-                  {visibility === 'shared' 
-                    ? 'Todos os membros do cofre podem ver e contribuir.' 
-                    : 'Apenas você (ou convidados) poderá ver esta caixinha.'}
-                </p>
-                 {state?.errors?.visibility && <p className="text-sm font-medium text-destructive">{state.errors.visibility[0]}</p>}
               </div>
 
             </CardContent>
