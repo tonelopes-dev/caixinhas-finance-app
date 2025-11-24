@@ -1,6 +1,8 @@
 
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
 import { getGoalsPageData } from './actions';
@@ -18,6 +20,9 @@ export default async function GoalsPage() {
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Metas</h2>
+        <Link href="/goals/new">
+          <Button>Nova Caixinha</Button>
+        </Link>
       </div>
       <GoalsPageClient data={data} />
     </div>

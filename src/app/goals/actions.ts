@@ -45,21 +45,26 @@ async function getWorkspaceId(userId: string): Promise<string> {
   return userId;
 }
 
-
 // Funções de Busca de Dados
 export async function getGoalsPageData(userId: string) {
   try {
-    const workspaceId = await getWorkspaceId(userId);
-    const isPersonalWorkspace = workspaceId === userId;
-    const [goalsForWorkspace, userVaults] = await Promise.all([
-      isPersonalWorkspace ? GoalService.getUserGoals(userId) : GoalService.getVaultGoals(workspaceId),
-      VaultService.getUserVaults(userId)
+    const [personalGoals, userVaults] = await Promise.all([
+        GoalService.getUserGoals(userId),
+        VaultService.getUserVaults(userId)
     ]);
+
+    const vaultGoals = await Promise.all(userVaults.map(v => GoalService.getVaultGoals(v.id)));
+
+    const allGoals = [...personalGoals, ...vaultGoals.flat()];
+
     return {
-      goals: goalsForWorkspace.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
+      goals: allGoals.map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] })),
       vaults: userVaults.map(v => ({ ...v, members: v.members || [] }))
     };
-  } catch (error) { console.error(error); return { goals: [], vaults: [] }; }
+  } catch (error) {
+    console.error('Erro ao buscar dados da página de metas:', error);
+    return { goals: [], vaults: [] };
+  }
 }
 
 export async function getGoalDetails(goalId: string, userId: string) {
