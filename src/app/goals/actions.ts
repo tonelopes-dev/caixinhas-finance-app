@@ -16,7 +16,13 @@ import { authOptions } from '@/lib/auth';
 // Schemas
 const goalSchema = z.object({
   name: z.string().min(1, { message: 'O nome é obrigatório.' }),
-  targetAmount: z.coerce.number().positive({ message: 'O valor alvo deve ser positivo.' }),
+  targetAmount: z.string().min(1, { message: 'O valor alvo é obrigatório.' }).transform((val) => {
+    const num = parseFloat(val);
+    if (isNaN(num) || num <= 0) {
+      throw new Error('O valor alvo deve ser um número positivo.');
+    }
+    return num;
+  }),
   emoji: z.string().min(1, { message: 'O emoji é obrigatório.' }),
   visibility: z.enum(['private', 'shared'])
 });

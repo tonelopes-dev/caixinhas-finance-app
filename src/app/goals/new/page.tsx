@@ -44,7 +44,7 @@ export default function NewGoalPage() {
   const [state, dispatch] = useActionState(createGoalAction, initialState);
   const { toast } = useToast();
   const [visibility, setVisibility] = useState('shared');
-  const [selectedEmoji, setSelectedEmoji] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('💰');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -110,6 +110,7 @@ export default function NewGoalPage() {
                   id="name"
                   name="name"
                   placeholder="Ex: Viagem dos Sonhos"
+                  required
                 />
                 {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
               </div>
@@ -148,7 +149,9 @@ export default function NewGoalPage() {
                   name="targetAmount"
                   type="number"
                   step="0.01"
-                  placeholder="R$ 20.000,00"
+                  min="0.01"
+                  placeholder="20000.00"
+                  required
                 />
                 {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
               </div>

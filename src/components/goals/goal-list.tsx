@@ -7,15 +7,17 @@ import { GoalCard } from './goal-card';
 interface GoalListProps {
   goals: Goal[];
   userVaults: Vault[];
+  userId: string;
   onToggleFeatured: (goalId: string) => void;
-  onGoToVault: (vaultId: string) => void;
+  onGoToWorkspace: (workspaceId: string) => void;
 }
 
 export function GoalList({
   goals,
   userVaults,
+  userId,
   onToggleFeatured,
-  onGoToVault,
+  onGoToWorkspace,
 }: GoalListProps) {
   
   if (!Array.isArray(goals) || goals.length === 0) {
@@ -38,8 +40,9 @@ export function GoalList({
           key={goal.id}
           goal={goal}
           userVaults={userVaults}
+          userId={userId}
           onToggleFeatured={onToggleFeatured}
-          onGoToVault={onGoToVault}
+          onGoToWorkspace={onGoToWorkspace}
         />
       ))}
     </div>
