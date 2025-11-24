@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-// O caminho foi corrigido para refletir a nova estrutura de diretórios
-import { getGoalDetails } from '../../actions'; 
+// O caminho foi corrigido para o local correto do arquivo de actions.
+import { getGoalDetails } from '../actions'; 
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
 // A sintaxe do parâmetro foi ajustada para ser compatível com as versões recentes do Next.js
