@@ -28,7 +28,8 @@ export const authOptions: AuthOptions = {
         const user = await AuthService.login(credentials);
         
         if (user) {
-          return { ...user, id: user.id }; 
+          // Retorna o objeto do usuário completo para ser usado nos callbacks
+          return user;
         }
         return null;
       }
@@ -62,12 +63,17 @@ export const authOptions: AuthOptions = {
       }
       return true;
     },
-    async session({ session, user }) {
-        const dbUser = await AuthService.getUserById(user.id);
+
+    async session({ session, token }) {
+      // A estratégia JWT armazena o ID do usuário no `sub` do token.
+      if (token.sub) {
+        const dbUser = await AuthService.getUserById(token.sub);
         if (dbUser) {
-            session.user = { ...session.user, ...dbUser };
+          // Enriquece o objeto `session.user` com dados do banco de dados
+          session.user = { ...session.user, ...dbUser };
         }
-        return session;
+      }
+      return session;
     },
   },
   pages: {
