@@ -33,10 +33,23 @@ export type GoalActionState = {
   success?: boolean;
 };
 
-// Funções de Busca de Dados (Refatoradas para não usar cookies() diretamente)
+async function getWorkspaceId(userId: string): Promise<string> {
+  const cookieStore = cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+  if (vaultId) {
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      return vaultId;
+    }
+  }
+  return userId;
+}
 
-export async function getGoalsPageData(userId: string, workspaceId: string) {
+
+// Funções de Busca de Dados
+export async function getGoalsPageData(userId: string) {
   try {
+    const workspaceId = await getWorkspaceId(userId);
     const isPersonalWorkspace = workspaceId === userId;
     const [goalsForWorkspace, userVaults] = await Promise.all([
       isPersonalWorkspace ? GoalService.getUserGoals(userId) : GoalService.getVaultGoals(workspaceId),
@@ -49,25 +62,9 @@ export async function getGoalsPageData(userId: string, workspaceId: string) {
   } catch (error) { console.error(error); return { goals: [], vaults: [] }; }
 }
 
-export async function getUserAllGoals(userId: string) {
-    try {
-        const [personalGoals, vaults] = await Promise.all([
-            GoalService.getUserGoals(userId),
-            VaultService.getUserVaults(userId)
-        ]);
-        const vaultGoals = await Promise.all(vaults.map(v => GoalService.getVaultGoals(v.id)));
-
-        return {
-            goals: [...personalGoals, ...vaultGoals.flat()].map(g => ({ ...g, ownerType: g.userId ? 'user' : 'vault', ownerId: g.userId || g.vaultId, participants: g.participants || [] }))
-        };
-    } catch (error) {
-        console.error('Erro ao buscar todas as metas do usuário (pessoais e de cofres):', error);
-        return { goals: [] };
-    }
-}
-
-export async function getGoalDetails(goalId: string, userId: string, workspaceId: string) {
+export async function getGoalDetails(goalId: string, userId: string) {
   try {
+    const workspaceId = await getWorkspaceId(userId);
     const goal = await GoalService.getGoalById(goalId);
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
 
@@ -85,8 +82,9 @@ export async function getGoalDetails(goalId: string, userId: string, workspaceId
   } catch (error) { console.error(error); return null; }
 }
 
-export async function getGoalManageData(goalId: string, userId: string, workspaceId: string) {
+export async function getGoalManageData(goalId: string, userId: string) {
   try {
+      const workspaceId = await getWorkspaceId(userId);
       const goal = await GoalService.getGoalById(goalId);
       if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return null;
 
@@ -99,8 +97,7 @@ export async function getGoalManageData(goalId: string, userId: string, workspac
   } catch (error) { console.error(error); return null; }
 }
 
-// Ações (CRUD) - Estas podem usar cookies() pois são chamadas por formulários, não no render da rota
-
+// Ações (CRUD)
 export async function createGoalAction(prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { message: 'Usuário não autenticado' };
@@ -110,9 +107,7 @@ export async function createGoalAction(prevState: GoalActionState, formData: For
   if (!validatedFields.success) return { errors: validatedFields.error.flatten().fieldErrors };
 
   try {
-    const cookieStore = cookies();
-    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
-    const workspaceId = vaultIdCookie?.value || userId;
+    const workspaceId = await getWorkspaceId(userId);
     await GoalService.createGoal({ ...validatedFields.data, ownerId: workspaceId, ownerType: workspaceId === userId ? 'user' : 'vault' });
   } catch (error) { console.error(error); return { message: 'Erro ao criar caixinha.' }; }
 
@@ -165,10 +160,8 @@ export async function depositToGoalAction(goalId: string, amount: number, source
   const userId = session.user.id;
 
   try {
+    const workspaceId = await getWorkspaceId(userId);
     const goal = await GoalService.getGoalById(goalId);
-    const cookieStore = cookies();
-    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
-    const workspaceId = vaultIdCookie?.value || userId;
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
 
     await TransactionService.createTransaction({ userId: goal.userId, vaultId: goal.vaultId, date: new Date(), description: description || `Depósito na caixinha ${goal.name}`, amount, type: 'transfer', category: 'Caixinha', sourceAccountId, destinationAccountId: null, goalId, actorId: userId });
@@ -185,10 +178,8 @@ export async function withdrawFromGoalAction(goalId: string, amount: number, des
   const userId = session.user.id;
 
   try {
+    const workspaceId = await getWorkspaceId(userId);
     const goal = await GoalService.getGoalById(goalId);
-    const cookieStore = cookies();
-    const vaultIdCookie = cookieStore.get('CAIXINHAS_VAULT_ID');
-    const workspaceId = vaultIdCookie?.value || userId;
     if (!goal || (goal.userId !== workspaceId && goal.vaultId !== workspaceId)) return { success: false, message: 'Permissão negada.' };
     if (goal.currentAmount < amount) return { success: false, message: 'Saldo insuficiente.' };
 
