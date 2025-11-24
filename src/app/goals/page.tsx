@@ -17,6 +17,14 @@ export default async function GoalsPage() {
 
   const data = await getGoalsPageData(session.user.id);
 
+  if (!data) {
+    return (
+      <div className="container max-w-5xl mx-auto p-4 md:p-8">
+        <p className="text-center text-muted-foreground">Erro ao carregar dados. Por favor, tente novamente.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container max-w-5xl mx-auto p-4 md:p-8">
       <Link href="/dashboard" className="inline-block">
@@ -31,7 +39,7 @@ export default async function GoalsPage() {
           <Button>Nova Caixinha</Button>
         </Link>
       </div>
-      <GoalsPageClient {...data} userId={session.user.id} />
+      <GoalsPageClient goals={data.goals} vaults={data.vaults} userId={session.user.id} />
     </div>
   );
 }

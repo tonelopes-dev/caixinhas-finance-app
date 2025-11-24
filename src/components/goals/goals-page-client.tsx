@@ -49,17 +49,18 @@ type Vault = {
 };
 
 type GoalsPageClientProps = {
-  data: {
-    goals: Goal[];
-    vaults: Vault[];
-  };
+  goals: Goal[];
+  vaults: Vault[];
   userId: string;
 };
 
-export function GoalsPageClient({ data, userId }: GoalsPageClientProps) {
+export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPageClientProps) {
   const { toast } = useToast();
-  const [goals, setGoals] = useState(data.goals || []);
-  const vaults = data.vaults || [];
+  const [goals, setGoals] = useState(initialGoals || []);
+
+  console.log('🎯 GoalsPageClient - Goals:', goals?.length, goals);
+  console.log('🎯 GoalsPageClient - Vaults:', vaults?.length);
+  console.log('🎯 GoalsPageClient - UserId:', userId);
 
   const toggleFeatured = async (goalId: string) => {
     // Atualização otimista
