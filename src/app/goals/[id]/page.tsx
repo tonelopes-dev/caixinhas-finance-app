@@ -6,14 +6,14 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions';
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-export default async function GoalDetailPage({ params }: { params: { id: string } }) {
+export default async function GoalDetailPage({ params: { id } }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect('/login');
   }
 
-  const data = await getGoalDetails(params.id, session.user.id);
+  const data = await getGoalDetails(id, session.user.id);
 
   if (!data) {
     notFound();
