@@ -216,24 +216,17 @@ async function main() {
     // ============================================
     // 9. CRIAR CONVITES (VAULT SERVICE)
     // ============================================
-    console.log('📧 Criando convites...');
+    console.log('📧 Criando convites (com notificações)...');
     
-    // Convite para um usuário existente
+    // Convite 1: Carlos para o cofre de Negócios
+    // Usa VaultService.createInvitation que já cria a notificação automaticamente
     await VaultService.createInvitation(businessVault.id, mainUser.id, additionalUsers[1].email);
     
-    // Criar um convite para o usuário 'Carlos' para o cofre da família
-    await prisma.invitation.create({
-        data: {
-          type: 'vault',
-          targetId: familyVault.id,
-          targetName: familyVault.name,
-          senderId: mainUser.id,
-          receiverId: additionalUsers[1].id,
-          status: 'pending'
-        }
-    });
+    // Convite 2: Julia para o cofre da Família
+    // Também usar VaultService para garantir que notificação seja criada
+    await VaultService.createInvitation(familyVault.id, mainUser.id, additionalUsers[2].email);
 
-    console.log('✅ Convites criados');
+    console.log('✅ Convites e notificações criados');
 
 
     // ============================================
