@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Header from '@/components/dashboard/header';
 import GoalBuckets from '@/components/dashboard/goal-buckets';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import { AnimatedDiv } from '@/components/ui/animated-div';
@@ -55,9 +54,7 @@ export function DashboardClient({
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header user={currentUser} partner={partner} />
-      <main className="flex-1 p-4 md:p-6 lg:p-8">
+    <main className="flex-1 p-4 md:p-6 lg:p-8">
         <div className="mx-auto w-full">
           <AnimatedDiv>
             <div className="flex flex-col gap-2 mb-8">
@@ -105,8 +102,6 @@ export function DashboardClient({
           </div>
         </div>
       </main>
-      <PwaPrompt />
-    </div>
   );
 }
 

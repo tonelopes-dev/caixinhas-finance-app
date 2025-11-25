@@ -8,6 +8,8 @@ import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
 import { GoalService } from '@/services/goal.service';
 import { withPageAccess } from '@/lib/page-access';
+import { PwaPrompt } from '@/components/pwa-prompt';
+import Header from '@/components/dashboard/header';
 import type { User, Vault } from '@/lib/definitions';
 
 export default async function DashboardPage() {
@@ -46,16 +48,20 @@ export default async function DashboardPage() {
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
-    <DashboardClient
-      currentUser={currentUser}
-      partner={null}
-      workspaceId={workspaceId}
-      workspaceName={workspaceName}
-      isPersonalWorkspace={workspaceId === userId}
-      accounts={accounts}
-      goals={allGoals || []}
-      transactions={recentTransactions || []}
-      categories={categories || []}
-    />
+    <div className="flex min-h-screen w-full flex-col bg-background">
+      <Header user={currentUser} partner={null} />
+      <DashboardClient
+        currentUser={currentUser}
+        partner={null}
+        workspaceId={workspaceId}
+        workspaceName={workspaceName}
+        isPersonalWorkspace={workspaceId === userId}
+        accounts={accounts}
+        goals={allGoals || []}
+        transactions={recentTransactions || []}
+        categories={categories || []}
+      />
+      <PwaPrompt />
+    </div>
   );
 }

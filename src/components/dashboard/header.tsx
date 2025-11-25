@@ -1,6 +1,4 @@
 
-'use client';
-
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
@@ -17,15 +15,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
-import { useRouter } from 'next/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
+import { NotificationService } from '@/services/notification.service';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { signOut } from 'next-auth/react';
+import { HeaderClient } from './header-client';
 
 
 type HeaderProps = {
@@ -33,22 +31,12 @@ type HeaderProps = {
   partner: User | null; // Partner can be null
 };
 
-export default function Header({ user, partner }: HeaderProps) {
-  const router = useRouter();
-  
-  const handleLogout = async () => {
-    // Limpar localStorage/sessionStorage por compatibilidade
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('CAIXINHAS_USER_ID');
-      sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
-    }
-    
-    // Usar NextAuth signOut
-    await signOut({ 
-      callbackUrl: '/login',
-      redirect: true
-    });
-  }
+export default async function Header({ user, partner }: HeaderProps) {
+  // Buscar notificações não lidas diretamente do service
+  const [unreadNotifications, unreadCount] = await Promise.all([
+    NotificationService.getUnreadNotifications(user.id),
+    NotificationService.getUnreadCount(user.id),
+  ]);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -82,84 +70,12 @@ export default function Header({ user, partner }: HeaderProps) {
             </Link>
           </Button>
           
-          <NotificationsDropdown />
+          <NotificationsDropdown 
+            initialNotifications={unreadNotifications}
+            initialUnreadCount={unreadCount}
+          />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-2 md:pr-4">
-                <Avatar className="h-9 w-9 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
-                  <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="woman portrait"/>
-                  <AvatarFallback>{user.name.split(' ')[0]}</AvatarFallback>
-                </Avatar>
-                <span className="hidden md:inline font-medium text-sm">Olá, {user.name.split(' ')[0]}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                  <Link href="/patrimonio">
-                      <Wallet className="mr-2 h-4 w-4" />
-                      <span>Patrimônio</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/accounts">
-                      <Landmark className="mr-2 h-4 w-4" />
-                      <span>Contas</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/reports">
-                      <FileText className="mr-2 h-4 w-4" />
-                      <span>Relatórios</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/transactions">
-                      <ArrowRightLeft className="mr-2 h-4 w-4" />
-                      <span>Transações</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/goals">
-                  <Gift className="mr-2 h-4 w-4" />
-                  <span>Caixinhas</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Perfil</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/tutorial">
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      <span>Tutorial</span>
-                  </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                  <Link href="/vaults">
-                      <Building2 className="mr-2 h-4 w-4" />
-                      <span>Mudar de Espaço</span>
-                  </Link>
-              </DropdownMenuItem>
-              <ThemeSwitcher />
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <HeaderClient user={user} />
         </div>
       </div>
     </header>
