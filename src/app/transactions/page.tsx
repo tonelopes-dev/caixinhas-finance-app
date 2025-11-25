@@ -11,7 +11,7 @@ import { AccountService } from '@/services/account.service';
 import { CategoryService } from '@/services/category.service';
 import { TransactionService } from '@/services/transaction.service';
 import { VaultService } from '@/services/vault.service';
-import { getUserAllGoals } from '@/app/goals/actions';
+import { getUserAllGoals } from '@/app/(private)/goals/actions';
 
 export default async function TransactionsPage() {
   const session = await getServerSession(authOptions);
@@ -30,15 +30,13 @@ export default async function TransactionsPage() {
   const [
     transactions, 
     accounts, 
-    goals, 
-    categories, 
-    userVaults
+    goalsData,
+    categories 
   ] = await Promise.all([
     TransactionService.getTransactions(workspaceId, ownerType),
-    AccountService.getUserAccounts(userId), // Todas as contas do usuário
-    getUserAllGoals(userId).then(data => data.goals), // Todas as metas do usuário
+    AccountService.getUserAccounts(userId),
+    getUserAllGoals(userId),
     CategoryService.getUserCategories(userId),
-    VaultService.getUserVaults(userId)
   ]);
 
   return (
@@ -54,9 +52,10 @@ export default async function TransactionsPage() {
         <TransactionsPageClient
           initialTransactions={transactions}
           allAccounts={accounts}
-          allGoals={goals as any[]}
+          allGoals={goalsData.goals}
           allCategories={categories}
           workspaceId={workspaceId}
+          userVaults={goalsData.vaults}
         />
       </div>
     </div>

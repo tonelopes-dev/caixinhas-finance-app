@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { GoalList } from '@/components/goals/goal-list';
-import { toggleFeaturedGoalAction } from '@/app/goals/actions';
+import { toggleFeaturedGoalAction } from '@/app/(private)/goals/actions';
 import { Button } from '@/components/ui/button';
 import {
   Card,

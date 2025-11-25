@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useToast } from '@/hooks/use-toast';
-import { createGoalAction } from '@/app/goals/actions';
+import { createGoalAction } from '@/app/(private)/goals/actions';
 import { VaultService } from '@/services/vault.service';
 import { cn } from '@/lib/utils';
 

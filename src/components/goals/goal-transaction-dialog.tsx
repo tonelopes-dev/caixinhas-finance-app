@@ -1,149 +1,96 @@
+'use client';
 
-"use client"
-
-import React, { useRef, useState } from 'react';
-import { depositToGoalAction, withdrawFromGoalAction } from '@/app/goals/actions';
+import React, { useEffect, useState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Account } from '@/lib/definitions';
+import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
+
+const initialState = {
+  message: '',
+  errors: undefined,
+  success: false,
+};
 
 type GoalTransactionDialogProps = {
   type: 'deposit' | 'withdrawal';
   goalId: string;
-  accounts: Account[];
   onComplete?: () => void;
 };
 
-export function GoalTransactionDialog({ type, goalId, accounts, onComplete }: GoalTransactionDialogProps) {
-  const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const amount = parseFloat(formData.get('amount') as string);
-    const description = formData.get('description') as string || '';
-    const accountId = formData.get('accountId') as string;
-
-    if (!accountId) {
-        toast({ title: "Erro", description: "Por favor, selecione uma conta.", variant: "destructive" });
-        setIsSubmitting(false);
-        return;
-    }
-
-    try {
-      let result;
-      if (type === 'deposit') {
-        result = await depositToGoalAction(goalId, amount, accountId, description);
-      } else {
-        result = await withdrawFromGoalAction(goalId, amount, accountId, description);
-      }
-
-      if (result.success) {
-        toast({
-          title: "Sucesso!",
-          description: result.message,
-        });
-        formRef.current?.reset();
-        setOpen(false);
-        onComplete?.();
-      } else {
-        toast({
-          title: "Erro",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const title = type === 'deposit' ? 'Guardar Dinheiro' : 'Retirar Dinheiro';
-  const description = type === 'deposit' ? 'Mova dinheiro de uma conta para a sua caixinha.' : 'Resgate dinheiro da sua caixinha para uma conta.';
-  const buttonText = type === 'deposit' ? 'Guardar Dinheiro' : 'Retirar Dinheiro';
-  const ButtonIcon = type === 'deposit' ? ArrowDown : ArrowUp;
-  const accountLabel = type === 'deposit' ? 'De qual conta vai sair o dinheiro?' : 'Para qual conta vai o dinheiro?';
-  
+function SubmitButton() {
+  const { pending } = useFormStatus();
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Salvando...' : 'Salvar'}
+    </Button>
+  );
+}
+
+export function GoalTransactionDialog({ type, goalId, onComplete }: GoalTransactionDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+
+  const actionToUse = type === 'deposit' ? depositToGoalAction : withdrawFromGoalAction;
+  const [state, formAction] = useFormState(actionToUse, initialState);
+
+  const Icon = type === 'deposit' ? ArrowUp : ArrowDown;
+  const title = type === 'deposit' ? 'Fazer um depósito' : 'Fazer uma retirada';
+  const buttonLabel = type === 'deposit' ? 'Depositar' : 'Retirar';
+
+  useEffect(() => {
+    if (state.success) {
+      toast({ title: 'Sucesso!', description: state.message });
+      setIsOpen(false);
+      onComplete?.();
+    } else if (state.message) {
+      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast, onComplete]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="flex-1" variant={type === 'deposit' ? 'default' : 'secondary'}>
-            <ButtonIcon className="mr-2 h-4 w-4" />
-            {buttonText}
+        <Button variant={type === 'deposit' ? 'default' : 'secondary'} size="sm">
+          <Icon className="mr-2 h-4 w-4" />
+          {buttonLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {description}
+            Insira o valor que deseja {type === 'deposit' ? 'depositar' : 'retirar'}.
           </DialogDescription>
         </DialogHeader>
-        <form ref={formRef} onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="amount">
-                      Valor
-                  </Label>
-                  <Input id="amount" name="amount" type="number" step="0.01" placeholder="R$ 0,00" required />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="accountId">{accountLabel}</Label>
-                    <Select name="accountId" required>
-                        <SelectTrigger id="accountId">
-                            <SelectValue placeholder="Selecione a conta" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {accounts.map(account => (
-                                <SelectItem key={account.id} value={account.id}>
-                                    {account.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">
-                      Descrição (opcional)
-                  </Label>
-                  <Input id="description" name="description" type="text" placeholder="Ex: Adiantamento do 13º" />
-                </div>
+        <form action={formAction}>
+          <input type="hidden" name="goalId" value={goalId} />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amount" className="text-right">Valor</Label>
+              <Input id="amount" name="amount" placeholder="R$ 0,00" className="col-span-3" />
+              {state.errors?.amount && <p className="col-span-4 text-right text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
             </div>
-            <DialogFooter>
-                <DialogClose asChild>
-                    <Button type="button" variant="ghost">Cancelar</Button>
-                </DialogClose>
-                <Button type="submit" disabled={isSubmitting} variant={type === 'withdrawal' ? 'destructive' : 'default'}>
-                  {isSubmitting ? 'Salvando...' : buttonText}
-                </Button>
-            </DialogFooter>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">Descrição</Label>
+              <Input id="description" name="description" placeholder="Ex: Férias de verão (opcional)" className="col-span-3" />
+               {state.errors?.description && <p className="col-span-4 text-right text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="ghost">Cancelar</Button>
+            </DialogClose>
+            <SubmitButton />
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

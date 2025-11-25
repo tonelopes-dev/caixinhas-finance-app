@@ -17,16 +17,15 @@ export type GoalFormState = {
   errors?: { [key: string]: string[] | undefined };
 };
 
-export type TransactionFormState = GoalFormState; // Reutilizando a estrutura
+export type TransactionFormState = GoalFormState;
 
-// --- FUNÇÕES DE PRÉ-PROCESSAMENTO E ESQUEMAS ZOD ---
-
+// --- ESQUEMAS ZOD ---
 const moneyPreprocess = (val: unknown) => {
   if (typeof val === 'string' && val) {
     const sanitizedString = val.replace(/\./g, '').replace(',', '.');
     return parseFloat(sanitizedString);
   }
-  if (val === '' || val === null || val === undefined) return 0; // Trata como 0 para ser pego pelo .positive()
+  if (val === '' || val === null || val === undefined) return 0;
   return val;
 };
 
@@ -41,6 +40,10 @@ const goalSchema = z.object({
   visibility: z.enum(['private', 'shared']),
   ownerType: z.enum(['user', 'vault']),
   ownerId: z.string().min(1, 'O proprietário é obrigatório.'),
+});
+
+const updateGoalSchema = goalSchema.omit({ ownerType: true, ownerId: true }).extend({
+  id: z.string().min(1, "ID da caixinha é obrigatório"),
 });
 
 const transactionSchema = z.object({
@@ -69,9 +72,32 @@ export async function createGoalAction(prevState: GoalFormState, formData: FormD
 
   revalidatePath('/goals');
   revalidatePath('/dashboard');
-  return { success: true, message: 'Caixinha criada com sucesso!' };
+  redirect('/goals');
 }
 
+export async function updateGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { message: "Usuário não autenticado" };
+
+  const validatedFields = updateGoalSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  try {
+    // TODO: Adicionar verificação de permissão aqui
+    await GoalService.updateGoal(validatedFields.data.id, validatedFields.data);
+  } catch (error) {
+    return { message: "Ocorreu um erro ao atualizar a caixinha." };
+  }
+
+  revalidatePath("/goals");
+  revalidatePath(`/goals/${validatedFields.data.id}`);
+  revalidatePath(`/goals/${validatedFields.data.id}/manage`);
+  revalidatePath("/dashboard");
+  return { success: true, message: "Caixinha atualizada com sucesso!" };
+}
 
 async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw'): Promise<TransactionFormState> {
     const session = await getServerSession(authOptions);
@@ -107,7 +133,6 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
     return { success: true, message: `${type === 'deposit' ? 'Depósito' : 'Retirada'} realizado com sucesso!` };
 }
 
-
 export async function depositToGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
     return handleTransaction(formData, 'deposit');
 }
@@ -116,24 +141,49 @@ export async function withdrawFromGoalAction(prevState: TransactionFormState, fo
     return handleTransaction(formData, 'withdraw');
 }
 
+export async function deleteGoalAction(goalId: string): Promise<{ success: boolean; message: string }> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado.' };
+  
+  try {
+    // TODO: Adicionar verificação de permissão aqui
+    await GoalService.deleteGoal(goalId);
+    revalidatePath('/goals');
+    revalidatePath('/dashboard');
+    return { success: true, message: 'Caixinha excluída com sucesso.' };
+  } catch (error) {
+    return { success: false, message: 'Erro ao excluir caixinha.' };
+  }
+}
 
 // --- FUNÇÕES DE BUSCA DE DADOS ---
+
+export async function getGoalManageData(goalId: string, userId: string) {
+  const goal = await GoalService.getGoalById(goalId);
+  if (!goal) return null;
+
+  const isOwner = goal.ownerType === 'user' && goal.ownerId === userId;
+  const isVaultMember = goal.ownerType === 'vault' && await VaultService.isUserInVault(userId, goal.ownerId);
+  if (!isOwner && !isVaultMember) return null;
+
+  const currentVault = goal.ownerType === 'vault' ? await VaultService.getVaultById(goal.ownerId) : null;
+
+  return { goal, currentVault };
+}
+
+export async function getUserAllGoals(userId: string) {
+  const personalGoals = await GoalService.getGoals(userId, 'user');
+  const userVaults = await VaultService.getUserVaults(userId);
+  const vaultGoalsPromises = userVaults.map(v => GoalService.getGoals(v.id, 'vault'));
+  const vaultGoals = (await Promise.all(vaultGoalsPromises)).flat();
+  return { goals: [...personalGoals, ...vaultGoals] };
+}
 
 export async function getGoalsPageData(userId: string) {
   try {
     const userVaults = await VaultService.getUserVaults(userId);
-    const personalGoalsPromise = GoalService.getGoals(userId, 'user');
-    const vaultGoalsPromises = userVaults.map(vault => GoalService.getGoals(vault.id, 'vault'));
-
-    const [personalGoals, ...vaultGoalsArrays] = await Promise.all([
-      personalGoalsPromise,
-      ...vaultGoalsPromises,
-    ]);
-    
-    const allVaultGoals = vaultGoalsArrays.flat();
-    const allGoals = [...personalGoals, ...allVaultGoals];
-
-    return { goals: allGoals, vaults: userVaults };
+    const { goals } = await getUserAllGoals(userId);
+    return { goals, vaults: userVaults };
   } catch (error) {
     console.error('❌ getGoalsPageData - Erro ao buscar dados:', error);
     return { goals: [], vaults: [] };
@@ -153,11 +203,8 @@ export async function getGoalDetails(goalId: string, userId: string) {
     VaultService.getUserVaults(userId)
   ]);
 
-  return { goal, transactions, accounts: [], vaults }; // Accounts é placeholder
+  return { goal, transactions, accounts: [], vaults };
 }
-
-
-// --- OUTRAS ACTIONS ---
 
 export async function toggleFeaturedGoalAction(goalId: string) {
   try {
@@ -168,19 +215,4 @@ export async function toggleFeaturedGoalAction(goalId: string) {
   } catch (error) {
     return { success: false, message: 'Erro ao alterar o destaque.' };
   }
-}
-
-export async function deleteGoalAction(goalId: string): Promise<{ success: boolean; message: string }> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado.' };
-  
-  try {
-    // TODO: Adicionar verificação de permissão aqui
-    await GoalService.deleteGoal(goalId);
-    revalidatePath('/goals');
-  } catch (error) {
-    return { success: false, message: 'Erro ao excluir caixinha.' };
-  }
-  
-  redirect('/goals');
 }

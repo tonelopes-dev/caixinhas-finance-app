@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Lock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { updateGoalAction, type GoalActionState } from '@/app/goals/actions';
+import { updateGoalAction } from '@/app/(private)/goals/actions';
 import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
 import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
@@ -35,6 +34,8 @@ interface ManageGoalClientProps {
   currentVault: Vault | null;
 }
 
+const initialState = { message: '', errors: undefined, success: false };
+
 export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoalClientProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -42,29 +43,26 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
   const [visibility, setVisibility] = useState<Goal['visibility']>(goal.visibility || 'shared');
   const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
 
-  const initialState: GoalActionState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(updateGoalAction, initialState);
+  const [state, formAction] = useFormState(updateGoalAction, initialState);
 
   useEffect(() => {
-    if (state?.message && !state.errors) {
+    if (state.success) {
       toast({ title: "Sucesso!", description: state.message });
-    } else if (state?.message && state.errors) {
-      toast({ title: "Erro de Validação", description: state.message, variant: 'destructive' });
+    } else if (state.message) {
+      toast({ title: "Erro", description: state.message, variant: 'destructive' });
     }
   }, [state, toast]);
 
-  // Define participantes - por enquanto apenas o owner até implementarmos o sistema completo
   const participants = [{
     id: currentUser.id,
-    name: currentUser.name,
-    avatarUrl: currentUser.avatarUrl,
+    name: currentUser.name || '',
+    avatarUrl: currentUser.image || '',
     role: 'owner' as const
   }];
 
-  // Lógica de permissão
   const isOwner = goal.userId 
-    ? goal.userId === currentUser.id  // Goal pessoal
-    : currentVault?.ownerId === currentUser.id; // Goal de vault
+    ? goal.userId === currentUser.id
+    : currentVault?.ownerId === currentUser.id;
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
     if (newVisibility !== visibility) {
@@ -94,17 +92,17 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="name">Nome da Caixinha</Label>
               <Input id="name" name="name" defaultValue={goal.name} />
-              {state?.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
+              {state.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
             </div>
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="emoji">Ícone (Emoji)</Label>
-              <Input id="emoji" name="emoji" defaultValue={goal.emoji} maxLength={2} className="text-center text-2xl h-14" />
-              {state?.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
+              <Input id="emoji" name="emoji" defaultValue={goal.emoji || ''} maxLength={2} className="text-center text-2xl h-14" />
+              {state.errors?.emoji && <p className="text-sm font-medium text-destructive">{state.errors.emoji[0]}</p>}
             </div>
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="targetAmount">Valor da Meta</Label>
-              <Input id="targetAmount" name="targetAmount" type="number" step="0.01" defaultValue={goal.targetAmount} className="h-14"/>
-              {state?.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
+              <Input id="targetAmount" name="targetAmount" type="number" step="0.01" defaultValue={goal.targetAmount || 0} className="h-14"/>
+              {state.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
             </div>
           </div>
         

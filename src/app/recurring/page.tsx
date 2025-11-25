@@ -10,7 +10,7 @@ import { getRecurringData } from './actions';
 import { cookies } from 'next/headers';
 import { AccountService } from '@/services/account.service';
 import { CategoryService } from '@/services/category.service';
-import { getUserAllGoals } from '../goals/actions';
+import { getUserAllGoals } from '@/app/(private)/goals/actions';
 
 export default async function RecurringPage() {
   const session = await getServerSession(authOptions);

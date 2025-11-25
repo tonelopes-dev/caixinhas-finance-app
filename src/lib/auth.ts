@@ -25,11 +25,10 @@ export const authOptions: AuthOptions = {
         if (!credentials) {
             return null;
         }
-        const user = await AuthService.login(credentials);
+        const result = await AuthService.login(credentials);
         
-        if (user) {
-          // Retorna o objeto do usuário completo para ser usado nos callbacks
-          return user;
+        if (result.user) {
+          return result.user;
         }
         return null;
       }
@@ -65,11 +64,9 @@ export const authOptions: AuthOptions = {
     },
 
     async session({ session, token }) {
-      // A estratégia JWT armazena o ID do usuário no `sub` do token.
       if (token.sub) {
         const dbUser = await AuthService.getUserById(token.sub);
         if (dbUser) {
-          // Enriquece o objeto `session.user` com dados do banco de dados
           session.user = { ...session.user, ...dbUser };
         }
       }
@@ -79,9 +76,7 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: '/login',
     signOut: '/login',
-    error: '/login', // Error code passed in query string as ?error=
-    // verifyRequest: '/auth/verify-request', // (used for email-based verification)
-    // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
+    error: '/login', 
   },
   session: {
     strategy: 'jwt',
