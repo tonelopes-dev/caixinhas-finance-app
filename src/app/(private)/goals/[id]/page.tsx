@@ -7,15 +7,15 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions'; 
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-// A sintaxe do parâmetro foi ajustada para ser compatível com as versões recentes do Next.js
-export default async function GoalDetailPage({ params }: { params: { id: string } }) {
+// A sintaxe do parâmetro foi ajustada para desestruturar o id diretamente.
+export default async function GoalDetailPage({ params: { id } }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect('/login');
   }
 
-  const data = await getGoalDetails(params.id, session.user.id);
+  const data = await getGoalDetails(id, session.user.id);
 
   if (!data) {
     notFound();
