@@ -3,12 +3,12 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-// O caminho foi corrigido para o local correto do arquivo de actions.
 import { getGoalDetails } from '../actions'; 
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-// A sintaxe do parâmetro foi ajustada para desestruturar o id diretamente.
-export default async function GoalDetailPage({ params: { id } }: { params: { id: string } }) {
+// A anotação de tipo foi removida para permitir a inferência pelo Next.js
+export default async function GoalDetailPage({ params }) {
+  const id = params.id;
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {

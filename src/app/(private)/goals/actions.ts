@@ -46,8 +46,10 @@ const updateGoalSchema = goalSchema.omit({ ownerType: true, ownerId: true }).ext
   id: z.string().min(1, "ID da caixinha é obrigatório"),
 });
 
-const transactionSchema = z.object({
+// Esquema para transações de depósito/retirada
+const goalTransactionSchema = z.object({
     goalId: z.string().min(1, 'A meta é obrigatória.'),
+    accountId: z.string().min(1, 'A conta é obrigatória'),
     amount: z.preprocess(moneyPreprocess, positiveNumberSchema),
     description: z.string().optional(),
 });
@@ -65,9 +67,11 @@ export async function createGoalAction(prevState: GoalFormState, formData: FormD
   }
 
   try {
-    await GoalService.createGoal({ ...validatedFields.data, userId: session.user.id });
+    // CORRIGIDO: Usa a estrutura de dados correta para createGoal
+    await GoalService.createGoal(validatedFields.data);
   } catch (error) {
-    return { message: 'Ocorreu um erro ao criar a caixinha.' };
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
+    return { message: `Ocorreu um erro ao criar a caixinha: ${errorMessage}` };
   }
 
   revalidatePath('/goals');
@@ -89,7 +93,8 @@ export async function updateGoalAction(prevState: GoalFormState, formData: FormD
     // TODO: Adicionar verificação de permissão aqui
     await GoalService.updateGoal(validatedFields.data.id, validatedFields.data);
   } catch (error) {
-    return { message: "Ocorreu um erro ao atualizar a caixinha." };
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
+    return { message: `Ocorreu um erro ao atualizar a caixinha: ${errorMessage}` };
   }
 
   revalidatePath("/goals");
@@ -99,32 +104,40 @@ export async function updateGoalAction(prevState: GoalFormState, formData: FormD
   return { success: true, message: "Caixinha atualizada com sucesso!" };
 }
 
+// CORRIGIDO: Lógica de transação reescrita para usar o TransactionService corretamente
 async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw'): Promise<TransactionFormState> {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+    const userId = session?.user?.id;
+    if (!userId) return { message: 'Usuário não autenticado' };
 
-    const validatedFields = transactionSchema.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = goalTransactionSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
         return { errors: validatedFields.error.flatten().fieldErrors };
     }
 
-    const { amount, goalId, description } = validatedFields.data;
-    const finalAmount = type === 'withdraw' ? -amount : amount;
+    const { amount, goalId, accountId, description } = validatedFields.data;
+    
+    const transactionData = {
+        amount,
+        goalId,
+        actorId: userId,
+        type: 'transfer' as 'transfer',
+        date: new Date(),
+        category: type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha',
+        description: description || (type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha'),
+        sourceAccountId: type === 'deposit' ? accountId : null,
+        destinationAccountId: type === 'withdraw' ? accountId : null,
+    };
 
     try {
-        await TransactionService.createTransaction({
-            amount: finalAmount,
-            goalId,
-            userId: session.user.id,
-            description: description || (type === 'deposit' ? 'Depósito' : 'Retirada'),
-        });
-        
-        await GoalService.updateBalance(goalId, finalAmount);
+        // O TransactionService.createTransaction já lida com a atualização dos saldos
+        await TransactionService.createTransaction(transactionData);
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
         console.error(`❌ Erro ao processar ${type}:`, error);
-        return { message: `Ocorreu um erro ao realizar o ${type}.` };
+        return { message: `Ocorreu um erro ao realizar o ${type}: ${errorMessage}` };
     }
 
     revalidatePath('/goals');
@@ -152,29 +165,36 @@ export async function deleteGoalAction(goalId: string): Promise<{ success: boole
     revalidatePath('/dashboard');
     return { success: true, message: 'Caixinha excluída com sucesso.' };
   } catch (error) {
-    return { success: false, message: 'Erro ao excluir caixinha.' };
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
+    return { success: false, message: `Erro ao excluir caixinha: ${errorMessage}` };
   }
 }
 
 // --- FUNÇÕES DE BUSCA DE DADOS ---
 
+// CORRIGIDO: usa VaultService.isMember
 export async function getGoalManageData(goalId: string, userId: string) {
   const goal = await GoalService.getGoalById(goalId);
   if (!goal) return null;
 
-  const isOwner = goal.ownerType === 'user' && goal.ownerId === userId;
-  const isVaultMember = goal.ownerType === 'vault' && await VaultService.isUserInVault(userId, goal.ownerId);
-  if (!isOwner && !isVaultMember) return null;
+  let hasPermission = false;
+  if (goal.vaultId) {
+      hasPermission = await VaultService.isMember(goal.vaultId, userId);
+  } else if (goal.userId) {
+      hasPermission = goal.userId === userId;
+  }
 
-  const currentVault = goal.ownerType === 'vault' ? await VaultService.getVaultById(goal.ownerId) : null;
+  if (!hasPermission) return null;
+
+  const currentVault = goal.vaultId ? await VaultService.getVaultById(goal.vaultId) : null;
 
   return { goal, currentVault };
 }
 
 export async function getUserAllGoals(userId: string) {
-  const personalGoals = await GoalService.getGoals(userId, 'user');
+  const personalGoals = await GoalService.getUserGoals(userId);
   const userVaults = await VaultService.getUserVaults(userId);
-  const vaultGoalsPromises = userVaults.map(v => GoalService.getGoals(v.id, 'vault'));
+  const vaultGoalsPromises = userVaults.map(v => GoalService.getVaultGoals(v.id));
   const vaultGoals = (await Promise.all(vaultGoalsPromises)).flat();
   return { goals: [...personalGoals, ...vaultGoals] };
 }
@@ -190,19 +210,26 @@ export async function getGoalsPageData(userId: string) {
   }
 }
 
+// CORRIGIDO: usa isMember e getTransactionsForGoal
 export async function getGoalDetails(goalId: string, userId: string) {
   const goal = await GoalService.getGoalById(goalId);
   if (!goal) return null;
 
-  const isOwner = goal.ownerType === 'user' && goal.ownerId === userId;
-  const isVaultMember = goal.ownerType === 'vault' && await VaultService.isUserInVault(userId, goal.ownerId);
-  if (!isOwner && !isVaultMember) return null;
+  let hasPermission = false;
+  if (goal.vaultId) {
+      hasPermission = await VaultService.isMember(goal.vaultId, userId);
+  } else if (goal.userId) {
+      hasPermission = goal.userId === userId;
+  }
+
+  if (!hasPermission) return null;
 
   const [transactions, vaults] = await Promise.all([
-    GoalService.getGoalTransactions(goalId),
+    TransactionService.getTransactionsForGoal(goalId),
     VaultService.getUserVaults(userId)
   ]);
 
+  // TODO: Buscar contas bancárias reais
   return { goal, transactions, accounts: [], vaults };
 }
 
@@ -213,6 +240,7 @@ export async function toggleFeaturedGoalAction(goalId: string) {
     revalidatePath('/goals');
     return { success: true };
   } catch (error) {
-    return { success: false, message: 'Erro ao alterar o destaque.' };
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
+    return { success: false, message: `Erro ao alterar o destaque: ${errorMessage}` };
   }
 }
