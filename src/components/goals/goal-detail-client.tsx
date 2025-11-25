@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
@@ -58,6 +59,7 @@ type Goal = {
     avatarUrl: string;
     role: string;
   }[];
+  createdAt: string;
 };
 
 type Transaction = {
@@ -66,8 +68,14 @@ type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense' | 'transfer';
-  category: string;
-  actorId: string;
+  category: {
+    name: string;
+  } | null;
+  actor: {
+    id: string;
+    name: string;
+    avatarUrl: string;
+  } | null;
   sourceAccountId: string | null;
   destinationAccountId: string | null;
   ownerId: string;
@@ -77,17 +85,14 @@ type GoalDetailClientProps = {
   goal: Goal;
   transactions: Transaction[];
   accounts: Account[];
-  vaults: Vault[]; // Vaults agora são recebidos
+  vaults: Vault[];
   userId: string;
 };
 
 export function GoalDetailClient({ goal, transactions, accounts, vaults, userId }: GoalDetailClientProps) {
   const [currentAmount, setCurrentAmount] = useState(goal.currentAmount);
 
-  // Lógica para calcular e inserir o saldo inicial
   const transactionTotal = transactions.reduce((acc, t) => {
-    // Um depósito (sourceAccountId existe) aumenta o valor na caixinha
-    // Uma retirada (destinationAccountId existe) diminui o valor
     return t.sourceAccountId ? acc + t.amount : acc - t.amount;
   }, 0);
 
@@ -95,18 +100,17 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
 
   const virtualInitialTransaction = {
     id: 'initial-balance',
-    date: new Date(goal.createdAt).toISOString(), // Usando a data de criação da caixinha
+    date: new Date(goal.createdAt).toISOString(),
     description: 'Valor inicial da caixinha',
     amount: initialAmount,
     type: 'income' as const,
-    actorId: 'system',
+    actor: { id: 'system', name: 'Sistema', avatarUrl: '' },
     sourceAccountId: 'system-initial',
     destinationAccountId: null,
     ownerId: goal.ownerId,
-    category: 'Saldo Inicial',
+    category: { name: 'Saldo Inicial' },
   };
 
-  // Adiciona a transação inicial apenas se ela for maior que zero
   const allActivities = [
     ...(initialAmount > 0.01 ? [virtualInitialTransaction] : []),
     ...transactions,
@@ -121,12 +125,16 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
   const handleTransactionComplete = () => {
     window.location.reload();
   };
+  
+  // CORRIGIDO: Valida se existem contas bancárias
+  const hasAccounts = accounts && accounts.length > 0;
 
-  const getActor = (actorId: string) => {
-    if (actorId === 'system') return { id: 'system', name: 'Sistema', avatarUrl: '' };
-    return goal.participants.find((p) => p.id === actorId) || 
-           { id: 'unknown', name: 'Usuário', avatarUrl: '' };
-  };
+  const transactionButtons = (
+    <div className="my-4 flex flex-col sm:flex-row gap-2">
+      <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts} />
+      <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts} />
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -152,7 +160,6 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
               <span className="text-5xl sm:text-6xl">{goal.emoji}</span>
               <div className="flex-1">
                 <CardTitle className="font-headline text-2xl md:text-3xl">{goal.name}</CardTitle>
-                {/* Contexto adicionado abaixo do título */}
                 <p className="text-base font-semibold text-amber-800 dark:text-amber-600">
                   {ownerName}
                 </p>
@@ -170,15 +177,27 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
             </div>
           </CardHeader>
           <CardContent>
-            <div className="my-4 flex flex-col sm:flex-row gap-2">
-              <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} />
-              <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} />
-            </div>
+            {/* CORRIGIDO: Adiciona tooltip para botões desativados */}
+            {!hasAccounts ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {transactionButtons}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Você precisa ter ao menos uma conta cadastrada para depositar ou retirar.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              transactionButtons
+            )}
+            
             <h3 className="font-headline mt-8 mb-4 text-xl font-semibold">Histórico de Atividades</h3>
             <div className="space-y-4">
               {allActivities.map((activity) => {
                 const isDeposit = activity.type === 'income' || (activity.type === 'transfer' && !!activity.sourceAccountId);
-                const actor = getActor(activity.actorId);
+                const actor = activity.actor || { id: 'unknown', name: 'Usuário', avatarUrl: '' };
                 const descriptionText = activity.id === 'initial-balance' 
                   ? 'Saldo inicial da caixinha' 
                   : <><span className="font-semibold">{actor.name}</span> {isDeposit ? ' guardou ' : ' retirou '}</>;
@@ -214,7 +233,8 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                               </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                              <EditTransactionDialog transaction={activity as any} accounts={accounts} goals={[goal as any]} categories={[]} />
+                              {/* @ts-ignore */}
+                              <EditTransactionDialog transaction={activity} accounts={accounts} goals={[goal]} categories={[]} />
                               <DeleteTransactionDialog transactionId={activity.id} />
                           </DropdownMenuContent>
                       </DropdownMenu>

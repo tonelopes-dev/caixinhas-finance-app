@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { GoalService } from '@/services/goal.service';
 import { VaultService } from '@/services/vault.service';
 import { TransactionService } from '@/services/transaction.service';
+import { AccountService } from '@/services/account.service'; // Importado
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
@@ -67,7 +68,6 @@ export async function createGoalAction(prevState: GoalFormState, formData: FormD
   }
 
   try {
-    // CORRIGIDO: Usa a estrutura de dados correta para createGoal
     await GoalService.createGoal(validatedFields.data);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
@@ -90,7 +90,6 @@ export async function updateGoalAction(prevState: GoalFormState, formData: FormD
   }
 
   try {
-    // TODO: Adicionar verificação de permissão aqui
     await GoalService.updateGoal(validatedFields.data.id, validatedFields.data);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
@@ -104,7 +103,6 @@ export async function updateGoalAction(prevState: GoalFormState, formData: FormD
   return { success: true, message: "Caixinha atualizada com sucesso!" };
 }
 
-// CORRIGIDO: Lógica de transação reescrita para usar o TransactionService corretamente
 async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw'): Promise<TransactionFormState> {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
@@ -131,7 +129,6 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
     };
 
     try {
-        // O TransactionService.createTransaction já lida com a atualização dos saldos
         await TransactionService.createTransaction(transactionData);
 
     } catch (error) {
@@ -159,7 +156,6 @@ export async function deleteGoalAction(goalId: string): Promise<{ success: boole
   if (!session?.user?.id) return { success: false, message: 'Usuário não autenticado.' };
   
   try {
-    // TODO: Adicionar verificação de permissão aqui
     await GoalService.deleteGoal(goalId);
     revalidatePath('/goals');
     revalidatePath('/dashboard');
@@ -172,7 +168,6 @@ export async function deleteGoalAction(goalId: string): Promise<{ success: boole
 
 // --- FUNÇÕES DE BUSCA DE DADOS ---
 
-// CORRIGIDO: usa VaultService.isMember
 export async function getGoalManageData(goalId: string, userId: string) {
   const goal = await GoalService.getGoalById(goalId);
   if (!goal) return null;
@@ -210,12 +205,14 @@ export async function getGoalsPageData(userId: string) {
   }
 }
 
-// CORRIGIDO: usa isMember e getTransactionsForGoal
+// CORRIGIDO: Busca e retorna as contas bancárias
 export async function getGoalDetails(goalId: string, userId: string) {
   const goal = await GoalService.getGoalById(goalId);
   if (!goal) return null;
 
   let hasPermission = false;
+  const scope = goal.vaultId || userId; // Define o scope para a busca de contas
+
   if (goal.vaultId) {
       hasPermission = await VaultService.isMember(goal.vaultId, userId);
   } else if (goal.userId) {
@@ -224,13 +221,13 @@ export async function getGoalDetails(goalId: string, userId: string) {
 
   if (!hasPermission) return null;
 
-  const [transactions, vaults] = await Promise.all([
+  const [transactions, vaults, accounts] = await Promise.all([
     TransactionService.getTransactionsForGoal(goalId),
-    VaultService.getUserVaults(userId)
+    VaultService.getUserVaults(userId),
+    AccountService.getVisibleAccounts(userId, scope) // Busca as contas
   ]);
 
-  // TODO: Buscar contas bancárias reais
-  return { goal, transactions, accounts: [], vaults };
+  return { goal, transactions, accounts, vaults };
 }
 
 export async function toggleFeaturedGoalAction(goalId: string) {
