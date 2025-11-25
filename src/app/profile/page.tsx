@@ -123,6 +123,20 @@ export default function ProfilePage() {
                 />
               </motion.div>
             )}
+            {isPersonalVault && (
+              <motion.div variants={itemVariants}>
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    Para convidar pessoas, você precisa estar em um cofre compartilhado.
+                  </p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/invite">
+                      Ir para Convites
+                    </Link>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>

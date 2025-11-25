@@ -116,7 +116,24 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
 
     const { amount, goalId, accountId, description } = validatedFields.data;
     
+    // Buscar a caixinha para obter userId ou vaultId
+    const goal = await GoalService.getGoalById(goalId);
+    if (!goal) {
+        return { message: 'Caixinha não encontrada' };
+    }
+    
+    // Validar saldo para retiradas
+    if (type === 'withdraw') {
+        if (goal.currentAmount < amount) {
+            return { 
+                message: `Saldo insuficiente. Saldo disponível: R$ ${goal.currentAmount.toFixed(2)}` 
+            };
+        }
+    }
+    
     const transactionData = {
+        userId: goal.userId,
+        vaultId: goal.vaultId,
         amount,
         goalId,
         actorId: userId,

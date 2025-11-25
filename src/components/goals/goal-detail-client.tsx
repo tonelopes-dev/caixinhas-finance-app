@@ -128,11 +128,12 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
   
   // CORRIGIDO: Valida se existem contas bancárias
   const hasAccounts = accounts && accounts.length > 0;
+  const hasBalance = currentAmount > 0;
 
   const transactionButtons = (
     <div className="my-4 flex flex-col sm:flex-row gap-2">
       <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts} />
-      <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts} />
+      <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts || !hasBalance} />
     </div>
   );
 
@@ -189,6 +190,22 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            ) : !hasBalance ? (
+              <div className="my-4 flex flex-col sm:flex-row gap-2">
+                <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={false} />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex-1">
+                        <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={true} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Não há saldo disponível para retirada nesta caixinha.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             ) : (
               transactionButtons
             )}

@@ -28,7 +28,22 @@ const transactionSchema = z.object({
   isInstallment: z.boolean().optional(),
   installmentNumber: z.coerce.number().optional().nullable(),
   totalInstallments: z.coerce.number().optional().nullable(),
-  paidInstallments: z.coerce.number().optional().nullable(),
+  paidInstallments: z.union([
+    z.array(z.number()), 
+    z.number(), 
+    z.string()
+  ]).optional().nullable().transform(val => {
+    if (typeof val === 'number') return [];
+    if (typeof val === 'string') {
+      try {
+        const parsed = JSON.parse(val);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return val || [];
+  }),
   actorId: z.string().optional(),
   userId: z.string().optional(),
   vaultId: z.string().optional(),
@@ -88,7 +103,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
-    paidInstallments: formData.get('chargeType') === 'installment' ? 1 : null,
+    paidInstallments: formData.get('chargeType') === 'installment' ? [] : null,
     projectRecurring: formData.get('projectRecurring') === 'true',
     actorId: userId,
     userId: isPersonal ? userId : undefined,

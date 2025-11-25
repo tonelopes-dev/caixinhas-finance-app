@@ -102,13 +102,27 @@ export async function createVaultAction(
   }
 
   try {
-    await VaultService.createVault({
+    const newVault = await VaultService.createVault({
       name: validatedFields.data.name,
       imageUrl: validatedFields.data.imageUrl,
       ownerId: userId,
     });
 
+    // Automaticamente definir o novo cofre como workspace ativo
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    cookieStore.set('CAIXINHAS_VAULT_ID', newVault.id, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      path: '/',
+    });
+
     revalidatePath('/vaults');
+    revalidatePath('/dashboard');
+    revalidatePath('/profile');
+    revalidatePath('/invite');
     
     return {
       message: 'Cofre criado com sucesso!',

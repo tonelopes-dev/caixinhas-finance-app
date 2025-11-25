@@ -356,6 +356,15 @@ export class TransactionService {
       delete updateData.destinationAccountId;
       delete updateData.goalId;
       
+      // Se paidInstallments for um número, converte para array ou remove
+      if (typeof updateData.paidInstallments === 'number') {
+        if (updateData.isInstallment) {
+          updateData.paidInstallments = [];
+        } else {
+          delete updateData.paidInstallments;
+        }
+      }
+      
       return await prisma.transaction.update({
         where: { id: transactionId },
         data: updateData,
