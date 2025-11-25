@@ -84,30 +84,30 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
       <div className="w-full max-w-6xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Painel
-          </Link>
-        </Button>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <motion.div
-            className="lg:col-span-1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
-            <h2 className="text-2xl font-headline font-bold">Configurações</h2>
-            <p className="text-muted-foreground">
-              Gerencie suas informações pessoais, financeiras e de acesso.
-            </p>
-          </motion.div>
-          <motion.div
-            className="grid auto-rows-max grid-cols-1 items-start gap-8 lg:col-span-2"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="mb-8"
+        >
+          <Button asChild variant="ghost" className="mb-4">
+            <Link href="/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para o Painel
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-headline font-bold mb-2">Configurações</h1>
+          <p className="text-muted-foreground">
+            Gerencie suas informações pessoais, financeiras e de acesso.
+          </p>
+        </motion.div>
+        
+        <motion.div
+          className="grid auto-rows-max grid-cols-1 items-start gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
             <motion.div variants={itemVariants}>
               <ProfileForm user={currentUser} />
             </motion.div>
@@ -120,6 +120,8 @@ export default function ProfilePage() {
                   members={currentVault.members}
                   vaultOwnerId={currentVault.ownerId}
                   currentUserId={currentUser.id}
+                  vaultId={currentVault.id}
+                  currentUser={currentUser}
                 />
               </motion.div>
             )}
@@ -137,8 +139,7 @@ export default function ProfilePage() {
                 </div>
               </motion.div>
             )}
-          </motion.div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

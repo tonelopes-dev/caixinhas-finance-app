@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   Card,
@@ -21,10 +21,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Mail, Send } from 'lucide-react';
+import { Mail, Send, Users, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { sendPartnerInvite } from '@/app/invite/actions';
+import { sendPartnerInvite, getVaultMembers } from '@/app/invite/actions';
 import type { GenericState } from '@/app/auth/actions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -46,11 +48,15 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
   const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedVaultId, setSelectedVaultId] = useState<string>('');
+  const [vaultMembers, setVaultMembers] = useState<any[]>([]);
 
   useEffect(() => {
     if (state.message && !state.errors) {
       toast({ title: 'Sucesso!', description: state.message });
       formRef.current?.reset();
+      setSelectedVaultId('');
+      setVaultMembers([]);
     } else if (state.message && state.errors) {
       toast({
         title: 'Erro de Validação',
@@ -59,6 +65,14 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
       });
     }
   }, [state, toast]);
+
+  useEffect(() => {
+    if (selectedVaultId) {
+      getVaultMembers(selectedVaultId).then(setVaultMembers);
+    } else {
+      setVaultMembers([]);
+    }
+  }, [selectedVaultId]);
 
   return (
     <Card>
@@ -77,7 +91,7 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
         <CardContent className="grid gap-4">
           <div className="space-y-2">
             <Label htmlFor="vaultId">Selecione o Cofre</Label>
-            <Select name="vaultId" required>
+            <Select name="vaultId" required onValueChange={setSelectedVaultId} value={selectedVaultId}>
               <SelectTrigger id="vaultId">
                 <SelectValue placeholder="Escolha um cofre para convidar" />
               </SelectTrigger>
@@ -95,6 +109,43 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
               </p>
             )}
           </div>
+          
+          {vaultMembers.length > 0 && (
+            <Alert>
+              <Users className="h-4 w-4" />
+              <AlertDescription>
+                <div className="font-medium mb-2">Membros atuais deste cofre:</div>
+                <div className="space-y-2">
+                  {vaultMembers.map((member) => (
+                    <div key={member.userId} className="flex items-center gap-2 text-sm">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={member.user.avatarUrl || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {member.user.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{member.user.name}</span>
+                      <span className="text-muted-foreground">({member.user.email})</span>
+                      {member.role === 'owner' && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                          Dono
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {selectedVaultId && (
+            <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800 dark:text-blue-200">
+                O usuário convidado precisa estar cadastrado no sistema para receber o convite.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">E-mail do Convidado(a)</Label>
             <Input
