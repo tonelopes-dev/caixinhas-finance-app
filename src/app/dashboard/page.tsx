@@ -1,30 +1,19 @@
 
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 import { cookies } from 'next/headers';
 
-import { authOptions } from '@/lib/auth';
 import { getDashboardData } from './actions';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
 import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
 import { GoalService } from '@/services/goal.service';
-import { AuthService } from '@/services/auth.service';
-// Corrigido: O tipo correto é Vault, não o inexistente VaultWithMembers
+import { withPageAccess } from '@/lib/page-access';
 import type { User, Vault } from '@/lib/definitions';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-
-  const currentUser: User | null = await AuthService.getUserById(userId);
-  if (!currentUser) {
-    redirect('/login');
-  }
+  // Verifica acesso completo à página
+  const { user: currentUser, accessInfo } = await withPageAccess({ requireFullAccess: true });
+  const userId = currentUser.id;
 
   // Corrigido: Adicionado 'await' para resolver a Promise de cookies
   const cookieStore = await cookies(); 

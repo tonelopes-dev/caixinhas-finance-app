@@ -2,23 +2,17 @@
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { getAccountsData } from './actions';
+import { withPageAccess } from '@/lib/page-access';
 
 import { Button } from '@/components/ui/button';
 import { AccountsManagement } from '@/components/profile/accounts-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 
 export default async function AccountsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
+  // Verifica acesso completo à página
+  const { user } = await withPageAccess({ requireFullAccess: true });
+  const userId = user.id;
   // A lógica do workspaceId é menos relevante aqui agora, mas mantemos para consistência do nome
   const workspaceId = userId; 
   const workspaceName = "seu"; // Simplificado, já que a página agora mostra todas as contas

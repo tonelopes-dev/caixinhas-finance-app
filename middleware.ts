@@ -1,27 +1,31 @@
 
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import { AuthService } from '@/services';
 
+/**
+ * Middleware simplificado para Edge Runtime
+ * A verificação completa de acesso é feita nas páginas individuais
+ * usando getServerSession e getAccessInfo
+ */
 export default withAuth(
     async function middleware(req) {
         const token = req.nextauth.token;
         const { pathname } = req.nextUrl;
 
-        // Se o usuário está logado, redireciona de /landing para /dashboard
+        // Se o usuário está logado, redireciona de /landing para /vaults
         if (token && pathname.startsWith('/landing')) {
-            return NextResponse.redirect(new URL('/dashboard', req.url));
+            return NextResponse.redirect(new URL('/vaults', req.url));
         }
 
         // Se o usuário não está logado, redireciona da raiz para /landing
-        // Se estiver logado, redireciona da raiz para /dashboard
+        // Se estiver logado, redireciona da raiz para /vaults (seleção de workspace)
         if (pathname === '/') {
-            const targetUrl = token ? '/dashboard' : '/landing';
+            const targetUrl = token ? '/vaults' : '/landing';
             return NextResponse.redirect(new URL(targetUrl, req.url));
         }
 
-        // Permite acesso a todas as rotas autenticadas sem verificação de assinatura
-        // (verificação de assinatura pode ser feita nas páginas específicas se necessário)
+        // Permite acesso a todas as rotas autenticadas
+        // A verificação de acesso completo é feita nas páginas individuais
         return NextResponse.next();
     },
     {

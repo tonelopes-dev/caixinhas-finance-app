@@ -43,6 +43,8 @@ type VaultsPageClientProps = {
   currentUser: User;
   userVaults: Vault[];
   userInvitations: VaultInvitation[];
+  canCreateVaults?: boolean;
+  canAccessPersonal?: boolean;
 };
 
 function WorkspaceCard({
@@ -191,9 +193,24 @@ export function VaultsPageClient({
   currentUser,
   userVaults,
   userInvitations,
+  canCreateVaults = true,
+  canAccessPersonal = true,
 }: VaultsPageClientProps) {
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreateVaultClick = () => {
+    if (!canCreateVaults) {
+      toast({
+        title: 'Acesso Restrito',
+        description: 'Você precisa de uma assinatura ativa para criar novos cofres.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setCreateVaultOpen(true);
+  };
 
   const handleLogout = async () => {
     if (typeof window !== 'undefined') {
@@ -264,13 +281,31 @@ export function VaultsPageClient({
             <h3 className="text-xl font-semibold mb-4">Seus Espaços</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Personal Account Card */}
-              <WorkspaceCard
-                id={currentUser.id}
-                name="Minha Conta Pessoal"
-                imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
-                members={[currentUser]}
-                isPersonal={true}
-              />
+              {canAccessPersonal ? (
+                <WorkspaceCard
+                  id={currentUser.id}
+                  name="Minha Conta Pessoal"
+                  imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
+                  members={[currentUser]}
+                  isPersonal={true}
+                />
+              ) : (
+                <Card className="flex flex-col items-center justify-center border-2 opacity-60 min-h-[220px] relative">
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <p className="font-semibold text-sm mb-1">🔒 Acesso Restrito</p>
+                      <p className="text-xs text-muted-foreground">Assine para acessar</p>
+                    </div>
+                  </div>
+                  <CardContent className="p-6 text-center blur-sm">
+                    <Avatar className="mx-auto h-16 w-16 mb-3">
+                      <AvatarImage src={currentUser.avatarUrl || ''} />
+                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <p className="font-semibold">Minha Conta Pessoal</p>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Vault Cards */}
               <AnimatePresence>
@@ -288,12 +323,19 @@ export function VaultsPageClient({
               
               {/* Create New Vault Card */}
               <Card
-                onClick={() => setCreateVaultOpen(true)}
-                className="flex flex-col items-center justify-center border-dashed border-2 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50 min-h-[220px]"
+                onClick={handleCreateVaultClick}
+                className={`flex flex-col items-center justify-center border-dashed border-2 transition-colors min-h-[220px] ${
+                  canCreateVaults 
+                    ? 'cursor-pointer hover:border-primary hover:bg-muted/50' 
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
               >
                 <CardContent className="p-6 text-center">
                   <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                   <p className="font-semibold">Criar Novo Cofre</p>
+                  {!canCreateVaults && (
+                    <p className="text-xs text-muted-foreground mt-1">🔒 Requer assinatura</p>
+                  )}
                 </CardContent>
               </Card>
             </div>

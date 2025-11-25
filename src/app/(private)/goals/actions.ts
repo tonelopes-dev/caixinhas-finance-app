@@ -58,8 +58,13 @@ const goalTransactionSchema = z.object({
 // --- ACTIONS ---
 
 export async function createGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { message: 'Usuário não autenticado' };
+  // Verifica se o usuário tem acesso completo
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
+
+  if (!accessCheck.success || !accessCheck.data) {
+    return { message: accessCheck.error || 'Acesso negado' };
+  }
 
   const validatedFields = goalSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -80,8 +85,13 @@ export async function createGoalAction(prevState: GoalFormState, formData: FormD
 }
 
 export async function updateGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { message: "Usuário não autenticado" };
+  // Verifica se o usuário tem acesso completo
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
+
+  if (!accessCheck.success || !accessCheck.data) {
+    return { message: accessCheck.error || 'Acesso negado' };
+  }
 
   const validatedFields = updateGoalSchema.safeParse(Object.fromEntries(formData.entries()));
 

@@ -3,11 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getUserVaultsData } from './actions';
 import { VaultsPageClient } from '@/components/vaults';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { AuthService } from '@/services/auth.service';
+import { getAccessInfo } from '@/lib/access-control';
+import { AccessBanner } from '@/components/ui/access-banner';
 
 export default async function VaultSelectionPage() {
   const session = await getServerSession(authOptions);
@@ -27,29 +25,24 @@ export default async function VaultSelectionPage() {
     redirect('/login?error=user_not_found');
   }
 
-  const hasActiveSubscription = user.subscriptionStatus === 'active';
-  const hasActiveTrial = AuthService.isTrialActive(user);
-  const showExpiredAlert = !hasActiveSubscription && !hasActiveTrial;
+  // Usa o sistema centralizado de controle de acesso
+  const accessInfo = getAccessInfo(user);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl">
-        {showExpiredAlert && (
-          <Alert variant="destructive" className="mb-8">
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Seu acesso expirou!</AlertTitle>
-            <AlertDescription className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              Seu período de teste terminou. Para continuar usando seu espaço pessoal e criar novos cofres, por favor, assine um de nossos planos.
-              <Button asChild size="sm">
-                <Link href="/pricing">Ver Planos</Link>
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+        <AccessBanner
+          status={accessInfo.status}
+          daysRemaining={accessInfo.daysRemaining}
+          message={accessInfo.message}
+          showUpgradeButton={accessInfo.isRestricted}
+        />
         <VaultsPageClient 
           currentUser={data.currentUser as any}
           userVaults={data.userVaults}
           userInvitations={data.userInvitations}
+          canCreateVaults={accessInfo.canCreateVaults}
+          canAccessPersonal={accessInfo.canAccessPersonalWorkspace}
         />
       </div>
     </div>

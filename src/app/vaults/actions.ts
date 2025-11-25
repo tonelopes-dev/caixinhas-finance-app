@@ -80,14 +80,18 @@ export async function createVaultAction(
   prevState: VaultActionState,
   formData: FormData
 ): Promise<VaultActionState> {
-  const userId = formData.get('userId') as string;
+  // Verifica se o usuário tem permissão para criar cofres
+  const { requireVaultCreationAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireVaultCreationAccess();
 
-  if (!userId) {
+  if (!accessCheck.success || !accessCheck.data) {
     return {
-      message: 'Usuário não autenticado',
+      message: accessCheck.error || 'Acesso negado',
       errors: {},
     };
   }
+
+  const userId = accessCheck.data.id;
 
   const validatedFields = createVaultSchema.safeParse({
     name: formData.get('name'),

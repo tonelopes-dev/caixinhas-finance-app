@@ -75,9 +75,12 @@ export type TransactionState = {
 }
 
 export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user.id) {
-    return { success: false, message: 'Usuário não autenticado.' };
+  // Verifica se o usuário tem acesso completo
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
+
+  if (!accessCheck.success || !accessCheck.data) {
+    return { success: false, message: accessCheck.error || 'Acesso negado.' };
   }
   const userId = session.user.id;
 

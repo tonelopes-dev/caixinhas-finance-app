@@ -43,12 +43,15 @@ export async function getAccountsData(userId: string): Promise<AccountsData> {
 }
 
 export async function createAccount(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
-  
-  if (!userId) {
-    throw new Error('Usuário não autenticado');
+  // Verifica se o usuário tem acesso completo
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
+
+  if (!accessCheck.success || !accessCheck.data) {
+    throw new Error(accessCheck.error || 'Acesso negado');
   }
+
+  const userId = accessCheck.data.id;
 
   const accountType = formData.get('account-type') as Account['type'];
   const name = formData.get('account-name') as string;
@@ -91,12 +94,15 @@ export async function createAccount(formData: FormData) {
 }
 
 export async function updateAccount(accountId: string, formData: FormData) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  // Verifica se o usuário tem acesso completo
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
 
-  if (!userId) {
-    throw new Error('Usuário não autenticado');
+  if (!accessCheck.success || !accessCheck.data) {
+    throw new Error(accessCheck.error || 'Acesso negado');
   }
+
+  const userId = accessCheck.data.id;
 
   const account = await AccountService.getAccountById(accountId);
   if (!account || account.ownerId !== userId) {
