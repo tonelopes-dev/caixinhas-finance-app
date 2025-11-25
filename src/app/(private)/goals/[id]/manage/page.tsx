@@ -8,8 +8,8 @@ import { getGoalManageData } from '../../actions';
 import { ManageGoalClient } from '@/components/goals/manage-goal-client';
 import { Vault } from '@/types';
 
-export default async function ManageGoalPage({ params }) {
-  const id = params.id;
+export default async function ManageGoalPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params; // No Next.js 15, params precisa ser aguardado
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

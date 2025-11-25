@@ -6,9 +6,8 @@ import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions'; 
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
 
-// A anotação de tipo foi removida para permitir a inferência pelo Next.js
-export default async function GoalDetailPage({ params }) {
-  const id = params.id;
+export default async function GoalDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params; // No Next.js 15, params precisa ser aguardado
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
