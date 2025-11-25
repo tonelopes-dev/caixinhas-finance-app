@@ -317,7 +317,7 @@ export class VaultService {
             throw new Error('Este usuário já é membro deste cofre.');
         }
 
-        await prisma.invitation.create({
+        const invitation = await prisma.invitation.create({
             data: {
                 type: 'vault',
                 targetId: vaultId,
@@ -326,6 +326,15 @@ export class VaultService {
                 receiverId: receiverId,
                 status: 'pending',
             }
+        });
+
+        // Criar notificação para o usuário convidado
+        const { NotificationService } = await import('./notification.service');
+        await NotificationService.createVaultInviteNotification({
+            receiverId: receiverId,
+            senderName: sender.name,
+            vaultName: vault.name,
+            invitationId: invitation.id,
         });
 
     } catch (error) {
