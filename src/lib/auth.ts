@@ -22,14 +22,34 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials) {
+        console.log('🔐 Authorize - Iniciando com credenciais:', credentials?.email);
+        
+        if (!credentials?.email || !credentials?.password) {
+            console.log('❌ Authorize - Credenciais inválidas ou faltando');
             return null;
         }
-        const result = await AuthService.login(credentials);
         
-        if (result.user) {
-          return result.user;
+        try {
+          const user = await AuthService.login({
+            email: credentials.email,
+            password: credentials.password
+          });
+          
+          if (user) {
+            console.log('✅ Authorize - Usuário autenticado:', user.email);
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.avatarUrl
+            };
+          }
+          
+          console.log('❌ Authorize - Login retornou null');
+        } catch (error) {
+          console.error('❌ Authorize - Erro:', error);
         }
+        
         return null;
       }
     })
@@ -63,11 +83,29 @@ export const authOptions: AuthOptions = {
       return true;
     },
 
+    async jwt({ token, user, account }) {
+      // Quando o usuário faz login, adiciona o ID ao token
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
+      }
+      return token;
+    },
+
     async session({ session, token }) {
-      if (token.sub) {
-        const dbUser = await AuthService.getUserById(token.sub);
+      // Adiciona informações do token à sessão
+      if (token?.id) {
+        const dbUser = await AuthService.getUserById(token.id as string);
         if (dbUser) {
-          session.user = { ...session.user, ...dbUser };
+          session.user = {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name,
+            image: dbUser.avatarUrl,
+            ...dbUser
+          };
         }
       }
       return session;

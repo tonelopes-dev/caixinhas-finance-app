@@ -38,31 +38,41 @@ export class AuthService {
    */
   static async login(data: LoginInput): Promise<UserWithoutPassword | null> {
     try {
+      console.log('🔐 Login - Tentando login com email:', data.email);
+      
       const user = await prisma.user.findUnique({
         where: { email: data.email },
       });
 
       if (!user) {
+        console.log('❌ Login - Usuário não encontrado:', data.email);
         return null;
       }
       
-      // Em desenvolvimento, podemos pular a verificação de senha para facilitar os testes
-      if (process.env.NODE_ENV === 'development') {
-          const { password, ...userWithoutPassword } = user;
-          return userWithoutPassword;
+      console.log('✅ Login - Usuário encontrado:', user.email);
+      console.log('🔍 Login - Password hash exists:', !!user.password);
+
+      // Verifica se a senha do usuário existe
+      if (!user.password) {
+        console.log('❌ Login - Usuário não tem senha definida (pode ser login social)');
+        return null;
       }
 
       const isPasswordValid = await bcrypt.compare(data.password, user.password);
+      console.log('🔍 Login - Senha válida:', isPasswordValid);
+      
       if (!isPasswordValid) {
+        console.log('❌ Login - Senha incorreta');
         return null;
       }
 
       // Retorna o usuário sem a senha
       const { password, ...userWithoutPassword } = user;
+      console.log('✅ Login - Login bem-sucedido para:', user.email);
       return userWithoutPassword;
       
     } catch (error) {
-      console.error('Erro no login:', error);
+      console.error('❌ Erro no login:', error);
       throw new Error('Erro ao realizar login');
     }
   }
