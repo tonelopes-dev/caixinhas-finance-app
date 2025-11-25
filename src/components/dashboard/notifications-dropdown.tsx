@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   DropdownMenu,
@@ -11,41 +11,44 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Bell, CircleDot, ClipboardCheck } from 'lucide-react';
-import { notifications as mockNotifications } from '@/lib/data';
-import type { Notification } from '@/lib/definitions';
+import { Bell, CircleDot } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import type { NotificationData } from '@/services/notification.service';
 
-const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-        case 'goal_invite':
-        case 'vault_invite':
-            return <AvatarImage src={mockNotifications.find(n => n.type === type)?.actor?.avatarUrl} />;
-        case 'transaction_added':
-            return <span className="font-bold text-primary">R$</span>;
-        case 'goal_progress':
-             return <span className="font-bold text-green-500">%</span>;
-        default:
-            return <Bell className="h-4 w-4" />;
-    }
-}
+const getNotificationIcon = (type: string) => {
+  switch (type) {
+    case 'vault_invite':
+      return <Bell className="h-4 w-4 text-blue-500" />;
+    case 'transaction_added':
+      return <span className="font-bold text-primary">R$</span>;
+    case 'goal_progress':
+      return <span className="font-bold text-green-500">%</span>;
+    case 'vault_member_added':
+      return <Bell className="h-4 w-4 text-green-500" />;
+    default:
+      return <Bell className="h-4 w-4" />;
+  }
+};
 
+type NotificationsDropdownProps = {
+  initialNotifications?: NotificationData[];
+  initialUnreadCount?: number;
+};
 
-export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+export function NotificationsDropdown({ 
+  initialNotifications = [],
+  initialUnreadCount = 0,
+}: NotificationsDropdownProps) {
+  const [notifications, setNotifications] = useState<NotificationData[]>(initialNotifications);
+  const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  useEffect(() => {
+    setNotifications(initialNotifications);
+    setUnreadCount(initialUnreadCount);
+  }, [initialNotifications, initialUnreadCount]);
 
-  const toggleRead = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the dropdown from closing
-    e.preventDefault(); // Prevent link navigation if it's a link
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
-    );
-  };
-  
-  const recentUnreadNotifications = notifications.filter(n => !n.read).slice(0, 4);
+  const recentUnreadNotifications = notifications.filter(n => !n.isRead).slice(0, 4);
 
   return (
     <DropdownMenu>
@@ -54,7 +57,7 @@ export function NotificationsDropdown() {
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-              {unreadCount}
+              {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
           <span className="sr-only">Notificações</span>
@@ -62,34 +65,26 @@ export function NotificationsDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-screen max-w-md" align="end">
         <DropdownMenuLabel className="flex justify-between items-center">
-            Notificações
-            <Link href="/notifications" className='text-xs font-normal text-primary hover:underline'>Ver todas</Link>
+          Notificações
+          <Link href="/notifications" className='text-xs font-normal text-primary hover:underline'>Ver todas</Link>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {recentUnreadNotifications.length > 0 ? (
           recentUnreadNotifications.map((notification) => (
             <DropdownMenuItem key={notification.id} asChild>
-                <Link href={notification.link || '#'} className={cn("flex items-start gap-3 p-3", !notification.read && 'font-semibold')}>
-                    <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
-                        {getNotificationIcon(notification.type)}
-                        <AvatarFallback><Bell /></AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 whitespace-normal">
-                        <p className="text-sm" dangerouslySetInnerHTML={{ __html: notification.text }} />
-                        <p className="text-xs text-muted-foreground">
-                        {new Date(notification.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                        </p>
-                    </div>
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8" 
-                        onClick={(e) => toggleRead(notification.id, e)}
-                        title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}
-                    >
-                        {notification.read ? <ClipboardCheck className="h-4 w-4" /> : <CircleDot className="h-4 w-4 text-primary" />}
-                    </Button>
-                </Link>
+              <Link href={notification.link || '/notifications'} className={cn("flex items-start gap-3 p-3", 'font-semibold')}>
+                <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
+                  {getNotificationIcon(notification.type)}
+                  <AvatarFallback><Bell /></AvatarFallback>
+                </Avatar>
+                <div className="flex-1 whitespace-normal">
+                  <p className="text-sm font-medium">{notification.message}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(notification.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                  </p>
+                </div>
+                <CircleDot className="h-4 w-4 text-primary mt-1" />
+              </Link>
             </DropdownMenuItem>
           ))
         ) : (
