@@ -11,6 +11,16 @@ const inviteSchema = z.object({
   userId: z.string().min(1, { message: 'ID do usuário remetente não encontrado.' }),
 });
 
+export async function getVaultMembers(vaultId: string) {
+  try {
+    const vault = await VaultService.getVaultById(vaultId);
+    return vault?.members || [];
+  } catch (error) {
+    console.error('Erro ao buscar membros:', error);
+    return [];
+  }
+}
+
 export async function sendPartnerInvite(
   prevState: GenericState,
   formData: FormData
@@ -39,6 +49,29 @@ export async function sendPartnerInvite(
     return { message: 'Convite enviado com sucesso e registrado no sistema!' };
   } catch (error: any) {
     console.error("Erro ao criar convite:", error);
+    
+    // Retornar mensagens de erro mais específicas
+    if (error.message.includes('já é membro')) {
+      return { 
+        message: 'Este usuário já faz parte deste cofre. Não é necessário enviar convite.',
+        errors: { email: ['Este e-mail já pertence a um membro do cofre'] }
+      };
+    }
+    
+    if (error.message.includes('convite pendente')) {
+      return { 
+        message: 'Já existe um convite pendente para este usuário neste cofre.',
+        errors: { email: ['Convite já enviado anteriormente'] }
+      };
+    }
+    
+    if (error.message.includes('não encontrado')) {
+      return { 
+        message: 'Usuário não encontrado. Peça para ele(a) se cadastrar primeiro.',
+        errors: { email: ['E-mail não cadastrado no sistema'] }
+      };
+    }
+    
     return { message: error.message || 'Ocorreu um erro ao enviar o convite. Tente novamente.' };
   }
 }
