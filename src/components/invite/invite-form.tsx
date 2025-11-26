@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
@@ -28,10 +27,10 @@ import type { GenericState } from '@/app/auth/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button disabled={pending}>
+    <Button disabled={pending || disabled}>
       <Send className="mr-2 h-4 w-4" />
       {pending ? 'Enviando...' : 'Enviar Convite'}
     </Button>
@@ -96,6 +95,9 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
                 <SelectValue placeholder="Escolha um cofre para convidar" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="personal" className="text-muted-foreground font-medium">
+                  Minha Conta Pessoal (Privada)
+                </SelectItem>
                 {userVaults.map((vault) => (
                   <SelectItem key={vault.id} value={vault.id}>
                     {vault.name}
@@ -109,8 +111,17 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
               </p>
             )}
           </div>
+
+          {selectedVaultId === 'personal' && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Sua conta pessoal é privada e não pode receber membros. Para compartilhar finanças, crie um novo cofre compartilhado no painel.
+              </AlertDescription>
+            </Alert>
+          )}
           
-          {vaultMembers.length > 0 && (
+          {vaultMembers.length > 0 && selectedVaultId !== 'personal' && (
             <Alert>
               <Users className="h-4 w-4" />
               <AlertDescription>
@@ -138,7 +149,7 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
             </Alert>
           )}
           
-          {selectedVaultId && (
+          {selectedVaultId && selectedVaultId !== 'personal' && (
             <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-800 dark:text-blue-200">
@@ -154,6 +165,7 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
               type="email"
               placeholder="nome@example.com"
               required
+              disabled={selectedVaultId === 'personal'}
             />
             {state?.errors?.email && (
               <p className="text-sm font-medium text-destructive">
@@ -163,7 +175,7 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
           </div>
         </CardContent>
         <CardFooter>
-          <SubmitButton />
+          <SubmitButton disabled={selectedVaultId === 'personal'} />
         </CardFooter>
       </form>
     </Card>
