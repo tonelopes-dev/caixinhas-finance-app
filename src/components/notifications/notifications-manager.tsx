@@ -417,19 +417,27 @@ export function NotificationsManager({ initialNotifications, initialInvitations,
                 className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border bg-card p-4 gap-4 transition-all hover:shadow-sm"
               >
                 <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center border-2 border-muted">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                  </div>
+                  <Avatar className="h-10 w-10 border-2 border-muted">
+                    {invitation.receiver?.avatarUrl ? (
+                      <img src={invitation.receiver.avatarUrl} alt={invitation.receiver.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <Mail className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <AvatarFallback>{invitation.receiver?.name?.charAt(0) || '?'}</AvatarFallback>
+                  </Avatar>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-medium text-sm md:text-base">
-                        Convite para {invitation.receiverId ? 'usuário' : 'e-mail'} entrar em "{invitation.targetName}"
+                        Convite para <span className="text-foreground font-semibold">{invitation.receiver?.name || invitation.receiverEmail || 'Usuário'}</span> entrar em "{invitation.targetName}"
                       </span>
                       <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-200">
                         Pendente
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
+                      {invitation.receiverEmail && (
+                        <span className="block text-xs mb-1">Email: {invitation.receiverEmail}</span>
+                      )}
                       Enviado em {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
                     </p>
                   </div>

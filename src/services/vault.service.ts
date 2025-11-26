@@ -41,11 +41,17 @@ export type VaultInvitationData = {
   targetName: string;
   senderId: string;
   receiverId: string | null;
+  receiverEmail: string | null;
   status: string;
   createdAt: Date;
   sender: {
     name: string;
   };
+  receiver?: {
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+  } | null;
 };
 
 /**
@@ -621,6 +627,13 @@ export class VaultService {
           sender: {
             select: {
               name: true,
+            },
+          },
+          receiver: {
+            select: {
+              name: true,
+              email: true,
+              avatarUrl: true,
             },
           },
         },
