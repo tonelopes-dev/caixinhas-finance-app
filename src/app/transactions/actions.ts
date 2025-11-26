@@ -82,7 +82,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
   if (!accessCheck.success || !accessCheck.data) {
     return { success: false, message: accessCheck.error || 'Acesso negado.' };
   }
-  const userId = session.user.id;
+  const userId = accessCheck.data.id;
 
   const ownerId = formData.get('ownerId') as string;
   const isPersonal = ownerId === userId;

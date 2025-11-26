@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { cookies } from 'next/headers';
 
 import { authOptions } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -21,8 +22,18 @@ export default async function TransactionsPage() {
   }
 
   const userId = session.user.id;
-  // TODO: Pegar o workspaceId do cookie quando implementado
-  const workspaceId = userId; 
+  
+  const cookieStore = await cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+
+  let workspaceId = userId;
+  if (vaultId) {
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      workspaceId = vaultId;
+    }
+  }
+
   const isPersonal = workspaceId === userId;
   const ownerType = isPersonal ? 'user' : 'vault';
 
