@@ -7,8 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useToast } from '@/hooks/use-toast';
-import { createGoalAction } from '@/app/(private)/goals/actions';
-import { VaultService } from '@/services/vault.service';
+import { createGoalAction, getUserVaultsAction, getCurrentVaultContextAction } from '@/app/(private)/goals/actions';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -60,33 +59,68 @@ export default function NewGoalPage() {
     }
     if (status === 'authenticated' && session?.user?.id) {
       const currentUserId = session.user.id;
-      // Define o proprietário padrão como o usuário logado
-      setOwnerId(currentUserId);
       
-      const fetchVaults = async () => {
+      const init = async () => {
         try {
-          const vaults = await VaultService.getUserVaults(currentUserId);
-          setUserVaults(vaults.map(v => ({ id: v.id, name: v.name })));
+          const [vaults, currentVaultId] = await Promise.all([
+            getUserVaultsAction(),
+            getCurrentVaultContextAction()
+          ]);
+          
+          setUserVaults(vaults);
+
+          // Lógica para definir o contexto inicial
+          if (currentVaultId && currentVaultId !== currentUserId) {
+            // Verifica se o usuário ainda é membro do cofre do contexto
+            const vault = vaults.find(v => v.id === currentVaultId);
+            if (vault) {
+              setOwnerType('vault');
+              setOwnerId(currentVaultId);
+            } else {
+              // Fallback para pessoal se o cofre do contexto não for encontrado
+              setOwnerType('user');
+              setOwnerId(currentUserId);
+            }
+          } else {
+            // Contexto é pessoal ou indefinido
+            setOwnerType('user');
+            setOwnerId(currentUserId);
+          }
         } catch (error) {
-          console.error("Erro ao buscar cofres:", error);
-          toast({ title: 'Erro', description: 'Não foi possível carregar seus cofres.', variant: 'destructive' });
+          console.error("Erro ao inicializar:", error);
+          toast({ title: 'Erro', description: 'Não foi possível carregar as informações iniciais.', variant: 'destructive' });
+          // Fallback seguro
+          setOwnerType('user');
+          setOwnerId(currentUserId);
         } finally {
           setIsLoading(false);
         }
       };
-      fetchVaults();
+      
+      init();
     }
   }, [status, router, session, toast]);
 
-  useEffect(() => {
-    // Atualiza o ownerId quando o tipo de proprietário muda
-    if (ownerType === 'user') {
+  // Removido o useEffect que resetava o ownerId quando ownerType mudava, 
+  // pois agora controlamos isso na inicialização e na interação do usuário.
+  // Mantemos apenas um handler simples para a mudança de tipo.
+  const handleOwnerTypeChange = (type: string) => {
+    setOwnerType(type);
+    if (type === 'user') {
       if (session?.user?.id) setOwnerId(session.user.id);
     } else {
-      // Se houver cofres, define o primeiro como padrão, senão limpa
-      setOwnerId(userVaults.length > 0 ? userVaults[0].id : '');
+      // Se mudar para cofre, seleciona o primeiro disponível se nenhum estiver selecionado
+      if (userVaults.length > 0) {
+        // Tenta manter o cofre selecionado se já houver um, senão pega o primeiro
+        const currentSelectedVault = userVaults.find(v => v.id === ownerId);
+        if (!currentSelectedVault) {
+            setOwnerId(userVaults[0].id);
+        }
+      } else {
+        setOwnerId('');
+      }
     }
-  }, [ownerType, session, userVaults]);
+  };
 
   useEffect(() => {
     if (state.message || state.errors) {
@@ -141,7 +175,7 @@ export default function NewGoalPage() {
             <CardContent className="grid gap-6">
               <div className="space-y-3">
                 <Label>Onde guardar a caixinha?</Label>
-                 <RadioGroup value={ownerType} onValueChange={setOwnerType} className="grid grid-cols-2 gap-4">
+                 <RadioGroup value={ownerType} onValueChange={handleOwnerTypeChange} className="grid grid-cols-2 gap-4">
                     <Label className={cn("flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer", ownerType === 'user' && "border-primary")}>
                       <RadioGroupItem value="user" id="ownerUser" className="sr-only" />
                       <Lock className="mb-3 h-6 w-6" />
@@ -166,7 +200,7 @@ export default function NewGoalPage() {
                         {userVaults.length > 0 ? (
                           userVaults.map(vault => <SelectItem key={vault.id} value={vault.id}>{vault.name}</SelectItem>)
                         ) : (
-                          <SelectItem value="" disabled>Você não participa de nenhum cofre</SelectItem>
+                          <SelectItem value="none" disabled>Você não participa de nenhum cofre</SelectItem>
                         )}
                       </SelectContent>
                     </Select>

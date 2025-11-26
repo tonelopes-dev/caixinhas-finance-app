@@ -27,6 +27,7 @@ export default async function ManageGoalPage({ params }: { params: Promise<{ id:
       goal={data.goal}
       currentUser={session.user}
       currentVault={data.currentVault as Vault}
+      userVaults={data.userVaults as Vault[]}
     />
   );
 }

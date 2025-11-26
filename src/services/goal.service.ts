@@ -178,12 +178,27 @@ export class GoalService {
       emoji: string;
       visibility: string;
       isFeatured: boolean;
+      ownerType?: 'user' | 'vault';
+      ownerId?: string;
     }>
   ): Promise<any> {
     try {
+      const updateData: any = { ...data };
+      
+      // Handle owner change if provided
+      if (data.ownerType && data.ownerId) {
+        const isPersonal = data.ownerType === 'user';
+        updateData.userId = isPersonal ? data.ownerId : null;
+        updateData.vaultId = !isPersonal ? data.ownerId : null;
+        
+        // Remove helper fields that don't exist in Prisma schema
+        delete updateData.ownerType;
+        delete updateData.ownerId;
+      }
+
       return await prisma.goal.update({
         where: { id: goalId },
-        data,
+        data: updateData,
       });
     } catch (error) {
       console.error('Erro ao atualizar meta:', error);

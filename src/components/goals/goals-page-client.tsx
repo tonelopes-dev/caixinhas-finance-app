@@ -25,8 +25,10 @@ type Goal = {
   currentAmount: number;
   visibility: 'private' | 'shared';
   isFeatured: boolean;
-  ownerId: string;
-  ownerType: 'user' | 'vault';
+  userId?: string | null;
+  vaultId?: string | null;
+  ownerId?: string; // Mantido para compatibilidade
+  ownerType?: 'user' | 'vault'; // Mantido para compatibilidade
   participants: {
     id: string;
     name: string;

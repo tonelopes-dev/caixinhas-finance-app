@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lock, Users } from 'lucide-react';
@@ -20,6 +20,13 @@ import {
   CardTitle,
   CardFooter
 } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { updateGoalAction } from '@/app/(private)/goals/actions';
@@ -28,6 +35,12 @@ import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
 import type { Goal, Vault, User } from '@/lib/definitions';
+
+// Estendendo o tipo Goal para incluir os campos do Prisma
+type ExtendedGoal = Goal & {
+  userId?: string | null;
+  vaultId?: string | null;
+};
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
@@ -39,21 +52,29 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
 }
 
 interface ManageGoalClientProps {
-  goal: Goal;
+  goal: ExtendedGoal;
   currentUser: User;
   currentVault: Vault | null;
+  userVaults: Vault[];
 }
 
 const initialState = { message: '', errors: undefined, success: false };
 
-export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoalClientProps) {
+export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }: ManageGoalClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   
   const [visibility, setVisibility] = useState<Goal['visibility']>(goal.visibility || 'shared');
   const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
+  
+  // Determine initial owner
+  const initialOwnerType = goal.vaultId ? 'vault' : 'user';
+  const initialOwnerId = goal.vaultId || currentUser.id;
 
-  const [state, formAction] = useFormState(updateGoalAction, initialState);
+  const [ownerType, setOwnerType] = useState<'user' | 'vault'>(initialOwnerType);
+  const [ownerId, setOwnerId] = useState<string>(initialOwnerId);
+
+  const [state, formAction] = useActionState(updateGoalAction, initialState);
 
   useEffect(() => {
     if (state.success) {
@@ -70,9 +91,14 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
     role: 'owner' as const
   }];
 
-  const isOwner = goal.userId 
+  // Lógica corrigida para determinar o proprietário e contexto
+  const isPersonal = goal.userId ? true : (goal.ownerType === 'user');
+  
+  const isOwner = isPersonal 
     ? goal.userId === currentUser.id
     : currentVault?.ownerId === currentUser.id;
+
+  const ownerName = isPersonal ? 'Espaço Pessoal' : (currentVault?.name || 'Cofre');
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
     if (newVisibility !== visibility) {
@@ -83,6 +109,21 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
   const confirmVisibilityChange = () => {
     if (pendingVisibility) {
       setVisibility(pendingVisibility);
+      
+      // Logic to switch owner based on visibility
+      if (pendingVisibility === 'private') {
+        setOwnerType('user');
+        setOwnerId(currentUser.id);
+      } else {
+        // If switching to shared, default to current vault or first available vault
+        if (ownerType === 'user') {
+           setOwnerType('vault');
+           // Prefer current vault if available, otherwise first vault
+           const targetVaultId = currentVault?.id || userVaults[0]?.id || '';
+           setOwnerId(targetVaultId);
+        }
+      }
+
       setPendingVisibility(null);
     }
   };
@@ -107,11 +148,15 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Caixinha</CardTitle>
-              <CardDescription>Ajuste os detalhes, gerencie participantes e a visibilidade da sua caixinha.</CardDescription>
+              <CardDescription>
+                Ajuste os detalhes da caixinha localizada em <span className="font-medium text-primary">{ownerName}</span>.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <input type="hidden" name="id" value={goal.id} />
               <input type="hidden" name="visibility" value={visibility} />
+              <input type="hidden" name="ownerType" value={ownerType} />
+              <input type="hidden" name="ownerId" value={ownerId} />
               
               <fieldset disabled={!isOwner} className="space-y-6 disabled:opacity-70">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
@@ -127,7 +172,23 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
                   </div>
                   <div className="space-y-2 md:col-span-1">
                     <Label htmlFor="targetAmount">Valor da Meta</Label>
-                    <Input id="targetAmount" name="targetAmount" type="number" step="0.01" defaultValue={goal.targetAmount || 0} className="h-14"/>
+                    <Input 
+                      id="targetAmount" 
+                      name="targetAmount" 
+                      type="text" 
+                      inputMode="decimal"
+                      defaultValue={goal.targetAmount ? (goal.targetAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} 
+                      className="h-14"
+                      onChange={(e) => {
+                          let value = e.target.value.replace(/\D/g, '');
+                          if (value) {
+                            const numberValue = Number(value) / 100;
+                            e.target.value = numberValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                          } else {
+                            e.target.value = '';
+                          }
+                      }}
+                    />
                     {state.errors?.targetAmount && <p className="text-sm font-medium text-destructive">{state.errors.targetAmount[0]}</p>}
                   </div>
                 </div>
@@ -171,6 +232,34 @@ export function ManageGoalClient({ goal, currentUser, currentVault }: ManageGoal
                     onCancel={cancelVisibilityChange}
                   />
                 </div>
+
+                {visibility === 'shared' && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                    <Label htmlFor="vault-select">Cofre da Caixinha</Label>
+                    <Select
+                      value={ownerId}
+                      onValueChange={(value) => {
+                        setOwnerId(value);
+                        setOwnerType('vault');
+                      }}
+                      disabled={!isOwner}
+                    >
+                      <SelectTrigger id="vault-select">
+                        <SelectValue placeholder="Selecione um cofre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {userVaults.map((vault) => (
+                          <SelectItem key={vault.id} value={vault.id}>
+                            {vault.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Escolha em qual cofre esta caixinha ficará visível.
+                    </p>
+                  </div>
+                )}
               </fieldset>
 
               <Separator />

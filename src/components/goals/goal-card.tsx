@@ -25,6 +25,12 @@ import {
 import { cn } from '@/lib/utils';
 import type { Goal, Vault } from '@/lib/definitions';
 
+// Estendendo o tipo Goal para incluir os campos do Prisma que podem estar faltando na definição global
+type ExtendedGoal = Goal & {
+  userId?: string | null;
+  vaultId?: string | null;
+};
+
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -33,7 +39,7 @@ function formatCurrency(value: number) {
 }
 
 interface GoalCardProps {
-  goal: Goal;
+  goal: ExtendedGoal;
   userVaults: Vault[];
   userId: string;
   onToggleFeatured: (goalId: string) => void;
@@ -48,12 +54,17 @@ export function GoalCard({
   onGoToWorkspace,
 }: GoalCardProps) {
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
+  
+  // Lógica corrigida para determinar o proprietário
+  // Prioriza userId/vaultId se existirem (vindos do Prisma), senão tenta usar ownerType/ownerId
+  const isPersonal = goal.userId ? true : (goal.ownerType === 'user');
+  const vaultId = goal.vaultId || (goal.ownerType === 'vault' ? goal.ownerId : undefined);
+  
   let ownerName = 'Pessoal';
-  let isPersonal = goal.ownerType === 'user';
   let ownerVault: Vault | undefined;
 
-  if (!isPersonal) {
-    ownerVault = userVaults.find((v) => v.id === goal.ownerId);
+  if (!isPersonal && vaultId) {
+    ownerVault = userVaults.find((v) => v.id === vaultId);
     ownerName = ownerVault?.name || 'Cofre Desconhecido';
   }
   
@@ -158,7 +169,8 @@ export function GoalCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onGoToWorkspace(isPersonal ? userId : ownerVault!.id)}
+                onClick={() => onGoToWorkspace(isPersonal ? userId : (ownerVault?.id || vaultId || ''))}
+                disabled={!isPersonal && !ownerVault}
               >
                 <span className="text-xs">{ownerName}</span>
                 <ChevronsRight className="ml-1 h-4 w-4" />

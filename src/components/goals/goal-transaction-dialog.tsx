@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import React, { useEffect, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose
 } from '@/components/ui/dialog';
@@ -45,7 +45,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
   const { toast } = useToast();
 
   const actionToUse = type === 'deposit' ? depositToGoalAction : withdrawFromGoalAction;
-  const [state, formAction] = useFormState(actionToUse, initialState);
+  const [state, formAction] = useActionState(actionToUse, initialState);
 
   const Icon = type === 'deposit' ? ArrowUp : ArrowDown;
   const title = type === 'deposit' ? 'Fazer um depósito' : 'Fazer uma retirada';

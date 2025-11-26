@@ -1,4 +1,3 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -10,6 +9,7 @@ import { AccountService } from '@/services/account.service'; // Importado
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 // --- TIPOS DE ESTADO PARA ACTIONS ---
 export type GoalFormState = {
@@ -43,7 +43,7 @@ const goalSchema = z.object({
   ownerId: z.string().min(1, 'O proprietário é obrigatório.'),
 });
 
-const updateGoalSchema = goalSchema.omit({ ownerType: true, ownerId: true }).extend({
+const updateGoalSchema = goalSchema.extend({
   id: z.string().min(1, "ID da caixinha é obrigatório"),
 });
 
@@ -209,8 +209,9 @@ export async function getGoalManageData(goalId: string, userId: string) {
   if (!hasPermission) return null;
 
   const currentVault = goal.vaultId ? await VaultService.getVaultById(goal.vaultId) : null;
+  const userVaults = await VaultService.getUserVaults(userId);
 
-  return { goal, currentVault };
+  return { goal, currentVault, userVaults };
 }
 
 export async function getUserAllGoals(userId: string) {
@@ -267,4 +268,24 @@ export async function toggleFeaturedGoalAction(goalId: string) {
     const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
     return { success: false, message: `Erro ao alterar o destaque: ${errorMessage}` };
   }
+}
+
+export async function getUserVaultsAction() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    throw new Error("Usuário não autenticado.");
+  }
+  try {
+    const vaults = await VaultService.getUserVaults(session.user.id);
+    return vaults.map(v => ({ id: v.id, name: v.name }));
+  } catch (error) {
+    console.error("Erro ao buscar cofres:", error);
+    return [];
+  }
+}
+
+export async function getCurrentVaultContextAction() {
+  const cookieStore = await cookies();
+  const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
+  return vaultId;
 }
