@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ListFilter, ArrowRight, Repeat } from 'lucide-react';
+import { ListFilter, ArrowRight, Repeat, Landmark, PiggyBank } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -46,6 +46,15 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
         return new Date(dateString).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
     }
 
+    const getAccountName = (id: string) => {
+      if (id.startsWith('goal')) {
+          const goal = goals.find(g => g.id === id);
+          return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
+      }
+      const account = accounts.find(a => a.id === id);
+      return account ? account.name : 'Conta desconhecida';
+    }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -75,6 +84,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             <TableRow>
               <TableHead>Descrição</TableHead>
               <TableHead className="hidden sm:table-cell">Categoria</TableHead>
+              <TableHead className="hidden lg:table-cell">Contas</TableHead>
               <TableHead className="hidden xl:table-cell">Frequência</TableHead>
               <TableHead className="hidden sm:table-cell">Data</TableHead>
               <TableHead className="text-right">Valor</TableHead>
@@ -93,6 +103,31 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
                     <Badge variant={transaction.type === 'income' ? 'secondary' : 'outline'}>
                         {typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category}
                     </Badge>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell text-xs">
+                    {transaction.sourceAccountId ? (
+                        <div className='flex items-center gap-1 text-muted-foreground'>
+                            <Landmark className="h-3 w-3 text-red-500" />
+                            <span>{getAccountName(transaction.sourceAccountId)}</span>
+                        </div>
+                    ) : (transaction.goalId && transaction.type === 'transfer' && transaction.destinationAccountId) ? (
+                        <div className='flex items-center gap-1 text-muted-foreground'>
+                            <PiggyBank className="h-3 w-3 text-red-500"/>
+                            <span>{transaction.goal?.name ? `Caixinha: ${transaction.goal.name}` : 'Caixinha'}</span>
+                        </div>
+                    ) : null}
+                    
+                    {transaction.destinationAccountId ? (
+                        <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                            <Landmark className="h-3 w-3 text-green-500" />
+                            <span>{getAccountName(transaction.destinationAccountId)}</span>
+                        </div>
+                    ) : (transaction.goalId && transaction.type === 'transfer' && transaction.sourceAccountId) ? (
+                        <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                            <PiggyBank className="h-3 w-3 text-green-500"/>
+                            <span>{transaction.goal?.name ? `Caixinha: ${transaction.goal.name}` : 'Caixinha'}</span>
+                        </div>
+                    ) : null}
                 </TableCell>
                 <TableCell className="hidden xl:table-cell">
                   {transaction.isRecurring && (
@@ -118,7 +153,7 @@ export default function RecentTransactions({ transactions, accounts, goals, cate
             ))}
              {filteredTransactions.length === 0 && (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         Nenhuma transação encontrada.
                     </TableCell>
                 </TableRow>
