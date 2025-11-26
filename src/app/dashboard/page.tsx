@@ -1,4 +1,3 @@
-
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
@@ -43,6 +42,12 @@ export default async function DashboardPage() {
       ? 'Pessoal'
       : userVaults.find((v: any) => v.id === workspaceId)?.name || 'Cofre';
 
+  const currentVault = workspaceId !== userId 
+    ? userVaults.find((v: any) => v.id === workspaceId)
+    : null;
+
+  const members = currentVault?.members.map((m: any) => m.user) || [];
+
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
@@ -54,6 +59,7 @@ export default async function DashboardPage() {
         workspaceId={workspaceId}
         workspaceName={workspaceName}
         isPersonalWorkspace={workspaceId === userId}
+        members={members}
         accounts={accounts}
         goals={allGoals || []}
         transactions={recentTransactions || []}

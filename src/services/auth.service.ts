@@ -1,4 +1,3 @@
-
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 import { CategoryService } from './category.service'; // Importar o CategoryService
@@ -125,6 +124,12 @@ export class AuthService {
 
       // Criar categorias padrão para o novo usuário
       await CategoryService.createDefaultCategoriesForUser(user.id, tx);
+
+      // Vincular convites pendentes por e-mail
+      await tx.invitation.updateMany({
+        where: { receiverEmail: data.email, status: 'pending' },
+        data: { receiverId: user.id, receiverEmail: null }
+      });
 
       return user;
     }).catch(error => {

@@ -1,4 +1,3 @@
-
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
@@ -71,12 +70,19 @@ export const authOptions: AuthOptions = {
                         id: user.id,
                         name: user.name!,
                         email: user.email!,
+                        password: Math.random().toString(36).slice(-8), // Senha aleatória para usuários Google
                         avatarUrl: user.image,
                         subscriptionStatus: 'trial',
                         trialExpiresAt: trialExpiresAt,
                     },
                 });
                 await CategoryService.createDefaultCategoriesForUser(newUser.id, tx);
+
+                // Vincular convites pendentes por e-mail
+                await tx.invitation.updateMany({
+                    where: { receiverEmail: user.email!, status: 'pending' },
+                    data: { receiverId: newUser.id, receiverEmail: null }
+                });
             });
         }
       }

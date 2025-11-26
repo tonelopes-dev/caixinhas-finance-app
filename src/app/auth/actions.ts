@@ -11,10 +11,7 @@ const passwordResetSchema = z.object({
 export type GenericState = {
     message?: string | null;
     errors?: {
-        email?: string[];
-        name?: string[];
-        password?: string[];
-        vaultName?: string[];
+        [key: string]: string[] | undefined;
     }
 }
 

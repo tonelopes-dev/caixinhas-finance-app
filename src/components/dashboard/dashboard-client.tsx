@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -9,6 +8,8 @@ import { PwaPrompt } from '@/components/pwa-prompt';
 import { MotivationalNudge } from '@/components/dashboard/motivational-nudge';
 import NetWorthSummary from '@/components/dashboard/net-worth-summary';
 import type { User, Account, Goal, Transaction } from '@/lib/definitions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type DashboardClientProps = {
   currentUser: User;
@@ -16,6 +17,12 @@ type DashboardClientProps = {
   workspaceId: string;
   workspaceName: string;
   isPersonalWorkspace: boolean;
+  members?: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+  }[];
   accounts: Account[];
   goals: Goal[];
   transactions: Transaction[];
@@ -28,6 +35,7 @@ export function DashboardClient({
   workspaceId,
   workspaceName,
   isPersonalWorkspace,
+  members,
   accounts,
   goals,
   transactions,
@@ -58,9 +66,34 @@ export function DashboardClient({
         <div className="mx-auto w-full">
           <AnimatedDiv>
             <div className="flex flex-col gap-2 mb-8">
-              <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-                Painel: <span className="text-primary">{workspaceName}</span>
-              </h1>
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
+                  Painel: <span className="text-primary">{workspaceName}</span>
+                </h1>
+                
+                {!isPersonalWorkspace && members && members.length > 0 && (
+                  <div className="flex items-center gap-2 bg-card/50 p-2 rounded-full border backdrop-blur-sm">
+                    <span className="text-xs text-muted-foreground pl-2">Membros:</span>
+                    <div className="flex -space-x-2 overflow-hidden">
+                      {members.map((member) => (
+                        <TooltipProvider key={member.id}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background transition-transform hover:scale-110 hover:z-10">
+                                <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
+                                <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{member.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <p className="text-muted-foreground">
                 {isPersonalWorkspace
                   ? 'Seu centro de comando financeiro pessoal.'

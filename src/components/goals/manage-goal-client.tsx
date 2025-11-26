@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useActionState } from 'react';
@@ -267,7 +266,12 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold text-lg">Participantes</h3>
-                  <InviteParticipantDialog goalName={goal.name} disabled={!isOwner} />
+                  <InviteParticipantDialog 
+                    goalName={goal.name} 
+                    disabled={!isOwner} 
+                    vaultId={currentVault?.id}
+                    vaultName={currentVault?.name}
+                  />
                 </div>
                 <div className="space-y-4">
                   {participants.map((p) => (
