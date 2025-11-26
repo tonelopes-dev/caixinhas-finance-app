@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useEffect, useRef, useState, useActionState } from 'react';
+import React, { useEffect, useRef, useState, useActionState, startTransition } from 'react';
 import { addTransaction, type TransactionState } from '@/app/transactions/actions';
 import {
   Dialog,
@@ -144,6 +144,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const sourceAccount = workspaceAccounts.find(a => a.id === sourceAccountId) || null;
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
+  // Filter destinations to exclude the selected source
+  const availableDestinations = allSourcesAndDestinations.filter(item => item.value !== sourceAccountId);
+  // Filter sources to exclude the selected destination (if selected first, though less common flow)
+  const availableSources = allSourcesAndDestinations.filter(item => item.value !== destinationAccountId);
+
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
   
@@ -174,7 +179,9 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     formData.append('amount', amount);
     if (projectRecurring) formData.append('projectRecurring', 'true');
     
-    dispatch(formData);
+    startTransition(() => {
+      dispatch(formData);
+    });
   };
   
   const formVariants = {
@@ -304,7 +311,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                   <Label htmlFor="sourceAccountId_field">Origem</Label>
                                   <Select value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
                                       <SelectTrigger id="sourceAccountId_field"><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
-                                      <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
+                                      <SelectContent>{availableSources.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
                                   </Select>
                                   {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
                               </div>
@@ -314,7 +321,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                   <Label htmlFor="destinationAccountId_field">Destino</Label>
                                   <Select value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
                                       <SelectTrigger id="destinationAccountId_field"><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
-                                      <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
+                                      <SelectContent>{availableDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
                                   </Select>
                                   {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
                               </div>

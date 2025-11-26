@@ -391,7 +391,8 @@ export function TransactionsPageClient({
               <Table className="hidden md:table">
               <TableHeader>
                   <TableRow>
-                    <TableHead>Transação</TableHead>
+                    <TableHead className="w-[50px]">Tipo</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                     <TableHead className="hidden lg:table-cell">Contas</TableHead>
                     <TableHead className="hidden xl:table-cell">Frequência</TableHead>
@@ -412,38 +413,48 @@ export function TransactionsPageClient({
                       return (
                           <motion.tr variants={itemVariants} key={t.id}>
                               <TableCell>
-                                  <div className='flex items-center gap-3'>
-                                      <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
-                                          <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
-                                      </div>
-                                      <div>
-                                          <p className="font-medium">{t.description}</p>
-                                          {MethodIcon && (
-                                            <div className='flex items-center gap-1 text-muted-foreground text-xs'>
-                                                <MethodIcon className="h-3 w-3" />
-                                                <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                            </div>
-                                          )}
-                                      </div>
+                                  <div className={cn("p-2 rounded-full w-fit", typeInfo.bgColor)}>
+                                      <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
+                                  </div>
+                              </TableCell>
+                              <TableCell>
+                                  <div>
+                                      <p className="font-medium">{t.description}</p>
+                                      {MethodIcon && (
+                                        <div className='flex items-center gap-1 text-muted-foreground text-xs'>
+                                            <MethodIcon className="h-3 w-3" />
+                                            <span>{paymentMethods[t.paymentMethod!].label}</span>
+                                        </div>
+                                      )}
                                   </div>
                               </TableCell>
                               <TableCell className="hidden lg:table-cell">
                                   <Badge variant="outline">{t.category?.name || 'Sem categoria'}</Badge>
                               </TableCell>
                               <TableCell className="hidden lg:table-cell text-xs">
-                                  {t.sourceAccountId && (
+                                  {t.sourceAccountId ? (
                                       <div className='flex items-center gap-1 text-muted-foreground'>
                                           <Landmark className="h-3 w-3 text-red-500" />
                                           <span>{getAccountName(t.sourceAccountId)}</span>
                                       </div>
-
-                                  )}
-                                  {t.destinationAccountId && (
+                                  ) : (t.goalId && t.type === 'transfer' && t.destinationAccountId) ? (
+                                      <div className='flex items-center gap-1 text-muted-foreground'>
+                                          <PiggyBank className="h-3 w-3 text-red-500"/>
+                                          <span>{t.goal?.name ? `Caixinha: ${t.goal.name}` : 'Caixinha'}</span>
+                                      </div>
+                                  ) : null}
+                                  
+                                  {t.destinationAccountId ? (
                                       <div className='flex items-center gap-1 text-muted-foreground mt-1'>
-                                          {t.destinationAccountId.startsWith('goal') ? <PiggyBank className="h-3 w-3 text-green-500"/> : <Landmark className="h-3 w-3 text-green-500" />}
+                                          <Landmark className="h-3 w-3 text-green-500" />
                                           <span>{getAccountName(t.destinationAccountId)}</span>
                                       </div>
-                                  )}
+                                  ) : (t.goalId && t.type === 'transfer' && t.sourceAccountId) ? (
+                                      <div className='flex items-center gap-1 text-muted-foreground mt-1'>
+                                          <PiggyBank className="h-3 w-3 text-green-500"/>
+                                          <span>{t.goal?.name ? `Caixinha: ${t.goal.name}` : 'Caixinha'}</span>
+                                      </div>
+                                  ) : null}
                               </TableCell>
                               <TableCell className="hidden xl:table-cell">
                                 {t.isRecurring && (
