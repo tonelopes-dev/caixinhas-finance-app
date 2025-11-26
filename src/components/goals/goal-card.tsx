@@ -90,30 +90,45 @@ export function GoalCard({
             </CardDescription>
           </div>
         </Link>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground transition-colors hover:text-[#ff6b7b]"
-                onClick={() => onToggleFeatured(goal.id)}
-              >
-                <Heart
-                  className={cn(
-                    'h-5 w-5',
-                    goal.isFeatured && 'fill-[#ff6b7b] text-[#ff6b7b]'
-                  )}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {goal.isFeatured ? 'Remover dos favoritos' : 'Favoritar no painel'}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {goal.visibility === 'private' ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex h-8 w-8 items-center justify-center text-muted-foreground/50 cursor-help">
+                  <Lock className="h-4 w-4" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Caixinhas privadas não aparecem nos destaques da página inicial.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground transition-colors hover:text-[#ff6b7b]"
+                  onClick={() => onToggleFeatured(goal.id)}
+                >
+                  <Heart
+                    className={cn(
+                      'h-5 w-5',
+                      goal.isFeatured && 'fill-[#ff6b7b] text-[#ff6b7b]'
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {goal.isFeatured ? 'Remover dos favoritos' : 'Favoritar no painel'}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </CardHeader>
       <CardContent className="flex-1">
         <Link href={`/goals/${goal.id}`} className="block">
