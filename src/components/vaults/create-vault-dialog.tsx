@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -13,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ExternalLink, Plus, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import Image from 'next/image';
@@ -125,14 +125,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                           <p className="text-sm text-destructive">{state.errors.name[0]}</p>
                         )}
                     </div>
-                    {/* 
-                    <div className="space-y-2">
-                        <Label>Membros</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Convites de membros serão implementados em breve.
-                        </p>
+
+                    <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="is-private" className="text-base">
+                                Cofre Privado
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                                Cofres privados são visíveis apenas para você.
+                            </p>
+                        </div>
+                        <Switch id="is-private" name="isPrivate" />
                     </div>
-                    */}
+
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 mb-2">
                             <Label>Imagem de Capa</Label>

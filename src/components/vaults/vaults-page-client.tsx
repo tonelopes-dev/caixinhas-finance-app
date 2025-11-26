@@ -5,15 +5,32 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Mail, Plus, X } from 'lucide-react';
+import { Check, Mail, Plus, X, MoreVertical, Pencil, Users, ArrowRightLeft, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
-import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
+import { EditVaultDialog } from '@/components/vaults/edit-vault-dialog';
+import { acceptInvitationAction, declineInvitationAction, convertPersonalToSharedVaultAction } from '@/app/vaults/actions';
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type User = {
   id: string;
@@ -27,6 +44,7 @@ type Vault = {
   id: string;
   name: string;
   imageUrl: string;
+  isPrivate: boolean;
   ownerId: string;
   members: User[];
 };
@@ -53,12 +71,20 @@ function WorkspaceCard({
   imageUrl,
   members,
   isPersonal = false,
+  isPrivate = false,
+  onEdit,
+  onConvert,
+  isOwner = false,
 }: {
   id: string;
   name: string;
   imageUrl: string;
   members: User[];
   isPersonal?: boolean;
+  isPrivate?: boolean;
+  onEdit?: (vault: { id: string; name: string; imageUrl: string; isPrivate: boolean }) => void;
+  onConvert?: () => void;
+  isOwner?: boolean;
 }) {
   return (
     <motion.div
@@ -67,8 +93,44 @@ function WorkspaceCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
-      className="h-full"
+      className="h-full relative group"
     >
+      {isOwner && !isPersonal && onEdit && (
+        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate })}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Editar Cofre
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      {isPersonal && onConvert && (
+        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onConvert}>
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                Converter em Compartilhado
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       <form action={setWorkspaceAction} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
@@ -198,6 +260,9 @@ export function VaultsPageClient({
 }: VaultsPageClientProps) {
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
+  const [editingVault, setEditingVault] = useState<{ id: string; name: string; imageUrl: string; isPrivate: boolean } | null>(null);
+  const [isConvertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const { toast } = useToast();
 
   const handleCreateVaultClick = () => {
@@ -225,6 +290,30 @@ export function VaultsPageClient({
 
   const handleInvitationAction = () => {
     router.refresh();
+  };
+
+  const handleConvertPersonal = async () => {
+    setIsConverting(true);
+    try {
+      const result = await convertPersonalToSharedVaultAction(currentUser.id);
+      toast({
+        title: result.success ? 'Sucesso' : 'Erro',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) {
+        setConvertDialogOpen(false);
+        router.refresh();
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao converter a conta.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsConverting(false);
+    }
   };
 
   return (
@@ -288,6 +377,7 @@ export function VaultsPageClient({
                   imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
                   members={[currentUser]}
                   isPersonal={true}
+                  onConvert={() => setConvertDialogOpen(true)}
                 />
               ) : (
                 <Card className="flex flex-col items-center justify-center border-2 opacity-60 min-h-[220px] relative">
@@ -315,8 +405,11 @@ export function VaultsPageClient({
                     id={vault.id}
                     name={vault.name}
                     imageUrl={vault.imageUrl}
+                    isPrivate={vault.isPrivate}
                     members={vault.members}
                     isPersonal={false}
+                    isOwner={vault.ownerId === currentUser.id}
+                    onEdit={setEditingVault}
                   />
                 ))}
               </AnimatePresence>
@@ -346,6 +439,35 @@ export function VaultsPageClient({
           onOpenChange={setCreateVaultOpen}
           currentUser={currentUser}
         />
+        {editingVault && (
+          <EditVaultDialog
+            open={!!editingVault}
+            onOpenChange={(open) => !open && setEditingVault(null)}
+            vault={editingVault}
+          />
+        )}
+
+        <AlertDialog open={isConvertDialogOpen} onOpenChange={setConvertDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Converter para Cofre Compartilhado?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Isso criará um novo cofre chamado "Cofre de {currentUser.name.split(' ')[0]}" e moverá todas as suas contas, transações e metas pessoais para ele.
+                <br /><br />
+                <span className="font-semibold text-yellow-600 dark:text-yellow-500 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Sua conta pessoal ficará vazia após esta ação.
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isConverting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={(e) => { e.preventDefault(); handleConvertPersonal(); }} disabled={isConverting}>
+                {isConverting ? 'Convertendo...' : 'Confirmar Conversão'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </>
   );
 }

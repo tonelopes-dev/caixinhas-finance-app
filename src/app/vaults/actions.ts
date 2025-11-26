@@ -8,6 +8,14 @@ import { z } from 'zod';
 const createVaultSchema = z.object({
   name: z.string().min(1, { message: 'O nome do cofre é obrigatório.' }),
   imageUrl: z.string().url().optional(),
+  isPrivate: z.boolean().optional(),
+});
+
+const updateVaultSchema = z.object({
+  vaultId: z.string().min(1),
+  name: z.string().min(1, { message: 'O nome do cofre é obrigatório.' }),
+  imageUrl: z.string().url().optional(),
+  isPrivate: z.boolean().optional(),
 });
 
 export type VaultActionState = {
@@ -40,6 +48,7 @@ export async function getUserVaultsData(userId: string) {
       id: vault.id,
       name: vault.name,
       imageUrl: vault.imageUrl || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080',
+      isPrivate: vault.isPrivate,
       ownerId: vault.ownerId,
       members: vault.members.map((member) => ({
         id: member.user.id,
@@ -96,6 +105,7 @@ export async function createVaultAction(
   const validatedFields = createVaultSchema.safeParse({
     name: formData.get('name'),
     imageUrl: formData.get('imageUrl') || undefined,
+    isPrivate: formData.get('isPrivate') === 'on',
   });
 
   if (!validatedFields.success) {
@@ -109,6 +119,7 @@ export async function createVaultAction(
     const newVault = await VaultService.createVault({
       name: validatedFields.data.name,
       imageUrl: validatedFields.data.imageUrl,
+      isPrivate: validatedFields.data.isPrivate,
       ownerId: userId,
     });
 
@@ -135,6 +146,71 @@ export async function createVaultAction(
     console.error('Erro ao criar cofre:', error);
     return {
       message: 'Erro ao criar cofre. Tente novamente.',
+      errors: {},
+    };
+  }
+}
+
+/**
+ * Atualiza um cofre existente
+ * @param prevState - Estado anterior
+ * @param formData - Dados do formulário
+ * @returns Estado atualizado
+ */
+export async function updateVaultAction(
+  prevState: VaultActionState,
+  formData: FormData
+): Promise<VaultActionState> {
+  const validatedFields = updateVaultSchema.safeParse({
+    vaultId: formData.get('vaultId'),
+    name: formData.get('name'),
+    imageUrl: formData.get('imageUrl') || undefined,
+    isPrivate: formData.get('isPrivate') === 'on',
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+
+  try {
+    // Verificar se o usuário é dono do cofre
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return { message: 'Não autorizado', errors: {} };
+    }
+
+    const vault = await VaultService.getVaultById(validatedFields.data.vaultId);
+    if (!vault) {
+      return { message: 'Cofre não encontrado', errors: {} };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+      return { message: 'Você não tem permissão para editar este cofre', errors: {} };
+    }
+
+    await VaultService.updateVault(validatedFields.data.vaultId, {
+      name: validatedFields.data.name,
+      imageUrl: validatedFields.data.imageUrl,
+      isPrivate: validatedFields.data.isPrivate,
+    });
+
+    revalidatePath('/vaults');
+    revalidatePath('/dashboard');
+    revalidatePath('/profile');
+    
+    return {
+      message: 'Cofre atualizado com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao atualizar cofre:', error);
+    return {
+      message: 'Erro ao atualizar cofre. Tente novamente.',
       errors: {},
     };
   }
@@ -188,6 +264,65 @@ export async function declineInvitationAction(
     return {
       success: false,
       message: 'Erro ao recusar convite. Tente novamente.',
+    };
+  }
+}
+
+/**
+ * Converte a conta pessoal em um cofre compartilhado
+ * @param userId - ID do usuário
+ */
+export async function convertPersonalToSharedVaultAction(
+  userId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const { AuthService } = await import('@/services/auth.service');
+    const user = await AuthService.getUserById(userId);
+    
+    if (!user) {
+      return { success: false, message: 'Usuário não encontrado.' };
+    }
+
+    // 1. Criar novo cofre
+    const newVault = await VaultService.createVault({
+      name: `Cofre de ${user.name.split(' ')[0]}`,
+      imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
+      ownerId: userId,
+    });
+
+    // 2. Migrar dados
+    const prisma = (await import('@/services/prisma')).default;
+    
+    await prisma.$transaction([
+      // Migrar Contas
+      prisma.account.updateMany({
+        where: { ownerId: userId, vaultId: null },
+        data: { vaultId: newVault.id, scope: newVault.id },
+      }),
+      // Migrar Transações
+      prisma.transaction.updateMany({
+        where: { userId: userId, vaultId: null },
+        data: { vaultId: newVault.id },
+      }),
+      // Migrar Metas
+      prisma.goal.updateMany({
+        where: { userId: userId, vaultId: null },
+        data: { vaultId: newVault.id },
+      }),
+    ]);
+
+    revalidatePath('/vaults');
+    revalidatePath('/dashboard');
+    
+    return {
+      success: true,
+      message: 'Conta pessoal convertida em cofre compartilhado com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao converter conta:', error);
+    return {
+      success: false,
+      message: 'Erro ao converter conta. Tente novamente.',
     };
   }
 }

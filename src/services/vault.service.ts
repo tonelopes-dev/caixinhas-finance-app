@@ -1,10 +1,10 @@
-
 import prisma from './prisma';
 
 export type VaultWithMembers = {
   id: string;
   name: string;
   imageUrl: string | null;
+  isPrivate: boolean;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,12 +24,14 @@ export type VaultWithMembers = {
 export type CreateVaultInput = {
   name: string;
   imageUrl?: string;
+  isPrivate?: boolean;
   ownerId: string;
 };
 
 export type UpdateVaultInput = {
   name?: string;
   imageUrl?: string;
+  isPrivate?: boolean;
 };
 
 export type VaultInvitationData = {
@@ -131,6 +133,7 @@ export class VaultService {
         data: {
           name: data.name,
           imageUrl: data.imageUrl || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080',
+          isPrivate: data.isPrivate || false,
           ownerId: data.ownerId,
           members: {
             create: {
@@ -291,6 +294,7 @@ export class VaultService {
         ]);
 
         if (!vault) throw new Error('Cofre não encontrado.');
+        if (vault.isPrivate) throw new Error('Este cofre é privado e não permite convites.');
         if (!sender) throw new Error('Usuário remetente não encontrado.');
         
         let receiver = await prisma.user.findUnique({ where: { email: receiverEmail } });
