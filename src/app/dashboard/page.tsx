@@ -35,23 +35,21 @@ export default async function DashboardPage() {
     getDashboardData(userId, workspaceId),
     VaultService.getUserVaults(userId),
     GoalService.getGoals(owner.ownerId, owner.ownerType),
-    // Corrigido: Nome do método e argumentos
-    CategoryService.getUserCategories(owner.ownerId, owner.ownerType),
+    CategoryService.getUserCategories(userId),
   ]);
 
-  // Corrigido: Tipo explícito para 'v' é Vault
   const workspaceName =
     workspaceId === userId
       ? 'Pessoal'
-      : userVaults.find((v: Vault) => v.id === workspaceId)?.name || 'Cofre';
+      : userVaults.find((v: any) => v.id === workspaceId)?.name || 'Cofre';
 
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header user={currentUser} partner={null} />
+      <Header user={currentUser as User} partner={null} />
       <DashboardClient
-        currentUser={currentUser}
+        currentUser={currentUser as User}
         partner={null}
         workspaceId={workspaceId}
         workspaceName={workspaceName}
