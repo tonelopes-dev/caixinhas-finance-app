@@ -36,13 +36,15 @@ export function VaultCreationSuccessDialog({ open, onOpenChange }: VaultCreation
 
   return (
     <>
-      <Confetti
-        width={width}
-        height={height}
-        recycle={false}
-        numberOfPieces={400}
-        gravity={0.1}
-      />
+      <div className="fixed inset-0 z-[100] pointer-events-none">
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={400}
+          gravity={0.1}
+        />
+      </div>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md text-center p-8 flex flex-col items-center justify-center">
             <DialogTitle className="sr-only">Cofre criado com sucesso</DialogTitle>

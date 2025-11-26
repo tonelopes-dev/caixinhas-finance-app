@@ -326,3 +326,200 @@ export async function convertPersonalToSharedVaultAction(
     };
   }
 }
+
+/**
+ * Envia um convite para um cofre
+ * @param vaultId - ID do cofre
+ * @param email - E-mail do convidado
+ */
+export async function inviteToVaultAction(
+  vaultId: string,
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return { success: false, message: 'Não autorizado' };
+    }
+
+    await VaultService.createInvitation(vaultId, session.user.id, email);
+    
+    revalidatePath('/vaults');
+    
+    return {
+      success: true,
+      message: 'Convite enviado com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao enviar convite:', error);
+    if (error instanceof Error) {
+        return { success: false, message: error.message };
+    }
+    return {
+      success: false,
+      message: 'Erro ao enviar convite. Tente novamente.',
+    };
+  }
+}
+
+/**
+ * Exclui um cofre
+ * @param vaultId - ID do cofre
+ */
+export async function deleteVaultAction(vaultId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return { success: false, message: 'Não autorizado' };
+    }
+
+    const vault = await VaultService.getVaultById(vaultId);
+    if (!vault) {
+      return { success: false, message: 'Cofre não encontrado' };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+      return { success: false, message: 'Você não tem permissão para excluir este cofre' };
+    }
+
+    await VaultService.deleteVault(vaultId);
+    
+    revalidatePath('/vaults');
+    revalidatePath('/dashboard');
+    
+    return {
+      success: true,
+      message: 'Cofre excluído com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao excluir cofre:', error);
+    return {
+      success: false,
+      message: 'Erro ao excluir cofre. Tente novamente.',
+    };
+  }
+}
+
+/**
+ * Remove um membro de um cofre
+ * @param vaultId - ID do cofre
+ * @param userId - ID do usuário a ser removido
+ */
+export async function removeMemberAction(
+  vaultId: string,
+  userId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return { success: false, message: 'Não autorizado' };
+    }
+
+    const vault = await VaultService.getVaultById(vaultId);
+    if (!vault) {
+      return { success: false, message: 'Cofre não encontrado' };
+    }
+
+    // Apenas o dono pode remover membros (ou o próprio membro pode sair - lógica futura)
+    if (vault.ownerId !== session.user.id) {
+      return { success: false, message: 'Você não tem permissão para remover membros deste cofre' };
+    }
+
+    if (vault.ownerId === userId) {
+        return { success: false, message: 'O proprietário não pode ser removido.' };
+    }
+
+    await VaultService.removeMember(vaultId, userId);
+    
+    revalidatePath('/vaults');
+    
+    return {
+      success: true,
+      message: 'Membro removido com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao remover membro:', error);
+    return {
+      success: false,
+      message: 'Erro ao remover membro. Tente novamente.',
+    };
+  }
+}
+
+/**
+ * Busca convites pendentes de um cofre
+ * @param vaultId - ID do cofre
+ */
+export async function getVaultPendingInvitationsAction(vaultId: string) {
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return [];
+    }
+
+    // Verificar se o usuário é membro do cofre (ou dono) para ver os convites
+    const isMember = await VaultService.isMember(vaultId, session.user.id);
+    if (!isMember) {
+      return [];
+    }
+
+    const invitations = await VaultService.getVaultPendingInvitations(vaultId);
+    
+    return invitations.map(inv => ({
+      id: inv.id,
+      email: inv.receiverEmail || 'Sem e-mail',
+      invitedBy: inv.sender.name,
+      createdAt: inv.createdAt, // Assumindo que createdAt existe no tipo retornado pelo prisma, se não, ajustar
+      status: inv.status
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar convites do cofre:', error);
+    return [];
+  }
+}
+
+/**
+ * Cancela um convite enviado
+ * @param invitationId - ID do convite
+ */
+export async function cancelInvitationAction(invitationId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return { success: false, message: 'Não autorizado' };
+    }
+
+    await VaultService.cancelInvitation(invitationId, session.user.id);
+    
+    revalidatePath('/vaults');
+    
+    return {
+      success: true,
+      message: 'Convite cancelado com sucesso!',
+    };
+  } catch (error) {
+    console.error('Erro ao cancelar convite:', error);
+    if (error instanceof Error) {
+        return { success: false, message: error.message };
+    }
+    return {
+      success: false,
+      message: 'Erro ao cancelar convite.',
+    };
+  }
+}

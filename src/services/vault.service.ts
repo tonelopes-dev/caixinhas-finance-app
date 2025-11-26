@@ -40,8 +40,9 @@ export type VaultInvitationData = {
   targetId: string;
   targetName: string;
   senderId: string;
-  receiverId: string;
+  receiverId: string | null;
   status: string;
+  createdAt: Date;
   sender: {
     name: string;
   };
@@ -298,27 +299,32 @@ export class VaultService {
         if (!sender) throw new Error('Usuário remetente não encontrado.');
         
         let receiver = await prisma.user.findUnique({ where: { email: receiverEmail } });
-        let receiverId: string;
+        let receiverId: string | null = null;
 
-        // Se o usuário convidado não existe, não podemos criar o convite ainda.
-        // A lógica de negócio é que o usuário deve se cadastrar primeiro, o que é um fluxo comum.
-        if (!receiver) {
-            throw new Error(`Usuário com e-mail ${receiverEmail} não encontrado. Peça para ele(a) se cadastrar primeiro.`);
-        }
-        receiverId = receiver.id;
+        if (receiver) {
+            receiverId = receiver.id;
+            
+            // Verificar se o usuário já é membro
+            const isAlreadyMember = await this.isMember(vaultId, receiverId);
+            if (isAlreadyMember) {
+                throw new Error('Este usuário já é membro deste cofre.');
+            }
 
-        // Verificar se já existe um convite pendente para este usuário e cofre
-        const existingInvitation = await prisma.invitation.findFirst({
-            where: { targetId: vaultId, receiverId, status: 'pending', type: 'vault' }
-        });
-        if (existingInvitation) {
-            throw new Error('Este usuário já tem um convite pendente para este cofre.');
-        }
-
-        // Verificar se o usuário já é membro
-        const isAlreadyMember = await this.isMember(vaultId, receiverId);
-        if (isAlreadyMember) {
-            throw new Error('Este usuário já é membro deste cofre.');
+            // Verificar se já existe um convite pendente para este usuário e cofre
+            const existingInvitation = await prisma.invitation.findFirst({
+                where: { targetId: vaultId, receiverId, status: 'pending', type: 'vault' }
+            });
+            if (existingInvitation) {
+                throw new Error('Este usuário já tem um convite pendente para este cofre.');
+            }
+        } else {
+            // Verificar se já existe um convite pendente para este email
+            const existingInvitation = await prisma.invitation.findFirst({
+                where: { targetId: vaultId, receiverEmail, status: 'pending', type: 'vault' }
+            });
+            if (existingInvitation) {
+                throw new Error('Este e-mail já tem um convite pendente para este cofre.');
+            }
         }
 
         const invitation = await prisma.invitation.create({
@@ -327,19 +333,25 @@ export class VaultService {
                 targetId: vaultId,
                 targetName: vault.name,
                 senderId: senderId,
-                receiverId: receiverId,
+                receiverId: receiverId, // Pode ser null
+                receiverEmail: receiverEmail,
                 status: 'pending',
             }
         });
 
-        // Criar notificação para o usuário convidado
-        const { NotificationService } = await import('./notification.service');
-        await NotificationService.createVaultInviteNotification({
-            receiverId: receiverId,
-            senderName: sender.name,
-            vaultName: vault.name,
-            invitationId: invitation.id,
-        });
+        // Se o usuário existe, criar notificação
+        if (receiverId) {
+            const { NotificationService } = await import('./notification.service');
+            await NotificationService.createVaultInviteNotification({
+                receiverId: receiverId,
+                senderName: sender.name,
+                vaultName: vault.name,
+                invitationId: invitation.id,
+            });
+        }
+        
+        // TODO: Enviar e-mail de convite (para usuários existentes e novos)
+        // Isso será implementado posteriormente ou chamado pelo controller/action
 
     } catch (error) {
         console.error('Erro ao criar convite:', error);
@@ -363,6 +375,37 @@ export class VaultService {
           receiverId: userId,
           type: 'vault',
           status: 'pending',
+        },
+        include: {
+          sender: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return invitations;
+    } catch (error) {
+      console.error('Erro ao buscar convites:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Busca todos os convites de um usuário (pendentes, aceitos, recusados)
+   * @param userId - ID do usuário
+   * @returns Lista de convites
+   */
+  static async getUserInvitations(userId: string): Promise<VaultInvitationData[]> {
+    try {
+      const invitations = await prisma.invitation.findMany({
+        where: {
+          receiverId: userId,
+          type: 'vault',
         },
         include: {
           sender: {
@@ -415,6 +458,11 @@ export class VaultService {
           data: { status: 'accepted' },
         });
       });
+
+      // Marcar notificação como lida
+      const { NotificationService } = await import('./notification.service');
+      await NotificationService.markAsReadByRelatedId(invitationId, userId);
+
     } catch (error) {
       console.error('Erro ao aceitar convite:', error);
       throw new Error('Erro ao aceitar convite. Talvez você já seja membro deste cofre.');
@@ -440,9 +488,151 @@ export class VaultService {
         where: { id: invitationId },
         data: { status: 'declined' },
       });
+
+      // Marcar notificação como lida
+      const { NotificationService } = await import('./notification.service');
+      await NotificationService.markAsReadByRelatedId(invitationId, userId);
+
     } catch (error) {
       console.error('Erro ao recusar convite:', error);
       throw new Error('Erro ao recusar convite');
+    }
+  }
+
+  /**
+   * Deleta um convite (apenas para limpeza de histórico)
+   * @param invitationId - ID do convite
+   * @param userId - ID do usuário
+   */
+  static async deleteInvitation(invitationId: string, userId: string): Promise<void> {
+    try {
+      const invitation = await prisma.invitation.findUnique({
+        where: { id: invitationId },
+      });
+
+      if (!invitation || invitation.receiverId !== userId) {
+        throw new Error('Convite não encontrado ou sem permissão.');
+      }
+
+      await prisma.invitation.delete({
+        where: { id: invitationId },
+      });
+    } catch (error) {
+      console.error('Erro ao deletar convite:', error);
+      throw new Error('Erro ao deletar convite');
+    }
+  }
+
+  /**
+   * Busca convites pendentes enviados para um cofre específico
+   * @param vaultId - ID do cofre
+   * @returns Lista de convites pendentes
+   */
+  static async getVaultPendingInvitations(vaultId: string): Promise<VaultInvitationData[]> {
+    try {
+      const invitations = await prisma.invitation.findMany({
+        where: {
+          targetId: vaultId,
+          type: 'vault',
+          status: 'pending',
+        },
+        include: {
+          sender: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return invitations;
+    } catch (error) {
+      console.error('Erro ao buscar convites do cofre:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Cancela um convite pendente (ação do remetente ou dono do cofre)
+   * @param invitationId - ID do convite
+   * @param userId - ID do usuário que está cancelando (deve ser o remetente ou dono do cofre)
+   */
+  static async cancelInvitation(invitationId: string, userId: string): Promise<void> {
+    try {
+      const invitation = await prisma.invitation.findUnique({
+        where: { id: invitationId },
+        include: {
+          vault: true,
+        },
+      });
+
+      if (!invitation) {
+        throw new Error('Convite não encontrado.');
+      }
+
+      // Verificar permissão: deve ser o remetente ou o dono do cofre
+      const isSender = invitation.senderId === userId;
+      const isOwner = invitation.vault?.ownerId === userId;
+
+      if (!isSender && !isOwner) {
+        throw new Error('Sem permissão para cancelar este convite.');
+      }
+
+      await prisma.invitation.delete({
+        where: { id: invitationId },
+      });
+      
+      // Se houver notificação associada, ela deve ser removida ou atualizada?
+      // Ao deletar o convite, a notificação pode ficar "órfã" se não tiver cascade, 
+      // mas como a notificação tem relatedId, podemos tentar limpar também.
+      if (invitation.receiverId) {
+         const { NotificationService } = await import('./notification.service');
+         // Implementar limpeza de notificação se necessário, ou deixar como está (o link vai falhar ou avisar que expirou)
+         // Por enquanto, vamos deixar, pois o usuário pode querer saber que foi convidado mas cancelaram.
+         // Ou podemos deletar a notificação para não poluir. Vamos deletar por relatedId.
+         await prisma.notification.deleteMany({
+             where: { relatedId: invitationId }
+         });
+      }
+
+    } catch (error) {
+      console.error('Erro ao cancelar convite:', error);
+      throw new Error('Erro ao cancelar convite');
+    }
+  }
+
+  /**
+   * Busca convites enviados pelo usuário (pendentes)
+   * @param userId - ID do usuário
+   * @returns Lista de convites enviados
+   */
+  static async getUserSentInvitations(userId: string): Promise<VaultInvitationData[]> {
+    try {
+      const invitations = await prisma.invitation.findMany({
+        where: {
+          senderId: userId,
+          type: 'vault',
+          status: 'pending',
+        },
+        include: {
+          sender: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return invitations;
+    } catch (error) {
+      console.error('Erro ao buscar convites enviados:', error);
+      return [];
     }
   }
 }

@@ -75,6 +75,7 @@ function WorkspaceCard({
   onEdit,
   onConvert,
   isOwner = false,
+  ownerId,
 }: {
   id: string;
   name: string;
@@ -82,9 +83,10 @@ function WorkspaceCard({
   members: User[];
   isPersonal?: boolean;
   isPrivate?: boolean;
-  onEdit?: (vault: { id: string; name: string; imageUrl: string; isPrivate: boolean }) => void;
+  onEdit?: (vault: Vault) => void;
   onConvert?: () => void;
   isOwner?: boolean;
+  ownerId?: string;
 }) {
   return (
     <motion.div
@@ -104,7 +106,7 @@ function WorkspaceCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate })}>
+              <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Editar Cofre
               </DropdownMenuItem>
@@ -260,7 +262,7 @@ export function VaultsPageClient({
 }: VaultsPageClientProps) {
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
-  const [editingVault, setEditingVault] = useState<{ id: string; name: string; imageUrl: string; isPrivate: boolean } | null>(null);
+  const [editingVault, setEditingVault] = useState<Vault | null>(null);
   const [isConvertDialogOpen, setConvertDialogOpen] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const { toast } = useToast();
@@ -409,6 +411,7 @@ export function VaultsPageClient({
                     members={vault.members}
                     isPersonal={false}
                     isOwner={vault.ownerId === currentUser.id}
+                    ownerId={vault.ownerId}
                     onEdit={setEditingVault}
                   />
                 ))}

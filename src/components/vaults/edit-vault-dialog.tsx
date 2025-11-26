@@ -13,15 +13,35 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Trash2, UserMinus, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
-import { updateVaultAction } from '@/app/vaults/actions';
+import { 
+  updateVaultAction, 
+  deleteVaultAction, 
+  removeMemberAction, 
+  inviteToVaultAction,
+  getVaultPendingInvitationsAction,
+  cancelInvitationAction
+} from '@/app/vaults/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from '@/components/ui/badge';
 
 const coverImages = [
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -32,6 +52,14 @@ const coverImages = [
     'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800',
 ];
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  subscriptionStatus: string;
+};
+
 interface EditVaultDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,6 +68,8 @@ interface EditVaultDialogProps {
     name: string;
     imageUrl: string;
     isPrivate: boolean;
+    ownerId: string;
+    members: User[];
   };
 }
 
@@ -48,12 +78,24 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
   const [selectedImage, setSelectedImage] = React.useState(vault.imageUrl);
   const [customImageUrl, setCustomImageUrl] = React.useState('');
   const [isPrivate, setIsPrivate] = React.useState(vault.isPrivate);
+  const [inviteEmail, setInviteEmail] = React.useState('');
+  const [isInviting, setIsInviting] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [pendingInvitations, setPendingInvitations] = React.useState<any[]>([]);
   const { toast } = useToast();
   const router = useRouter();
   
   const [state, formAction, isPending] = useActionState(updateVaultAction, {
     message: null,
   });
+
+  // Fetch pending invitations
+  const fetchPendingInvitations = React.useCallback(async () => {
+    if (open && vault.id) {
+      const invitations = await getVaultPendingInvitationsAction(vault.id);
+      setPendingInvitations(invitations);
+    }
+  }, [open, vault.id]);
 
   // Reset form when vault changes or dialog opens
   React.useEffect(() => {
@@ -67,8 +109,9 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
             setSelectedImage('');
             setCustomImageUrl(vault.imageUrl);
         }
+        fetchPendingInvitations();
     }
-  }, [open, vault]);
+  }, [open, vault, fetchPendingInvitations]);
 
   React.useEffect(() => {
     if (state?.message && !state?.errors) {
@@ -97,19 +140,106 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     setSelectedImage(e.target.value);
   }
 
+  const handleInvite = async () => {
+    if (!inviteEmail) return;
+    setIsInviting(true);
+    try {
+      const result = await inviteToVaultAction(vault.id, inviteEmail);
+      toast({
+        title: result.success ? 'Convite enviado' : 'Erro',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) {
+        setInviteEmail('');
+        fetchPendingInvitations();
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao enviar convite',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    try {
+      const result = await cancelInvitationAction(invitationId);
+      toast({
+        title: result.success ? 'Convite cancelado' : 'Erro',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) {
+        fetchPendingInvitations();
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao cancelar convite',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRemoveMember = async (userId: string) => {
+    try {
+      const result = await removeMemberAction(vault.id, userId);
+      toast({
+        title: result.success ? 'Membro removido' : 'Erro',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) router.refresh();
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao remover membro',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteVault = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteVaultAction(vault.id);
+      toast({
+        title: result.success ? 'Cofre excluído' : 'Erro',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) {
+        onOpenChange(false);
+        router.refresh();
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir cofre',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const finalImageUrl = customImageUrl || selectedImage;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form action={formAction}>
             <input type="hidden" name="vaultId" value={vault.id} />
             <input type="hidden" name="imageUrl" value={finalImageUrl} />
             
             <DialogHeader>
-            <DialogTitle className="font-headline text-xl">Editar Cofre</DialogTitle>
+            <DialogTitle className="font-headline text-xl">Gerenciar Cofre</DialogTitle>
             <DialogDescription>
-                Atualize as informações do seu cofre compartilhado.
+                Atualize as informações, gerencie membros ou exclua o cofre.
             </DialogDescription>
             </DialogHeader>
 
@@ -157,6 +287,88 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                         checked={isPrivate}
                         onCheckedChange={setIsPrivate}
                     />
+                </div>
+
+                <div className="space-y-3">
+                    <Label>Membros</Label>
+                    <div className="flex gap-2">
+                        <Input 
+                            placeholder="E-mail do novo membro" 
+                            value={inviteEmail}
+                            onChange={(e) => setInviteEmail(e.target.value)}
+                        />
+                        <Button type="button" onClick={handleInvite} disabled={isInviting || !inviteEmail}>
+                            {isInviting ? 'Enviando...' : <><UserPlus className="mr-2 h-4 w-4" /> Convidar</>}
+                        </Button>
+                    </div>
+                    
+                    <div className="space-y-2 mt-4">
+                        {vault.members.map((member) => (
+                            <div key={member.id} className="flex items-center justify-between p-2 rounded-lg border bg-card">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={member.avatarUrl || ''} />
+                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-sm font-medium">{member.name}</p>
+                                        <p className="text-xs text-muted-foreground">{member.email}</p>
+                                    </div>
+                                </div>
+                                {member.id !== vault.ownerId && (
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleRemoveMember(member.id)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
+                                {member.id === vault.ownerId && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Dono</span>
+                                )}
+                            </div>
+                        ))}
+
+                        {/* Lista de Convites Pendentes */}
+                        {pendingInvitations.length > 0 && (
+                          <>
+                            <Label className="text-xs text-muted-foreground mt-4 block">Convites Pendentes</Label>
+                            {pendingInvitations.map((invitation) => (
+                              <div key={invitation.id} className="flex items-center justify-between p-2 rounded-lg border border-dashed bg-muted/30">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                    <UserPlus className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium">{invitation.email}</p>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="outline" className="text-[10px] h-5 px-1 bg-yellow-500/10 text-yellow-600 border-yellow-200">
+                                        Pendente
+                                      </Badge>
+                                      <span className="text-[10px] text-muted-foreground">
+                                        Enviado por {invitation.invitedBy}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="text-muted-foreground hover:text-destructive"
+                                  onClick={() => handleCancelInvitation(invitation.id)}
+                                  title="Cancelar convite"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-3">
@@ -217,6 +429,33 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                           <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
                         )}
                     </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                    <Label className="text-destructive mb-2 block">Zona de Perigo</Label>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button type="button" variant="destructive" className="w-full">
+                                <Trash2 className="mr-2 h-4 w-4" /> Excluir Cofre
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta ação não pode ser desfeita. Isso excluirá permanentemente o cofre 
+                                    <span className="font-bold"> {vault.name} </span> 
+                                    e removerá todos os dados associados.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteVault} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    {isDeleting ? 'Excluindo...' : 'Sim, excluir cofre'}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
             <DialogFooter>
