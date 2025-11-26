@@ -34,6 +34,7 @@ export class NotificationService {
     type: NotificationType;
     message: string;
     link?: string;
+    relatedId?: string;
   }): Promise<NotificationData> {
     try {
       const notification = await prisma.notification.create({
@@ -42,6 +43,7 @@ export class NotificationService {
           type: data.type,
           message: data.message,
           link: data.link,
+          relatedId: data.relatedId,
           isRead: false,
         },
       });
@@ -170,6 +172,7 @@ export class NotificationService {
       type: 'vault_invite',
       message: `${data.senderName} convidou você para participar do cofre "${data.vaultName}"`,
       link: `/vaults`,
+      relatedId: data.invitationId,
     });
   }
 
@@ -187,5 +190,24 @@ export class NotificationService {
       message: `${data.addedByName} adicionou você ao cofre "${data.vaultName}"`,
       link: `/vaults`,
     });
+  }
+
+  /**
+   * Marca uma notificação como lida pelo ID relacionado (ex: invitationId)
+   */
+  static async markAsReadByRelatedId(relatedId: string, userId: string): Promise<void> {
+    try {
+      await prisma.notification.updateMany({
+        where: {
+          relatedId,
+          userId,
+          isRead: false,
+        },
+        data: { isRead: true },
+      });
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida por relatedId:', error);
+      // Não lançar erro para não interromper o fluxo principal
+    }
   }
 }

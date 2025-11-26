@@ -11,8 +11,8 @@ import { ArrowLeft, Bell } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getNotifications } from './actions';
-import { NotificationsClient } from '@/components/notifications/notifications-client';
+import { getNotifications, getUserInvitations, getUserSentInvitations } from './actions';
+import { NotificationsManager } from '@/components/notifications/notifications-manager';
 
 
 export default async function NotificationsPage() {
@@ -22,7 +22,11 @@ export default async function NotificationsPage() {
     redirect('/login');
   }
 
-  const notifications = await getNotifications();
+  const [notifications, invitations, sentInvitations] = await Promise.all([
+    getNotifications(),
+    getUserInvitations(),
+    getUserSentInvitations()
+  ]);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -37,14 +41,18 @@ export default async function NotificationsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
               <Bell className="h-6 w-6 text-primary" />
-              Todas as Notificações
+              Central de Notificações
             </CardTitle>
             <CardDescription>
-              Gerencie todos os seus alertas, convites e atualizações.
+              Gerencie seus alertas e convites em um só lugar.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <NotificationsClient initialNotifications={notifications} />
+            <NotificationsManager 
+              initialNotifications={notifications} 
+              initialInvitations={invitations}
+              initialSentInvitations={sentInvitations}
+            />
           </CardContent>
         </Card>
       </div>

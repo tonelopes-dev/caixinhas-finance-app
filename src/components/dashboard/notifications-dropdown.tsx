@@ -15,6 +15,7 @@ import { Bell, CircleDot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import type { NotificationData } from '@/services/notification.service';
+import { markNotificationAsRead } from '@/app/notifications/actions';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -48,6 +49,18 @@ export function NotificationsDropdown({
     setUnreadCount(initialUnreadCount);
   }, [initialNotifications, initialUnreadCount]);
 
+  const handleNotificationClick = async (id: string) => {
+    // Otimisticamente marca como lida na UI local
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    try {
+      await markNotificationAsRead(id);
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida', error);
+    }
+  };
+
   const recentUnreadNotifications = notifications.filter(n => !n.isRead).slice(0, 4);
 
   return (
@@ -72,7 +85,11 @@ export function NotificationsDropdown({
         {recentUnreadNotifications.length > 0 ? (
           recentUnreadNotifications.map((notification) => (
             <DropdownMenuItem key={notification.id} asChild>
-              <Link href={notification.link || '/notifications'} className={cn("flex items-start gap-3 p-3", 'font-semibold')}>
+              <Link 
+                href={notification.link || '/notifications'} 
+                className={cn("flex items-start gap-3 p-3", 'font-semibold')}
+                onClick={() => handleNotificationClick(notification.id)}
+              >
                 <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
                   {getNotificationIcon(notification.type)}
                   <AvatarFallback><Bell /></AvatarFallback>

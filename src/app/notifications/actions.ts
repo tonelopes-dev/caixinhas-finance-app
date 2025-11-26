@@ -3,6 +3,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { NotificationService } from '@/services/notification.service';
+import { VaultService } from '@/services/vault.service';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -90,4 +91,60 @@ export async function deleteNotification(notificationId: string) {
   await NotificationService.deleteNotification(notificationId);
   revalidatePath('/notifications');
   revalidatePath('/dashboard');
+}
+
+/**
+ * Busca convites do usuário
+ */
+export async function getUserInvitations() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  const invitations = await VaultService.getUserInvitations(session.user.id);
+  return invitations;
+}
+
+/**
+ * Deleta um convite
+ */
+export async function deleteInvitation(invitationId: string) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    throw new Error('Não autenticado');
+  }
+
+  await VaultService.deleteInvitation(invitationId, session.user.id);
+  revalidatePath('/notifications');
+}
+
+/**
+ * Busca convites enviados pelo usuário
+ */
+export async function getUserSentInvitations() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  const invitations = await VaultService.getUserSentInvitations(session.user.id);
+  return invitations;
+}
+
+/**
+ * Cancela um convite enviado
+ */
+export async function cancelInvitation(invitationId: string) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    throw new Error('Não autenticado');
+  }
+
+  await VaultService.cancelInvitation(invitationId, session.user.id);
+  revalidatePath('/notifications');
 }

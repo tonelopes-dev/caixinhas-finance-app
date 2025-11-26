@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "prisma-migrate",
+			"type": "shell",
+			"command": "npx prisma",
+			"args": [
+				"migrate",
+				"dev",
+				"--name",
+				"allow_email_invites"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "db"
+		}
+	]
+}

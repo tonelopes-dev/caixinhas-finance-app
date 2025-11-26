@@ -48,7 +48,14 @@ export async function sendPartnerInvite(
 
     return { message: 'Convite enviado com sucesso e registrado no sistema!' };
   } catch (error: any) {
-    console.error("Erro ao criar convite:", error);
+    // Erros de regra de negócio conhecidos não precisam de log de erro crítico
+    const isKnownError = error.message.includes('já é membro') || 
+                        error.message.includes('convite pendente') || 
+                        error.message.includes('não encontrado');
+
+    if (!isKnownError) {
+        console.error("Erro ao criar convite:", error);
+    }
     
     // Retornar mensagens de erro mais específicas
     if (error.message.includes('já é membro')) {

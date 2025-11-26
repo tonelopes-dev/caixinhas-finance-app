@@ -57,10 +57,16 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
       setSelectedVaultId('');
       setVaultMembers([]);
     } else if (state.message && state.errors) {
+      // Verificar se é um erro de "aviso" (ex: convite já existe) ou erro crítico
+      const isWarning = state.message.includes('já existe') || 
+                        state.message.includes('já faz parte') ||
+                        state.message.includes('pendente');
+      
       toast({
-        title: 'Erro de Validação',
+        title: isWarning ? 'Atenção' : 'Erro',
         description: state.message,
-        variant: 'destructive',
+        variant: isWarning ? 'default' : 'destructive',
+        className: isWarning ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : '',
       });
     }
   }, [state, toast]);
