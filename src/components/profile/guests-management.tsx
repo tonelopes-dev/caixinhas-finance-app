@@ -338,10 +338,16 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
             return (
               <div
                 key={member.id}
-                className="group relative flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/50"
+                className={`group relative flex items-center justify-between rounded-xl border p-5 shadow-sm transition-all hover:shadow-md ${
+                  isSelf 
+                    ? 'bg-primary/5 border-primary/20' 
+                    : 'bg-card border-border hover:border-primary/50'
+                }`}
               >
                 {/* Indicador de posição */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-primary/20 to-primary rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-primary/20 to-primary rounded-r-full transition-opacity ${
+                  isSelf ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`} />
                 
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   {/* Avatar com indicador online */}
@@ -353,7 +359,7 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
                       </AvatarFallback>
                     </Avatar>
                     {isOwner && (
-                      <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary border-2 border-background flex items-center justify-center">
+                      <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary border-2 border-background flex items-center justify-center" title="Proprietário">
                         <svg className="h-3 w-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
@@ -370,12 +376,16 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
                           Você
                         </span>
                       )}
-                      {isOwner && (
+                      {isOwner ? (
                         <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-700/10 dark:ring-amber-300/20">
                           <svg className="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                           Proprietário
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 ring-1 ring-inset ring-slate-500/10 dark:ring-slate-400/20">
+                          Membro
                         </span>
                       )}
                     </div>
@@ -390,12 +400,14 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
 
                 {/* Botão de remover */}
                 <div className="flex-shrink-0">
-                  <DeleteGuestDialog 
-                    guestName={member.name ?? 'Convidado'} 
-                    disabled={!canBeRemoved}
-                    onConfirm={() => handleRemoveMember(member.id, member.name ?? 'Convidado')}
-                    isLoading={removingUserId === member.id}
-                  />
+                  {!isOwner && (
+                    <DeleteGuestDialog 
+                      guestName={member.name ?? 'Convidado'} 
+                      disabled={!canBeRemoved}
+                      onConfirm={() => handleRemoveMember(member.id, member.name ?? 'Convidado')}
+                      isLoading={removingUserId === member.id}
+                    />
+                  )}
                 </div>
               </div>
             )

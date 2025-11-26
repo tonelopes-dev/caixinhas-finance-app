@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
+import { VaultSettings } from '@/components/profile/vault-settings';
 import type { User, Vault } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -122,6 +122,15 @@ export default function ProfilePage() {
                   currentUserId={currentUser.id}
                   vaultId={currentVault.id}
                   currentUser={currentUser}
+                />
+              </motion.div>
+            )}
+            {!isPersonalVault && currentVault && currentUser && (
+              <motion.div variants={itemVariants}>
+                <VaultSettings
+                  vaultId={currentVault.id}
+                  vaultName={currentVault.name}
+                  isOwner={currentVault.ownerId === currentUser.id}
                 />
               </motion.div>
             )}

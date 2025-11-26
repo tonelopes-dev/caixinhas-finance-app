@@ -1,4 +1,3 @@
-
 'use server';
 
 import { cookies } from 'next/headers';
@@ -8,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 /**
  * Busca os dados necessários para a página de perfil
@@ -28,9 +28,24 @@ export async function getProfileData(userId: string) {
       return null;
     }
 
+    // Transformar o cofre para o formato esperado pelo frontend (Vault)
+    // O VaultService retorna VaultWithMembers onde members é um array de objetos com propriedade user
+    // O frontend espera members como um array de User
+    let formattedVault = null;
+    if (currentVault) {
+      formattedVault = {
+        ...currentVault,
+        imageUrl: currentVault.imageUrl || '',
+        members: currentVault.members.map(m => ({
+          ...m.user,
+          subscriptionStatus: 'active' as const // Valor padrão para satisfazer o tipo User
+        }))
+      };
+    }
+
     return {
       currentUser,
-      currentVault,
+      currentVault: formattedVault,
     };
   } catch (error) {
     console.error('Erro ao buscar dados do perfil:', error);
@@ -187,4 +202,39 @@ export async function removeMemberAction(vaultId: string, userId: string) {
     console.error("Erro ao remover membro:", error);
     return { success: false, message: error.message || 'Ocorreu um erro ao remover o membro.' };
   }
+}
+
+/**
+ * Server Action para excluir um cofre
+ */
+export async function deleteVaultAction(vaultId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { success: false, message: "Usuário não autenticado." };
+  }
+
+  try {
+    // Verificar se o usuário é o dono do cofre
+    const vault = await VaultService.getVaultById(vaultId);
+    
+    if (!vault) {
+      return { success: false, message: "Cofre não encontrado." };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+      return { success: false, message: "Apenas o proprietário pode excluir o cofre." };
+    }
+
+    // O Prisma está configurado com onDelete: Cascade, então deletar o cofre
+    // removerá automaticamente todos os membros, transações, contas, etc.
+    await VaultService.deleteVault(vaultId);
+    
+  } catch (error: any) {
+    console.error("Erro ao excluir cofre:", error);
+    return { success: false, message: error.message || 'Ocorreu um erro ao excluir o cofre.' };
+  }
+
+  // Redirecionar após a exclusão bem-sucedida
+  // Isso deve ser feito fora do bloco try/catch pois o redirect lança um erro NEXT_REDIRECT
+  redirect('/vaults');
 }
