@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ExternalLink, Plus, X } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { ExternalLink, X } from 'lucide-react'; // Removed Plus
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -48,16 +47,22 @@ interface CreateVaultDialogProps {
 }
 
 export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVaultDialogProps) {
-  const [vaultName, setVaultName] = React.useState('');
-  const [selectedImage, setSelectedImage] = React.useState(coverImages[0]);
-  const [customImageUrl, setCustomImageUrl] = React.useState('');
-  const [isSuccessModalOpen, setSuccessModalOpen] = React.useState(false);
+  const [vaultName, setVaultName] = useState('');
+  const [selectedPresetImage, setSelectedPresetImage] = useState<string | null>(coverImages[0]);
+  const [customImageUrlInput, setCustomImageUrlInput] = useState('');
+  const [localImageFile, setLocalImageFile] = useState<File | null>(null);
+  const [localImagePreviewUrl, setLocalImagePreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   
   const [state, formAction, isPending] = useActionState(createVaultAction, {
     message: null,
   });
+
+  // Determine the final image URL for display
+  const displayImageUrl = localImagePreviewUrl || customImageUrlInput || selectedPresetImage;
 
   React.useEffect(() => {
     if (state?.message && !state?.errors) {
@@ -68,8 +73,13 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
       
       // Reset form
       setVaultName('');
-      setSelectedImage(coverImages[0]);
-      setCustomImageUrl('');
+      setSelectedPresetImage(coverImages[0]);
+      setCustomImageUrlInput('');
+      setLocalImageFile(null);
+      setLocalImagePreviewUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       
       onOpenChange(false);
       setSuccessModalOpen(true);
@@ -84,25 +94,54 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   }, [state, toast, onOpenChange, router]);
   
   
-  const handleRemoveMember = (userId: string) => {
-    // Feature para ser implementada quando tivermos InvitationService
-  };
-
-  const handleImageSelection = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-    setCustomImageUrl('');
+  const handlePresetImageSelection = (imageUrl: string) => {
+    setSelectedPresetImage(imageUrl);
+    setCustomImageUrlInput(''); // Clear custom URL
+    setLocalImageFile(null); // Clear local file
+    setLocalImagePreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomImageUrl(e.target.value);
-    setSelectedImage(e.target.value);
+    const url = e.target.value;
+    setCustomImageUrlInput(url);
+    setSelectedPresetImage(null); // Clear preset selection
+    setLocalImageFile(null); // Clear local file
+    setLocalImagePreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLocalImageFile(file);
+    if (file) {
+      setLocalImagePreviewUrl(URL.createObjectURL(file));
+      setSelectedPresetImage(null); // Clear preset selection
+      setCustomImageUrlInput(''); // Clear custom URL
+    } else {
+      setLocalImagePreviewUrl(null);
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setLocalImageFile(null);
+    setLocalImagePreviewUrl(null);
+    setSelectedPresetImage(coverImages[0]); // Revert to a default preset
+    setCustomImageUrlInput('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   return (
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[525px]">
-            <form action={formAction}>
+            <form action={formAction} encType="multipart/form-data"> {/* Add encType */}
                 <DialogHeader>
                 <DialogTitle className="font-headline text-xl">Criar Novo Cofre Compartilhado</DialogTitle>
                 <DialogDescription>
@@ -138,40 +177,72 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                         <Switch id="is-private" name="isPrivate" />
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Label>Imagem de Capa</Label>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="outline" size="icon" className="h-6 w-6" asChild>
-                                            <Link href="https://unsplash.com" target="_blank">
-                                                <ExternalLink className="h-3 w-3" />
-                                            </Link>
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Copie a URL de uma imagem do Unsplash. Apenas URLs do unsplash.com são aceitas.</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                    <div className="space-y-4"> {/* Increased spacing */}
+                        <Label>Imagem de Capa</Label>
+                        <div className="relative h-40 w-full rounded-md border flex items-center justify-center overflow-hidden">
+                            {displayImageUrl ? (
+                                <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
+                            ) : (
+                                <span className="text-muted-foreground">Sem imagem</span>
+                            )}
+                            {(localImageFile || customImageUrlInput) && ( 
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute top-2 right-2 rounded-full bg-background/80"
+                                    onClick={handleRemoveImage}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                        {coverImages.map(imgSrc => (
-                            <button type="button" key={imgSrc} onClick={() => handleImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedImage === imgSrc && !customImageUrl ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
-                                <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
-                            </button>
-                        ))}
+
+                        {/* File Upload Input */}
+                        <div className="space-y-2">
+                            <Label htmlFor="image-file">Upload de Imagem (local)</Label>
+                            <Input
+                                id="image-file"
+                                type="file"
+                                name="imageFile" 
+                                accept="image/*"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                            />
                         </div>
+
+                        {/* Preset Images */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Label>Ou selecione uma imagem predefinida</Label>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                            {coverImages.map(imgSrc => (
+                                <button type="button" key={imgSrc} onClick={() => handlePresetImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
+                                    <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
+                                </button>
+                            ))}
+                            </div>
+                        </div>
+
+                        {/* Custom URL Input */}
                         <div className="space-y-2 mt-2">
-                            <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
+                            <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem externa</Label>
                             <Input 
                                 id="custom-image-url"
                                 placeholder="https://images.unsplash.com/..."
-                                value={customImageUrl}
+                                value={customImageUrlInput}
                                 onChange={handleCustomUrlChange}
                             />
-                            <input type="hidden" name="imageUrl" value={selectedImage} />
+                            {/* Hidden input for imageUrl, only if no file and no custom URL selected */}
+                            {!localImageFile && !customImageUrlInput && selectedPresetImage && (
+                              <input type="hidden" name="imageUrl" value={selectedPresetImage} />
+                            )}
+                            {/* Hidden input for imageUrl, if custom URL selected */}
+                            {!localImageFile && customImageUrlInput && (
+                              <input type="hidden" name="imageUrl" value={customImageUrlInput} />
+                            )}
+
                             {state?.errors?.imageUrl && (
                               <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
                             )}

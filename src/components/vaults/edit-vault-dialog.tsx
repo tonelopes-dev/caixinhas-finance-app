@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ExternalLink, Trash2, UserMinus, UserPlus } from 'lucide-react';
+import { ExternalLink, Trash2, UserMinus, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -66,7 +66,7 @@ interface EditVaultDialogProps {
   vault: {
     id: string;
     name: string;
-    imageUrl: string;
+    imageUrl: string | null; // Allow null for image URL
     isPrivate: boolean;
     ownerId: string;
     members: User[];
@@ -74,20 +74,26 @@ interface EditVaultDialogProps {
 }
 
 export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogProps) {
-  const [vaultName, setVaultName] = React.useState(vault.name);
-  const [selectedImage, setSelectedImage] = React.useState(vault.imageUrl);
-  const [customImageUrl, setCustomImageUrl] = React.useState('');
-  const [isPrivate, setIsPrivate] = React.useState(vault.isPrivate);
-  const [inviteEmail, setInviteEmail] = React.useState('');
-  const [isInviting, setIsInviting] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
-  const [pendingInvitations, setPendingInvitations] = React.useState<any[]>([]);
+  const [vaultName, setVaultName] = useState(vault.name);
+  const [selectedPresetImage, setSelectedPresetImage] = useState<string | null>(null);
+  const [customImageUrlInput, setCustomImageUrlInput] = useState<string | null>(null);
+  const [localImageFile, setLocalImageFile] = useState<File | null>(null);
+  const [localImagePreviewUrl, setLocalImagePreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isPrivate, setIsPrivate] = useState(vault.isPrivate);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const { toast } = useToast();
   const router = useRouter();
   
   const [state, formAction, isPending] = useActionState(updateVaultAction, {
     message: null,
   });
+
+  // Determine the final image URL for display
+  const displayImageUrl = localImagePreviewUrl || customImageUrlInput || selectedPresetImage || vault.imageUrl || coverImages[0];
 
   // Fetch pending invitations
   const fetchPendingInvitations = React.useCallback(async () => {
@@ -102,12 +108,21 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     if (open) {
         setVaultName(vault.name);
         setIsPrivate(vault.isPrivate);
-        if (coverImages.includes(vault.imageUrl)) {
-            setSelectedImage(vault.imageUrl);
-            setCustomImageUrl('');
+        // Reset image states based on current vault image
+        if (vault.imageUrl && coverImages.includes(vault.imageUrl)) {
+            setSelectedPresetImage(vault.imageUrl);
+            setCustomImageUrlInput(null);
+        } else if (vault.imageUrl) {
+            setSelectedPresetImage(null);
+            setCustomImageUrlInput(vault.imageUrl);
         } else {
-            setSelectedImage('');
-            setCustomImageUrl(vault.imageUrl);
+            setSelectedPresetImage(coverImages[0]); // Default preset if no image
+            setCustomImageUrlInput(null);
+        }
+        setLocalImageFile(null);
+        setLocalImagePreviewUrl(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
         fetchPendingInvitations();
     }
@@ -130,14 +145,47 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     }
   }, [state, toast, onOpenChange, router]);
 
-  const handleImageSelection = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-    setCustomImageUrl('');
+  const handlePresetImageSelection = (imageUrl: string) => {
+    setSelectedPresetImage(imageUrl);
+    setCustomImageUrlInput(null); // Clear custom URL
+    setLocalImageFile(null); // Clear local file
+    setLocalImagePreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomImageUrl(e.target.value);
-    setSelectedImage(e.target.value);
+    const url = e.target.value;
+    setCustomImageUrlInput(url || null);
+    setSelectedPresetImage(null); // Clear preset selection
+    setLocalImageFile(null); // Clear local file
+    setLocalImagePreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLocalImageFile(file);
+    if (file) {
+      setLocalImagePreviewUrl(URL.createObjectURL(file));
+      setSelectedPresetImage(null); // Clear preset selection
+      setCustomImageUrlInput(null); // Clear custom URL
+    } else {
+      setLocalImagePreviewUrl(null);
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setLocalImageFile(null);
+    setLocalImagePreviewUrl(null);
+    setSelectedPresetImage(null); // Explicitly set to null to indicate removal
+    setCustomImageUrlInput(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   const handleInvite = async () => {
@@ -167,7 +215,7 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
   const handleCancelInvitation = async (invitationId: string) => {
     try {
-      const result = await cancelInvitationAction(invitationId);
+      const result = await cancelInvitationAction(invitationId, vault.id); // Pass vault.id
       toast({
         title: result.success ? 'Convite cancelado' : 'Erro',
         description: result.message,
@@ -227,14 +275,24 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     }
   };
 
-  const finalImageUrl = customImageUrl || selectedImage;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <form action={formAction}>
+        <form action={formAction} encType="multipart/form-data"> {/* Add encType */}
             <input type="hidden" name="vaultId" value={vault.id} />
-            <input type="hidden" name="imageUrl" value={finalImageUrl} />
+            {/* Hidden input for imageUrl, only if no file is selected. 
+                If a file is selected, the action will handle the upload. 
+                If customImageUrlInput is null, it means the user cleared it or it wasn't there.
+                If selectedPresetImage is null, it means no preset is selected.
+                If both are null, it means the image is explicitly removed.
+            */}
+            {!localImageFile && (
+                <input 
+                    type="hidden" 
+                    name="imageUrl" 
+                    value={customImageUrlInput ?? selectedPresetImage ?? ''} 
+                />
+            )}
             
             <DialogHeader>
             <DialogTitle className="font-headline text-xl">Gerenciar Cofre</DialogTitle>
@@ -245,19 +303,26 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
             <div className="grid gap-6 py-4">
                 {/* Preview da Imagem */}
-                <div className="relative h-32 w-full overflow-hidden rounded-lg border shadow-sm">
-                    <Image 
-                        src={finalImageUrl || coverImages[0]} 
-                        alt="Preview da capa" 
-                        fill 
-                        className="object-cover transition-all hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                        <span className="text-white font-bold text-lg truncate">{vaultName || 'Nome do Cofre'}</span>
-                    </div>
+                <div className="relative h-40 w-full rounded-md border flex items-center justify-center overflow-hidden">
+                    {displayImageUrl ? (
+                        <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
+                    ) : (
+                        <span className="text-muted-foreground">Sem imagem</span>
+                    )}
+                    {(localImageFile || customImageUrlInput || selectedPresetImage) && ( 
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-2 right-2 rounded-full bg-background/80"
+                            onClick={handleRemoveImage}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2"> {/* Increased spacing */}
                     <Label htmlFor="edit-vault-name">Nome do Cofre</Label>
                     <Input
                         id="edit-vault-name"
@@ -287,6 +352,69 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                         checked={isPrivate}
                         onCheckedChange={setIsPrivate}
                     />
+                </div>
+
+                <div className="space-y-4">
+                    <Label>Imagem de Capa</Label>
+
+                    {/* File Upload Input */}
+                    <div className="space-y-2">
+                        <Label htmlFor="image-file">Upload de Imagem (local)</Label>
+                        <Input
+                            id="image-file"
+                            type="file"
+                            name="imageFile" 
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                        />
+                    </div>
+
+                    {/* Preset Images */}
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Label>Ou selecione uma imagem predefinida</Label>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                        {coverImages.map(imgSrc => (
+                            <button 
+                                type="button" 
+                                key={imgSrc} 
+                                onClick={() => handlePresetImageSelection(imgSrc)} 
+                                className={cn(
+                                    'relative h-20 w-full overflow-hidden rounded-md border-2 transition-all hover:opacity-90', 
+                                    selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput 
+                                        ? 'border-primary ring-2 ring-primary ring-offset-1' 
+                                        : 'border-transparent hover:border-muted-foreground/20'
+                                )}
+                            >
+                                <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
+                                {selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput && (
+                                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                        <div className="bg-primary text-primary-foreground rounded-full p-0.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </div>
+                                    </div>
+                                )}
+                            </button>
+                        ))}
+                        </div>
+                    </div>
+
+                    {/* Custom URL Input */}
+                    <div className="space-y-2 mt-2">
+                        <Label htmlFor="edit-custom-image-url" className="text-xs text-muted-foreground">Ou cole a URL de uma imagem externa</Label>
+                        <Input 
+                            id="edit-custom-image-url"
+                            placeholder="https://images.unsplash.com/..."
+                            value={customImageUrlInput ?? ''} // Ensure it's not null for controlled input
+                            onChange={handleCustomUrlChange}
+                            className="text-sm"
+                        />
+                        {state?.errors?.imageUrl && (
+                          <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-3">
@@ -371,65 +499,6 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                     </div>
                 </div>
 
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <Label>Imagem de Capa</Label>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" asChild>
-                                        <Link href="https://unsplash.com" target="_blank">
-                                            Buscar no Unsplash <ExternalLink className="ml-1 h-3 w-3" />
-                                        </Link>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Encontre imagens incríveis no Unsplash</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-3">
-                    {coverImages.map(imgSrc => (
-                        <button 
-                            type="button" 
-                            key={imgSrc} 
-                            onClick={() => handleImageSelection(imgSrc)} 
-                            className={cn(
-                                'relative h-16 w-full overflow-hidden rounded-md border-2 transition-all hover:opacity-90', 
-                                selectedImage === imgSrc && !customImageUrl 
-                                    ? 'border-primary ring-2 ring-primary ring-offset-1' 
-                                    : 'border-transparent hover:border-muted-foreground/20'
-                            )}
-                        >
-                            <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
-                            {selectedImage === imgSrc && !customImageUrl && (
-                                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                                    <div className="bg-primary text-primary-foreground rounded-full p-0.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    </div>
-                                </div>
-                            )}
-                        </button>
-                    ))}
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                        <Label htmlFor="edit-custom-image-url" className="text-xs text-muted-foreground">Ou use uma URL personalizada</Label>
-                        <Input 
-                            id="edit-custom-image-url"
-                            // name="imageUrl" -> Removido para não conflitar com o hidden input
-                            placeholder="https://images.unsplash.com/..."
-                            value={customImageUrl}
-                            onChange={handleCustomUrlChange}
-                            className="text-sm"
-                        />
-                        {state?.errors?.imageUrl && (
-                          <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
-                        )}
-                    </div>
-                </div>
 
                 <div className="pt-4 border-t">
                     <Label className="text-destructive mb-2 block">Zona de Perigo</Label>
