@@ -11,7 +11,6 @@ const createVaultSchema = z.object({
   isPrivate: z.boolean().optional(),
 });
 
-// Esquema de validação unificado para atualização
 const updateVaultSchema = z.object({
   vaultId: z.string().min(1),
   name: z.string().min(1, { message: 'O nome é obrigatório.' }),
@@ -27,11 +26,6 @@ export type VaultActionState = {
   };
 };
 
-/**
- * Busca dados do usuário e seus cofres
- * @param userId - ID do usuário
- * @returns Dados do usuário, cofres e convites
- */
 export async function getUserVaultsData(userId: string) {
   try {
     const [user, vaults, invitations] = await Promise.all([
@@ -40,9 +34,7 @@ export async function getUserVaultsData(userId: string) {
       VaultService.getPendingInvitations(userId),
     ]);
 
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
     const formattedVaults = vaults.map((vault) => ({
       id: vault.id,
@@ -78,12 +70,6 @@ export async function getUserVaultsData(userId: string) {
   }
 }
 
-/**
- * Cria um novo cofre
- * @param prevState - Estado anterior
- * @param formData - Dados do formulário
- * @returns Estado atualizado
- */
 export async function createVaultAction(
   prevState: VaultActionState,
   formData: FormData
@@ -94,7 +80,6 @@ export async function createVaultAction(
   if (!accessCheck.success || !accessCheck.data) {
     return { message: accessCheck.error || 'Acesso negado' };
   }
-
   const userId = accessCheck.data.id;
 
   const validatedFields = createVaultSchema.safeParse({
@@ -104,30 +89,22 @@ export async function createVaultAction(
   });
 
   if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação.',
-    };
+    return { errors: validatedFields.error.flatten().fieldErrors, message: 'Falha na validação.' };
   }
 
   try {
-    const newVault = await VaultService.createVault({
-      ...validatedFields.data,
-      ownerId: userId,
-    });
-
+    const newVault = await VaultService.createVault({ ...validatedFields.data, ownerId: userId });
     const { cookies } = await import('next/headers');
     await cookies().set('CAIXINHAS_VAULT_ID', newVault.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
 
     revalidatePath('/vaults');
     revalidatePath('/dashboard');
-    
     return { message: 'Cofre criado com sucesso!' };
   } catch (error) {
     console.error('Erro ao criar cofre:', error);
@@ -135,12 +112,6 @@ export async function createVaultAction(
   }
 }
 
-/**
- * Atualiza um cofre ou o perfil do usuário (conta pessoal)
- * @param prevState - Estado anterior
- * @param formData - Dados do formulário
- * @returns Estado atualizado
- */
 export async function updateVaultAction(
   prevState: VaultActionState,
   formData: FormData
@@ -149,9 +120,7 @@ export async function updateVaultAction(
   const { authOptions } = await import('@/lib/auth');
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
-    return { message: 'Não autorizado' };
-  }
+  if (!session?.user) return { message: 'Não autorizado' };
   const userId = session.user.id;
 
   const validatedFields = updateVaultSchema.safeParse({
@@ -162,29 +131,17 @@ export async function updateVaultAction(
   });
 
   if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação.',
-    };
+    return { errors: validatedFields.error.flatten().fieldErrors, message: 'Falha na validação.' };
   }
 
   const { vaultId, ...updateData } = validatedFields.data;
 
   try {
-    // Caso especial: Atualizar perfil do usuário (Conta Pessoal)
-    if (vaultId === userId) {
-      await AuthService.updateProfile(userId, {
-        name: updateData.name,
-        avatarUrl: updateData.imageUrl,
-      });
-    } else {
-      // Atualizar cofre compartilhado
-      const vault = await VaultService.getVaultById(vaultId);
-      if (!vault || vault.ownerId !== userId) {
-        return { message: 'Você não tem permissão para editar este cofre' };
-      }
-      await VaultService.updateVault(vaultId, updateData);
+    const vault = await VaultService.getVaultById(vaultId);
+    if (!vault || vault.ownerId !== userId) {
+      return { message: 'Você não tem permissão para editar este cofre' };
     }
+    await VaultService.updateVault(vaultId, updateData);
 
     revalidatePath('/vaults');
     revalidatePath('/dashboard');
@@ -197,12 +154,6 @@ export async function updateVaultAction(
   }
 }
 
-
-/**
- * Aceita um convite de cofre
- * @param invitationId - ID do convite
- * @param userId - ID do usuário
- */
 export async function acceptInvitationAction(
   invitationId: string,
   userId: string
@@ -210,25 +161,13 @@ export async function acceptInvitationAction(
   try {
     await VaultService.acceptInvitation(invitationId, userId);
     revalidatePath('/vaults');
-    
-    return {
-      success: true,
-      message: 'Convite aceito com sucesso!',
-    };
+    return { success: true, message: 'Convite aceito com sucesso!' };
   } catch (error) {
     console.error('Erro ao aceitar convite:', error);
-    return {
-      success: false,
-      message: 'Erro ao aceitar convite. Tente novamente.',
-    };
+    return { success: false, message: 'Erro ao aceitar convite. Tente novamente.' };
   }
 }
 
-/**
- * Recusa um convite de cofre
- * @param invitationId - ID do convite
- * @param userId - ID do usuário
- */
 export async function declineInvitationAction(
   invitationId: string,
   userId: string
@@ -236,272 +175,9 @@ export async function declineInvitationAction(
   try {
     await VaultService.declineInvitation(invitationId, userId);
     revalidatePath('/vaults');
-    
-    return {
-      success: true,
-      message: 'Convite recusado.',
-    };
+    return { success: true, message: 'Convite recusado.' };
   } catch (error) {
     console.error('Erro ao recusar convite:', error);
-    return {
-      success: false,
-      message: 'Erro ao recusar convite. Tente novamente.',
-    };
-  }
-}
-
-/**
- * Converte a conta pessoal em um cofre compartilhado
- * @param userId - ID do usuário
- */
-export async function convertPersonalToSharedVaultAction(
-  userId: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const { AuthService } = await import('@/services/auth.service');
-    const user = await AuthService.getUserById(userId);
-    
-    if (!user) {
-      return { success: false, message: 'Usuário não encontrado.' };
-    }
-
-    // 1. Criar novo cofre
-    const newVault = await VaultService.createVault({
-      name: `Cofre de ${user.name.split(' ')[0]}`,
-      imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
-      ownerId: userId,
-    });
-
-    // 2. Migrar dados
-    const prisma = (await import('@/services/prisma')).default;
-    
-    await prisma.$transaction([
-      // Migrar Contas
-      prisma.account.updateMany({
-        where: { ownerId: userId, vaultId: null },
-        data: { vaultId: newVault.id, scope: newVault.id },
-      }),
-      // Migrar Transações
-      prisma.transaction.updateMany({
-        where: { userId: userId, vaultId: null },
-        data: { vaultId: newVault.id },
-      }),
-      // Migrar Metas
-      prisma.goal.updateMany({
-        where: { userId: userId, vaultId: null },
-        data: { vaultId: newVault.id },
-      }),
-    ]);
-
-    revalidatePath('/vaults');
-    revalidatePath('/dashboard');
-    
-    return {
-      success: true,
-      message: 'Conta pessoal convertida em cofre compartilhado com sucesso!',
-    };
-  } catch (error) {
-    console.error('Erro ao converter conta:', error);
-    return {
-      success: false,
-      message: 'Erro ao converter conta. Tente novamente.',
-    };
-  }
-}
-
-/**
- * Envia um convite para um cofre
- * @param vaultId - ID do cofre
- * @param email - E-mail do convidado
- */
-export async function inviteToVaultAction(
-  vaultId: string,
-  email: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return { success: false, message: 'Não autorizado' };
-    }
-
-    await VaultService.createInvitation(vaultId, session.user.id, email);
-    
-    revalidatePath('/vaults');
-    
-    return {
-      success: true,
-      message: 'Convite enviado com sucesso!',
-    };
-  } catch (error) {
-    console.error('Erro ao enviar convite:', error);
-    if (error instanceof Error) {
-        return { success: false, message: error.message };
-    }
-    return {
-      success: false,
-      message: 'Erro ao enviar convite. Tente novamente.',
-    };
-  }
-}
-
-/**
- * Exclui um cofre
- * @param vaultId - ID do cofre
- */
-export async function deleteVaultAction(vaultId: string): Promise<{ success: boolean; message: string }> {
-  try {
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return { success: false, message: 'Não autorizado' };
-    }
-
-    const vault = await VaultService.getVaultById(vaultId);
-    if (!vault) {
-      return { success: false, message: 'Cofre não encontrado' };
-    }
-
-    if (vault.ownerId !== session.user.id) {
-      return { success: false, message: 'Você não tem permissão para excluir este cofre' };
-    }
-
-    await VaultService.deleteVault(vaultId);
-    
-    revalidatePath('/vaults');
-    revalidatePath('/dashboard');
-    
-    return {
-      success: true,
-      message: 'Cofre excluído com sucesso!',
-    };
-  } catch (error) {
-    console.error('Erro ao excluir cofre:', error);
-    return {
-      success: false,
-      message: 'Erro ao excluir cofre. Tente novamente.',
-    };
-  }
-}
-
-/**
- * Remove um membro de um cofre
- * @param vaultId - ID do cofre
- * @param userId - ID do usuário a ser removido
- */
-export async function removeMemberAction(
-  vaultId: string,
-  userId: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return { success: false, message: 'Não autorizado' };
-    }
-
-    const vault = await VaultService.getVaultById(vaultId);
-    if (!vault) {
-      return { success: false, message: 'Cofre não encontrado' };
-    }
-
-    // Apenas o dono pode remover membros (ou o próprio membro pode sair - lógica futura)
-    if (vault.ownerId !== session.user.id) {
-      return { success: false, message: 'Você não tem permissão para remover membros deste cofre' };
-    }
-
-    if (vault.ownerId === userId) {
-        return { success: false, message: 'O proprietário não pode ser removido.' };
-    }
-
-    await VaultService.removeMember(vaultId, userId);
-    
-    revalidatePath('/vaults');
-    
-    return {
-      success: true,
-      message: 'Membro removido com sucesso!',
-    };
-  } catch (error) {
-    console.error('Erro ao remover membro:', error);
-    return {
-      success: false,
-      message: 'Erro ao remover membro. Tente novamente.',
-    };
-  }
-}
-
-/**
- * Busca convites pendentes de um cofre
- * @param vaultId - ID do cofre
- */
-export async function getVaultPendingInvitationsAction(vaultId: string) {
-  try {
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return [];
-    }
-
-    // Verificar se o usuário é membro do cofre (ou dono) para ver os convites
-    const isMember = await VaultService.isMember(vaultId, session.user.id);
-    if (!isMember) {
-      return [];
-    }
-
-    const invitations = await VaultService.getVaultPendingInvitations(vaultId);
-    
-    return invitations.map(inv => ({
-      id: inv.id,
-      email: inv.receiverEmail || 'Sem e-mail',
-      invitedBy: inv.sender.name,
-      createdAt: inv.createdAt, // Assumindo que createdAt existe no tipo retornado pelo prisma, se não, ajustar
-      status: inv.status
-    }));
-  } catch (error) {
-    console.error('Erro ao buscar convites do cofre:', error);
-    return [];
-  }
-}
-
-/**
- * Cancela um convite enviado
- * @param invitationId - ID do convite
- */
-export async function cancelInvitationAction(invitationId: string): Promise<{ success: boolean; message: string }> {
-  try {
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return { success: false, message: 'Não autorizado' };
-    }
-
-    await VaultService.cancelInvitation(invitationId, session.user.id);
-    
-    revalidatePath('/vaults');
-    
-    return {
-      success: true,
-      message: 'Convite cancelado com sucesso!',
-    };
-  } catch (error) {
-    console.error('Erro ao cancelar convite:', error);
-    if (error instanceof Error) {
-        return { success: false, message: error.message };
-    }
-    return {
-      success: false,
-      message: 'Erro ao cancelar convite.',
-    };
+    return { success: false, message: 'Erro ao recusar convite. Tente novamente.' };
   }
 }
