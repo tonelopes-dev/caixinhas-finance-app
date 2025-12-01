@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -54,8 +53,6 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
 
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
 const months = [
     { value: 'all', label: 'Todos os meses' },
     { value: '1', label: 'Janeiro' },
@@ -108,9 +105,26 @@ export function TransactionsPageClient({
   
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
-  const [monthFilter, setMonthFilter] = useState('all');
-  const [yearFilter, setYearFilter] = useState('all');
-  
+  const [monthFilter, setMonthFilter] = useState<string>('all');
+  const [yearFilter, setYearFilter] = useState<string>('all');
+
+  const years = useMemo(() => {
+      const currentYear = new Date().getFullYear();
+      if (!initialTransactions || initialTransactions.length === 0) {
+          return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+      }
+      
+      const transactionYears = initialTransactions.map(t => new Date(t.date).getFullYear());
+      const minYear = Math.min(...transactionYears, currentYear - 2); // Pelo menos 2 anos atrás
+      const maxYear = Math.max(...transactionYears, currentYear + 1); // Pelo menos ano que vem
+      
+      const yearsList = [];
+      for (let y = maxYear; y >= minYear; y--) {
+        yearsList.push(y.toString());
+      }
+      return [...new Set(yearsList)]; // Remove duplicates
+  }, [initialTransactions]);
+
   useEffect(() => {
     setMonthFilter((new Date().getMonth() + 1).toString());
     setYearFilter(new Date().getFullYear().toString());
@@ -359,7 +373,7 @@ export function TransactionsPageClient({
                                           )}
                                           {t.isInstallment && t.totalInstallments && (
                                               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                                                  ({t.paidInstallments.length}/{t.totalInstallments})
+                                                  ({t.installmentNumber || 1}/{t.totalInstallments})
                                               </Badge>
                                           )}
                                           {MethodIcon && (
@@ -464,7 +478,7 @@ export function TransactionsPageClient({
                                 )}
                                 {t.isInstallment && t.totalInstallments && (
                                   <Badge variant="outline" className="border-blue-300 text-blue-800">
-                                      Parcelado ({t.paidInstallments.length}/{t.totalInstallments})
+                                      Parcelado ({t.installmentNumber || 1}/{t.totalInstallments})
                                   </Badge>
                                 )}
                               </TableCell>

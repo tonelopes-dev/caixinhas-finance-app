@@ -202,10 +202,11 @@ export class TransactionService {
     totalInstallments?: number;
     paidInstallments?: number[];
     projectRecurring?: boolean;
+    recurringId?: string;
   }): Promise<any> {
     return prisma.$transaction(async (tx) => {
       try {
-        const recurringId = data.isRecurring ? require('crypto').randomUUID() : null;
+        const recurringId = data.recurringId || (data.isRecurring ? require('crypto').randomUUID() : null);
 
         const createSingleTransaction = async (transactionData: typeof data, customDate?: Date) => {
             const createData: any = {
@@ -218,7 +219,7 @@ export class TransactionService {
                 isInstallment: transactionData.isInstallment ?? false,
                 installmentNumber: transactionData.installmentNumber,
                 totalInstallments: transactionData.totalInstallments,
-                paidInstallments: transactionData.isInstallment ? [1] : [],
+                paidInstallments: transactionData.paidInstallments || (transactionData.isInstallment ? [1] : []),
                 recurringId: recurringId,
                 actor: { connect: { id: transactionData.actorId } },
             };
@@ -474,14 +475,83 @@ export class TransactionService {
 
   /**
    * Atualiza o número de parcelas pagas de uma transação.
+   * Se for uma transação parcelada, cria ou remove as transações futuras conforme as parcelas são marcadas.
    */
   static async updatePaidInstallments(transactionId: string, paidInstallments: number[]): Promise<any> {
     try {
-      // Como o grupo é representado por uma única transação, atualizamos ela.
-      return await prisma.transaction.update({
+      const masterTx = await prisma.transaction.findUnique({ 
+          where: { id: transactionId },
+          include: { category: true }
+      });
+      
+      if (!masterTx) throw new Error("Transação não encontrada");
+
+      // Garantir recurringId no Master
+      let recurringId = masterTx.recurringId;
+      if (!recurringId) {
+        recurringId = require('crypto').randomUUID();
+        await prisma.transaction.update({ 
+            where: { id: transactionId }, 
+            data: { recurringId } 
+        });
+      }
+
+      // Atualizar Master
+      await prisma.transaction.update({
         where: { id: transactionId },
         data: { paidInstallments: paidInstallments },
       });
+
+      // Gerenciar transações filhas (parcelas 2..N)
+      if (masterTx.totalInstallments && masterTx.totalInstallments > 1) {
+          for (let i = 2; i <= masterTx.totalInstallments; i++) {
+              const isPaid = paidInstallments.includes(i);
+              
+              const childTx = await prisma.transaction.findFirst({
+                  where: {
+                      recurringId: recurringId,
+                      installmentNumber: i
+                  }
+              });
+
+              if (isPaid && !childTx) {
+                  // Criar transação para a parcela
+                  const targetDate = new Date(masterTx.date);
+                  targetDate.setMonth(targetDate.getMonth() + (i - 1));
+                  
+                  // Ajuste de dia (Clamping)
+                  const originalDay = masterTx.date.getDate();
+                  const daysInMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0).getDate();
+                  targetDate.setDate(Math.min(originalDay, daysInMonth));
+
+                  await this.createTransaction({
+                      date: targetDate,
+                      description: masterTx.description,
+                      amount: masterTx.amount,
+                      type: masterTx.type as any,
+                      category: masterTx.category?.name || 'Outros',
+                      actorId: masterTx.actorId,
+                      paymentMethod: masterTx.paymentMethod,
+                      sourceAccountId: masterTx.sourceAccountId,
+                      destinationAccountId: masterTx.destinationAccountId,
+                      goalId: masterTx.goalId,
+                      isRecurring: false,
+                      isInstallment: true,
+                      installmentNumber: i,
+                      totalInstallments: masterTx.totalInstallments,
+                      paidInstallments: [i],
+                      userId: masterTx.userId || undefined,
+                      vaultId: masterTx.vaultId || undefined,
+                      recurringId: recurringId // Vincula ao grupo
+                  });
+              } else if (!isPaid && childTx) {
+                  // Remover transação se foi desmarcada
+                  await this.deleteTransaction(childTx.id);
+              }
+          }
+      }
+
+      return { success: true };
     } catch (error) {
       console.error('Erro ao atualizar parcelas pagas:', error);
       throw new Error('Não foi possível atualizar o número de parcelas pagas.');

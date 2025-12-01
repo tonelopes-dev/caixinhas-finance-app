@@ -104,7 +104,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     paymentMethod: formData.get('paymentMethod') || null,
     isRecurring: formData.get('chargeType') === 'recurring',
     isInstallment: formData.get('chargeType') === 'installment',
-    installmentNumber: formData.get('installmentNumber'),
+    installmentNumber: formData.get('installmentNumber') || (formData.get('chargeType') === 'installment' ? 1 : null),
     totalInstallments: formData.get('totalInstallments'),
     paidInstallments: formData.get('chargeType') === 'installment' ? [] : null,
     projectRecurring: formData.get('projectRecurring') === 'true',
@@ -112,6 +112,15 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     userId: isPersonal ? userId : undefined,
     vaultId: !isPersonal ? ownerId : undefined,
   };
+
+  // Se for parcelado, o valor recebido é o TOTAL. Precisamos converter para o valor da PARCELA.
+  if (processedData.isInstallment && processedData.totalInstallments) {
+      const total = parseFloat(processedData.amount as string);
+      const installments = parseInt(processedData.totalInstallments as string);
+      if (!isNaN(total) && !isNaN(installments) && installments > 0) {
+          processedData.amount = (total / installments).toFixed(2);
+      }
+  }
   
   const validatedFields = transactionSchema.safeParse(processedData);
 
