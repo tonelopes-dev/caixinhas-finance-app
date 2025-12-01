@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
 import { getDashboardData } from './actions';
+import { getPatrimonyData } from '@/app/patrimonio/actions';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
 import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
@@ -30,11 +31,12 @@ export default async function DashboardPage() {
 
   const owner = { ownerType: workspaceId === userId ? 'user' as const : 'vault' as const, ownerId: workspaceId };
 
-  const [dashboardData, userVaults, allGoals, categories] = await Promise.all([
+  const [dashboardData, userVaults, allGoals, categories, patrimonyData] = await Promise.all([
     getDashboardData(userId, workspaceId),
     VaultService.getUserVaults(userId),
     GoalService.getGoals(owner.ownerId, owner.ownerType),
     CategoryService.getUserCategories(userId),
+    getPatrimonyData(userId),
   ]);
 
   const workspaceName =
@@ -64,6 +66,7 @@ export default async function DashboardPage() {
         goals={allGoals || []}
         transactions={recentTransactions || []}
         categories={categories || []}
+        patrimonyData={patrimonyData}
       />
       <PwaPrompt />
     </div>

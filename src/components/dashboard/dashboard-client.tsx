@@ -10,6 +10,7 @@ import NetWorthSummary from '@/components/dashboard/net-worth-summary';
 import type { User, Account, Goal, Transaction } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type { PatrimonyData } from '@/app/patrimonio/actions';
 
 type DashboardClientProps = {
   currentUser: User;
@@ -27,6 +28,7 @@ type DashboardClientProps = {
   goals: Goal[];
   transactions: Transaction[];
   categories: any[];
+  patrimonyData?: PatrimonyData;
 };
 
 export function DashboardClient({
@@ -40,25 +42,31 @@ export function DashboardClient({
   goals,
   transactions,
   categories,
+  patrimonyData,
 }: DashboardClientProps) {
   const [transactionFilter, setTransactionFilter] = useState<
     'all' | 'income' | 'expense' | 'transfer'
   >('all');
   
-  // CORREÇÃO APLICADA AQUI
+  // Se tiver dados de patrimônio global, usa eles para o resumo.
+  // Caso contrário, usa os dados locais do workspace (fallback).
+  
+  const summaryAccounts = patrimonyData ? patrimonyData.accounts : accounts;
+  const summaryGoals = patrimonyData ? patrimonyData.goals : goals;
+
   // 1. Calcula o total guardado em objetivos (caixinhas)
-  const goalAssets = goals.reduce((sum, g) => sum + g.currentAmount, 0);
+  const goalAssets = summaryGoals.reduce((sum, g) => sum + g.currentAmount, 0);
 
   // 2. Calcula o total de ativos líquidos (contas correntes/poupança)
-  const liquidAssetsRaw = accounts
+  const liquidAssetsRaw = summaryAccounts
     .filter((a) => a.type === 'checking' || a.type === 'savings')
     .reduce((sum, a) => sum + a.balance, 0);
 
-  // 3. Subtrai o valor dos objetivos do total líquido para evitar dupla contagem
-  const liquidAssets = liquidAssetsRaw - goalAssets;
+  // 3. Mantém o valor total líquido (sem subtrair objetivos) para alinhar com a página de patrimônio
+  const liquidAssets = liquidAssetsRaw;
 
   // 4. Calcula o total investido em contas de investimento
-  const investedAssets = accounts
+  const investedAssets = summaryAccounts
     .filter((a) => a.type === 'investment')
     .reduce((sum, a) => sum + a.balance, 0);
 
