@@ -73,7 +73,6 @@ function WorkspaceCard({
   isPersonal = false,
   isPrivate = false,
   onEdit,
-  onEditProfile,
   onConvert,
   isOwner = false,
   ownerId,
@@ -85,11 +84,12 @@ function WorkspaceCard({
   isPersonal?: boolean;
   isPrivate?: boolean;
   onEdit?: (vault: Vault) => void;
-  onEditProfile?: () => void;
   onConvert?: () => void;
   isOwner?: boolean;
   ownerId?: string;
 }) {
+  const canEdit = isOwner || isPersonal;
+  
   return (
     <motion.div
       layout
@@ -99,25 +99,7 @@ function WorkspaceCard({
       transition={{ duration: 0.3 }}
       className="h-full relative group"
     >
-      {isOwner && !isPersonal && onEdit && (
-        <div className="absolute top-2 right-2 z-20">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar Espaço
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
-              {isPersonal && (
+      {canEdit && (
         <div className="absolute top-2 right-2 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -132,7 +114,7 @@ function WorkspaceCard({
                     Editar Espaço
                   </DropdownMenuItem>
               )}
-              {onConvert && (
+              {isPersonal && onConvert && (
                   <DropdownMenuItem onClick={onConvert}>
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
                     Converter em Compartilhado

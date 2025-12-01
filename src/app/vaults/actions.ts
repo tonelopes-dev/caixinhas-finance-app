@@ -11,9 +11,10 @@ const createVaultSchema = z.object({
   isPrivate: z.boolean().optional(),
 });
 
+// Esquema de validação unificado para atualização
 const updateVaultSchema = z.object({
   vaultId: z.string().min(1),
-  name: z.string().min(1, { message: 'O nome do cofre é obrigatório.' }),
+  name: z.string().min(1, { message: 'O nome é obrigatório.' }),
   imageUrl: z.string().url().optional(),
   isPrivate: z.boolean().optional(),
 });
@@ -43,7 +44,6 @@ export async function getUserVaultsData(userId: string) {
       return null;
     }
 
-    // Transformar vaults para o formato esperado pela UI
     const formattedVaults = vaults.map((vault) => ({
       id: vault.id,
       name: vault.name,
@@ -59,7 +59,6 @@ export async function getUserVaultsData(userId: string) {
       })),
     }));
 
-    // Transformar invitations para o formato esperado
     const formattedInvitations = invitations.map((inv) => ({
       id: inv.id,
       vaultId: inv.targetId,
@@ -89,15 +88,11 @@ export async function createVaultAction(
   prevState: VaultActionState,
   formData: FormData
 ): Promise<VaultActionState> {
-  // Verifica se o usuário tem permissão para criar cofres
   const { requireVaultCreationAccess } = await import('@/lib/action-helpers');
   const accessCheck = await requireVaultCreationAccess();
 
   if (!accessCheck.success || !accessCheck.data) {
-    return {
-      message: accessCheck.error || 'Acesso negado',
-      errors: {},
-    };
+    return { message: accessCheck.error || 'Acesso negado' };
   }
 
   const userId = accessCheck.data.id;
@@ -111,22 +106,18 @@ export async function createVaultAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação. Por favor, verifique os campos.',
+      message: 'Falha na validação.',
     };
   }
 
   try {
     const newVault = await VaultService.createVault({
-      name: validatedFields.data.name,
-      imageUrl: validatedFields.data.imageUrl,
-      isPrivate: validatedFields.data.isPrivate,
+      ...validatedFields.data,
       ownerId: userId,
     });
 
-    // Automaticamente definir o novo cofre como workspace ativo
     const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    cookieStore.set('CAIXINHAS_VAULT_ID', newVault.id, {
+    await cookies().set('CAIXINHAS_VAULT_ID', newVault.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -136,23 +127,16 @@ export async function createVaultAction(
 
     revalidatePath('/vaults');
     revalidatePath('/dashboard');
-    revalidatePath('/profile');
-    revalidatePath('/invite');
     
-    return {
-      message: 'Cofre criado com sucesso!',
-    };
+    return { message: 'Cofre criado com sucesso!' };
   } catch (error) {
     console.error('Erro ao criar cofre:', error);
-    return {
-      message: 'Erro ao criar cofre. Tente novamente.',
-      errors: {},
-    };
+    return { message: 'Erro ao criar cofre. Tente novamente.' };
   }
 }
 
 /**
- * Atualiza um cofre existente
+ * Atualiza um cofre ou o perfil do usuário (conta pessoal)
  * @param prevState - Estado anterior
  * @param formData - Dados do formulário
  * @returns Estado atualizado
@@ -161,6 +145,15 @@ export async function updateVaultAction(
   prevState: VaultActionState,
   formData: FormData
 ): Promise<VaultActionState> {
+  const { getServerSession } = await import('next-auth');
+  const { authOptions } = await import('@/lib/auth');
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { message: 'Não autorizado' };
+  }
+  const userId = session.user.id;
+
   const validatedFields = updateVaultSchema.safeParse({
     vaultId: formData.get('vaultId'),
     name: formData.get('name'),
@@ -171,66 +164,39 @@ export async function updateVaultAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação. Por favor, verifique os campos.',
+      message: 'Falha na validação.',
     };
   }
 
+  const { vaultId, ...updateData } = validatedFields.data;
+
   try {
-    // Verificar se o usuário é dono do cofre
-    const { getServerSession } = await import('next-auth');
-    const { authOptions } = await import('@/lib/auth');
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return { message: 'Não autorizado', errors: {} };
-    }
-
     // Caso especial: Atualizar perfil do usuário (Conta Pessoal)
-    if (validatedFields.data.vaultId === session.user.id) {
-      await AuthService.updateProfile(session.user.id, {
-        name: validatedFields.data.name,
-        avatarUrl: validatedFields.data.imageUrl,
+    if (vaultId === userId) {
+      await AuthService.updateProfile(userId, {
+        name: updateData.name,
+        avatarUrl: updateData.imageUrl,
       });
-      
-      revalidatePath('/vaults');
-      revalidatePath('/dashboard');
-      revalidatePath('/profile');
-      
-      return {
-        message: 'Perfil atualizado com sucesso!',
-      };
+    } else {
+      // Atualizar cofre compartilhado
+      const vault = await VaultService.getVaultById(vaultId);
+      if (!vault || vault.ownerId !== userId) {
+        return { message: 'Você não tem permissão para editar este cofre' };
+      }
+      await VaultService.updateVault(vaultId, updateData);
     }
-
-    const vault = await VaultService.getVaultById(validatedFields.data.vaultId);
-    if (!vault) {
-      return { message: 'Cofre não encontrado', errors: {} };
-    }
-
-    if (vault.ownerId !== session.user.id) {
-      return { message: 'Você não tem permissão para editar este cofre', errors: {} };
-    }
-
-    await VaultService.updateVault(validatedFields.data.vaultId, {
-      name: validatedFields.data.name,
-      imageUrl: validatedFields.data.imageUrl,
-      isPrivate: validatedFields.data.isPrivate,
-    });
 
     revalidatePath('/vaults');
     revalidatePath('/dashboard');
     revalidatePath('/profile');
     
-    return {
-      message: 'Cofre atualizado com sucesso!',
-    };
+    return { message: 'Espaço de trabalho atualizado com sucesso!' };
   } catch (error) {
-    console.error('Erro ao atualizar cofre:', error);
-    return {
-      message: 'Erro ao atualizar cofre. Tente novamente.',
-      errors: {},
-    };
+    console.error('Erro ao atualizar:', error);
+    return { message: 'Erro ao atualizar. Tente novamente.' };
   }
 }
+
 
 /**
  * Aceita um convite de cofre
