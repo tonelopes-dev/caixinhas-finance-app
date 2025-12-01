@@ -7,6 +7,7 @@ import { DashboardClient } from '@/components/dashboard/dashboard-client';
 import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
 import { GoalService } from '@/services/goal.service';
+import { TransactionService } from '@/services/transaction.service';
 import { withPageAccess } from '@/lib/page-access';
 import { PwaPrompt } from '@/components/pwa-prompt';
 import Header from '@/components/dashboard/header';
@@ -16,6 +17,9 @@ export default async function DashboardPage() {
   // Verifica acesso completo à página
   const { user: currentUser, accessInfo } = await withPageAccess({ requireFullAccess: true });
   const userId = currentUser.id;
+
+  // Processar transações recorrentes (Lazy Approach)
+  await TransactionService.processRecurringTransactions(userId);
 
   // Corrigido: Adicionado 'await' para resolver a Promise de cookies
   const cookieStore = await cookies(); 

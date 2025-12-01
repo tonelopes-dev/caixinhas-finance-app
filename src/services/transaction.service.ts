@@ -1,4 +1,3 @@
-
 import { prisma } from './prisma';
 import { AccountService } from './account.service';
 import { GoalService } from './goal.service';
@@ -299,6 +298,95 @@ export class TransactionService {
         throw new Error('Não foi possível criar a transação');
       }
     });
+  }
+
+  /**
+   * Processa transações recorrentes (Lazy Approach)
+   * Verifica se há transações recorrentes que precisam ser geradas para o mês atual/próximo
+   */
+  static async processRecurringTransactions(userId: string): Promise<void> {
+    try {
+      // 1. Buscar grupos de transações recorrentes
+      const recurringGroups = await prisma.transaction.groupBy({
+        by: ['recurringId'],
+        where: {
+          OR: [
+            { userId: userId },
+            { actorId: userId }
+          ],
+          isRecurring: true,
+          recurringId: { not: null }
+        },
+        _max: {
+          date: true
+        }
+      });
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (const group of recurringGroups) {
+        if (!group.recurringId || !group._max.date) continue;
+
+        let lastDate = new Date(group._max.date);
+        
+        // Loop para "catch up" (criar todas as pendentes até hoje)
+        while (true) {
+          // Calcular a próxima data (mês seguinte)
+          const targetMonth = (lastDate.getMonth() + 1) % 12;
+          const targetYear = lastDate.getFullYear() + (lastDate.getMonth() + 1 >= 12 ? 1 : 0);
+          
+          // Criar data no dia 1 do mês alvo
+          let nextDate = new Date(targetYear, targetMonth, 1);
+          
+          // Tentar setar o dia original (Clamping: Jan 31 -> Feb 28)
+          const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+          const originalDay = lastDate.getDate();
+          nextDate.setDate(Math.min(originalDay, daysInMonth));
+
+          // Se a próxima data ainda é futura, paramos
+          if (nextDate > today) break;
+
+          // Buscar a última transação para usar como template
+          // Buscamos novamente dentro do loop pois acabamos de criar uma nova que pode ser a "last"
+          const templateTransaction = await prisma.transaction.findFirst({
+            where: {
+              recurringId: group.recurringId,
+              date: lastDate
+            },
+            include: {
+              category: true
+            }
+          });
+
+          if (!templateTransaction) break;
+
+          // Criar a nova transação
+          await this.createTransaction({
+            date: nextDate,
+            description: templateTransaction.description,
+            amount: templateTransaction.amount,
+            type: templateTransaction.type,
+            paymentMethod: templateTransaction.paymentMethod,
+            isRecurring: true,
+            projectRecurring: false,
+            userId: templateTransaction.userId || undefined,
+            vaultId: templateTransaction.vaultId || undefined,
+            actorId: templateTransaction.actorId,
+            sourceAccountId: templateTransaction.sourceAccountId || undefined,
+            destinationAccountId: templateTransaction.destinationAccountId || undefined,
+            goalId: templateTransaction.goalId || undefined,
+            category: templateTransaction.category?.name || 'Outros',
+          });
+
+          // Atualizar lastDate para a próxima iteração
+          lastDate = nextDate;
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao processar transações recorrentes:', error);
+      // Não lançar erro para não quebrar o dashboard
+    }
   }
 
   /**
