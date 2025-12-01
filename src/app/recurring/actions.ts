@@ -20,8 +20,9 @@ export async function getRecurringData(
     const recurringExpenses = allTransactions.filter((t: any) => t.isRecurring && t.type === 'expense');
     const recurringIncomes = allTransactions.filter((t: any) => t.isRecurring && t.type === 'income');
     
-    const installmentExpenses = allTransactions.filter((t: any) => t.isInstallment && t.type === 'expense');
-    const installmentIncomes = allTransactions.filter((t: any) => t.isInstallment && t.type === 'income');
+    // Filter only the first installment (Master) to avoid duplicates in the UI
+    const installmentExpenses = allTransactions.filter((t: any) => t.isInstallment && t.type === 'expense' && (t.installmentNumber === 1 || t.installmentNumber === null));
+    const installmentIncomes = allTransactions.filter((t: any) => t.isInstallment && t.type === 'income' && (t.installmentNumber === 1 || t.installmentNumber === null));
 
 
     return {
