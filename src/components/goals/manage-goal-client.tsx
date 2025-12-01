@@ -86,7 +86,7 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
   const participants = [{
     id: currentUser.id,
     name: currentUser.name || '',
-    avatarUrl: currentUser.image || '',
+    avatarUrl: currentUser.avatarUrl || '',
     role: 'owner' as const
   }];
 
