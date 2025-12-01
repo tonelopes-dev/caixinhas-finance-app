@@ -30,6 +30,8 @@ export default async function PatrimonioPage() {
   const totalInvestedAccounts = investedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
   const totalInGoals = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
   const totalInvested = totalInvestedAccounts + totalInGoals;
+  
+  const grandTotal = totalLiquid + totalInvested;
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -49,6 +51,12 @@ export default async function PatrimonioPage() {
             <CardDescription>
               Uma visão consolidada de todos os seus ativos, incluindo contas pessoais e participações em cofres.
             </CardDescription>
+            <div className="mt-4 p-6 bg-primary/5 rounded-xl border border-primary/10 flex flex-col items-center justify-center text-center">
+              <span className="text-muted-foreground text-sm font-medium uppercase tracking-wider mb-1">Valor Total Acumulado</span>
+              <span className="text-4xl md:text-5xl font-bold text-primary">
+                {grandTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
+            </div>
           </CardHeader>
           <CardContent className="grid gap-8">
             <PatrimonySection title="Disponível Agora (Ativos Líquidos)" total={totalLiquid}>
