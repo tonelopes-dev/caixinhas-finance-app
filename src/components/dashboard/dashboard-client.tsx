@@ -44,17 +44,27 @@ export function DashboardClient({
   const [transactionFilter, setTransactionFilter] = useState<
     'all' | 'income' | 'expense' | 'transfer'
   >('all');
+  
+  // CORREÇÃO APLICADA AQUI
+  // 1. Calcula o total guardado em objetivos (caixinhas)
+  const goalAssets = goals.reduce((sum, g) => sum + g.currentAmount, 0);
 
-  const liquidAssets = accounts
+  // 2. Calcula o total de ativos líquidos (contas correntes/poupança)
+  const liquidAssetsRaw = accounts
     .filter((a) => a.type === 'checking' || a.type === 'savings')
     .reduce((sum, a) => sum + a.balance, 0);
 
+  // 3. Subtrai o valor dos objetivos do total líquido para evitar dupla contagem
+  const liquidAssets = liquidAssetsRaw - goalAssets;
+
+  // 4. Calcula o total investido em contas de investimento
   const investedAssets = accounts
     .filter((a) => a.type === 'investment')
     .reduce((sum, a) => sum + a.balance, 0);
 
-  const goalAssets = goals.reduce((sum, g) => sum + g.currentAmount, 0);
-
+  // O total para "Investido p/ Sonhos" é a soma de contas de investimento + caixinhas
+  const totalInvestedForGoals = investedAssets + goalAssets;
+  
   const almostThereGoal = goals.find(
     (g) =>
       g.currentAmount / g.targetAmount >= 0.95 &&
@@ -111,7 +121,7 @@ export function DashboardClient({
               <AnimatedDiv transition={{ delay: 0.1 }}>
                 <NetWorthSummary
                   liquidAssets={liquidAssets}
-                  investedAssets={investedAssets + goalAssets}
+                  investedAssets={totalInvestedForGoals}
                 />
               </AnimatedDiv>
               <AnimatedDiv transition={{ delay: 0.2 }}>
