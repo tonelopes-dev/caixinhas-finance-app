@@ -185,6 +185,22 @@ export async function updateVaultAction(
       return { message: 'Não autorizado', errors: {} };
     }
 
+    // Caso especial: Atualizar perfil do usuário (Conta Pessoal)
+    if (validatedFields.data.vaultId === session.user.id) {
+      await AuthService.updateProfile(session.user.id, {
+        name: validatedFields.data.name,
+        avatarUrl: validatedFields.data.imageUrl,
+      });
+      
+      revalidatePath('/vaults');
+      revalidatePath('/dashboard');
+      revalidatePath('/profile');
+      
+      return {
+        message: 'Perfil atualizado com sucesso!',
+      };
+    }
+
     const vault = await VaultService.getVaultById(validatedFields.data.vaultId);
     if (!vault) {
       return { message: 'Cofre não encontrado', errors: {} };

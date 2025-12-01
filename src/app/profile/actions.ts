@@ -55,12 +55,14 @@ export async function getProfileData(userId: string) {
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
+  avatarUrl: z.string().optional(),
 });
 
 export type ProfileActionState = {
   message?: string | null;
   errors?: {
     name?: string[];
+    avatarUrl?: string[];
   };
 };
 
@@ -75,6 +77,7 @@ export async function updateProfileAction(prevState: ProfileActionState, formDat
 
   const validatedFields = updateProfileSchema.safeParse({
     name: formData.get('name'),
+    avatarUrl: formData.get('avatarUrl'),
   });
 
   if (!validatedFields.success) {
@@ -87,6 +90,7 @@ export async function updateProfileAction(prevState: ProfileActionState, formDat
   try {
     await AuthService.updateProfile(session.user.id, {
       name: validatedFields.data.name,
+      avatarUrl: validatedFields.data.avatarUrl,
     });
     
     revalidatePath('/profile');
@@ -237,4 +241,58 @@ export async function deleteVaultAction(vaultId: string) {
   // Redirecionar após a exclusão bem-sucedida
   // Isso deve ser feito fora do bloco try/catch pois o redirect lança um erro NEXT_REDIRECT
   redirect('/vaults');
+}
+
+const updateUserSchema = z.object({
+  name: z.string().min(1, { message: 'O nome é obrigatório.' }),
+  imageUrl: z.string().url().optional().or(z.literal('')),
+});
+
+export type UpdateUserState = {
+  message?: string | null;
+  errors?: {
+    name?: string[];
+    imageUrl?: string[];
+  };
+  success?: boolean;
+};
+
+/**
+ * Server Action para atualizar o perfil do usuário
+ */
+export async function updateUserAction(prevState: UpdateUserState, formData: FormData): Promise<UpdateUserState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { message: "Usuário não autenticado.", success: false };
+  }
+
+  const validatedFields = updateUserSchema.safeParse({
+    name: formData.get('name'),
+    imageUrl: formData.get('imageUrl'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação.',
+      success: false
+    };
+  }
+
+  const { name, imageUrl } = validatedFields.data;
+
+  try {
+    await AuthService.updateProfile(session.user.id, {
+      name,
+      avatarUrl: imageUrl || undefined,
+    });
+    
+    revalidatePath('/vaults');
+    revalidatePath('/profile');
+
+    return { message: 'Perfil atualizado com sucesso!', success: true };
+  } catch (error: any) {
+    console.error("Erro ao atualizar perfil:", error);
+    return { message: error.message || 'Ocorreu um erro ao atualizar o perfil.', success: false };
+  }
 }

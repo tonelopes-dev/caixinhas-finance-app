@@ -167,11 +167,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem</Label>
                             <Input 
                                 id="custom-image-url"
-                                name="imageUrl"
                                 placeholder="https://images.unsplash.com/..."
                                 value={customImageUrl}
                                 onChange={handleCustomUrlChange}
                             />
+                            <input type="hidden" name="imageUrl" value={selectedImage} />
                             {state?.errors?.imageUrl && (
                               <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
                             )}

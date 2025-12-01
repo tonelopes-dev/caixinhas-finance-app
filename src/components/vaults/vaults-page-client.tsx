@@ -73,6 +73,7 @@ function WorkspaceCard({
   isPersonal = false,
   isPrivate = false,
   onEdit,
+  onEditProfile,
   onConvert,
   isOwner = false,
   ownerId,
@@ -84,6 +85,7 @@ function WorkspaceCard({
   isPersonal?: boolean;
   isPrivate?: boolean;
   onEdit?: (vault: Vault) => void;
+  onEditProfile?: () => void;
   onConvert?: () => void;
   isOwner?: boolean;
   ownerId?: string;
@@ -98,7 +100,7 @@ function WorkspaceCard({
       className="h-full relative group"
     >
       {isOwner && !isPersonal && onEdit && (
-        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
@@ -108,15 +110,15 @@ function WorkspaceCard({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
                 <Pencil className="mr-2 h-4 w-4" />
-                Editar Cofre
+                Editar Espaço
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       )}
 
-      {isPersonal && onConvert && (
-        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+              {isPersonal && (
+        <div className="absolute top-2 right-2 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
@@ -124,10 +126,18 @@ function WorkspaceCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onConvert}>
-                <ArrowRightLeft className="mr-2 h-4 w-4" />
-                Converter em Compartilhado
-              </DropdownMenuItem>
+              {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar Espaço
+                  </DropdownMenuItem>
+              )}
+              {onConvert && (
+                  <DropdownMenuItem onClick={onConvert}>
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    Converter em Compartilhado
+                  </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -326,10 +336,13 @@ export function VaultsPageClient({
             <h1 className="font-headline text-xl font-bold text-foreground">Caixinhas</h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
+            <div className="text-right hidden sm:block">
               <p className="font-semibold">{currentUser.name}</p>
               <p className="text-xs text-muted-foreground">{currentUser.email}</p>
             </div>
+            <Button variant="outline" size="sm" onClick={() => router.push('/profile')}>
+              Meu Perfil
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               Sair
             </Button>
@@ -376,10 +389,13 @@ export function VaultsPageClient({
                 <WorkspaceCard
                   id={currentUser.id}
                   name="Minha Conta Pessoal"
-                  imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
+                  imageUrl="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800"
                   members={[currentUser]}
                   isPersonal={true}
+                  isOwner={true}
+                  ownerId={currentUser.id}
                   onConvert={() => setConvertDialogOpen(true)}
+                  onEdit={setEditingVault}
                 />
               ) : (
                 <Card className="flex flex-col items-center justify-center border-2 opacity-60 min-h-[220px] relative">
