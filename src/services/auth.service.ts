@@ -7,6 +7,7 @@ export type UserWithoutPassword = {
   email: string;
   name: string;
   avatarUrl: string | null;
+  workspaceImageUrl: string | null;
   subscriptionStatus: string;
   trialExpiresAt: Date | null;
   createdAt: Date;
@@ -153,6 +154,7 @@ export class AuthService {
           email: true,
           name: true,
           avatarUrl: true,
+          workspaceImageUrl: true,
           subscriptionStatus: true,
           trialExpiresAt: true,
           createdAt: true,
@@ -181,6 +183,7 @@ export class AuthService {
           email: true,
           name: true,
           avatarUrl: true,
+          workspaceImageUrl: true,
           subscriptionStatus: true,
           trialExpiresAt: true,
           createdAt: true,
@@ -233,6 +236,7 @@ export class AuthService {
           email: true,
           name: true,
           avatarUrl: true,
+          workspaceImageUrl: true,
           subscriptionStatus: true,
           trialExpiresAt: true,
           createdAt: true,

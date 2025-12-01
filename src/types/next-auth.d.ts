@@ -7,6 +7,8 @@ declare module "next-auth" {
       email: string;
       name: string;
       image?: string;
+      avatarUrl?: string;
+      workspaceImageUrl?: string;
     }
   }
 
@@ -15,6 +17,8 @@ declare module "next-auth" {
     email: string;
     name: string;
     image?: string;
+    avatarUrl?: string;
+    workspaceImageUrl?: string;
   }
 }
 

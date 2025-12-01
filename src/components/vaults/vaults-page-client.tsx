@@ -37,6 +37,7 @@ type User = {
   name: string;
   email: string;
   avatarUrl: string | null;
+  workspaceImageUrl: string | null;
   subscriptionStatus: string;
 };
 
@@ -99,7 +100,7 @@ function WorkspaceCard({
       transition={{ duration: 0.3 }}
       className="h-full relative group"
     >
-      {isOwner && !isPersonal && onEdit && (
+      {onEdit && (
         <div className="absolute top-2 right-2 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -108,35 +109,23 @@ function WorkspaceCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar Espaço
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
-              {isPersonal && (
-        <div className="absolute top-2 right-2 z-20">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar Espaço
-                  </DropdownMenuItem>
+              {isOwner && (
+                <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar Espaço
+                </DropdownMenuItem>
               )}
-              {onConvert && (
-                  <DropdownMenuItem onClick={onConvert}>
-                    <ArrowRightLeft className="mr-2 h-4 w-4" />
-                    Converter em Compartilhado
-                  </DropdownMenuItem>
+              {!isOwner && (
+                <DropdownMenuItem disabled>
+                  <Pencil className="mr-2 h-4 w-4 opacity-50" />
+                  Apenas Proprietário
+                </DropdownMenuItem>
+              )}
+              {isPersonal && onConvert && (
+                <DropdownMenuItem onClick={onConvert}>
+                  <ArrowRightLeft className="mr-2 h-4 w-4" />
+                  Converter em Compartilhado
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -289,6 +278,23 @@ export function VaultsPageClient({
     setCreateVaultOpen(true);
   };
 
+  const handleEditClick = (vault: Vault) => {
+    // Para conta pessoal, precisamos criar um vault virtual com dados do usuário
+    if (vault.id === currentUser.id) {
+      const personalVault = {
+        id: currentUser.id,
+        name: 'Minha Conta Pessoal',
+        imageUrl: currentUser.workspaceImageUrl || 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800',
+        isPrivate: true,
+        ownerId: currentUser.id,
+        members: [currentUser]
+      };
+      setEditingVault(personalVault);
+    } else {
+      setEditingVault(vault);
+    }
+  };
+
   const handleLogout = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('CAIXINHAS_USER_ID');
@@ -389,13 +395,13 @@ export function VaultsPageClient({
                 <WorkspaceCard
                   id={currentUser.id}
                   name="Minha Conta Pessoal"
-                  imageUrl="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800"
+                  imageUrl={currentUser.workspaceImageUrl || "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800"}
                   members={[currentUser]}
                   isPersonal={true}
                   isOwner={true}
                   ownerId={currentUser.id}
                   onConvert={() => setConvertDialogOpen(true)}
-                  onEdit={setEditingVault}
+                  onEdit={handleEditClick}
                 />
               ) : (
                 <Card className="flex flex-col items-center justify-center border-2 opacity-60 min-h-[220px] relative">
@@ -428,7 +434,7 @@ export function VaultsPageClient({
                     isPersonal={false}
                     isOwner={vault.ownerId === currentUser.id}
                     ownerId={vault.ownerId}
-                    onEdit={setEditingVault}
+                    onEdit={handleEditClick}
                   />
                 ))}
               </AnimatePresence>
@@ -465,6 +471,8 @@ export function VaultsPageClient({
             vault={editingVault}
           />
         )}
+        
+
 
         <AlertDialog open={isConvertDialogOpen} onOpenChange={setConvertDialogOpen}>
           <AlertDialogContent>

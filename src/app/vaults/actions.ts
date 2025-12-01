@@ -185,11 +185,18 @@ export async function updateVaultAction(
       return { message: 'Não autorizado', errors: {} };
     }
 
-    // Caso especial: Atualizar perfil do usuário (Conta Pessoal)
+    // Caso especial: Conta Pessoal (quando vaultId é igual ao userId)
     if (validatedFields.data.vaultId === session.user.id) {
-      await AuthService.updateProfile(session.user.id, {
-        name: validatedFields.data.name,
-        avatarUrl: validatedFields.data.imageUrl,
+      // Para a conta pessoal, salvamos apenas no workspaceImageUrl
+      // O avatarUrl permanece separado para o perfil do usuário
+      const prisma = (await import('@/services/prisma')).default;
+      
+      // Atualizar apenas a imagem do workspace, não o avatar
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          workspaceImageUrl: validatedFields.data.imageUrl || 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800'
+        },
       });
       
       revalidatePath('/vaults');
@@ -197,7 +204,7 @@ export async function updateVaultAction(
       revalidatePath('/profile');
       
       return {
-        message: 'Perfil atualizado com sucesso!',
+        message: 'Capa do workspace atualizada com sucesso!',
       };
     }
 
