@@ -328,6 +328,16 @@ export class TransactionService {
       for (const group of recurringGroups) {
         if (!group.recurringId || !group._max.date) continue;
 
+        // Buscar a primeira transação para estabelecer o dia "âncora" (evita drift de data: 31 -> 28 -> 28)
+        const firstTransaction = await prisma.transaction.findFirst({
+            where: { recurringId: group.recurringId },
+            orderBy: { date: 'asc' },
+            select: { date: true }
+        });
+        
+        if (!firstTransaction) continue;
+        const anchorDay = firstTransaction.date.getDate();
+
         let lastDate = new Date(group._max.date);
         
         // Loop para "catch up" (criar todas as pendentes até hoje)
@@ -339,10 +349,9 @@ export class TransactionService {
           // Criar data no dia 1 do mês alvo
           let nextDate = new Date(targetYear, targetMonth, 1);
           
-          // Tentar setar o dia original (Clamping: Jan 31 -> Feb 28)
+          // Tentar setar o dia original (Clamping: Jan 31 -> Feb 28 -> Mar 31)
           const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
-          const originalDay = lastDate.getDate();
-          nextDate.setDate(Math.min(originalDay, daysInMonth));
+          nextDate.setDate(Math.min(anchorDay, daysInMonth));
 
           // Se a próxima data ainda é futura, paramos
           if (nextDate > today) break;
