@@ -109,7 +109,7 @@ export class AuthService {
           name: data.name,
           email: data.email,
           password: hashedPassword,
-          avatarUrl: data.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
+          avatarUrl: data.avatarUrl || `https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png`,
           subscriptionStatus: 'trial',
           trialExpiresAt: trialExpiresAt,
         },
@@ -135,6 +135,31 @@ export class AuthService {
 
       // Criar categorias padrão para o novo usuário
       await CategoryService.createDefaultCategoriesForUser(user.id, tx);
+
+      // Criar cofre compartilhado padrão para o usuário
+      const defaultVault = await tx.vault.create({
+        data: {
+          name: `Cofre de ${user.name}`,
+          imageUrl: 'https://images.unsplash.com/photo-1554224155-8d04421cd6c3?w=800',
+          isPrivate: false,
+          ownerId: user.id,
+        },
+      });
+
+      // Adicionar o usuário como membro do cofre
+      await tx.vaultMember.create({
+        data: {
+          userId: user.id,
+          vaultId: defaultVault.id,
+          role: 'owner',
+        },
+      });
+
+      console.log('✅ Debug Register - Cofre padrão criado:', {
+        vaultId: defaultVault.id,
+        vaultName: defaultVault.name,
+        isPrivate: defaultVault.isPrivate
+      });
 
       // Vincular convites pendentes por e-mail
       await tx.invitation.updateMany({
