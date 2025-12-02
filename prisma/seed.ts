@@ -47,7 +47,7 @@ async function main() {
       email: 'alice@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[0],
-      emailVerified: faker.date.recent(),
+      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'active',
       trialExpiresAt: faker.date.future({ years: 1 }),
     },
@@ -59,7 +59,7 @@ async function main() {
       email: 'bruno@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[1],
-      emailVerified: faker.date.recent(),
+      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'active',
       trialExpiresAt: faker.date.future({ years: 1 }),
     },
@@ -71,7 +71,7 @@ async function main() {
       email: 'carlos@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
-      emailVerified: faker.date.recent(),
+      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'trial',
       trialExpiresAt: faker.date.future({ days: 15 }), // Trial expira em 15 dias
     },
@@ -83,7 +83,7 @@ async function main() {
       email: 'diana@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[3],
-      emailVerified: faker.date.recent(),
+      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'trial',
       trialExpiresAt: faker.date.past({ years: 1 }), // Trial expirado
     },
