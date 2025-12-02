@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Mail, Plus, X, MoreVertical, Pencil, Users, ArrowRightLeft, AlertTriangle } from 'lucide-react';
+import { Check, Mail, Plus, X, MoreVertical, Pencil, Users } from 'lucide-react';
 import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
@@ -21,16 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 
 type User = {
   id: string;
@@ -260,8 +251,7 @@ export function VaultsPageClient({
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
   const [editingVault, setEditingVault] = useState<Vault | null>(null);
-  const [isConvertDialogOpen, setConvertDialogOpen] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
+
   const { toast } = useToast();
 
   const handleCreateVaultClick = () => {
@@ -277,20 +267,7 @@ export function VaultsPageClient({
   };
 
   const handleEditClick = (vault: Vault) => {
-    // Para conta pessoal, precisamos criar um vault virtual com dados do usuário
-    if (vault.id === currentUser.id) {
-      const personalVault = {
-        id: currentUser.id,
-        name: 'Minha Conta Pessoal',
-        imageUrl: currentUser.workspaceImageUrl || 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800',
-        isPrivate: true,
-        ownerId: currentUser.id,
-        members: [currentUser]
-      };
-      setEditingVault(personalVault);
-    } else {
-      setEditingVault(vault);
-    }
+    setEditingVault(vault);
   };
 
   const handleLogout = async () => {
@@ -388,36 +365,6 @@ export function VaultsPageClient({
           <div>
             <h3 className="text-xl font-semibold mb-4">Seus Espaços</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Personal Account Card */}
-              {canAccessPersonal ? (
-                <WorkspaceCard
-                  id={currentUser.id}
-                  name="Minha Conta Pessoal"
-                  imageUrl={currentUser.workspaceImageUrl || "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800"}
-                  members={[currentUser]}
-                  isPersonal={true}
-                  isOwner={true}
-                  ownerId={currentUser.id}
-                  onConvert={() => setConvertDialogOpen(true)}
-                  onEdit={handleEditClick}
-                />
-              ) : (
-                <Card className="flex flex-col items-center justify-center border-2 opacity-60 min-h-[220px] relative">
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <p className="font-semibold text-sm mb-1">🔒 Acesso Restrito</p>
-                      <p className="text-xs text-muted-foreground">Assine para acessar</p>
-                    </div>
-                  </div>
-                  <CardContent className="p-6 text-center blur-sm">
-                    <Avatar className="mx-auto h-16 w-16 mb-3">
-                      <AvatarImage src={currentUser.avatarUrl || ''} />
-                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <p className="font-semibold">Minha Conta Pessoal</p>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Vault Cards */}
               <AnimatePresence>
@@ -472,28 +419,7 @@ export function VaultsPageClient({
         
 
 
-        <AlertDialog open={isConvertDialogOpen} onOpenChange={setConvertDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Converter para Cofre Compartilhado?</AlertDialogTitle>
-              <AlertDialogDescription>
-                <div>
-                  Isso criará um novo cofre chamado "Cofre de {currentUser.name.split(' ')[0]}" e moverá todas as suas contas, transações e metas pessoais para ele.
-                </div>
-                <div className="mt-4 font-semibold text-yellow-600 dark:text-yellow-500 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  Sua conta pessoal ficará vazia após esta ação.
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isConverting}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={(e) => { e.preventDefault(); handleConvertPersonal(); }} disabled={isConverting}>
-                {isConverting ? 'Convertendo...' : 'Confirmar Conversão'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+
     </>
   );
 }
