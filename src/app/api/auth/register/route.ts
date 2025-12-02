@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/services/prisma";
 import { z } from "zod";
+import { CategoryService } from "@/services/category.service";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -39,6 +40,10 @@ export async function POST(request: NextRequest) {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Definir data de expiração do trial (30 dias)
+    const trialExpiresAt = new Date();
+    trialExpiresAt.setDate(trialExpiresAt.getDate() + 30);
+
     // Criar usuário
     const user = await prisma.user.create({
       data: {
@@ -47,6 +52,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
         subscriptionStatus: "trial",
+        trialExpiresAt,
       },
       select: {
         id: true,
@@ -54,9 +60,35 @@ export async function POST(request: NextRequest) {
         email: true,
         avatarUrl: true,
         subscriptionStatus: true,
+        trialExpiresAt: true,
         createdAt: true,
       }
     });
+
+    // Criar categorias padrão para o novo usuário
+    const defaultCategories = [
+      { name: 'Alimentação', ownerId: user.id },
+      { name: 'Transporte', ownerId: user.id },
+      { name: 'Lazer', ownerId: user.id },
+      { name: 'Saúde', ownerId: user.id },
+      { name: 'Educação', ownerId: user.id },
+      { name: 'Casa', ownerId: user.id },
+      { name: 'Roupas', ownerId: user.id },
+      { name: 'Outros', ownerId: user.id },
+    ];
+
+    try {
+      // Criar todas as categorias em paralelo
+      await Promise.all(
+        defaultCategories.map(category => 
+          CategoryService.createCategory(category.name, category.ownerId)
+        )
+      );
+      console.log(`✅ Categorias padrão criadas para usuário ${user.id}`);
+    } catch (error) {
+      console.error('Erro ao criar categorias padrão:', error);
+      // Não falha o registro se as categorias falharem
+    }
 
     return NextResponse.json(
       { 

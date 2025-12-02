@@ -1,6 +1,7 @@
 "use server";
 
 import { AuthService } from '@/services/auth.service';
+import { CategoryService } from '@/services/category.service';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
@@ -46,12 +47,15 @@ export async function registerAction(
 
   try {
     // Registrar usuário
-    await AuthService.register({
+    const newUser = await AuthService.register({
       name,
       email,
       password,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
     });
+
+    // Adicionar categorias padrão para o novo usuário
+    await createDefaultCategoriesForUser(newUser.id);
 
     // TODO: Enviar email de boas-vindas
     // await sendWelcomeEmail(email, name);
@@ -74,4 +78,40 @@ export async function registerAction(
   }
 
   redirect('/login?registered=true');
+}
+
+/**
+ * Cria categorias padrão para um novo usuário
+ */
+async function createDefaultCategoriesForUser(userId: string): Promise<void> {
+  const defaultCategories = [
+    'Alimentação',
+    'Transporte',
+    'Moradia',
+    'Saúde',
+    'Educação',
+    'Lazer',
+    'Roupas',
+    'Tecnologia',
+    'Serviços',
+    'Outros'
+  ];
+
+  try {
+    console.log(`🏷️ Criando categorias padrão para usuário ${userId}`);
+    
+    for (const categoryName of defaultCategories) {
+      try {
+        await CategoryService.createCategory(categoryName, userId);
+        console.log(`✅ Categoria "${categoryName}" criada com sucesso`);
+      } catch (error) {
+        console.log(`⚠️ Categoria "${categoryName}" já existe ou erro ao criar:`, error);
+      }
+    }
+    
+    console.log(`🎉 Categorias padrão configuradas para usuário ${userId}`);
+  } catch (error) {
+    console.error('Erro ao criar categorias padrão:', error);
+    // Não falha o registro se não conseguir criar categorias
+  }
 }
