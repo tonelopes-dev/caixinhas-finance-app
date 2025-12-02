@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const AVATAR_URLS = [
   'https://images.unsplash.com/photo-1535713875002-d1d0cf267ddc?auto=format&fit=crop&q=80&w=400&h=400',
   'https://images.unsplash.com/photo-1520692739414-a95267425121?auto=format&fit=crop&q=80&w=400&h=400',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400&h=400',
+  'https://images.unsplash.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400&h=400',
   'https://images.unsplash.com/photo-1542155734-b203a9f029a1?auto=format&fit=crop&q=80&w=400&h=400',
 ];
 
@@ -70,7 +70,7 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.soon({ days: 15 }), // Corrigido para faker.date.soon
+      trialExpiresAt: faker.date.soon({ days: 15 }), 
     },
   });
 
@@ -81,11 +81,11 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[3],
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.past({ years: 1 }), // Trial expirado
+      trialExpiresAt: faker.date.past({ years: 1 }), 
     },
   });
 
-  const userInvitedEmail = 'eva@example.com'; // E-mail para um usuário que não existe ainda
+  const userInvitedEmail = 'eva@example.com'; 
 
   console.log('Usuários criados:', { user1: user1.email, user2: user2.email, user3: user3.email, user4: user4.email });
 
@@ -93,7 +93,7 @@ async function main() {
   console.log('Criando categorias...');
   // Supondo que Category tem um campo ownerId
   const categoriesData = [
-    { name: 'Alimentação', ownerId: user1.id }, // Corrigido de userId para ownerId
+    { name: 'Alimentação', ownerId: user1.id }, 
     { name: 'Transporte', ownerId: user1.id },
     { name: 'Lazer', ownerId: user1.id },
     { name: 'Salário', ownerId: user1.id },
@@ -110,9 +110,9 @@ async function main() {
       name: 'Finanças Pessoais Alice',
       imageUrl: VAULT_IMAGE_URLS[0],
       isPrivate: true,
-      owner: { connect: { id: user1.id } }, // Usando connect
+      ownerId: user1.id, // Usando ownerId diretamente
       members: {
-        create: { user: { connect: { id: user1.id } }, role: 'owner' },
+        create: { userId: user1.id, role: 'owner' }, // Usando userId diretamente
       },
     },
   });
@@ -122,11 +122,11 @@ async function main() {
       name: 'Viagem dos Sonhos',
       imageUrl: VAULT_IMAGE_URLS[1],
       isPrivate: false,
-      owner: { connect: { id: user1.id } }, // Usando connect
+      ownerId: user1.id, // Usando ownerId diretamente
       members: {
         create: [
-          { user: { connect: { id: user1.id } }, role: 'owner' },
-          { user: { connect: { id: user2.id } }, role: 'member' },
+          { userId: user1.id, role: 'owner' }, // Usando userId diretamente
+          { userId: user2.id, role: 'member' }, // Usando userId diretamente
         ],
       },
     },
@@ -137,12 +137,12 @@ async function main() {
       name: 'Compras do Mês',
       imageUrl: VAULT_IMAGE_URLS[2],
       isPrivate: false,
-      owner: { connect: { id: user2.id } }, // Usando connect
+      ownerId: user2.id, // Usando ownerId diretamente
       members: {
         create: [
-          { user: { connect: { id: user2.id } }, role: 'owner' },
-          { user: { connect: { id: user1.id } }, role: 'member' },
-          { user: { connect: { id: user3.id } }, role: 'member' },
+          { userId: user2.id, role: 'owner' }, // Usando userId diretamente
+          { userId: user1.id, role: 'member' }, // Usando userId diretamente
+          { userId: user3.id, role: 'member' }, // Usando userId diretamente
         ],
       },
     },
@@ -158,7 +158,7 @@ async function main() {
       type: 'vault',
       targetId: vault2.id,
       targetName: vault2.name,
-      sender: { connect: { id: user1.id } }, // Usando connect
+      senderId: user1.id, // Usando senderId diretamente
       receiverEmail: userInvitedEmail,
       status: 'pending',
     },
@@ -170,8 +170,8 @@ async function main() {
       type: 'vault',
       targetId: vault1.id,
       targetName: vault1.name,
-      sender: { connect: { id: user2.id } }, // Usando connect
-      receiver: { connect: { id: user3.id } }, // Usando connect
+      senderId: user2.id, // Usando senderId diretamente
+      receiverId: user3.id, // Usando receiverId diretamente
       receiverEmail: user3.email,
       status: 'pending',
     },
@@ -184,8 +184,8 @@ async function main() {
     data: {
       name: 'Conta Corrente Alice',
       balance: 1500.00,
-      user: { connect: { id: user1.id } }, // Usando connect
-      vault: { connect: { id: vault1.id } }, // Usando connect
+      userId: user1.id, // Usando userId diretamente
+      vaultId: vault1.id, // Usando vaultId diretamente
     },
   });
 
@@ -193,8 +193,8 @@ async function main() {
     data: {
       name: 'Poupança Conjunta',
       balance: 5000.00,
-      user: { connect: { id: user1.id } }, // Usando connect
-      vault: { connect: { id: vault2.id } }, // Usando connect
+      userId: user1.id, // Usando userId diretamente
+      vaultId: vault2.id, // Usando vaultId diretamente
     },
   });
 
@@ -202,8 +202,8 @@ async function main() {
     data: {
       name: 'Cartão de Crédito Bruno',
       balance: -300.00,
-      user: { connect: { id: user2.id } }, // Usando connect
-      vault: { connect: { id: vault3.id } }, // Usando connect
+      userId: user2.id, // Usando userId diretamente
+      vaultId: vault3.id, // Usando vaultId diretamente
     },
   });
   console.log('Contas criadas.');
@@ -218,9 +218,9 @@ async function main() {
       emoji: '🚨',
       visibility: 'private',
       isFeatured: true,
-      user: { connect: { id: user1.id } }, // Usando connect
+      userId: user1.id, // Usando userId diretamente
       participants: {
-        create: { user: { connect: { id: user1.id } }, role: 'owner' },
+        create: { userId: user1.id, role: 'owner' }, // Usando userId diretamente
       },
     },
   });
@@ -233,11 +233,11 @@ async function main() {
       emoji: '✈️',
       visibility: 'shared',
       isFeatured: false,
-      vault: { connect: { id: vault2.id } }, // Usando connect
+      vaultId: vault2.id, // Usando vaultId diretamente
       participants: {
         create: [
-          { user: { connect: { id: user1.id } }, role: 'member' },
-          { user: { connect: { id: user2.id } }, role: 'member' },
+          { userId: user1.id, role: 'member' }, // Usando userId diretamente
+          { userId: user2.id, role: 'member' }, // Usando userId diretamente
         ],
       },
     },
@@ -251,11 +251,11 @@ async function main() {
       emoji: '🎁',
       visibility: 'shared',
       isFeatured: false,
-      vault: { connect: { id: vault3.id } }, // Usando connect
+      vaultId: vault3.id, // Usando vaultId diretamente
       participants: {
         create: [
-          { user: { connect: { id: user1.id } }, role: 'member' },
-          { user: { connect: { id: user2.id } }, role: 'member' },
+          { userId: user1.id, role: 'member' }, // Usando userId diretamente
+          { userId: user2.id, role: 'member' }, // Usando userId diretamente
         ],
       },
     },
@@ -271,10 +271,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Depósito inicial reserva',
       type: 'income',
-      account: { connect: { id: account1.id } }, // Usando connect
-      category: { connect: { id: createdCategories.find(c => c.name === 'Salário')?.id } }, // Usando connect
-      user: { connect: { id: user1.id } }, // Usando connect
-      vault: { connect: { id: vault1.id } }, // Usando connect
+      accountId: account1.id, // Usando accountId diretamente
+      categoryId: createdCategories.find(c => c.name === 'Salário')?.id!, // Usando categoryId diretamente
+      userId: user1.id, // Usando userId diretamente
+      vaultId: vault1.id, // Usando vaultId diretamente
     },
   });
 
@@ -284,10 +284,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Almoço',
       type: 'expense',
-      account: { connect: { id: account1.id } }, // Usando connect
-      category: { connect: { id: createdCategories.find(c => c.name === 'Alimentação')?.id } }, // Usando connect
-      user: { connect: { id: user1.id } }, // Usando connect
-      vault: { connect: { id: vault1.id } }, // Usando connect
+      accountId: account1.id, // Usando accountId diretamente
+      categoryId: createdCategories.find(c => c.name === 'Alimentação')?.id!, // Usando categoryId diretamente
+      userId: user1.id, // Usando userId diretamente
+      vaultId: vault1.id, // Usando vaultId diretamente
     },
   });
 
@@ -297,10 +297,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Contribuição viagem',
       type: 'income',
-      account: { connect: { id: account2.id } }, // Usando connect
-      goal: { connect: { id: goal2.id } }, // Usando connect
-      user: { connect: { id: user1.id } }, // Usando connect
-      vault: { connect: { id: vault2.id } }, // Usando connect
+      accountId: account2.id, // Usando accountId diretamente
+      goalId: goal2.id, // Usando goalId diretamente
+      userId: user1.id, // Usando userId diretamente
+      vaultId: vault2.id, // Usando vaultId diretamente
     },
   });
 
@@ -310,10 +310,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Uber',
       type: 'expense',
-      account: { connect: { id: account3.id } }, // Usando connect
-      category: { connect: { id: createdCategories.find(c => c.name === 'Transporte')?.id } }, // Usando connect
-      user: { connect: { id: user2.id } }, // Usando connect
-      vault: { connect: { id: vault3.id } }, // Usando connect
+      accountId: account3.id, // Usando accountId diretamente
+      categoryId: createdCategories.find(c => c.name === 'Transporte')?.id!, // Usando categoryId diretamente
+      userId: user2.id, // Usando userId diretamente
+      vaultId: vault3.id, // Usando vaultId diretamente
     },
   });
   console.log('Transações criadas.');
@@ -322,7 +322,7 @@ async function main() {
   console.log('Criando notificações...');
   await prisma.notification.create({
     data: {
-      user: { connect: { id: user1.id } }, // Usando connect
+      userId: user1.id, // Usando userId diretamente
       type: 'system',
       message: 'Bem-vindo ao Caixinhas! Explore seus cofres.',
       link: '/dashboard',
@@ -332,7 +332,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      user: { connect: { id: user3.id } }, // Usando connect
+      userId: user3.id, // Usando userId diretamente
       type: 'vault_invite',
       message: `${user2.name} convidou você para o cofre '${vault1.name}'.`,
       link: '/invitations',
@@ -343,7 +343,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      user: { connect: { id: user2.id } }, // Usando connect
+      userId: user2.id, // Usando userId diretamente
       type: 'goal_progress',
       message: `Sua meta '${goal2.name}' atingiu 40% do objetivo!`,
       link: `/goals/${goal2.id}`,
