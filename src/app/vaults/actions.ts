@@ -112,7 +112,8 @@ export async function createVaultAction(
   try {
     const newVault = await VaultService.createVault({ ...validatedFields.data, ownerId: userId });
     const { cookies } = await import('next/headers');
-    await cookies().set('CAIXINHAS_VAULT_ID', newVault.id, {
+    const cookieStore = await cookies();
+    cookieStore.set('CAIXINHAS_VAULT_ID', newVault.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

@@ -222,11 +222,9 @@ function InvitationCard({
         exit={{ opacity: 0, x: -50, transition: { duration: 0.3 } }}
         className="flex items-center justify-between rounded-lg border p-4 bg-card"
     >
-      <div>
-        <p className="font-medium">
-          <span className="font-bold">{invitation.invitedBy}</span> te convidou para o cofre{' '}
-          <span className="font-bold text-primary">{invitation.vaultName}</span>.
-        </p>
+      <div className="font-medium">
+        <span className="font-bold">{invitation.invitedBy}</span> te convidou para o cofre{' '}
+        <span className="font-bold text-primary">{invitation.vaultName}</span>.
       </div>
       <div className="flex gap-2">
         <Button
@@ -360,9 +358,9 @@ export function VaultsPageClient({
             <h2 className="text-3xl font-bold font-headline tracking-tight">
               Bem-vindo(a), {currentUser.name.split(' ')[0]}!
             </h2>
-            <p className="text-muted-foreground mt-2">
+            <div className="text-muted-foreground mt-2">
               Escolha um espaço de trabalho para começar a planejar.
-            </p>
+            </div>
           </div>
 
           <AnimatePresence>
@@ -450,9 +448,9 @@ export function VaultsPageClient({
               >
                 <CardContent className="p-6 text-center">
                   <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="font-semibold">Criar Novo Cofre</p>
+                  <div className="font-semibold">Criar Novo Cofre</div>
                   {!canCreateVaults && (
-                    <p className="text-xs text-muted-foreground mt-1">🔒 Requer assinatura</p>
+                    <div className="text-xs text-muted-foreground mt-1">🔒 Requer assinatura</div>
                   )}
                 </CardContent>
               </Card>
@@ -479,12 +477,13 @@ export function VaultsPageClient({
             <AlertDialogHeader>
               <AlertDialogTitle>Converter para Cofre Compartilhado?</AlertDialogTitle>
               <AlertDialogDescription>
-                Isso criará um novo cofre chamado "Cofre de {currentUser.name.split(' ')[0]}" e moverá todas as suas contas, transações e metas pessoais para ele.
-                <br /><br />
-                <span className="font-semibold text-yellow-600 dark:text-yellow-500 flex items-center gap-2">
+                <div>
+                  Isso criará um novo cofre chamado "Cofre de {currentUser.name.split(' ')[0]}" e moverá todas as suas contas, transações e metas pessoais para ele.
+                </div>
+                <div className="mt-4 font-semibold text-yellow-600 dark:text-yellow-500 flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   Sua conta pessoal ficará vazia após esta ação.
-                </span>
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
