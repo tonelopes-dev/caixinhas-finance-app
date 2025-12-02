@@ -18,8 +18,11 @@ export default withAuth(
         return NextResponse.next();
     },
     {
+        callbacks: {
+            authorized: ({ token }) => !!token
+        },
         pages: {
-            signIn: '/login', // Página para a qual redirecionar se o usuário não estiver logado
+            signIn: '/login',
         },
     }
 );
