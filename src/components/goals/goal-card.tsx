@@ -71,6 +71,7 @@ export function GoalCard({
   return (
     <Card
       key={goal.id}
+      data-goal-id={goal.id}
       className="flex h-full flex-col transition-all hover:shadow-md"
     >
       <CardHeader className="flex-row items-start gap-4">

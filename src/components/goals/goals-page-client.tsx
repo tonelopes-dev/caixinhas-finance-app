@@ -1,10 +1,11 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { GoalList } from '@/components/goals/goal-list';
+import { CompletedGoalsConfetti } from '@/components/goals/completed-goals-confetti';
 import { toggleFeaturedGoalAction } from '@/app/(private)/goals/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,7 +61,15 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
   const { toast } = useToast();
   const [goals, setGoals] = useState(initialGoals || []);
 
+  // Calcula quantas metas estão completas (100% ou mais)
+  const completedGoals = useMemo(() => {
+    return goals.filter(goal => goal.currentAmount >= goal.targetAmount);
+  }, [goals]);
+
+  const completedGoalsCount = completedGoals.length;
+
   console.log('🎯 GoalsPageClient - Goals:', goals?.length, goals);
+  console.log('🎯 GoalsPageClient - Completed Goals:', completedGoalsCount);
   console.log('🎯 GoalsPageClient - Vaults:', vaults?.length);
   console.log('🎯 GoalsPageClient - UserId:', userId);
 
@@ -106,6 +115,12 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
 
   return (
     <>
+      {/* Confetes para metas completas */}
+      <CompletedGoalsConfetti 
+        completedGoals={completedGoals} 
+        userId={userId} 
+      />
+      
     {goals.length === 0 ? (
       <Card>
         <CardContent className="pt-6">
