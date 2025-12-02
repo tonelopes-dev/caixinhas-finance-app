@@ -28,7 +28,7 @@ export function CTASection() {
             className="text-xl h-14 px-8 bg-background text-foreground hover:bg-background/90 hover:scale-110 transition-all relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center">
-              Assinar Agora
+              Começar Agora
               <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </span>
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />

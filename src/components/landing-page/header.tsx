@@ -75,7 +75,7 @@ export function Header() {
           </Button>
           <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
             <Link href="#planos">
-                <span className="relative z-10">Assinar Agora</span>
+                <span className="relative z-10">Começar Agora</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </Link>
           </Button>
@@ -141,7 +141,7 @@ export function Header() {
               <Link href="/login" onClick={handleNavClick}>Entrar</Link>
             </Button>
             <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold w-full">
-              <Link href="#planos" onClick={handleNavClick}>Assinar Agora</Link>
+              <Link href="#planos" onClick={handleNavClick}>Começar Agora</Link>
             </Button>
           </div>
         </nav>
