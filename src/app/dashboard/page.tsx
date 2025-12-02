@@ -31,6 +31,12 @@ export default async function DashboardPage() {
     if (isMember) {
       workspaceId = vaultId;
     }
+  } else {
+    // Se não há vault definido no cookie, tenta usar o primeiro cofre do usuário
+    const userVaults = await VaultService.getUserVaults(userId);
+    if (userVaults.length > 0) {
+      workspaceId = userVaults[0].id;
+    }
   }
 
   const owner = { ownerType: workspaceId === userId ? 'user' as const : 'vault' as const, ownerId: workspaceId };
