@@ -92,6 +92,9 @@ type GoalDetailClientProps = {
 export function GoalDetailClient({ goal, transactions, accounts, vaults, userId }: GoalDetailClientProps) {
   const [currentAmount, setCurrentAmount] = useState(goal.currentAmount);
 
+  const hasAccounts = accounts.length > 0;
+  const hasBalance = currentAmount > 0;
+
   const transactionTotal = transactions.reduce((acc, t) => {
     return t.sourceAccountId ? acc + t.amount : acc - t.amount;
   }, 0);
@@ -125,15 +128,17 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
   const handleTransactionComplete = () => {
     window.location.reload();
   };
-  
-  // CORRIGIDO: Valida se existem contas bancárias
-  const hasAccounts = accounts && accounts.length > 0;
-  const hasBalance = currentAmount > 0;
 
   const transactionButtons = (
     <div className="my-4 flex flex-col sm:flex-row gap-2">
-      <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts} />
-      <GoalTransactionDialog type="withdrawal" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={!hasAccounts || !hasBalance} />
+      <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} />
+      <GoalTransactionDialog 
+        type="withdrawal" 
+        goalId={goal.id} 
+        accounts={accounts} 
+        onComplete={handleTransactionComplete} 
+        disabled={!hasBalance}
+      />
     </div>
   );
 
@@ -178,21 +183,9 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
             </div>
           </CardHeader>
           <CardContent>
-            {/* CORRIGIDO: Adiciona tooltip para botões desativados */}
-            {!hasAccounts ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    {transactionButtons}
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Você precisa ter ao menos uma conta cadastrada para depositar ou retirar.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : !hasBalance ? (
+            {!hasBalance ? (
               <div className="my-4 flex flex-col sm:flex-row gap-2">
-                <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} disabled={false} />
+                <GoalTransactionDialog type="deposit" goalId={goal.id} accounts={accounts} onComplete={handleTransactionComplete} />
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>

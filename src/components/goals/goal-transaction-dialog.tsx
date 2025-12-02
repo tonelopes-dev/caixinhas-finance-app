@@ -15,6 +15,7 @@ import {
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
+import { AddAccountPromptDialog } from '@/components/transactions/add-account-prompt-dialog';
 import type { Account } from '@/lib/definitions';
 
 const initialState = {
@@ -26,9 +27,9 @@ const initialState = {
 type GoalTransactionDialogProps = {
   type: 'deposit' | 'withdrawal';
   goalId: string;
-  accounts: Account[]; // Contas são recebidas aqui
+  accounts: Account[];
   onComplete?: () => void;
-  disabled?: boolean; // Prop para desativar o botão
+  disabled?: boolean; // Para casos específicos como saque sem saldo
 };
 
 function SubmitButton() {
@@ -42,7 +43,25 @@ function SubmitButton() {
 
 export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disabled }: GoalTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [promptOpen, setPromptOpen] = useState(false);
   const { toast } = useToast();
+  
+  const hasNoAccounts = accounts.length === 0;
+  
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (disabled) {
+      // Se está desabilitado (ex: saque sem saldo), não faz nada
+      return;
+    }
+    if (hasNoAccounts) {
+      setPromptOpen(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   const actionToUse = type === 'deposit' ? depositToGoalAction : withdrawFromGoalAction;
   const [state, formAction] = useActionState(actionToUse, initialState);
@@ -70,14 +89,20 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
   }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {/* CORRIGIDO: Botão é desativado se a prop `disabled` for verdadeira */}
-        <Button variant={type === 'deposit' ? 'default' : 'secondary'} size="sm" disabled={disabled}>
-          <Icon className="mr-2 h-4 w-4" />
-          {buttonLabel}
-        </Button>
-      </DialogTrigger>
+    <>
+      <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
+      <Dialog open={isOpen && !hasNoAccounts} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button 
+            variant={type === 'deposit' ? 'default' : 'secondary'} 
+            size="sm" 
+            onClick={handleTriggerClick}
+            disabled={disabled}
+          >
+            <Icon className="mr-2 h-4 w-4" />
+            {buttonLabel}
+          </Button>
+        </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -125,5 +150,6 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
