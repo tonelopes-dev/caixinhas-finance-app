@@ -112,6 +112,10 @@ export const authOptions: AuthOptions = {
             image: dbUser.avatarUrl,
             ...dbUser
           };
+        } else {
+          // Se o usuário não existe mais no banco, invalida a sessão
+          console.log('⚠️ Usuário não encontrado no banco, invalidando sessão');
+          return null;
         }
       }
       return session;

@@ -100,6 +100,8 @@ export class AuthService {
       // Define a data de expiração do trial
       const trialExpiresAt = new Date();
       trialExpiresAt.setDate(trialExpiresAt.getDate() + 30);
+      
+      console.log('🔍 Debug Register - trialExpiresAt:', trialExpiresAt);
 
       // Criar usuário
       const user = await tx.user.create({
@@ -116,11 +118,19 @@ export class AuthService {
           email: true,
           name: true,
           avatarUrl: true,
+          workspaceImageUrl: true,
           subscriptionStatus: true,
           trialExpiresAt: true,
           createdAt: true,
           updatedAt: true,
         },
+      });
+
+      console.log('✅ Debug Register - Usuario criado:', {
+        id: user.id,
+        email: user.email,
+        subscriptionStatus: user.subscriptionStatus,
+        trialExpiresAt: user.trialExpiresAt
       });
 
       // Criar categorias padrão para o novo usuário
@@ -257,9 +267,37 @@ export class AuthService {
    * @returns true se o trial for válido
    */
   static isTrialActive(user: UserWithoutPassword): boolean {
-    if (user.subscriptionStatus !== 'trial' || !user.trialExpiresAt) {
+    if (user.subscriptionStatus !== 'trial') {
       return false;
     }
+    
+    // Se não tem data de expiração mas é trial, corrige automaticamente
+    if (!user.trialExpiresAt) {
+      console.warn(`⚠️ Corrigindo trial sem data para usuário ${user.id}`);
+      // Correção automática em background
+      this.fixTrialExpirationDate(user.id).catch(console.error);
+      return true; // Permite acesso enquanto corrige
+    }
+    
     return new Date(user.trialExpiresAt) > new Date();
+  }
+
+  /**
+   * Corrige a data de expiração do trial para usuários afetados
+   */
+  static async fixTrialExpirationDate(userId: string): Promise<void> {
+    try {
+      const trialDuration = 21 * 24 * 60 * 60 * 1000; // 21 dias
+      const trialExpiresAt = new Date(Date.now() + trialDuration);
+      
+      await prisma.user.update({
+        where: { id: userId },
+        data: { trialExpiresAt }
+      });
+      
+      console.log(`✅ Trial corrigido para usuário ${userId}, expira em ${trialExpiresAt}`);
+    } catch (error) {
+      console.error('Erro ao corrigir trial:', error);
+    }
   }
 }
