@@ -90,46 +90,7 @@ export function RecurringPageClient({
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 font-headline">
-              <TrendingDown className="h-6 w-6 text-primary" />
-              Pagamentos Parcelados
-            </CardTitle>
-            <CardDescription>
-              Acompanhe o andamento de todas as suas compras parceladas.
-            </CardDescription>
-          </div>
-           <AddTransactionDialog
-            accounts={allAccounts}
-            goals={allGoals}
-            categories={allCategories}
-            ownerId={workspaceId}
-            chargeType="installment"
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {groupedInstallmentExpenses.length > 0 ? (
-              groupedInstallmentExpenses.map((installment) => (
-                <InstallmentCard
-                  key={installment.id}
-                  transaction={installment as Transaction}
-                  allAccounts={allAccounts}
-                  allGoals={allGoals}
-                  allCategories={allCategories}
-                />
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-4">
-                Nenhuma compra parcelada encontrada.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
+      {/* 1. Entradas Parceladas */}
       <Card>
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
@@ -170,6 +131,7 @@ export function RecurringPageClient({
         </CardContent>
       </Card>
 
+      {/* 2. Transações Recorrentes */}
       <Card>
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
@@ -247,6 +209,47 @@ export function RecurringPageClient({
               )}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      {/* 3. Pagamentos Parcelados */}
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <TrendingDown className="h-6 w-6 text-primary" />
+              Pagamentos Parcelados
+            </CardTitle>
+            <CardDescription>
+              Acompanhe o andamento de todas as suas compras parceladas.
+            </CardDescription>
+          </div>
+           <AddTransactionDialog
+            accounts={allAccounts}
+            goals={allGoals}
+            categories={allCategories}
+            ownerId={workspaceId}
+            chargeType="installment"
+          />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {groupedInstallmentExpenses.length > 0 ? (
+              groupedInstallmentExpenses.map((installment) => (
+                <InstallmentCard
+                  key={installment.id}
+                  transaction={installment as Transaction}
+                  allAccounts={allAccounts}
+                  allGoals={allGoals}
+                  allCategories={allCategories}
+                />
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma compra parcelada encontrada.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
