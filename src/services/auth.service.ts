@@ -225,7 +225,7 @@ export class AuthService {
    */
   static async updateProfile(
     userId: string,
-    data: { name?: string; avatarUrl?: string }
+    data: { name?: string; avatarUrl?: string; workspaceImageUrl?: string }
   ): Promise<UserWithoutPassword> {
     try {
       const user = await prisma.user.update({
