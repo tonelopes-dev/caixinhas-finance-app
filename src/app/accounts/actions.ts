@@ -236,3 +236,48 @@ export async function deleteCategory(prevState: CategoryActionState, formData: F
   }
 }
 
+/**
+ * Adiciona automaticamente as principais categorias padrão
+ */
+export async function addDefaultCategories(prevState: CategoryActionState, formData: FormData): Promise<CategoryActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return { success: false, message: 'Usuário não autenticado' };
+  }
+
+  const defaultCategories = [
+    'Alimentação',
+    'Transporte',
+    'Moradia',
+    'Saúde',
+    'Educação',
+    'Lazer',
+    'Vestuário',
+    'Contas e Taxas',
+    'Compras',
+    'Outros'
+  ];
+
+  try {
+    let createdCount = 0;
+    for (const categoryName of defaultCategories) {
+      try {
+        await CategoryService.createCategory(categoryName, session.user.id);
+        createdCount++;
+      } catch (error) {
+        // Se a categoria já existe, ignora o erro e continua
+        console.log(`Categoria "${categoryName}" já existe, pulando...`);
+      }
+    }
+    
+    revalidatePath('/accounts');
+    return { 
+      success: true, 
+      message: `${createdCount} categorias principais foram adicionadas com sucesso!` 
+    };
+  } catch (error) {
+    console.error('Erro ao criar categorias padrão:', error);
+    return { success: false, message: 'Erro ao adicionar categorias principais.' };
+  }
+}
+
