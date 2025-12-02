@@ -47,7 +47,6 @@ async function main() {
       email: 'alice@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[0],
-      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'active',
       trialExpiresAt: faker.date.future({ years: 1 }),
     },
@@ -59,7 +58,6 @@ async function main() {
       email: 'bruno@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[1],
-      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'active',
       trialExpiresAt: faker.date.future({ years: 1 }),
     },
@@ -71,9 +69,8 @@ async function main() {
       email: 'carlos@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
-      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.future({ days: 15 }), // Trial expira em 15 dias
+      trialExpiresAt: faker.date.soon({ days: 15 }), // Corrigido para faker.date.soon
     },
   });
 
@@ -83,7 +80,6 @@ async function main() {
       email: 'diana@example.com',
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[3],
-      // emailVerified: faker.date.recent(), // Removido pois não está no schema.prisma
       subscriptionStatus: 'trial',
       trialExpiresAt: faker.date.past({ years: 1 }), // Trial expirado
     },
@@ -95,14 +91,15 @@ async function main() {
 
   // 2. Criar Categorias
   console.log('Criando categorias...');
-  const categories = [
-    { name: 'Alimentação', userId: user1.id },
-    { name: 'Transporte', userId: user1.id },
-    { name: 'Lazer', userId: user1.id },
-    { name: 'Salário', userId: user1.id },
-    { name: 'Contas de Casa', userId: user2.id },
+  // Supondo que Category tem um campo ownerId
+  const categoriesData = [
+    { name: 'Alimentação', ownerId: user1.id }, // Corrigido de userId para ownerId
+    { name: 'Transporte', ownerId: user1.id },
+    { name: 'Lazer', ownerId: user1.id },
+    { name: 'Salário', ownerId: user1.id },
+    { name: 'Contas de Casa', ownerId: user2.id },
   ];
-  await prisma.category.createMany({ data: categories });
+  await prisma.category.createMany({ data: categoriesData });
   const createdCategories = await prisma.category.findMany();
   console.log('Categorias criadas.');
 
@@ -113,9 +110,9 @@ async function main() {
       name: 'Finanças Pessoais Alice',
       imageUrl: VAULT_IMAGE_URLS[0],
       isPrivate: true,
-      ownerId: user1.id,
+      owner: { connect: { id: user1.id } }, // Usando connect
       members: {
-        create: { userId: user1.id, role: 'owner' },
+        create: { user: { connect: { id: user1.id } }, role: 'owner' },
       },
     },
   });
@@ -125,11 +122,11 @@ async function main() {
       name: 'Viagem dos Sonhos',
       imageUrl: VAULT_IMAGE_URLS[1],
       isPrivate: false,
-      ownerId: user1.id,
+      owner: { connect: { id: user1.id } }, // Usando connect
       members: {
         create: [
-          { userId: user1.id, role: 'owner' },
-          { userId: user2.id, role: 'member' },
+          { user: { connect: { id: user1.id } }, role: 'owner' },
+          { user: { connect: { id: user2.id } }, role: 'member' },
         ],
       },
     },
@@ -140,12 +137,12 @@ async function main() {
       name: 'Compras do Mês',
       imageUrl: VAULT_IMAGE_URLS[2],
       isPrivate: false,
-      ownerId: user2.id,
+      owner: { connect: { id: user2.id } }, // Usando connect
       members: {
         create: [
-          { userId: user2.id, role: 'owner' },
-          { userId: user1.id, role: 'member' },
-          { userId: user3.id, role: 'member' },
+          { user: { connect: { id: user2.id } }, role: 'owner' },
+          { user: { connect: { id: user1.id } }, role: 'member' },
+          { user: { connect: { id: user3.id } }, role: 'member' },
         ],
       },
     },
@@ -161,7 +158,7 @@ async function main() {
       type: 'vault',
       targetId: vault2.id,
       targetName: vault2.name,
-      senderId: user1.id,
+      sender: { connect: { id: user1.id } }, // Usando connect
       receiverEmail: userInvitedEmail,
       status: 'pending',
     },
@@ -173,8 +170,8 @@ async function main() {
       type: 'vault',
       targetId: vault1.id,
       targetName: vault1.name,
-      senderId: user2.id,
-      receiverId: user3.id,
+      sender: { connect: { id: user2.id } }, // Usando connect
+      receiver: { connect: { id: user3.id } }, // Usando connect
       receiverEmail: user3.email,
       status: 'pending',
     },
@@ -187,8 +184,8 @@ async function main() {
     data: {
       name: 'Conta Corrente Alice',
       balance: 1500.00,
-      userId: user1.id,
-      vaultId: vault1.id, // Associada ao cofre pessoal de Alice
+      user: { connect: { id: user1.id } }, // Usando connect
+      vault: { connect: { id: vault1.id } }, // Usando connect
     },
   });
 
@@ -196,8 +193,8 @@ async function main() {
     data: {
       name: 'Poupança Conjunta',
       balance: 5000.00,
-      userId: user1.id, // Alice é a proprietária da conta, mas ela está no cofre2
-      vaultId: vault2.id, // Associada ao cofre de viagem
+      user: { connect: { id: user1.id } }, // Usando connect
+      vault: { connect: { id: vault2.id } }, // Usando connect
     },
   });
 
@@ -205,8 +202,8 @@ async function main() {
     data: {
       name: 'Cartão de Crédito Bruno',
       balance: -300.00,
-      userId: user2.id,
-      vaultId: vault3.id, // Associada ao cofre de compras
+      user: { connect: { id: user2.id } }, // Usando connect
+      vault: { connect: { id: vault3.id } }, // Usando connect
     },
   });
   console.log('Contas criadas.');
@@ -221,9 +218,9 @@ async function main() {
       emoji: '🚨',
       visibility: 'private',
       isFeatured: true,
-      userId: user1.id,
+      user: { connect: { id: user1.id } }, // Usando connect
       participants: {
-        create: { userId: user1.id, role: 'owner' },
+        create: { user: { connect: { id: user1.id } }, role: 'owner' },
       },
     },
   });
@@ -236,11 +233,11 @@ async function main() {
       emoji: '✈️',
       visibility: 'shared',
       isFeatured: false,
-      vaultId: vault2.id, // Meta do cofre de viagem
+      vault: { connect: { id: vault2.id } }, // Usando connect
       participants: {
         create: [
-          { userId: user1.id, role: 'member' },
-          { userId: user2.id, role: 'member' },
+          { user: { connect: { id: user1.id } }, role: 'member' },
+          { user: { connect: { id: user2.id } }, role: 'member' },
         ],
       },
     },
@@ -254,11 +251,11 @@ async function main() {
       emoji: '🎁',
       visibility: 'shared',
       isFeatured: false,
-      vaultId: vault3.id, // Meta do cofre de compras
+      vault: { connect: { id: vault3.id } }, // Usando connect
       participants: {
         create: [
-          { userId: user1.id, role: 'member' },
-          { userId: user2.id, role: 'member' },
+          { user: { connect: { id: user1.id } }, role: 'member' },
+          { user: { connect: { id: user2.id } }, role: 'member' },
         ],
       },
     },
@@ -274,10 +271,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Depósito inicial reserva',
       type: 'income',
-      accountId: account1.id,
-      categoryId: createdCategories.find(c => c.name === 'Salário')?.id,
-      userId: user1.id,
-      vaultId: vault1.id,
+      account: { connect: { id: account1.id } }, // Usando connect
+      category: { connect: { id: createdCategories.find(c => c.name === 'Salário')?.id } }, // Usando connect
+      user: { connect: { id: user1.id } }, // Usando connect
+      vault: { connect: { id: vault1.id } }, // Usando connect
     },
   });
 
@@ -287,10 +284,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Almoço',
       type: 'expense',
-      accountId: account1.id,
-      categoryId: createdCategories.find(c => c.name === 'Alimentação')?.id,
-      userId: user1.id,
-      vaultId: vault1.id,
+      account: { connect: { id: account1.id } }, // Usando connect
+      category: { connect: { id: createdCategories.find(c => c.name === 'Alimentação')?.id } }, // Usando connect
+      user: { connect: { id: user1.id } }, // Usando connect
+      vault: { connect: { id: vault1.id } }, // Usando connect
     },
   });
 
@@ -300,10 +297,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Contribuição viagem',
       type: 'income',
-      accountId: account2.id,
-      goalId: goal2.id,
-      userId: user1.id,
-      vaultId: vault2.id,
+      account: { connect: { id: account2.id } }, // Usando connect
+      goal: { connect: { id: goal2.id } }, // Usando connect
+      user: { connect: { id: user1.id } }, // Usando connect
+      vault: { connect: { id: vault2.id } }, // Usando connect
     },
   });
 
@@ -313,10 +310,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Uber',
       type: 'expense',
-      accountId: account3.id,
-      categoryId: createdCategories.find(c => c.name === 'Transporte')?.id,
-      userId: user2.id,
-      vaultId: vault3.id,
+      account: { connect: { id: account3.id } }, // Usando connect
+      category: { connect: { id: createdCategories.find(c => c.name === 'Transporte')?.id } }, // Usando connect
+      user: { connect: { id: user2.id } }, // Usando connect
+      vault: { connect: { id: vault3.id } }, // Usando connect
     },
   });
   console.log('Transações criadas.');
@@ -325,7 +322,7 @@ async function main() {
   console.log('Criando notificações...');
   await prisma.notification.create({
     data: {
-      userId: user1.id,
+      user: { connect: { id: user1.id } }, // Usando connect
       type: 'system',
       message: 'Bem-vindo ao Caixinhas! Explore seus cofres.',
       link: '/dashboard',
@@ -335,7 +332,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      userId: user3.id,
+      user: { connect: { id: user3.id } }, // Usando connect
       type: 'vault_invite',
       message: `${user2.name} convidou você para o cofre '${vault1.name}'.`,
       link: '/invitations',
@@ -346,7 +343,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      userId: user2.id,
+      user: { connect: { id: user2.id } }, // Usando connect
       type: 'goal_progress',
       message: `Sua meta '${goal2.name}' atingiu 40% do objetivo!`,
       link: `/goals/${goal2.id}`,
