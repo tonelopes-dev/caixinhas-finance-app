@@ -75,9 +75,34 @@ export async function updateProfileAction(prevState: ProfileActionState, formDat
     return { message: "Usuário não autenticado." };
   }
 
+  // Buscar o usuário atual para comparar avatar
+  const currentUser = await AuthService.getUserById(session.user.id);
+  if (!currentUser) {
+    return { message: "Usuário não encontrado." };
+  }
+
+  const file = formData.get('avatarFile') as File;
+  let avatarUrl = formData.get('avatarUrl') as string || null;
+
+  // Se há um arquivo, fazer upload para S3
+  if (file && file.size > 0) {
+    try {
+      const { uploadFileToS3, deleteFileFromS3 } = await import('@/lib/s3');
+      avatarUrl = await uploadFileToS3(file);
+      
+      // Deletar avatar antigo se existir e não for um avatar padrão
+      if (currentUser.avatarUrl && !currentUser.avatarUrl.startsWith('data:image/svg+xml')) {
+        await deleteFileFromS3(currentUser.avatarUrl);
+      }
+    } catch (uploadError) {
+      console.error('Erro ao fazer upload do avatar:', uploadError);
+      return { message: 'Erro ao fazer upload da imagem de perfil.' };
+    }
+  }
+
   const validatedFields = updateProfileSchema.safeParse({
     name: formData.get('name'),
-    avatarUrl: formData.get('avatarUrl'),
+    avatarUrl: avatarUrl,
   });
 
   if (!validatedFields.success) {
