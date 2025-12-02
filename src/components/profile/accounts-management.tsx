@@ -541,7 +541,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
 
                     <div className="space-y-2 rounded-md border p-4">
                         <Label>Visibilidade nos Cofres</Label>
-                        <p className='text-xs text-muted-foreground'>Marque em quais cofres esta conta deve ser visível.</p>
+                        <p className='text-xs text-muted-foreground'>Você possui apenas esse cofre até o momento.</p>
                          {userVaults.map(vault => (
                              <div key={vault.id} className="flex items-center justify-between">
                                 <Label htmlFor={`create-visible-${vault.id}`} className="font-normal">{vault.name}</Label>

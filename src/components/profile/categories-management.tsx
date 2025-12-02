@@ -24,7 +24,7 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { createCategory, updateCategory, type CategoryActionState } from '@/app/accounts/actions';
+import { createCategory, updateCategory, addDefaultCategories, type CategoryActionState } from '@/app/accounts/actions';
 import type { Category } from '@/services/category.service';
 import { Skeleton } from '../ui/skeleton';
 import { DeleteCategoryDialog } from './delete-category-dialog';
@@ -32,6 +32,29 @@ import { DeleteCategoryDialog } from './delete-category-dialog';
 function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
   return <Button type="submit" disabled={pending}>{pending ? pendingLabel : label}</Button>;
+}
+
+function AddDefaultCategoriesButton() {
+  const { toast } = useToast();
+  const initialState: CategoryActionState = {};
+  const [state, formAction] = useActionState(addDefaultCategories, initialState);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast({ title: 'Sucesso!', description: state.message });
+    } else if (state?.message) {
+      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+    }
+  }, [state, toast]);
+
+  return (
+    <form action={formAction}>
+      <SubmitButton 
+        label="Adicionar Categorias Principais" 
+        pendingLabel="Adicionando..."
+      />
+    </form>
+  );
 }
 
 function EditCategoryDialog({ category }: { category: Category }) {
@@ -145,7 +168,15 @@ export function CategoriesManagement({ initialCategories }: { initialCategories:
             </div>
           ))}
           {!isDeleting && initialCategories.length === 0 && (
-            <p className="text-sm text-muted-foreground">Nenhuma categoria personalizada criada.</p>
+            <div className="w-full text-center py-8 space-y-4">
+              <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Que tal começar com as categorias mais utilizadas?
+                </p>
+                <AddDefaultCategoriesButton />
+              </div>
+            </div>
           )}
         </div>
       </CardContent>
