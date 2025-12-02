@@ -39,7 +39,7 @@ export default async function Header({ user, partner }: HeaderProps) {
   ]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-center border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
       <div className="container flex items-center justify-between">
         <Link href="/vaults" className="flex items-center gap-2">
           <Logo className="h-8 w-8" />
