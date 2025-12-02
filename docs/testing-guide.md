@@ -1,87 +1,134 @@
-# 🚀 Guia de Testes: Atualização e Verificação do Projeto
+# Guia de Testes do Projeto Caixinhas
 
-Com as últimas mudanças, o banco de dados foi alterado e novas lógicas de negócio foram introduzidas. Siga este guia para atualizar seu ambiente local e testar tudo.
+## 1. Introdução
 
-## 1. Comandos para Atualizar o Projeto
+Este documento detalha a estratégia e os procedimentos para a realização de testes no projeto "Caixinhas". O objetivo é garantir a qualidade, robustez e a correta funcionalidade de todas as features, desde a autenticação de usuários até a gestão de cofres e caixinhas colaborativas. Uma base de dados consistente e bem populada é essencial para simular cenários reais de uso.
 
-Você precisará executar dois comandos principais para sincronizar seu banco de dados com o novo `schema.prisma` e populá-lo com os dados de teste atualizados.
+## 2. Visão Geral da Estratégia de Testes
 
-```bash
-# 1. Aplicar as novas migrações do banco de dados
-# Este comando lerá as alterações no `schema.prisma` e atualizará a estrutura do seu banco.
-npm run prisma:migrate
+Nossa estratégia de testes foca em:
 
-# 2. Popular o banco de dados com os novos dados
-# O `seed.ts` foi atualizado para incluir o status de trial para os usuários.
-npm run db:seed
-```
+*   **Testes Unitários:** Verificar o funcionamento isolado de pequenas unidades de código (funções, métodos de serviço).
+*   **Testes de Integração:** Assegurar que diferentes módulos e serviços (ex: Server Actions com Services e Banco de Dados) funcionem corretamente em conjunto.
+*   **Testes E2E (End-to-End):** Simular o fluxo completo do usuário através da aplicação, garantindo que a experiência de ponta a ponta esteja conforme o esperado.
+*   **Testes de Regressão:** Garantir que novas funcionalidades ou correções não introduzam novos bugs ou quebrem funcionalidades existentes.
 
-Após executar esses comandos, seu banco de dados estará 100% atualizado. Agora, você pode iniciar a aplicação normalmente:
+## 3. Ambiente de Testes
 
-```bash
-# Inicie o servidor de desenvolvimento
-npm run dev
-```
+Para garantir um ambiente de testes consistente, seguimos algumas diretrizes:
 
----
+### 3.1. Configuração do Banco de Dados para Testes
 
-## 2. Como Começar a Testar
+É fundamental que os testes sejam executados em um banco de dados **separado** do ambiente de desenvolvimento ou produção para evitar perda de dados e garantir isolamento.
 
-O objetivo principal é testar o fluxo de **trial (período de teste)** e **expiração de conta**.
+*   **Variável de Ambiente:** Utilize a variável de ambiente `DATABASE_URL` para apontar para um banco de dados de teste (ex: `file:./test.db` para SQLite).
+*   **Limpeza Automática:** Antes de cada execução de testes ou antes de popular o banco com dados de seed, o banco de dados de teste deve ser limpo.
 
-### Cenário 1: Usuário Novo (Iniciando o Trial)
+### 3.2. Scripts de Apoio
 
-1.  **Acesse a página de registro:**
-    *   Vá para `http://localhost:9002/register`.
-2.  **Crie uma nova conta:**
-    *   Use um e-mail que ainda não existe no banco (ex: `teste-trial@email.com`).
-3.  **Verifique o acesso:**
-    *   Após o registro, você deve ser redirecionado para a tela de seleção de cofres (`/vaults`).
-    *   **Resultado esperado:** Você tem acesso total. Pode criar um cofre, acessar seu espaço pessoal, etc. Seu período de trial de 30 dias começou.
+Dois scripts principais são fornecidos para gerenciar o ambiente de dados de teste:
 
-### Cenário 2: Simular um Usuário com Trial Expirado
+*   **`scripts/clean-db.ts`:** Responsável por resetar o banco de dados, excluindo todas as tabelas e recriando-as a partir do schema Prisma. Isso garante um estado limpo para o seed.
+*   **`prisma/seed.ts`:** Preenche o banco de dados com um conjunto de dados fake abrangente, simulando diversos cenários de uso.
 
-Para este teste, vamos "forçar" a expiração do trial de um dos usuários criados pelo `seed`.
+## 4. População de Dados para Testes (`prisma/seed.ts`)
 
-1.  **Abra o Prisma Studio:**
-    *   Em um novo terminal, execute: `npm run prisma:studio`.
-    *   Isso abrirá uma interface visual do seu banco de dados no navegador.
-2.  **Modifique um Usuário:**
-    *   Vá para o modelo `User`.
-    *   Encontre o usuário **"Julia Mendes (Sem Cofre)"** (email: `julia@teste.com`).
-    *   Clique na célula da coluna `trialExpiresAt` e altere a data para uma data no passado (ex: o dia de ontem).
-    *   Clique em "Save changes".
-3.  **Teste o Acesso Bloqueado:**
-    *   Em uma janela anônima do navegador, acesse `http://localhost:9002/login`.
-    *   Faça login com as credenciais da Julia:
-        *   **E-mail:** `julia@teste.com`
-        *   **Senha:** `julia123`
-    *   **Resultado esperado:**
-        *   Você será redirecionado para a página `/vaults`.
-        *   Um alerta vermelho aparecerá no topo da página: **"Seu acesso expirou!"**.
-        *   Você **não conseguirá** clicar para acessar seu espaço pessoal "Minha Conta Pessoal".
-        *   O botão "Criar Novo Cofre" estará desabilitado.
-        *   A única ação permitida seria aceitar um convite para um cofre de um usuário pagante.
+O arquivo `prisma/seed.ts` é o coração da nossa estratégia de dados de teste. Ele é projetado para criar um cenário de dados rico que permite testar todas as principais funcionalidades do projeto.
 
-### Cenário 3: Acessando um Cofre Compartilhado com Trial Expirado
+### 4.1. Ferramentas Utilizadas
 
-Este cenário testa a regra mais importante: um usuário com conta expirada ainda pode colaborar em cofres de assinantes.
+*   **Prisma Client:** Para interagir com o banco de dados.
+*   **`@faker-js/faker`:** Biblioteca para gerar dados fake realistas (nomes, e-mails, descrições, etc.).
 
-1.  **Use o usuário com trial expirado (Julia):**
-    *   Mantenha a Julia logada (do Cenário 2).
-2.  **Convide a Julia para um cofre:**
-    *   Em outra janela do navegador (não anônima), faça login com o usuário principal:
-        *   **E-mail:** `conta01@email.com`
-        *   **Senha:** `conta@123`
-    *   Acesse o cofre "Cofre da Família".
-    *   Vá para a página de convite (`/invite`) e convide o e-mail `julia@teste.com`.
-3.  **Aceite o Convite:**
-    *   Volte para a janela onde a Julia está logada.
-    *   Atualize a página `/vaults`.
-    *   **Resultado esperado:**
-        *   Um card de "Convite Pendente" aparecerá.
-        *   Clique em "Aceitar".
-        *   Agora, na lista de cofres da Julia, o "Cofre da Família" aparecerá.
-        *   **Teste final:** Clique no "Cofre da Família". Você deve conseguir acessá-lo e ver o dashboard compartilhado, mesmo com a conta pessoal da Julia bloqueada.
+### 4.2. Cenários de Dados Populados
 
-Seguindo esses passos, você conseguirá validar todo o novo fluxo de assinatura e acesso implementado.
+O seed de dados abrange os seguintes tipos de entidades e cenários:
+
+1.  **Usuários (`User`):**
+    *   **Usuários Ativos:** Múltiplos usuários com `subscriptionStatus: 'active'`. Estes usuários podem criar cofres, convidar, gerenciar, etc.
+    *   **Usuário `Trial`:** Um usuário com `subscriptionStatus: 'trial'` e uma data de expiração no futuro, para testar funcionalidades de período de teste.
+    *   **Usuário `Inactive` (Trial Expirado):** Um usuário com `subscriptionStatus: 'trial'` cuja data de expiração (`trialExpiresAt`) está no passado, para testar as restrições de acesso (conforme `docs/user-access-control.md`).
+    *   **Usuário Convidado (Sem Conta):** Um e-mail de um usuário que ainda não possui uma conta no sistema, para testar o fluxo de convite.
+    *   **Avatares Fake:** Cada usuário recebe um URL de avatar fake para testar a exibição de imagens em diferentes contextos (perfil, membros de cofre).
+
+2.  **Cofres (`Vault`):**
+    *   **Cofres Pessoais:** Criados por usuários ativos, acessíveis apenas a eles.
+    *   **Cofres Compartilhados:** Criados por usuários ativos, com convites enviados ou aceitos por outros usuários.
+    *   **Cofres com Imagens:** Testar o upload e exibição de `imageUrl`.
+
+3.  **Membros do Cofre (`VaultMember`):**
+    *   Associações entre usuários e cofres, incluindo diferentes `roles` (proprietário, membro).
+
+4.  **Convites (`Invitation`):**
+    *   **Convites Pendentes:** Um usuário envia um convite para outro (existente ou não) que ainda não foi aceito.
+    *   **Convites Aceitos:** Um usuário que já aceitou um convite e agora é membro de um cofre.
+    *   **Convites Recusados:** Um convite que foi explicitamente recusado.
+    *   **Testes de Permissão:** Verificar se apenas o proprietário pode cancelar convites.
+
+5.  **Contas (`Account`):**
+    *   Múltiplas contas fictícias associadas a usuários e/ou cofres.
+
+6.  **Caixinhas (`Goal`):**
+    *   **Caixinhas Pessoais:** Metas financeiras criadas por usuários para seus próprios objetivos.
+    *   **Caixinhas de Cofre:** Metas financeiras criadas dentro de cofres compartilhados, com múltiplos participantes.
+    *   **Caixinhas com Diferentes Progressos:** Algumas com `currentAmount` perto de `targetAmount`, outras vazias.
+
+7.  **Transações (`Transaction`):**
+    *   Transações de entrada e saída para contas e caixinhas, simulando o fluxo financeiro.
+
+8.  **Categorias (`Category`):**
+    *   Categorias predefinidas para organizar as transações.
+
+9.  **Relatórios (`Report`):**
+    *   Relatórios gerados e salvos para usuários.
+
+10. **Notificações (`Notification`):**
+    *   Diversos tipos de notificações (`vault_invite`, `goal_progress`, etc.) para diferentes usuários, com status de lida/não lida.
+
+### 4.3. Logging Detalhado
+
+O script `seed.ts` incluirá `console.log` para cada etapa principal da criação de dados, permitindo que o desenvolvedor acompanhe o progresso e verifique quais dados foram inseridos.
+
+## 5. Procedimento de Execução dos Testes
+
+Para preparar e executar os testes, siga estes passos:
+
+1.  **Instalar Dependências:** Certifique-se de que todas as dependências do projeto e de testes estejam instaladas. Em particular, para o seed:
+    ```bash
+    npm install @faker-js/faker --save-dev
+    npm install -D ts-node # Se ainda não tiver
+    ```
+2.  **Configurar Variáveis de Ambiente:** Ajuste o `DATABASE_URL` no seu `.env.local` para apontar para o banco de dados de teste.
+    ```
+    DATABASE_URL="file:./prisma/test.db" # Exemplo para SQLite
+    # Certifique-se de ter as variáveis AWS S3 também para testar uploads de imagem
+    AWS_REGION=your-aws-region
+    AWS_ACCESS_KEY_ID=your-access-key-id
+    AWS_SECRET_ACCESS_KEY=your-secret-access-key
+    AWS_S3_BUCKET_NAME=your-s3-test-bucket-name
+    ```
+3.  **Limpar o Banco de Dados de Teste:**
+    ```bash
+    ts-node scripts/clean-db.ts
+    ```
+    Este comando executa `npx prisma migrate reset --force` para garantir que o banco esteja limpo antes do seed.
+4.  **Executar o Seed de Dados:**
+    ```bash
+    npx prisma db seed
+    ```
+    Observe os logs no console para verificar a criação dos dados.
+5.  **Executar os Testes:** Após o seed, execute seus testes (unitários, integração, E2E) utilizando os dados gerados.
+    ```bash
+    # Exemplo, dependendo do seu framework de teste (ex: Jest, Playwright)
+    npm test
+    ```
+
+## 6. Boas Práticas
+
+*   **Isolamento:** Sempre teste em um ambiente de banco de dados isolado.
+*   **Reproducibilidade:** O seed deve ser determinístico, criando sempre os mesmos dados para que os testes sejam reproduzíveis.
+*   **Dados Anônimos:** Utilize dados fake (`faker-js`) para evitar o uso de informações reais e garantir a privacidade.
+*   **Cobertura:** Garanta que os dados de seed cubram os casos de uso críticos e edge cases (ex: usuário `inactive`, convites pendentes).
+*   **Atualização:** Mantenha o `seed.ts` e este guia de testes atualizados conforme novas funcionalidades são adicionadas ao projeto.
+
+Este guia, juntamente com os scripts fornecidos, deve fornecer uma base sólida para um processo de testes eficaz e eficiente.
