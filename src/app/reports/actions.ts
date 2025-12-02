@@ -3,7 +3,6 @@
 
 import { z } from 'zod';
 import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
-import { transactions } from '@/lib/data';
 import { ReportService } from '@/services/ReportService';
 
 const generateReportSchema = z.object({
@@ -45,10 +44,11 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
         };
     }
 
-    const relevantTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date);
-        return t.ownerId === ownerId && transactionDate.getMonth() === monthIndex && transactionDate.getFullYear() === yearNum;
-    });
+    const relevantTransactions = await ReportService.getTransactionsForPeriod(
+        ownerId, 
+        parseInt(month, 10), 
+        yearNum
+    );
 
     if (relevantTransactions.length === 0) {
         const noDataHtml = `<div class="text-center py-10"><p class="text-muted-foreground">Nenhuma transação encontrada para ${monthYear}.</p></div>`;
@@ -98,4 +98,49 @@ export async function invalidateReportCache(date: string | undefined, ownerId: s
     if (deleted) {
         console.log(`Cache for report ${ownerId}-${monthYear} invalidated.`);
     }
+}
+
+export type ReportActionResult = {
+  success: boolean;
+  data?: any;
+  message?: string;
+};
+
+/**
+ * Verifica se o usuário tem alguma transação
+ */
+export async function checkHasAnyTransactionsAction(workspaceId: string): Promise<ReportActionResult> {
+  try {
+    const hasTransactions = await ReportService.hasAnyTransactions(workspaceId);
+    return { success: true, data: hasTransactions };
+  } catch (error) {
+    console.error('Erro ao verificar transações:', error);
+    return { success: false, message: 'Erro ao verificar transações' };
+  }
+}
+
+/**
+ * Busca meses que têm transações
+ */
+export async function getMonthsWithTransactionsAction(workspaceId: string): Promise<ReportActionResult> {
+  try {
+    const months = await ReportService.getMonthsWithTransactions(workspaceId);
+    return { success: true, data: months };
+  } catch (error) {
+    console.error('Erro ao buscar meses com transações:', error);
+    return { success: false, message: 'Erro ao buscar meses com transações' };
+  }
+}
+
+/**
+ * Verifica o status de um relatório
+ */
+export async function getReportStatusAction(workspaceId: string, monthLabel: string): Promise<ReportActionResult> {
+  try {
+    const status = await ReportService.getReportStatus(workspaceId, monthLabel);
+    return { success: true, data: status };
+  } catch (error) {
+    console.error('Erro ao verificar status do relatório:', error);
+    return { success: false, message: 'Erro ao verificar status do relatório' };
+  }
 }

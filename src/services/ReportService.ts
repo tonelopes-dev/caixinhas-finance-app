@@ -134,15 +134,19 @@ export class ReportService {
    */
   static async hasAnyTransactions(ownerId: string): Promise<boolean> {
     try {
+      // Se ownerId é um workspace pessoal (userId), verifica transações pessoais
+      // Se ownerId é um vault, verifica transações do vault
       const count = await prisma.transaction.count({
         where: {
           OR: [
-            { userId: ownerId },
-            { vaultId: ownerId }
+            { actorId: ownerId }, // Transações executadas pelo usuário
+            { userId: ownerId },  // Transações no workspace pessoal do usuário
+            { vaultId: ownerId }  // Transações no vault especificado
           ]
         }
       });
 
+      console.log(`🔍 hasAnyTransactions - ownerId: ${ownerId}, count: ${count}`);
       return count > 0;
     } catch (error) {
       console.error('Erro ao verificar transações:', error);
@@ -158,8 +162,21 @@ export class ReportService {
       const transactions = await prisma.transaction.findMany({
         where: {
           OR: [
-            { userId: ownerId },
-            { vaultId: ownerId }
+            { actorId: ownerId }, // Transações onde o usuário é o ator
+            { 
+              vault: {
+                OR: [
+                  { ownerId: ownerId }, // Vault onde o usuário é dono
+                  { 
+                    members: {
+                      some: {
+                        userId: ownerId
+                      }
+                    }
+                  } // Vault onde o usuário é membro
+                ]
+              }
+            }
           ]
         },
         select: {
@@ -301,6 +318,74 @@ export class ReportService {
         buttonLabel: 'Gerar Relatório',
         buttonEnabled: true
       };
+    }
+  }
+
+  /**
+   * Busca transações do usuário para um período específico
+   */
+  static async getTransactionsForPeriod(
+    ownerId: string, 
+    month: number, 
+    year: number
+  ): Promise<any[]> {
+    try {
+      const startDate = new Date(year, month - 1, 1); // Primeiro dia do mês
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Último dia do mês
+
+      const transactions = await prisma.transaction.findMany({
+        where: {
+          date: {
+            gte: startDate,
+            lte: endDate
+          },
+          OR: [
+            { actorId: ownerId }, // Transações onde o usuário é o ator
+            { 
+              vault: {
+                OR: [
+                  { ownerId: ownerId }, // Vault onde o usuário é dono
+                  { 
+                    members: {
+                      some: {
+                        userId: ownerId
+                      }
+                    }
+                  } // Vault onde o usuário é membro
+                ]
+              }
+            }
+          ]
+        },
+        include: {
+          category: true,
+          vault: true,
+          sourceAccount: true,
+          destinationAccount: true
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      });
+
+      // Converter para o formato esperado pelo gerador de relatórios
+      return transactions.map(t => ({
+        id: t.id,
+        date: t.date.toISOString(),
+        description: t.description,
+        amount: t.amount,
+        type: t.type,
+        paymentMethod: t.paymentMethod,
+        category: t.category?.name || 'Sem categoria',
+        ownerId: t.vaultId || t.actorId, // Para compatibilidade com o código existente
+        isRecurring: t.isRecurring,
+        isInstallment: t.isInstallment,
+        installmentNumber: t.installmentNumber,
+        totalInstallments: t.totalInstallments
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar transações por período:', error);
+      return [];
     }
   }
 }

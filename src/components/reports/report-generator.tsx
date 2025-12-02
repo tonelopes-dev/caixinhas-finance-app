@@ -67,13 +67,17 @@ export function ReportGenerator({
     // Filtra meses do ano selecionado
     const monthsForSelectedYear = availableMonths.filter(m => m.year.toString() === year);
     
-    // Atualiza mês se o selecionado não existe no ano atual
+    // Atualiza mês quando o ano muda
     React.useEffect(() => {
         if (year && monthsForSelectedYear.length > 0) {
             const monthExists = monthsForSelectedYear.some(m => m.value === month);
             if (!monthExists) {
+                // Se o mês atual não existe no ano selecionado, seleciona o primeiro disponível
                 setMonth(monthsForSelectedYear[0].value);
             }
+        } else if (!year) {
+            // Se não há ano selecionado, limpa o mês
+            setMonth('');
         }
     }, [year, month, monthsForSelectedYear, setMonth]);
 
@@ -84,10 +88,21 @@ export function ReportGenerator({
             <input type="hidden" name="year" value={year} />
             <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div className="space-y-2">
-                    <label className='text-sm font-medium'>Mês</label>
-                    <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending}>
+                    <label className='text-sm font-medium'>Ano</label>
+                    <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Mês" />
+                            <SelectValue placeholder="Selecione o ano" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <label className='text-sm font-medium'>Mês</label>
+                    <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending || !year}>
+                        <SelectTrigger>
+                            <SelectValue placeholder={!year ? "Selecione o ano primeiro" : "Selecione o mês"} />
                         </SelectTrigger>
                         <SelectContent>
                             {monthsForSelectedYear.map(m => (
@@ -95,17 +110,6 @@ export function ReportGenerator({
                                     {new Date(m.year, parseInt(m.value) - 1).toLocaleString('pt-BR', { month: 'long' })}
                                 </SelectItem>
                             ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                 <div className="space-y-2">
-                    <label className='text-sm font-medium'>Ano</label>
-                    <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Ano" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>

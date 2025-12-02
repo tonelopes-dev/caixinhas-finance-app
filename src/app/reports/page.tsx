@@ -17,8 +17,9 @@ import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
+import { ReportLoadingProgress } from '@/components/reports/report-loading-progress';
 import { generateNewFinancialReport, type FinancialReportState } from './actions';
-import { ReportService } from '@/services/ReportService';
+import { checkHasAnyTransactionsAction, getMonthsWithTransactionsAction, getReportStatusAction } from './actions';
 
 function ReportsPage() {
   const router = useRouter();
@@ -70,12 +71,23 @@ function ReportsPage() {
 
     // Verifica se o usuário tem alguma transação
     const checkTransactions = async () => {
-      const hasTransactions = await ReportService.hasAnyTransactions(selectedWorkspaceId);
+      const hasTransactionsResult = await checkHasAnyTransactionsAction(selectedWorkspaceId);
+      if (!hasTransactionsResult.success) {
+        console.error('Erro ao verificar transações:', hasTransactionsResult.message);
+        return;
+      }
+      
+      const hasTransactions = hasTransactionsResult.data;
       setHasAnyTransactions(hasTransactions);
       
       if (hasTransactions) {
         // Busca meses que realmente têm transações
-        const monthsWithTransactions = await ReportService.getMonthsWithTransactions(selectedWorkspaceId);
+        const monthsResult = await getMonthsWithTransactionsAction(selectedWorkspaceId);
+        if (!monthsResult.success) {
+          console.error('Erro ao buscar meses:', monthsResult.message);
+          return;
+        }
+        const monthsWithTransactions = monthsResult.data;
         setAvailableMonths(monthsWithTransactions);
         
         // Extrai anos únicos dos meses disponíveis
@@ -103,7 +115,12 @@ function ReportsPage() {
       const selectedMonth = availableMonths.find(m => m.value === month && m.year.toString() === year);
       if (!selectedMonth) return;
       
-      const status = await ReportService.getReportStatus(workspaceId, selectedMonth.label);
+      const statusResult = await getReportStatusAction(workspaceId, selectedMonth.label);
+      if (!statusResult.success) {
+        console.error('Erro ao verificar status:', statusResult.message);
+        return;
+      }
+      const status = statusResult.data;
       setReportStatus(status);
       
       // Se existe relatório e não está desatualizado, exibe o HTML salvo
@@ -173,24 +190,31 @@ function ReportsPage() {
             ) : hasAnyTransactions === true ? (
               // Tem transações - mostrar interface completa
               <>
-                <ReportGenerator
-                  workspaceId={workspaceId}
-                  month={month}
-                  setMonth={setMonth}
-                  year={year}
-                  setYear={setYear}
-                  availableMonths={availableMonths}
-                  availableYears={availableYears}
-                  handleGenerateReport={handleGenerateReport}
-                  buttonLabel={reportStatus.buttonLabel}
-                  buttonEnabled={reportStatus.buttonEnabled && !isGenerating}
-                  isGenerating={isGenerating}
-                />
+                {/* Se está gerando, mostra apenas o loading. Senão, mostra a interface normal */}
+                {isGenerating ? (
+                  <ReportLoadingProgress isVisible={true} />
+                ) : (
+                  <>
+                    <ReportGenerator
+                      workspaceId={workspaceId}
+                      month={month}
+                      setMonth={setMonth}
+                      year={year}
+                      setYear={setYear}
+                      availableMonths={availableMonths}
+                      availableYears={availableYears}
+                      handleGenerateReport={handleGenerateReport}
+                      buttonLabel={reportStatus.buttonLabel}
+                      buttonEnabled={reportStatus.buttonEnabled}
+                      isGenerating={false}
+                    />
 
-                <ReportDisplay
-                  reportHtml={reportHtml}
-                  isLoading={isGenerating}
-                />
+                    <ReportDisplay
+                      reportHtml={reportHtml}
+                      isLoading={false}
+                    />
+                  </>
+                )}
               </>
             ) : (
               // Carregando verificação de transações
