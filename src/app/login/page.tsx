@@ -43,17 +43,15 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    // Redirecionar se já estiver logado
-    if (status === 'authenticated' && session?.user) {
+    // Só redirecionar se estiver realmente autenticado e com sessão válida
+    if (status === 'authenticated' && session?.user?.id && !isLoading) {
       console.log('✅ Usuário autenticado, redirecionando...', session.user);
       localStorage.setItem('CAIXINHAS_USER_ID', session.user.id);
       
-      // Aguardar um tick antes de redirecionar
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 50);
+      // Usar replace para evitar voltar ao login no histórico
+      router.replace('/dashboard');
     }
-  }, [session, status]);
+  }, [session, status, router, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +66,12 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
+        console.log('❌ Erro no login:', result.error);
         setError('Email ou senha incorretos');
       } else if (result?.ok) {
-        console.log('✅ Login bem-sucedido, redirecionando...');
-        // Usar window.location para forçar o redirecionamento
-        window.location.href = '/dashboard';
+        console.log('✅ Login bem-sucedido, aguardando redirecionamento automático...');
+        // Não redirecionar manualmente aqui, deixar o useEffect fazer isso
+        // após a sessão ser atualizada
       }
     } catch (error) {
       setError('Erro ao fazer login. Tente novamente.');
