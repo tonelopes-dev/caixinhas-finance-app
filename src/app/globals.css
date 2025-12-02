@@ -305,3 +305,197 @@
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
+
+/* Animações para celebração de metas */
+
+@keyframes celebrate-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes celebrate-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes celebrate-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 
+                0 0 30px rgba(16, 185, 129, 0.6);
+  }
+}
+
+@keyframes celebrate-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0,-20px,0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0,-10px,0);
+  }
+  90% {
+    transform: translate3d(0,-4px,0);
+  }
+}
+
+@keyframes celebrate-sparkle {
+  0%, 100% { 
+    opacity: 0; 
+    transform: scale(0) rotate(0deg);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes celebrate-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes celebrate-rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Classes utilitárias para celebração */
+.celebrate-shake {
+  animation: celebrate-shake 0.5s ease-in-out;
+}
+
+.celebrate-pulse {
+  animation: celebrate-pulse 1s ease-in-out infinite;
+}
+
+.celebrate-glow {
+  animation: celebrate-glow 2s ease-in-out infinite;
+}
+
+.celebrate-bounce {
+  animation: celebrate-bounce 1s ease-in-out;
+}
+
+.celebrate-sparkle {
+  animation: celebrate-sparkle 1.5s ease-in-out infinite;
+}
+
+.celebrate-float {
+  animation: celebrate-float 3s ease-in-out infinite;
+}
+
+.celebrate-rainbow {
+  background: linear-gradient(45deg, 
+    #ff0000, #ff7f00, #ffff00, #00ff00, 
+    #0000ff, #4b0082, #9400d3, #ff0000);
+  background-size: 400% 400%;
+  animation: celebrate-rainbow 3s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Efeitos especiais para elementos de celebração */
+.celebration-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.celebration-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    rgba(16, 185, 129, 0.3), 
+    rgba(245, 158, 11, 0.3), 
+    rgba(139, 92, 246, 0.3));
+  border-radius: inherit;
+  z-index: -1;
+  animation: celebrate-rainbow 2s ease infinite;
+}
+
+/* Efeitos para confetti personalizado */
+.confetti-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #10B981;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotateZ(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotateZ(720deg);
+    opacity: 0;
+  }
+}
+
+/* Destaque para celebração de meta */
+.goal-celebration-highlight {
+  animation: goal-celebration-highlight 4s ease-in-out;
+  transform-origin: center;
+}
+
+@keyframes goal-celebration-highlight {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  10% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.4);
+  }
+  20% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+  30% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 30px rgba(34, 197, 94, 0.1);
+  }
+  40% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.4);
+  }
+  60% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 30px rgba(34, 197, 94, 0.1);
+  }
+  80% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+  90% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}

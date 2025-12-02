@@ -10,6 +10,9 @@ function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Aguardar o status ser definitivo antes de redirecionar
+    if (status === 'loading') return;
+    
     // Redireciona com base no status da autenticação
     if (status === 'unauthenticated') {
       router.replace('/landing');
