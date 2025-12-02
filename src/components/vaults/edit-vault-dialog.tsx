@@ -277,8 +277,11 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <form action={formAction} encType="multipart/form-data"> {/* Add encType */}
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Editar Vault</DialogTitle>
+        </DialogHeader>
+        <form action={formAction}>
             <input type="hidden" name="vaultId" value={vault.id} />
             {/* Hidden input for imageUrl, only if no file is selected. 
                 If a file is selected, the action will handle the upload. 
@@ -294,56 +297,65 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                 />
             )}
             
-            <DialogHeader>
-            <DialogTitle className="font-headline text-xl">Gerenciar Cofre</DialogTitle>
-            <DialogDescription>
-                Atualize as informações, gerencie membros ou exclua o cofre.
-            </DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-6 py-4">
-                {/* Preview da Imagem */}
-                <div className="relative h-40 w-full rounded-md border flex items-center justify-center overflow-hidden">
-                    {displayImageUrl ? (
-                        <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
-                    ) : (
-                        <span className="text-muted-foreground">Sem imagem</span>
-                    )}
-                    {(localImageFile || customImageUrlInput || selectedPresetImage) && ( 
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-2 right-2 rounded-full bg-background/80"
-                            onClick={handleRemoveImage}
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
-                    )}
+            {/* Header com imagem de fundo */}
+            <div className="relative h-48 w-full overflow-hidden">
+                {displayImageUrl ? (
+                    <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
+                ) : (
+                    <div className="bg-gradient-to-br from-blue-500 to-purple-600 h-full w-full" />
+                )}
+                <div className="absolute inset-0 bg-black/40" />
+                
+                {/* Botão remover imagem */}
+                {(localImageFile || selectedPresetImage) && ( 
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900"
+                        onClick={handleRemoveImage}
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
+                )}
+                
+                {/* Título sobre a imagem */}
+                <div className="absolute bottom-4 left-6">
+                    <h2 className="text-2xl font-bold text-white mb-1">Editar Cofre</h2>
+                    <p className="text-white/80 text-sm">Personalize seu cofre financeiro</p>
                 </div>
+            </div>
 
-                <div className="space-y-2"> {/* Increased spacing */}
-                    <Label htmlFor="edit-vault-name">Nome do Cofre</Label>
+            <div className="p-6 space-y-6">
+
+                {/* Nome do cofre */}
+                <div className="space-y-3">
+                    <Label htmlFor="edit-vault-name" className="text-base font-medium">Nome do Cofre</Label>
                     <Input
                         id="edit-vault-name"
                         name="name"
                         value={vaultName}
                         onChange={(e) => setVaultName(e.target.value)}
-                        placeholder="Ex: Reforma da Casa"
+                        placeholder="Ex: Reforma da Casa, Viagem dos Sonhos..."
                         required
+                        className="text-lg py-3"
                     />
                     {state?.errors?.name && (
-                      <p className="text-sm text-destructive">{state.errors.name[0]}</p>
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <span className="text-destructive">⚠</span>
+                        {state.errors.name[0]}
+                      </p>
                     )}
                 </div>
 
-                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="edit-is-private" className="text-base">
+                {/* Switch Privacidade */}
+                <div className="flex flex-row items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-colors">
+                    <div className="space-y-1">
+                        <Label htmlFor="edit-is-private" className="text-base font-medium">
                             Cofre Privado
                         </Label>
                         <p className="text-sm text-muted-foreground">
-                            Cofres privados são visíveis apenas para você.
+                            Apenas você pode ver este cofre
                         </p>
                     </div>
                     <Switch 
@@ -351,48 +363,66 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                         name="isPrivate" 
                         checked={isPrivate}
                         onCheckedChange={setIsPrivate}
+                        className="scale-110"
                     />
                 </div>
 
+                {/* Upload de imagem melhorado */}
                 <div className="space-y-4">
-                    <Label>Imagem de Capa</Label>
+                    <Label className="text-base font-medium">Imagem de Capa</Label>
 
-                    {/* File Upload Input */}
-                    <div className="space-y-2">
-                        <Label htmlFor="image-file">Upload de Imagem (local)</Label>
-                        <Input
-                            id="image-file"
+                    {/* Upload personalizado */}
+                    <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="relative border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-accent/30 group"
+                    >
+                        <input
                             type="file"
                             name="imageFile" 
                             accept="image/*"
                             ref={fileInputRef}
                             onChange={handleFileChange}
+                            className="hidden"
                         />
+                        <div className="space-y-2">
+                            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
+                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 10MB</p>
+                            </div>
+                        </div>
+                        {localImageFile && (
+                            <div className="mt-3 text-xs text-primary bg-primary/10 inline-block px-2 py-1 rounded-md">
+                                📁 {localImageFile.name}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Preset Images */}
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Label>Ou selecione uma imagem predefinida</Label>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
+                    {/* Imagens predefinidas */}
+                    <div className="space-y-3">
+                        <Label className="text-sm text-muted-foreground">Ou escolha uma imagem predefinida</Label>
+                        <div className="grid grid-cols-3 gap-3">
                         {coverImages.map(imgSrc => (
                             <button 
                                 type="button" 
                                 key={imgSrc} 
                                 onClick={() => handlePresetImageSelection(imgSrc)} 
                                 className={cn(
-                                    'relative h-20 w-full overflow-hidden rounded-md border-2 transition-all hover:opacity-90', 
-                                    selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput 
-                                        ? 'border-primary ring-2 ring-primary ring-offset-1' 
-                                        : 'border-transparent hover:border-muted-foreground/20'
+                                    'relative h-24 w-full overflow-hidden rounded-lg border-2 transition-all hover:scale-105 hover:shadow-md', 
+                                    selectedPresetImage === imgSrc && !localImageFile 
+                                        ? 'border-primary ring-2 ring-primary/20 ring-offset-2' 
+                                        : 'border-border hover:border-primary/30'
                                 )}
                             >
                                 <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
-                                {selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput && (
+                                {selectedPresetImage === imgSrc && !localImageFile && (
                                     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                                        <div className="bg-primary text-primary-foreground rounded-full p-0.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <div className="bg-primary text-primary-foreground rounded-full p-1.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         </div>
                                     </div>
                                 )}
@@ -401,20 +431,7 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                         </div>
                     </div>
 
-                    {/* Custom URL Input */}
-                    <div className="space-y-2 mt-2">
-                        <Label htmlFor="edit-custom-image-url" className="text-xs text-muted-foreground">Ou cole a URL de uma imagem externa</Label>
-                        <Input 
-                            id="edit-custom-image-url"
-                            placeholder="https://images.unsplash.com/..."
-                            value={customImageUrlInput ?? ''} // Ensure it's not null for controlled input
-                            onChange={handleCustomUrlChange}
-                            className="text-sm"
-                        />
-                        {state?.errors?.imageUrl && (
-                          <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
-                        )}
-                    </div>
+
                 </div>
 
                 <div className="space-y-3">
@@ -500,39 +517,112 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                 </div>
 
 
-                <div className="pt-4 border-t">
-                    <Label className="text-destructive mb-2 block">Zona de Perigo</Label>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button type="button" variant="destructive" className="w-full">
-                                <Trash2 className="mr-2 h-4 w-4" /> Excluir Cofre
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Esta ação não pode ser desfeita. Isso excluirá permanentemente o cofre 
-                                    <span className="font-bold"> {vault.name} </span> 
-                                    e removerá todos os dados associados.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteVault} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                    {isDeleting ? 'Excluindo...' : 'Sim, excluir cofre'}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
+               
             </div>
-            <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                <Button type="submit" disabled={isPending || !vaultName.trim()}>
-                  {isPending ? 'Salvando...' : 'Salvar Alterações'}
+            
+            {/* Rodapé com botões */}
+            <div className="flex flex-col sm:flex-row gap-3 p-6 bg-muted/30 border-t">
+                <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)}
+                    className="flex-1 font-medium"
+                >
+                    Cancelar
                 </Button>
-            </DialogFooter>
+                <Button 
+                    type="submit" 
+                    disabled={isPending || !vaultName.trim()}
+                    className="flex-1 font-medium bg-primary hover:bg-primary/90"
+                >
+                    {isPending ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Salvando...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Salvar Alterações
+                        </>
+                    )}
+                </Button>
+
+                
+            </div>
+             {/* Zona de Perigo */}
+                <div className="pt-6 mt-6 border-t border-destructive/20">
+                    <div className="bg-destructive/5 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                            <Label className="text-destructive font-medium">Zona de Perigo</Label>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Esta ação é irreversível. O cofre e todos os dados serão permanentemente removidos.
+                        </p>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button 
+                                    type="button" 
+                                    variant="destructive" 
+                                    className="w-full bg-destructive/90 hover:bg-destructive text-white font-medium"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" /> 
+                                    Excluir Cofre Permanentemente
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="flex items-center gap-2">
+                                        <Trash2 className="h-5 w-5 text-destructive" />
+                                        Confirmar Exclusão
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-2">
+                                        <p>Esta ação não pode ser desfeita. Isso excluirá permanentemente:</p>
+                                        <div className="bg-destructive/5 p-3 rounded-md">
+                                            <p className="font-semibold text-destructive">"{vault.name}"</p>
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                • Todas as transações<br/>
+                                                • Histórico completo<br/>
+                                                • Dados de membros
+                                            </p>
+                                        </div>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="font-medium">
+                                        Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction 
+                                        onClick={handleDeleteVault} 
+                                        disabled={isDeleting} 
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-medium"
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Excluindo...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Sim, excluir cofre
+                                            </>
+                                        )}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </div>
         </form>
       </DialogContent>
     </Dialog>

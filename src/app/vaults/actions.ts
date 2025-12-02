@@ -4,7 +4,7 @@ import { VaultService } from '@/services/vault.service';
 import { AuthService } from '@/services/auth.service';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'; // Importar S3 helpers
+
 
 const createVaultSchema = z.object({
   name: z.string().min(1, { message: 'O nome do cofre é obrigatório.' }),
@@ -89,10 +89,13 @@ export async function createVaultAction(
   // Se um arquivo foi enviado, fazer upload para o S3
   if (file && file.size > 0) {
     try {
+      const { uploadFileToS3 } = await import('@/lib/s3');
       imageUrl = await uploadFileToS3(file);
-    } catch (uploadError) {
-      console.error('Erro ao fazer upload da imagem para o S3:', uploadError);
-      return { message: 'Erro ao fazer upload da imagem para o cofre.' };
+    } catch (error) {
+      console.error('Erro no upload S3:', error);
+      return {
+        errors: { imageUrl: ['Falha no upload da imagem. Tente novamente.'] }
+      };
     }
   }
 
@@ -141,12 +144,20 @@ export async function updateVaultAction(
   let imageUrl: string | null | undefined = formData.get('imageUrl') as string || null; // URL existente ou null
   const vaultId = formData.get('vaultId') as string;
 
+  // Se o vaultId é igual ao userId, estamos editando a conta pessoal
+  console.log('🔍 Debug - vaultId:', vaultId, 'userId:', userId, 'isEqual:', vaultId === userId);
+  if (vaultId === userId) {
+    console.log('✅ Redirecionando para updatePersonalWorkspaceAction');
+    return await updatePersonalWorkspaceAction(prevState, formData);
+  }
+
   const currentVault = await VaultService.getVaultById(vaultId); // Obter o cofre atual para verificar a imagem antiga
 
   // Lógica de upload e exclusão da imagem
   if (file && file.size > 0) {
     // Se um novo arquivo foi enviado, faça o upload
     try {
+      const { uploadFileToS3, deleteFileFromS3 } = await import('@/lib/s3');
       imageUrl = await uploadFileToS3(file);
       // Se já existia uma imagem, exclua a antiga do S3
       if (currentVault?.imageUrl) {
@@ -158,7 +169,12 @@ export async function updateVaultAction(
     }
   } else if (imageUrl === null && currentVault?.imageUrl) {
     // Se a URL foi explicitamente definida como null (removida) e existia uma imagem antiga
-    await deleteFileFromS3(currentVault.imageUrl);
+    try {
+      const { deleteFileFromS3 } = await import('@/lib/s3');
+      await deleteFileFromS3(currentVault.imageUrl);
+    } catch (deleteError) {
+      console.error('Erro ao deletar imagem antiga do S3:', deleteError);
+    }
   }
   // Se imageUrl for undefined (não houve mudança no campo) ou se a nova URL for a mesma da antiga, não fazer nada.
 
@@ -177,7 +193,11 @@ export async function updateVaultAction(
 
   try {
     const vault = await VaultService.getVaultById(validatedVaultId);
+    console.log('🔍 Debug updateVault - userId:', userId);
+    console.log('🔍 Debug updateVault - vault:', vault ? { id: vault.id, name: vault.name, ownerId: vault.ownerId } : null);
+    
     if (!vault || vault.ownerId !== userId) {
+      console.log('❌ Permissão negada - vault.ownerId:', vault?.ownerId, 'userId:', userId);
       return { message: 'Você não tem permissão para editar este cofre' };
     }
     await VaultService.updateVault(validatedVaultId, updateData);
@@ -237,7 +257,12 @@ export async function deleteVaultAction(vaultId: string): Promise<{ success: boo
     
     // Deletar a imagem do S3 se existir
     if (vault.imageUrl) {
-      await deleteFileFromS3(vault.imageUrl);
+      try {
+        const { deleteFileFromS3 } = await import('@/lib/s3');
+        await deleteFileFromS3(vault.imageUrl);
+      } catch (deleteError) {
+        console.error('Erro ao deletar imagem do S3:', deleteError);
+      }
     }
 
     await VaultService.deleteVault(vaultId);
@@ -356,5 +381,84 @@ export async function cancelInvitationAction(
         return { success: false, message: error.message };
     }
     return { success: false, message: 'Erro ao cancelar convite. Tente novamente.' };
+  }
+}
+
+/**
+ * Atualiza o workspace pessoal (Minha Conta Pessoal)
+ */
+export async function updatePersonalWorkspaceAction(
+  prevState: VaultActionState,
+  formData: FormData
+): Promise<VaultActionState> {
+  const { getServerSession } = await import('next-auth');
+  const { authOptions } = await import('@/lib/auth');
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) return { message: 'Não autorizado' };
+  const userId = session.user.id;
+
+  const file = formData.get('imageFile') as File;
+  let imageUrl: string | null | undefined = formData.get('imageUrl') as string || null;
+  
+  // Buscar o usuário atual para verificar a imagem antiga
+  const currentUser = await AuthService.getUserById(userId);
+  if (!currentUser) {
+    return { message: 'Usuário não encontrado' };
+  }
+
+  // Lógica de upload e exclusão da imagem
+  if (file && file.size > 0) {
+    // Se um novo arquivo foi enviado, faça o upload
+    try {
+      const { uploadFileToS3, deleteFileFromS3 } = await import('@/lib/s3');
+      imageUrl = await uploadFileToS3(file);
+      // Se já existia uma imagem, exclua a antiga do S3
+      if (currentUser.workspaceImageUrl) {
+        await deleteFileFromS3(currentUser.workspaceImageUrl);
+      }
+    } catch (uploadError) {
+      console.error('Erro ao fazer upload da imagem para o S3:', uploadError);
+      return { message: 'Erro ao fazer upload da nova imagem.' };
+    }
+  } else if (imageUrl === null && currentUser.workspaceImageUrl) {
+    // Se a URL foi explicitamente definida como null (removida) e existia uma imagem antiga
+    try {
+      const { deleteFileFromS3 } = await import('@/lib/s3');
+      await deleteFileFromS3(currentUser.workspaceImageUrl);
+    } catch (deleteError) {
+      console.error('Erro ao deletar imagem antiga do S3:', deleteError);
+    }
+  }
+
+  const updatePersonalWorkspaceSchema = z.object({
+    name: z.string().min(1, { message: "Nome não pode estar vazio." }),
+    imageUrl: z.string().nullable().optional(),
+    isPrivate: z.boolean().optional(),
+  });
+
+  const validatedFields = updatePersonalWorkspaceSchema.safeParse({
+    name: formData.get('name'),
+    imageUrl: imageUrl,
+    isPrivate: formData.get('isPrivate') === 'on',
+  });
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors, message: 'Falha na validação.' };
+  }
+
+  try {
+    await AuthService.updateProfile(userId, {
+      workspaceImageUrl: validatedFields.data.imageUrl ?? undefined,
+    });
+
+    revalidatePath('/vaults');
+    revalidatePath('/dashboard');
+    revalidatePath('/profile');
+    
+    return { message: 'Workspace pessoal atualizado com sucesso!' };
+  } catch (error) {
+    console.error('Erro ao atualizar workspace pessoal:', error);
+    return { message: 'Erro ao atualizar workspace pessoal. Tente novamente.' };
   }
 }

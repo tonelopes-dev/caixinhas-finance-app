@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { EditVaultDialog } from '@/components/vaults/edit-vault-dialog';
-import { acceptInvitationAction, declineInvitationAction, convertPersonalToSharedVaultAction } from '@/app/vaults/actions';
+import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'next-auth/react';
@@ -313,7 +313,7 @@ export function VaultsPageClient({
   const handleConvertPersonal = async () => {
     setIsConverting(true);
     try {
-      const result = await convertPersonalToSharedVaultAction(currentUser.id);
+      // TODO: Implementar conversão de conta pessoal para cofre compartilhado
       toast({
         title: result.success ? 'Sucesso' : 'Erro',
         description: result.message,

@@ -20,7 +20,7 @@ export default async function VaultSelectionPage() {
     AuthService.getUserById(userId),
   ]);
 
-  if (!data || !user) {
+  if (!data || !user || !data.currentUser || !data.userVaults || !data.userInvitations) {
     // Se não encontrar o usuário no banco, desloga por segurança
     redirect('/login?error=user_not_found');
   }

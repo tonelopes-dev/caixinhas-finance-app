@@ -49,7 +49,7 @@ interface CreateVaultDialogProps {
 export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVaultDialogProps) {
   const [vaultName, setVaultName] = useState('');
   const [selectedPresetImage, setSelectedPresetImage] = useState<string | null>(coverImages[0]);
-  const [customImageUrlInput, setCustomImageUrlInput] = useState('');
+
   const [localImageFile, setLocalImageFile] = useState<File | null>(null);
   const [localImagePreviewUrl, setLocalImagePreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +62,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   });
 
   // Determine the final image URL for display
-  const displayImageUrl = localImagePreviewUrl || customImageUrlInput || selectedPresetImage;
+  const displayImageUrl = localImagePreviewUrl || selectedPresetImage;
 
   React.useEffect(() => {
     if (state?.message && !state?.errors) {
@@ -74,7 +74,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
       // Reset form
       setVaultName('');
       setSelectedPresetImage(coverImages[0]);
-      setCustomImageUrlInput('');
       setLocalImageFile(null);
       setLocalImagePreviewUrl(null);
       if (fileInputRef.current) {
@@ -96,18 +95,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   
   const handlePresetImageSelection = (imageUrl: string) => {
     setSelectedPresetImage(imageUrl);
-    setCustomImageUrlInput(''); // Clear custom URL
-    setLocalImageFile(null); // Clear local file
-    setLocalImagePreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }
-
-  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setCustomImageUrlInput(url);
-    setSelectedPresetImage(null); // Clear preset selection
     setLocalImageFile(null); // Clear local file
     setLocalImagePreviewUrl(null);
     if (fileInputRef.current) {
@@ -121,7 +108,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
     if (file) {
       setLocalImagePreviewUrl(URL.createObjectURL(file));
       setSelectedPresetImage(null); // Clear preset selection
-      setCustomImageUrlInput(''); // Clear custom URL
     } else {
       setLocalImagePreviewUrl(null);
     }
@@ -131,7 +117,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
     setLocalImageFile(null);
     setLocalImagePreviewUrl(null);
     setSelectedPresetImage(coverImages[0]); // Revert to a default preset
-    setCustomImageUrlInput('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -140,52 +125,127 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   return (
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[525px]">
-            <form action={formAction} encType="multipart/form-data"> {/* Add encType */}
-                <DialogHeader>
-                <DialogTitle className="font-headline text-xl">Criar Novo Cofre Compartilhado</DialogTitle>
-                <DialogDescription>
-                    Comece um novo espaço para planejar e economizar em conjunto.
-                </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-6 py-4">
-                    <input type="hidden" name="userId" value={currentUser.id} />
-                    <div className="space-y-2">
-                        <Label htmlFor="vault-name">Nome do Cofre</Label>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Criar Novo Vault</DialogTitle>
+            </DialogHeader>
+            <form action={formAction}>
+                <input type="hidden" name="userId" value={currentUser.id} />
+                {!localImageFile && (
+                    <input 
+                        type="hidden" 
+                        name="imageUrl" 
+                        value={selectedPresetImage ?? ''} 
+                    />
+                )}
+                
+                {/* Header com imagem de fundo */}
+                <div className="relative h-48 w-full overflow-hidden">
+                    {displayImageUrl ? (
+                        <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
+                    ) : (
+                        <div className="bg-gradient-to-br from-green-500 to-blue-600 h-full w-full" />
+                    )}
+                    <div className="absolute inset-0 bg-black/40" />
+                    
+                    {/* Botão remover imagem */}
+                    {(localImageFile || selectedPresetImage !== coverImages[0]) && ( 
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900"
+                            onClick={handleRemoveImage}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    )}
+                    
+                    {/* Título sobre a imagem */}
+                    <div className="absolute bottom-4 left-6">
+                        <h2 className="text-2xl font-bold text-white mb-1">Criar Novo Cofre</h2>
+                        <p className="text-white/80 text-sm">Planeje e economize em conjunto</p>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    {/* Nome do cofre */}
+                    <div className="space-y-3">
+                        <Label htmlFor="vault-name" className="text-base font-medium">Nome do Cofre</Label>
                         <Input
                             id="vault-name"
                             name="name"
                             value={vaultName}
                             onChange={(e) => setVaultName(e.target.value)}
-                            placeholder="Ex: Reforma da Casa"
+                            placeholder="Ex: Reforma da Casa, Viagem dos Sonhos..."
                             required
+                            className="text-lg py-3"
                         />
                         {state?.errors?.name && (
-                          <p className="text-sm text-destructive">{state.errors.name[0]}</p>
+                          <p className="text-sm text-destructive flex items-center gap-1">
+                            <span className="text-destructive">⚠</span>
+                            {state.errors.name[0]}
+                          </p>
                         )}
                     </div>
 
-                    <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="is-private" className="text-base">
+                    {/* Switch Privacidade */}
+                    <div className="flex flex-row items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-colors">
+                        <div className="space-y-1">
+                            <Label htmlFor="is-private" className="text-base font-medium">
                                 Cofre Privado
                             </Label>
                             <p className="text-sm text-muted-foreground">
-                                Cofres privados são visíveis apenas para você.
+                                Apenas você pode ver este cofre
                             </p>
                         </div>
-                        <Switch id="is-private" name="isPrivate" />
+                        <Switch id="is-private" name="isPrivate" className="scale-110" />
                     </div>
 
                     <div className="space-y-4"> {/* Increased spacing */}
-                        <Label>Imagem de Capa</Label>
+                        <Label className="text-base font-medium">Imagem de Capa</Label>
+
+                        {/* Upload personalizado */}
+                        <div 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="relative border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-accent/30 group"
+                        >
+                            <input
+                                type="file"
+                                name="imageFile" 
+                                accept="image/*"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
+                            <div className="space-y-2">
+                                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
+                                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 10MB</p>
+                                </div>
+                            </div>
+                            {localImageFile && (
+                                <div className="mt-3 text-xs text-primary bg-primary/10 inline-block px-2 py-1 rounded-md">
+                                    📁 {localImageFile.name}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Imagens predefinidas */}
+                        <div className="space-y-3">
+                            <Label className="text-sm text-muted-foreground">Ou escolha uma imagem predefinida</Label>
                         <div className="relative h-40 w-full rounded-md border flex items-center justify-center overflow-hidden">
                             {displayImageUrl ? (
                                 <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
                             ) : (
                                 <span className="text-muted-foreground">Sem imagem</span>
                             )}
-                            {(localImageFile || customImageUrlInput) && ( 
+                            {localImageFile && ( 
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -211,49 +271,67 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             />
                         </div>
 
-                        {/* Preset Images */}
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Label>Ou selecione uma imagem predefinida</Label>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-3 gap-3">
                             {coverImages.map(imgSrc => (
-                                <button type="button" key={imgSrc} onClick={() => handlePresetImageSelection(imgSrc)} className={cn('relative h-20 w-full overflow-hidden rounded-md border-2 transition-all', selectedPresetImage === imgSrc && !localImageFile && !customImageUrlInput ? 'border-primary ring-2 ring-primary' : 'border-transparent')}>
-                                    <Image src={imgSrc} alt="Imagem de capa" fill className="object-cover" />
+                                <button 
+                                    type="button" 
+                                    key={imgSrc} 
+                                    onClick={() => handlePresetImageSelection(imgSrc)} 
+                                    className={cn(
+                                        'relative h-24 w-full overflow-hidden rounded-lg border-2 transition-all hover:scale-105 hover:shadow-md', 
+                                        selectedPresetImage === imgSrc && !localImageFile 
+                                            ? 'border-primary ring-2 ring-primary/20 ring-offset-2' 
+                                            : 'border-border hover:border-primary/30'
+                                    )}
+                                >
+                                    <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
+                                    {selectedPresetImage === imgSrc && !localImageFile && (
+                                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                            <div className="bg-primary text-primary-foreground rounded-full p-1.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            </div>
+                                        </div>
+                                    )}
                                 </button>
                             ))}
                             </div>
                         </div>
-
-                        {/* Custom URL Input */}
-                        <div className="space-y-2 mt-2">
-                            <Label htmlFor="custom-image-url">Ou cole a URL de uma imagem externa</Label>
-                            <Input 
-                                id="custom-image-url"
-                                placeholder="https://images.unsplash.com/..."
-                                value={customImageUrlInput}
-                                onChange={handleCustomUrlChange}
-                            />
-                            {/* Hidden input for imageUrl, only if no file and no custom URL selected */}
-                            {!localImageFile && !customImageUrlInput && selectedPresetImage && (
-                              <input type="hidden" name="imageUrl" value={selectedPresetImage} />
-                            )}
-                            {/* Hidden input for imageUrl, if custom URL selected */}
-                            {!localImageFile && customImageUrlInput && (
-                              <input type="hidden" name="imageUrl" value={customImageUrlInput} />
-                            )}
-
-                            {state?.errors?.imageUrl && (
-                              <p className="text-sm text-destructive">{state.errors.imageUrl[0]}</p>
-                            )}
-                        </div>
                     </div>
                 </div>
-                <DialogFooter>
-                <Button type="submit" disabled={isPending || !vaultName.trim()}>
-                  {isPending ? 'Criando...' : 'Criar Cofre'}
-                </Button>
-                </DialogFooter>
+                
+                {/* Rodapé com botões */}
+                <div className="flex flex-col sm:flex-row gap-3 p-6 bg-muted/30 border-t">
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => onOpenChange(false)}
+                        className="flex-1 font-medium"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button 
+                        type="submit" 
+                        disabled={isPending || !vaultName.trim()}
+                        className="flex-1 font-medium bg-primary hover:bg-primary/90"
+                    >
+                        {isPending ? (
+                            <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Criando...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Criar Cofre
+                            </>
+                        )}
+                    </Button>
+                </div>
             </form>
         </DialogContent>
         </Dialog>
