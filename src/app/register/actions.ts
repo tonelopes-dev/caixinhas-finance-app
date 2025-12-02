@@ -51,7 +51,7 @@ export async function registerAction(
       name,
       email,
       password,
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+      avatarUrl: `https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png`,
     });
 
     // Adicionar categorias padrão para o novo usuário
