@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const AVATAR_URLS = [
   'https://images.unsplash.com/photo-1535713875002-d1d0cf267ddc?auto=format&fit=crop&q=80&w=400&h=400',
   'https://images.unsplash.com/photo-1520692739414-a95267425121?auto=format&fit=crop&q=80&w=400&h=400',
-  'https://images.unsplash.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400&h=400',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400&h=400',
   'https://images.unsplash.com/photo-1542155734-b203a9f029a1?auto=format&fit=crop&q=80&w=400&h=400',
 ];
 
@@ -70,7 +70,7 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.soon({ days: 15 }), 
+      trialExpiresAt: faker.date.soon(15), // Corrigido para faker.date.soon(days)
     },
   });
 
