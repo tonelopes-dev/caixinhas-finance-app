@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+        avatarUrl: `https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png`,
         subscriptionStatus: "trial",
         trialExpiresAt,
       },

@@ -270,7 +270,7 @@ export function VaultsPageClient({
               <WorkspaceCard
                 id={currentUser.id}
                 name="Minha Conta Pessoal"
-                imageUrl={currentUser.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.email}
+                imageUrl={currentUser.avatarUrl || 'https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png'}
                 members={[currentUser]}
               />
 
