@@ -55,7 +55,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
 
         <div className="max-w-3xl mx-auto">
           <div className="relative pb-6">
-            <div className="absolute -top-0 left-[65px] md:left-1/2 -translate-x-1/2 animate-bounce-slow z-20">
+            <div className="absolute -top-0 left-[65px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
               <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
                 Acesso Completo
@@ -78,25 +78,32 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
               >
                 <div className="text-center space-y-4">
                   <h3 className="text-3xl md:text-4xl font-bold text-foreground">
-                    Assinatura Anual Caixinhas
+                    Assinatura Caixinhas
                   </h3>
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="flex items-baseline gap-2">
                       <span className="text-6xl md:text-7xl font-bold text-foreground animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                        R$ 96
+                        R$ 5,00
                       </span>
-                      <span className="text-2xl text-foreground/60">/ano</span>
+                      <span className="text-2xl text-foreground/60">/trimestre</span>
                     </div>
                   </div>
-                  <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-3 hover:bg-primary/20 transition-colors">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <span className="text-lg font-semibold text-primary">
-                      ou 12x de R$ 9,93
-                    </span>
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-3 hover:bg-primary/20 transition-colors">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-semibold text-primary">
+                        ou 3x de R$ 1,78mês para o primeiro trimestre
+                      </span>
+                    </div>
+                    {/* <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-6 py-3 hover:bg-accent/20 transition-colors">
+                      <Sparkles className="w-5 h-5 text-accent" />
+                      <span className="text-lg font-semibold text-accent">
+                        ou 2x de R$ 2,63 para o primeiro trimestre
+                      </span>
+                    </div> */}
                   </div>
                   <p className="text-lg text-foreground/70 max-w-xl mx-auto">
-                    Menos de R$ 10 por mês para transformar a relação do casal
-                    com o dinheiro
+                    Depois renova por R$ 37,90 / trimestre
                   </p>
                 </div>
 
