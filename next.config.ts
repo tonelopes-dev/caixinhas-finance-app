@@ -3,15 +3,16 @@ import { type NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    // Habilita o suporte para src/app directory
-    turbo: {},
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb', // Aumentar limite para upload de imagens
+    },
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -44,6 +45,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.worldvectorlogo.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'caixinhas-finance-app.s3.us-east-1.amazonaws.com',
         port: '',
         pathname: '/**',
       },
