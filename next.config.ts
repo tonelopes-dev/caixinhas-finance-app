@@ -66,13 +66,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      // Adicionado para permitir avatares gerados dinamicamente
-      {
-        protocol: 'https',
-        hostname: 'api.dicebear.com',
-        port: '',
-        pathname: '/**',
-      },
+      
     ],
   },
 };
