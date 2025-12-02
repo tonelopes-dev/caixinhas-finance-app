@@ -70,7 +70,7 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.soon(15), // Corrigido para faker.date.soon(days)
+      trialExpiresAt: faker.date.soon({ days: 15 }), // Corrigido
     },
   });
 
@@ -110,9 +110,9 @@ async function main() {
       name: 'Finanças Pessoais Alice',
       imageUrl: VAULT_IMAGE_URLS[0],
       isPrivate: true,
-      ownerId: user1.id, // Usando ownerId diretamente
+      ownerId: user1.id, // ID direto
       members: {
-        create: { userId: user1.id, role: 'owner' }, // Usando userId diretamente
+        create: { userId: user1.id, role: 'owner' }, // ID direto
       },
     },
   });
@@ -122,11 +122,11 @@ async function main() {
       name: 'Viagem dos Sonhos',
       imageUrl: VAULT_IMAGE_URLS[1],
       isPrivate: false,
-      ownerId: user1.id, // Usando ownerId diretamente
+      ownerId: user1.id, // ID direto
       members: {
         create: [
-          { userId: user1.id, role: 'owner' }, // Usando userId diretamente
-          { userId: user2.id, role: 'member' }, // Usando userId diretamente
+          { userId: user1.id, role: 'owner' }, // ID direto
+          { userId: user2.id, role: 'member' }, // ID direto
         ],
       },
     },
@@ -137,12 +137,12 @@ async function main() {
       name: 'Compras do Mês',
       imageUrl: VAULT_IMAGE_URLS[2],
       isPrivate: false,
-      ownerId: user2.id, // Usando ownerId diretamente
+      ownerId: user2.id, // ID direto
       members: {
         create: [
-          { userId: user2.id, role: 'owner' }, // Usando userId diretamente
-          { userId: user1.id, role: 'member' }, // Usando userId diretamente
-          { userId: user3.id, role: 'member' }, // Usando userId diretamente
+          { userId: user2.id, role: 'owner' }, // ID direto
+          { userId: user1.id, role: 'member' }, // ID direto
+          { userId: user3.id, role: 'member' }, // ID direto
         ],
       },
     },
@@ -158,7 +158,7 @@ async function main() {
       type: 'vault',
       targetId: vault2.id,
       targetName: vault2.name,
-      senderId: user1.id, // Usando senderId diretamente
+      senderId: user1.id, // ID direto
       receiverEmail: userInvitedEmail,
       status: 'pending',
     },
@@ -170,8 +170,8 @@ async function main() {
       type: 'vault',
       targetId: vault1.id,
       targetName: vault1.name,
-      senderId: user2.id, // Usando senderId diretamente
-      receiverId: user3.id, // Usando receiverId diretamente
+      senderId: user2.id, // ID direto
+      receiverId: user3.id, // ID direto
       receiverEmail: user3.email,
       status: 'pending',
     },
@@ -184,8 +184,8 @@ async function main() {
     data: {
       name: 'Conta Corrente Alice',
       balance: 1500.00,
-      userId: user1.id, // Usando userId diretamente
-      vaultId: vault1.id, // Usando vaultId diretamente
+      userId: user1.id, // ID direto
+      vaultId: vault1.id, // ID direto
     },
   });
 
@@ -193,8 +193,8 @@ async function main() {
     data: {
       name: 'Poupança Conjunta',
       balance: 5000.00,
-      userId: user1.id, // Usando userId diretamente
-      vaultId: vault2.id, // Usando vaultId diretamente
+      userId: user1.id, // ID direto
+      vaultId: vault2.id, // ID direto
     },
   });
 
@@ -202,8 +202,8 @@ async function main() {
     data: {
       name: 'Cartão de Crédito Bruno',
       balance: -300.00,
-      userId: user2.id, // Usando userId diretamente
-      vaultId: vault3.id, // Usando vaultId diretamente
+      userId: user2.id, // ID direto
+      vaultId: vault3.id, // ID direto
     },
   });
   console.log('Contas criadas.');
@@ -218,9 +218,9 @@ async function main() {
       emoji: '🚨',
       visibility: 'private',
       isFeatured: true,
-      userId: user1.id, // Usando userId diretamente
+      userId: user1.id, // ID direto
       participants: {
-        create: { userId: user1.id, role: 'owner' }, // Usando userId diretamente
+        create: { userId: user1.id, role: 'owner' }, // ID direto
       },
     },
   });
@@ -233,11 +233,11 @@ async function main() {
       emoji: '✈️',
       visibility: 'shared',
       isFeatured: false,
-      vaultId: vault2.id, // Usando vaultId diretamente
+      vaultId: vault2.id, // ID direto
       participants: {
         create: [
-          { userId: user1.id, role: 'member' }, // Usando userId diretamente
-          { userId: user2.id, role: 'member' }, // Usando userId diretamente
+          { userId: user1.id, role: 'member' }, // ID direto
+          { userId: user2.id, role: 'member' }, // ID direto
         ],
       },
     },
@@ -251,11 +251,11 @@ async function main() {
       emoji: '🎁',
       visibility: 'shared',
       isFeatured: false,
-      vaultId: vault3.id, // Usando vaultId diretamente
+      vaultId: vault3.id, // ID direto
       participants: {
         create: [
-          { userId: user1.id, role: 'member' }, // Usando userId diretamente
-          { userId: user2.id, role: 'member' }, // Usando userId diretamente
+          { userId: user1.id, role: 'member' }, // ID direto
+          { userId: user2.id, role: 'member' }, // ID direto
         ],
       },
     },
@@ -271,10 +271,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Depósito inicial reserva',
       type: 'income',
-      accountId: account1.id, // Usando accountId diretamente
-      categoryId: createdCategories.find(c => c.name === 'Salário')?.id!, // Usando categoryId diretamente
-      userId: user1.id, // Usando userId diretamente
-      vaultId: vault1.id, // Usando vaultId diretamente
+      accountId: account1.id, // ID direto
+      categoryId: createdCategories.find(c => c.name === 'Salário')?.id!, // ID direto
+      userId: user1.id, // ID direto
+      vaultId: vault1.id, // ID direto
     },
   });
 
@@ -284,10 +284,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Almoço',
       type: 'expense',
-      accountId: account1.id, // Usando accountId diretamente
-      categoryId: createdCategories.find(c => c.name === 'Alimentação')?.id!, // Usando categoryId diretamente
-      userId: user1.id, // Usando userId diretamente
-      vaultId: vault1.id, // Usando vaultId diretamente
+      accountId: account1.id, // ID direto
+      categoryId: createdCategories.find(c => c.name === 'Alimentação')?.id!, // ID direto
+      userId: user1.id, // ID direto
+      vaultId: vault1.id, // ID direto
     },
   });
 
@@ -297,10 +297,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Contribuição viagem',
       type: 'income',
-      accountId: account2.id, // Usando accountId diretamente
-      goalId: goal2.id, // Usando goalId diretamente
-      userId: user1.id, // Usando userId diretamente
-      vaultId: vault2.id, // Usando vaultId diretamente
+      accountId: account2.id, // ID direto
+      goalId: goal2.id, // ID direto
+      userId: user1.id, // ID direto
+      vaultId: vault2.id, // ID direto
     },
   });
 
@@ -310,10 +310,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Uber',
       type: 'expense',
-      accountId: account3.id, // Usando accountId diretamente
-      categoryId: createdCategories.find(c => c.name === 'Transporte')?.id!, // Usando categoryId diretamente
-      userId: user2.id, // Usando userId diretamente
-      vaultId: vault3.id, // Usando vaultId diretamente
+      accountId: account3.id, // ID direto
+      categoryId: createdCategories.find(c => c.name === 'Transporte')?.id!, // ID direto
+      userId: user2.id, // ID direto
+      vaultId: vault3.id, // ID direto
     },
   });
   console.log('Transações criadas.');
@@ -322,7 +322,7 @@ async function main() {
   console.log('Criando notificações...');
   await prisma.notification.create({
     data: {
-      userId: user1.id, // Usando userId diretamente
+      userId: user1.id, // ID direto
       type: 'system',
       message: 'Bem-vindo ao Caixinhas! Explore seus cofres.',
       link: '/dashboard',
@@ -332,7 +332,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      userId: user3.id, // Usando userId diretamente
+      userId: user3.id, // ID direto
       type: 'vault_invite',
       message: `${user2.name} convidou você para o cofre '${vault1.name}'.`,
       link: '/invitations',
@@ -343,7 +343,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
-      userId: user2.id, // Usando userId diretamente
+      userId: user2.id, // ID direto
       type: 'goal_progress',
       message: `Sua meta '${goal2.name}' atingiu 40% do objetivo!`,
       link: `/goals/${goal2.id}`,
