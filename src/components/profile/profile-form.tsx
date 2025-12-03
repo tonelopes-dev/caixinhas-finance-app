@@ -54,7 +54,7 @@ const colorOptions = [
   { name: 'Rosa', value: '#FFB6C1' }
 ];
 
-export function ProfileForm({ user }: { user: User }) {
+export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUpdate?: () => Promise<void> }) {
   const { toast } = useToast();
   const initialState: ProfileActionState = { message: null, errors: {} };
   const [state, formAction] = useActionState(updateProfileAction, initialState);
@@ -70,6 +70,10 @@ export function ProfileForm({ user }: { user: User }) {
         title: "Sucesso!",
         description: state.message,
       });
+      // Atualizar os dados do perfil após sucesso
+      if (onProfileUpdate) {
+        onProfileUpdate();
+      }
     } else if (state.message && state.errors) {
       toast({
         title: "Erro de Validação",
@@ -77,7 +81,7 @@ export function ProfileForm({ user }: { user: User }) {
         variant: "destructive",
       });
     }
-  }, [state, toast]);
+  }, [state, toast, onProfileUpdate]);
 
   return (
     <Card>

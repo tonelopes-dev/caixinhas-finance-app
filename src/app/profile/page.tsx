@@ -51,6 +51,15 @@ export default function ProfilePage() {
     fetchData();
   }, [session, status, router]);
 
+  const refreshProfileData = async () => {
+    if (session?.user) {
+      const data = await getProfileData(session.user.id);
+      if (data?.currentUser) {
+        setProfileData(data as ProfileData);
+      }
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -112,7 +121,7 @@ export default function ProfilePage() {
           animate="visible"
         >
             <motion.div variants={itemVariants}>
-              <ProfileForm user={currentUser} />
+              <ProfileForm user={currentUser} onProfileUpdate={refreshProfileData} />
             </motion.div>
             <motion.div variants={itemVariants}>
               <ThemeCustomization />
