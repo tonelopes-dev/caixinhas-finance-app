@@ -11,6 +11,7 @@ import { ThemeCustomization } from '@/components/profile/theme-customization';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 import { VaultSettings } from '@/components/profile/vault-settings';
+import { PasswordManagement } from '@/components/profile/password-management';
 import type { User, Vault } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -115,6 +116,9 @@ export default function ProfilePage() {
             </motion.div>
             <motion.div variants={itemVariants}>
               <ThemeCustomization />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <PasswordManagement currentUser={currentUser} />
             </motion.div>
             <motion.div variants={itemVariants}>
               <NotificationsManagement />

@@ -161,6 +161,16 @@ export default function LoginPage() {
             {error && (
               <p className="text-sm font-medium text-destructive">{error}</p>
             )}
+            
+            <div className="flex items-center justify-between">
+              <Link 
+                href="/forgot-password"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Esqueceu a senha?
+              </Link>
+            </div>
+            
             <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>

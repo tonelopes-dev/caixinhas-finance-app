@@ -323,3 +323,49 @@ export async function updateUserAction(prevState: UpdateUserState, formData: For
     return { message: error.message || 'Ocorreu um erro ao atualizar o perfil.', success: false };
   }
 }
+
+/**
+ * Server Action para alterar senha do usuário
+ */
+export async function changePasswordAction(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) {
+  try {
+    const user = await AuthService.getUserById(userId);
+    
+    if (!user) {
+      return { success: false, message: 'Usuário não encontrado.' };
+    }
+
+    // Verificar senha atual
+    const bcrypt = await import('bcryptjs');
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isValidPassword) {
+      return { success: false, message: 'Senha atual incorreta.' };
+    }
+
+    // Validar nova senha
+    if (newPassword.length < 8) {
+      return { success: false, message: 'A nova senha deve ter pelo menos 8 caracteres.' };
+    }
+
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Atualizar senha no banco
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    revalidatePath('/profile');
+
+    return { success: true, message: 'Senha alterada com sucesso!' };
+  } catch (error) {
+    console.error('Erro ao alterar senha:', error);
+    return { success: false, message: 'Erro interno do servidor. Tente novamente.' };
+  }
+}

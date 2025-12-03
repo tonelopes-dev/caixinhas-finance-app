@@ -20,6 +20,8 @@ model User {
   workspaceImageUrl  String?   // Imagem específica para a capa do workspace pessoal
   subscriptionStatus String    @default("trial")
   trialExpiresAt     DateTime?
+  resetToken         String?   // Token para recuperação de senha
+  resetTokenExpiry   DateTime? // Data de expiração do token
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
