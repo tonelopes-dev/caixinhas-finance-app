@@ -85,7 +85,8 @@ export async function sendPartnerInvite(
 
 // Funções para gerenciar convites
 import { getServerSession } from 'next-auth';
-import { redirect, revalidatePath } from 'next/navigation';
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { authOptions } from '@/lib/auth';
 
 export async function getUserInvitations() {

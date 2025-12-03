@@ -18,7 +18,7 @@ export type Vault = {
   name: string;
   ownerId: string;
   members: User[];
-  imageUrl: string;
+  imageUrl: string | null;
 }
 
 export type VaultInvitation = {
@@ -44,6 +44,10 @@ export type Transaction = {
   destinationAccountId?: string; 
   actorId?: string;
   isRecurring?: boolean;
+  isInstallment?: boolean;
+  totalInstallments?: number;
+  paidInstallments?: number[];
+  goalId?: string;
 };
 
 export type GoalParticipant = {
@@ -75,6 +79,7 @@ export type User = {
   email: string;
   // Corrigido: avatarUrl pode ser nulo
   avatarUrl: string | null;
+  workspaceImageUrl: string | null;
   subscriptionStatus: 'active' | 'inactive' | 'trial';
 };
 
@@ -119,4 +124,13 @@ export type SavedReport = {
   monthYear: string;
   analysisHtml: string;
   createdAt: Date;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  type: 'income' | 'expense';
+  userId: string;
 };

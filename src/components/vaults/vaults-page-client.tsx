@@ -112,12 +112,7 @@ function WorkspaceCard({
                   Apenas Proprietário
                 </DropdownMenuItem>
               )}
-              {isPersonal && onConvert && (
-                <DropdownMenuItem onClick={onConvert}>
-                  <ArrowRightLeft className="mr-2 h-4 w-4" />
-                  Converter em Compartilhado
-                </DropdownMenuItem>
-              )}
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -285,29 +280,7 @@ export function VaultsPageClient({
     router.refresh();
   };
 
-  const handleConvertPersonal = async () => {
-    setIsConverting(true);
-    try {
-      // TODO: Implementar conversão de conta pessoal para cofre compartilhado
-      toast({
-        title: result.success ? 'Sucesso' : 'Erro',
-        description: result.message,
-        variant: result.success ? 'default' : 'destructive',
-      });
-      if (result.success) {
-        setConvertDialogOpen(false);
-        router.refresh();
-      }
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro ao converter a conta.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsConverting(false);
-    }
-  };
+
 
   return (
     <>

@@ -52,7 +52,7 @@ export default async function Header({ user, partner }: HeaderProps) {
                   <TooltipTrigger asChild>
                     <div className="flex -space-x-2">
                         <Avatar className="h-9 w-9 border-2 border-background" style={{borderColor: 'hsl(var(--chart-2))'}}>
-                        <AvatarImage src={partner.avatarUrl} alt={partner.name} data-ai-hint="man portrait"/>
+                        <AvatarImage src={partner.avatarUrl || undefined} alt={partner.name} data-ai-hint="man portrait"/>
                         <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                     </div>

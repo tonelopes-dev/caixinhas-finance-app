@@ -150,15 +150,15 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
                       <div className="flex items-start gap-4 flex-1">
                         <Avatar className="h-10 w-10 flex-shrink-0">
                           <AvatarFallback>
-                            {invitation.inviterName?.charAt(0) || 'U'}
+                            {invitation.sender?.name?.charAt(0) || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm sm:text-base">
-                            Convite para o cofre <span className="text-primary font-semibold">{invitation.vaultName}</span>
+                          <p className="font-medium">
+                            Convite para o cofre <span className="text-primary font-semibold">{invitation.targetName}</span>
                           </p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            Convidado por {invitation.inviterName} • {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
+                          <p className="text-sm text-muted-foreground">
+                            Convidado por {invitation.sender?.name} • {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                         <div className="flex-shrink-0 sm:hidden">

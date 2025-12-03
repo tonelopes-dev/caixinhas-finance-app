@@ -110,7 +110,14 @@ export async function createVaultAction(
   }
 
   try {
-    const newVault = await VaultService.createVault({ ...validatedFields.data, ownerId: userId });
+    // Converter null para undefined para compatibilidade com CreateVaultInput
+    const sanitizedData = {
+      ...validatedFields.data,
+      imageUrl: validatedFields.data.imageUrl === null ? undefined : validatedFields.data.imageUrl,
+      ownerId: userId
+    };
+    
+    const newVault = await VaultService.createVault(sanitizedData);
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
     cookieStore.set('CAIXINHAS_VAULT_ID', newVault.id, {
@@ -192,6 +199,12 @@ export async function updateVaultAction(
 
   const { vaultId: validatedVaultId, ...updateData } = validatedFields.data;
 
+  // Converter null para undefined para compatibilidade com UpdateVaultInput
+  const sanitizedUpdateData = {
+    ...updateData,
+    imageUrl: updateData.imageUrl === null ? undefined : updateData.imageUrl
+  };
+
   try {
     const vault = await VaultService.getVaultById(validatedVaultId);
     console.log('🔍 Debug updateVault - userId:', userId);
@@ -201,7 +214,7 @@ export async function updateVaultAction(
       console.log('❌ Permissão negada - vault.ownerId:', vault?.ownerId, 'userId:', userId);
       return { message: 'Você não tem permissão para editar este cofre' };
     }
-    await VaultService.updateVault(validatedVaultId, updateData);
+    await VaultService.updateVault(validatedVaultId, sanitizedUpdateData);
 
     revalidatePath('/vaults');
     revalidatePath('/dashboard');

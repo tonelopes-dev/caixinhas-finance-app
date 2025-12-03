@@ -183,8 +183,11 @@ async function main() {
   const account1 = await prisma.account.create({
     data: {
       name: 'Conta Corrente Alice',
+      bank: 'Banco do Brasil',
+      type: 'corrente',
       balance: 1500.00,
-      userId: user1.id, // ID direto
+      scope: vault1.id,
+      ownerId: user1.id, // ID correto
       vaultId: vault1.id, // ID direto
     },
   });
@@ -192,8 +195,11 @@ async function main() {
   const account2 = await prisma.account.create({
     data: {
       name: 'Poupança Conjunta',
+      bank: 'Caixa Econômica',
+      type: 'poupanca',
       balance: 5000.00,
-      userId: user1.id, // ID direto
+      scope: vault2.id,
+      ownerId: user1.id, // ID correto
       vaultId: vault2.id, // ID direto
     },
   });
@@ -201,8 +207,12 @@ async function main() {
   const account3 = await prisma.account.create({
     data: {
       name: 'Cartão de Crédito Bruno',
+      bank: 'Nubank',
+      type: 'credito',
       balance: -300.00,
-      userId: user2.id, // ID direto
+      creditLimit: 2000.00,
+      scope: vault3.id,
+      ownerId: user2.id, // ID correto
       vaultId: vault3.id, // ID direto
     },
   });
@@ -271,8 +281,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Depósito inicial reserva',
       type: 'income',
-      accountId: account1.id, // ID direto
+      paymentMethod: 'pix',
+      sourceAccountId: account1.id, // ID correto
       categoryId: createdCategories.find(c => c.name === 'Salário')?.id!, // ID direto
+      actorId: user1.id, // Obrigatório
       userId: user1.id, // ID direto
       vaultId: vault1.id, // ID direto
     },
@@ -280,12 +292,14 @@ async function main() {
 
   await prisma.transaction.create({
     data: {
-      amount: 50.00,
+      amount: -50.00,
       date: faker.date.recent(),
-      description: 'Almoço',
+      description: 'Supermercado Extra',
       type: 'expense',
-      accountId: account1.id, // ID direto
+      paymentMethod: 'debito',
+      sourceAccountId: account1.id, // ID correto
       categoryId: createdCategories.find(c => c.name === 'Alimentação')?.id!, // ID direto
+      actorId: user1.id, // Obrigatório
       userId: user1.id, // ID direto
       vaultId: vault1.id, // ID direto
     },
@@ -297,8 +311,10 @@ async function main() {
       date: faker.date.recent(),
       description: 'Contribuição viagem',
       type: 'income',
-      accountId: account2.id, // ID direto
+      paymentMethod: 'pix',
+      sourceAccountId: account2.id, // ID correto
       goalId: goal2.id, // ID direto
+      actorId: user1.id, // Obrigatório
       userId: user1.id, // ID direto
       vaultId: vault2.id, // ID direto
     },
@@ -306,12 +322,14 @@ async function main() {
 
   await prisma.transaction.create({
     data: {
-      amount: 70.00,
+      amount: -70.00,
       date: faker.date.recent(),
       description: 'Uber',
       type: 'expense',
-      accountId: account3.id, // ID direto
+      paymentMethod: 'credito',
+      sourceAccountId: account3.id, // ID correto
       categoryId: createdCategories.find(c => c.name === 'Transporte')?.id!, // ID direto
+      actorId: user2.id, // Obrigatório
       userId: user2.id, // ID direto
       vaultId: vault3.id, // ID direto
     },

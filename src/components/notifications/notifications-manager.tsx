@@ -225,21 +225,21 @@ export function NotificationsManager({ initialNotifications }: NotificationsMana
                           "font-medium text-sm",
                           notification.isRead ? "text-muted-foreground" : "text-foreground"
                         )}>
-                          {notification.title}
+                          {notification.message}
                         </h3>
                         <p className={cn(
                           "text-sm mt-1",
                           notification.isRead ? "text-muted-foreground/70" : "text-muted-foreground"
                         )}>
-                          {notification.message}
+                          {new Date(notification.createdAt).toLocaleDateString('pt-BR')}
                         </p>
                         
-                        {isInvite && notification.actionUrl && (
+                        {isInvite && (
                           <Link 
-                            href={notification.actionUrl}
+                            href="/invite"
                             className="inline-flex items-center text-sm text-primary hover:text-primary/80 mt-2"
                           >
-                            Ver convite →
+                            Ver convites →
                           </Link>
                         )}
                       </div>

@@ -27,8 +27,8 @@ export default async function InvitePage() {
   // Buscar dados necessários
   const [userVaults, receivedInvitations, sentInvitations] = await Promise.all([
     VaultService.getUserVaults(session.user.id),
-    getUserInvitations(session.user.id),
-    getUserSentInvitations(session.user.id),
+    getUserInvitations(),
+    getUserSentInvitations()
   ]);
 
   const formattedVaults = userVaults.map((v) => ({ id: v.id, name: v.name }));
