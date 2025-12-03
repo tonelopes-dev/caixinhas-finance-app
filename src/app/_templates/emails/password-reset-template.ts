@@ -1,46 +1,27 @@
-/**
- * Gera o template HTML para o e-mail de redefinição de senha.
- * @param resetLink O link para a página de redefinição de senha.
- * @returns A string HTML do e-mail.
- */
-export const passwordResetEmailTemplate = (resetLink: string): string => {
+
+import { emailHeader } from './email-header';
+import { emailFooter } from './email-footer';
+
+export const passwordResetEmail = (userName: string, resetLink: string) => {
   return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Redefinição de Senha - Caixinhas</title>
-       <style>
-        body { font-family: 'Alegreya', serif; background-color: #fcfaf4; color: #443831; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #e5e0d4; border-radius: 12px; overflow: hidden; }
-        .header { background-color: #f7eecf; padding: 40px; text-align: center; }
-        .header h1 { color: #d4ac0d; font-size: 32px; margin: 0; }
-        .content { padding: 30px; }
-        .content h2 { font-size: 24px; color: #d4ac0d; }
-        .content p { font-size: 16px; line-height: 1.6; }
-        .button { display: inline-block; background-color: #d4ac0d; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
-        .footer { background-color: #f3f0e9; padding: 20px; text-align: center; font-size: 12px; color: #8e8073; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Caixinhas</h1>
-        </div>
-        <div class="content">
-          <h2>Redefinir sua senha</h2>
-          <p>Recebemos uma solicitação para redefinir a senha da sua conta no Caixinhas.</p>
-          <p>Se foi você, clique no botão abaixo para criar uma nova senha. Este link é válido por 1 hora.</p>
-          <a href="${resetLink}" class="button">Redefinir Senha</a>
-          <p style="margin-top: 30px;">Se você não solicitou essa alteração, pode ignorar este e-mail com segurança.</p>
-          <p>Com carinho,<br>Equipe Caixinhas</p>
-        </div>
-        <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} Caixinhas. Todos os direitos reservados.</p>
-        </div>
-      </div>
-    </body>
-    </html>
+    ${emailHeader(userName)}
+    <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
+      Recebemos uma solicitação para redefinir a senha da sua conta Caixinhas App.
+    </p>
+    <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
+      Para redefinir sua senha, clique no link abaixo:
+    </p>
+    <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
+      <a href="${resetLink}" style="display: inline-block; padding: 12px 25px; background-color: #E7A42F; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Redefinir Senha</a>
+    </p>
+    <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: #777; margin-bottom: 10px;">
+      Se você não solicitou uma redefinição de senha, por favor, ignore este e-mail.
+      Sua senha atual permanecerá inalterada.
+    </p>
+    <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
+      Atenciosamente,<br>
+      Equipe Caixinhas App
+    </p>
+    ${emailFooter()}
   `;
 };
