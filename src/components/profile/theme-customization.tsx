@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Paintbrush, Check, RotateCcw } from "lucide-react";
 import { backgroundThemes, primaryThemes, applyTheme, saveThemeAndNotify } from "@/lib/theme-config";
@@ -47,10 +47,15 @@ export function ThemeCustomization() {
 
   // Detecta mudanças nos temas
   useEffect(() => {
-    setHasChanges(
-      currentBackground !== originalBackground || 
-      currentPrimary !== originalPrimary
-    );
+    const hasThemeChanges = currentBackground !== originalBackground || currentPrimary !== originalPrimary;
+    console.log('Theme changes detected:', {
+      currentBackground,
+      originalBackground,
+      currentPrimary,
+      originalPrimary,
+      hasThemeChanges
+    });
+    setHasChanges(hasThemeChanges);
   }, [currentBackground, currentPrimary, originalBackground, originalPrimary]);
 
   const handleThemePreview = (type: 'background' | 'primary', themeName: string) => {
@@ -199,43 +204,40 @@ export function ThemeCustomization() {
           </div>
         </div>
 
-        {/* Botões de Ação */}
-        <div className="pt-4 border-t space-y-3">
-          {/* Botões de Salvar e Descartar */}
-          {hasChanges && (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button 
-                onClick={handleSaveChanges}
-                className="flex items-center gap-2 flex-1"
-              >
-                <Check className="h-4 w-4" />
-                Salvar Alterações
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleDiscardChanges}
-                className="flex items-center gap-2 flex-1"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Descartar
-              </Button>
-            </div>
-          )}
-          
-          {/* Botão de Reset para Padrão */}
-          {(currentBackground !== 'Padrão' || currentPrimary !== 'Padrão') && (
+        {/* Botão de Reset para Padrão */}
+        {(currentBackground !== 'Padrão' || currentPrimary !== 'Padrão') && (
+          <div className="pt-4 border-t">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={resetToDefault}
-              className="flex items-center gap-2 w-full sm:w-auto"
+              className="flex items-center gap-2"
             >
               <RotateCcw className="h-4 w-4" />
               Restaurar Padrão
             </Button>
+          </div>
+        )}
+      </CardContent>
+      
+      {/* CardFooter seguindo exato padrão das outras seções */}
+      <CardFooter className="border-t px-6 py-4 flex justify-end">
+        <div className="flex gap-2">
+          <Button onClick={handleSaveChanges}>
+            Salvar Alterações
+          </Button>
+          {hasChanges && (
+            <Button 
+              variant="outline" 
+              onClick={handleDiscardChanges}
+              className="flex items-center gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Descartar
+            </Button>
           )}
         </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

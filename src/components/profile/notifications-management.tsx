@@ -43,7 +43,7 @@ export function NotificationsManagement() {
             <Switch id="partner-activity" defaultChecked />
         </div>
       </CardContent>
-       <CardFooter className="border-t px-6 py-4">
+       <CardFooter className="border-t px-6 py-4 flex justify-end">
         <Button>Salvar Alterações</Button>
       </CardFooter>
     </Card>

@@ -225,7 +225,7 @@ export function ProfileForm({ user }: { user: User }) {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="border-t px-6 py-4">
+        <CardFooter className="border-t px-6 py-4 flex justify-end">
           <SubmitButton />
         </CardFooter>
       </form>
