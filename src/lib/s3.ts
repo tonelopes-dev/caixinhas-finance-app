@@ -24,13 +24,21 @@ const s3Client = new S3Client({
 });
 
 export async function uploadFileToS3(file: File): Promise<string> {
-  console.log('🔧 uploadFileToS3 chamado:', { fileName: file.name, fileSize: file.size });
+  console.log('🔧 uploadFileToS3 chamado:', { 
+    fileName: file.name, 
+    fileSize: file.size,
+    fileType: file.type,
+    bucketName: AWS_S3_BUCKET_NAME,
+    region: AWS_REGION
+  });
   
   if (!AWS_S3_BUCKET_NAME) {
+    console.error('❌ AWS_S3_BUCKET_NAME não configurado');
     throw new Error("AWS_S3_BUCKET_NAME environment variable is not set.");
   }
   
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    console.error('❌ Credenciais AWS não configuradas');
     throw new Error("AWS credentials are not configured properly.");
   }
 
@@ -43,11 +51,20 @@ export async function uploadFileToS3(file: File): Promise<string> {
     ContentType: file.type,
   };
 
+  console.log('📤 Parâmetros de upload:', {
+    bucket: uploadParams.Bucket,
+    key: uploadParams.Key,
+    contentType: uploadParams.ContentType,
+    bodySize: uploadParams.Body.length
+  });
+
   try {
-    await s3Client.send(new PutObjectCommand(uploadParams));
-    return `https://${AWS_S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${uploadParams.Key}`;
+    const result = await s3Client.send(new PutObjectCommand(uploadParams));
+    const finalUrl = `https://${AWS_S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${uploadParams.Key}`;
+    console.log('✅ Upload S3 bem-sucedido:', { result, finalUrl });
+    return finalUrl;
   } catch (error) {
-    console.error("Erro ao fazer upload do arquivo para o S3:", error);
+    console.error("❌ Erro ao fazer upload do arquivo para o S3:", error);
     throw new Error("Falha ao fazer upload da imagem para o S3.");
   }
 }

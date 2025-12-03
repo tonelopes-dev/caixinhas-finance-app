@@ -64,6 +64,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   // Determine the final image URL for display
   const displayImageUrl = localImagePreviewUrl || selectedPresetImage;
 
+  // Função customizada para processar o envio do formulário
+  const handleSubmit = async (formData: FormData) => {
+    // Se há um arquivo local, adiciona ao FormData
+    if (localImageFile) {
+      formData.set('imageFile', localImageFile);
+      // Remove a URL da imagem predefinida se há um arquivo local
+      formData.delete('imageUrl');
+    }
+    
+    // Chama a action original
+    return formAction(formData);
+  };
+
   React.useEffect(() => {
     if (state?.message && !state?.errors) {
       toast({
@@ -129,7 +142,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
             <DialogHeader className="sr-only">
               <DialogTitle>Criar Novo Vault</DialogTitle>
             </DialogHeader>
-            <form action={formAction}>
+            <form action={handleSubmit}>
                 <input type="hidden" name="userId" value={currentUser.id} />
                 {!localImageFile && (
                     <input 
@@ -258,18 +271,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             )}
                         </div>
 
-                        {/* File Upload Input */}
-                        <div className="space-y-2">
-                            <Label htmlFor="image-file">Upload de Imagem (local)</Label>
-                            <Input
-                                id="image-file"
-                                type="file"
-                                name="imageFile" 
-                                accept="image/*"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                            />
-                        </div>
+
 
                             <div className="grid grid-cols-3 gap-3">
                             {coverImages.map(imgSrc => (

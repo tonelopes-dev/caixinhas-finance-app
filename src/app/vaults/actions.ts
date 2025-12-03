@@ -86,13 +86,22 @@ export async function createVaultAction(
   const file = formData.get('imageFile') as File; // Obter o arquivo da FormData
   let imageUrl: string | undefined = formData.get('imageUrl') as string || undefined;
 
+  console.log('🔍 Debug createVaultAction:', {
+    hasFile: !!file,
+    fileName: file?.name,
+    fileSize: file?.size,
+    imageUrl: imageUrl
+  });
+
   // Se um arquivo foi enviado, fazer upload para o S3
   if (file && file.size > 0) {
+    console.log('📤 Iniciando upload para S3...');
     try {
       const { uploadFileToS3 } = await import('@/lib/s3');
       imageUrl = await uploadFileToS3(file);
+      console.log('✅ Upload S3 concluído:', imageUrl);
     } catch (error) {
-      console.error('Erro no upload S3:', error);
+      console.error('❌ Erro no upload S3:', error);
       return {
         errors: { imageUrl: ['Falha no upload da imagem. Tente novamente.'] }
       };
