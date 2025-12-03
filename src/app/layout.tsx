@@ -5,26 +5,10 @@ import { PwaPrompt } from '@/components/pwa-prompt';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
-
-
-const backgroundThemes = [
-  { name: "Padrão", color: "60 56% 91%" },
-  { name: "Oceano", color: "210 40% 96%" },
-  { name: "Verde", color: "140 40% 96%" },
-  { name: "Névoa", color: "260 50% 96%" },
-  { name: "Pêssego", color: "30 60% 96%" },
-];
-
-const primaryThemes = [
-  { name: "Padrão", color: "45 65% 52%" },
-  { name: "Oceano", color: "220 80% 55%" },
-  { name: "Amanhecer", color: "25 95% 55%" },
-  { name: "Floresta", color: "130 50% 45%" },
-  { name: "Lavanda", color: "250 60% 60%" },
-];
 
 
 export default function RootLayout({
@@ -46,13 +30,15 @@ export default function RootLayout({
       </head>
       <body>
         <NextAuthProvider>
-          <FirebaseClientProvider>
-            <RootLayoutClient>
-              {children}
-            </RootLayoutClient>
-            <Toaster />
-            <PwaPrompt />
-          </FirebaseClientProvider>
+          <ThemeProvider>
+            <FirebaseClientProvider>
+              <RootLayoutClient>
+                {children}
+              </RootLayoutClient>
+              <Toaster />
+              <PwaPrompt />
+            </FirebaseClientProvider>
+          </ThemeProvider>
         </NextAuthProvider>
       </body>
     </html>

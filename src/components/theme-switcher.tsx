@@ -12,22 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Paintbrush, Check } from "lucide-react";
-
-const backgroundThemes = [
-  { name: "Padrão", color: "60 56% 91%" }, // Original beige
-  { name: "Oceano", color: "210 40% 96%" }, // Light Blue
-  { name: "Verde", color: "140 40% 96%" }, // Light Green
-  { name: "Névoa", color: "260 50% 96%" }, // Light Purple
-  { name: "Pêssego", color: "30 60% 96%" }, // Light Orange
-];
-
-const primaryThemes = [
-  { name: "Padrão", color: "45 65% 52%" }, // Gold
-  { name: "Oceano", color: "220 80% 55%" }, // Blue
-  { name: "Amanhecer", color: "25 95% 55%" }, // Orange
-  { name: "Floresta", color: "130 50% 45%" }, // Green
-  { name: "Lavanda", color: "250 60% 60%" }, // Purple
-];
+import { backgroundThemes, primaryThemes, saveThemeAndNotify } from "@/lib/theme-config";
 
 export function ThemeSwitcher() {
   const [currentBackground, setCurrentBackground] = useState("Padrão");
@@ -47,18 +32,12 @@ export function ThemeSwitcher() {
     }
   }, []);
 
-  const applyTheme = (type: 'background' | 'primary', color: string) => {
-    document.documentElement.style.setProperty(`--${type}`, color);
-  };
+
 
   const handleThemeChange = (type: 'background' | 'primary', themeName: string) => {
     if (!userId) return; // Não faz nada se não houver usuário
-    const themeList = type === 'background' ? backgroundThemes : primaryThemes;
-    const theme = themeList.find((t) => t.name === themeName);
-    if (theme) {
-      applyTheme(type, theme.color);
-      const themeKey = `app-theme-${type}-${userId}`;
-      localStorage.setItem(themeKey, themeName);
+    
+    if (saveThemeAndNotify(type, themeName, userId)) {
       if (type === 'background') {
         setCurrentBackground(themeName);
       } else {

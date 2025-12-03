@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import { getProfileData } from './actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
+import { ThemeCustomization } from '@/components/profile/theme-customization';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 import { VaultSettings } from '@/components/profile/vault-settings';
@@ -110,6 +111,9 @@ export default function ProfilePage() {
         >
             <motion.div variants={itemVariants}>
               <ProfileForm user={currentUser} />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <ThemeCustomization />
             </motion.div>
             <motion.div variants={itemVariants}>
               <NotificationsManagement />
