@@ -38,7 +38,7 @@ const sendEmailFlow = ai.defineFlow(
     const msg = {
       to: input.to,
       // IMPORTANT: This 'from' email must be a verified sender in your SendGrid account.
-      from: 'suporte@caixinhas.com', 
+      from: 'suporte@caixinhas.app', 
       subject: input.subject,
       html: input.body,
     };

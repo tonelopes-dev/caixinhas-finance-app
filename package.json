@@ -17,6 +17,7 @@
     "db:clear": "node scripts/clear-database.js",
     "db:clear:safe": "node scripts/clear-database-interactive.js",
     "db:reset": "npm run db:clear && npm run db:seed",
+    "test:emails": "tsx scripts/send-test-emails.ts",
     "prisma:reset": "prisma migrate reset",
     "db:reset:force": "prisma migrate reset --force && npm run db:seed",
     "db:push": "prisma db push",

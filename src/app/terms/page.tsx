@@ -136,10 +136,10 @@ export default function TermsOfServicePage() {
                     Se você tiver alguma dúvida sobre estes Termos, entre em
                     contato conosco em{' '}
                     <a
-                      href="mailto:suporte@caixinhas.com"
+                      href="mailto:suporte@caixinhas.app"
                       className="text-primary underline"
                     >
-                      suporte@Caixinhas.com
+                      suporte@caixinhas.app
                     </a>
                     .
                   </p>

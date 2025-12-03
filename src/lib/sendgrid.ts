@@ -1,10 +1,5 @@
 import sgMail from '@sendgrid/mail';
 
-// Configurar SendGrid
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
-
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -19,7 +14,10 @@ export async function sendEmail(to: string, subject: string, html: string, text?
       return false;
     }
 
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@caixinhas.finance';
+    // Configurar SendGrid com a API Key atual
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'suporte@caixinhas.app';
     const fromName = process.env.SENDGRID_FROM_NAME || 'Caixinhas Finance';
 
     const msg = {
