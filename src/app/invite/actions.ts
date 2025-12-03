@@ -82,3 +82,63 @@ export async function sendPartnerInvite(
     return { message: error.message || 'Ocorreu um erro ao enviar o convite. Tente novamente.' };
   }
 }
+
+// Funções para gerenciar convites
+import { getServerSession } from 'next-auth';
+import { redirect, revalidatePath } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
+
+export async function getUserInvitations() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const invitations = await VaultService.getUserInvitations(session.user.id);
+  return invitations;
+}
+
+export async function deleteInvitation(invitationId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  await VaultService.deleteInvitation(invitationId, session.user.id);
+  revalidatePath('/invite');
+}
+
+export async function getUserSentInvitations() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const invitations = await VaultService.getUserSentInvitations(session.user.id);
+  return invitations;
+}
+
+export async function cancelInvitation(invitationId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  await VaultService.cancelInvitation(invitationId, session.user.id);
+  revalidatePath('/invite');
+}
+
+export async function respondToInvitation(invitationId: string, action: 'accept' | 'decline') {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  if (action === 'accept') {
+    await VaultService.acceptInvitation(invitationId, session.user.id);
+  } else {
+    await VaultService.declineInvitation(invitationId, session.user.id);
+  }
+  
+  revalidatePath('/invite');
+}

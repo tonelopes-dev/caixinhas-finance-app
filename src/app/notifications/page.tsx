@@ -11,7 +11,7 @@ import { ArrowLeft, Bell } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getNotifications, getUserInvitations, getUserSentInvitations } from './actions';
+import { getNotifications } from './actions';
 import { NotificationsManager } from '@/components/notifications/notifications-manager';
 
 
@@ -22,11 +22,7 @@ export default async function NotificationsPage() {
     redirect('/login');
   }
 
-  const [notifications, invitations, sentInvitations] = await Promise.all([
-    getNotifications(),
-    getUserInvitations(),
-    getUserSentInvitations()
-  ]);
+  const notifications = await getNotifications();
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
@@ -44,14 +40,12 @@ export default async function NotificationsPage() {
               Central de Notificações
             </CardTitle>
             <CardDescription>
-              Gerencie seus alertas e convites em um só lugar.
+              Gerencie seus alertas e notificações do sistema.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <NotificationsManager 
               initialNotifications={notifications} 
-              initialInvitations={invitations}
-              initialSentInvitations={sentInvitations}
             />
           </CardContent>
         </Card>

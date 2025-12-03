@@ -30,7 +30,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button disabled={pending || disabled}>
+    <Button disabled={pending || disabled} className="w-full">
       <Send className="mr-2 h-4 w-4" />
       {pending ? 'Enviando...' : 'Enviar Convite'}
     </Button>
@@ -80,20 +80,9 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
   }, [selectedVaultId]);
 
   return (
-    <Card>
-      <form action={dispatch} ref={formRef}>
-        <input type="hidden" name="userId" value={userId} />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline">
-            <Mail className="h-6 w-6 text-primary" />
-            Convidar para um Cofre
-          </CardTitle>
-          <CardDescription>
-            Envie um convite para que outra pessoa possa participar de um dos
-            seus cofres.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+    <form action={dispatch} ref={formRef} className="space-y-4">
+      <input type="hidden" name="userId" value={userId} />
+      <div className="grid gap-4">
           <div className="space-y-2">
             <Label htmlFor="vaultId">Selecione o Cofre</Label>
             <Select name="vaultId" required onValueChange={setSelectedVaultId} value={selectedVaultId}>
@@ -179,11 +168,10 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
               </p>
             )}
           </div>
-        </CardContent>
-        <CardFooter>
+        <div className="pt-4">
           <SubmitButton disabled={selectedVaultId === 'personal'} />
-        </CardFooter>
-      </form>
-    </Card>
+        </div>
+      </div>
+    </form>
   );
 }
