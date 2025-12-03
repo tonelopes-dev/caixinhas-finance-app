@@ -12,7 +12,7 @@ export const passwordResetEmail = (userName: string, resetLink: string) => {
       Para redefinir sua senha, clique no link abaixo:
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
-      <a href="${resetLink}" style="display: inline-block; padding: 12px 25px; background-color: #E7A42F; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Redefinir Senha</a>
+      <a href="${resetLink}" style="display: inline-block; padding: 12px 25px; background-color: #F4D89C; color: #6B4E3D; text-decoration: none; border-radius: 5px; font-weight: bold;">Redefinir Senha</a>
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: #777; margin-bottom: 10px;">
       Se você não solicitou uma redefinição de senha, por favor, ignore este e-mail.

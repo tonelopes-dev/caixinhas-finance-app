@@ -14,10 +14,16 @@ export const welcomeEmailTemplate = (userName: string): string => {
       <style>
         body { font-family: 'Alegreya', serif; background-color: #fcfaf4; color: #443831; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #e5e0d4; border-radius: 12px; overflow: hidden; }
-        .header { background-color: #f7eecf; padding: 40px; text-align: center; }
-        .header h1 { color: #d4ac0d; font-size: 32px; margin: 0; }
-        .content { padding: 30px; }
-        .content h2 { font-size: 24px; color: #d4ac0d; }
+        .header { background: linear-gradient(135deg, #E7A42F 0%, #D4941F 100%); padding: 25px; text-align: center; }
+        .logo-container { display: inline-block; vertical-align: middle; }
+        .logo { width: 50px; height: 50px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); margin-right: 15px; vertical-align: middle; }
+        .brand-name { color: #ffffff; font-size: 32px; font-weight: bold; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: -0.5px; vertical-align: middle; }
+        .brand-tagline { color: #FFF8E6; font-size: 13px; margin: 5px 0 0 0; font-weight: 500; opacity: 0.9; }
+        .greeting-section { padding: 35px 30px 20px 30px; background-color: #ffffff; border-bottom: 2px solid #F0F0F0; margin-bottom: 25px; text-align: center; }
+        .greeting-title { color: #453C35; font-size: 26px; margin: 0; font-weight: 600; }
+        .greeting-highlight { color: #E7A42F; }
+        .content { padding: 0 30px 30px 30px; }
+        .content h2 { font-size: 24px; color: #E7A42F; }
         .content p { font-size: 16px; line-height: 1.6; }
         .button { display: inline-block; background-color: #d4ac0d; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
         .footer { background-color: #f3f0e9; padding: 20px; text-align: center; font-size: 12px; color: #8e8073; }
@@ -26,11 +32,17 @@ export const welcomeEmailTemplate = (userName: string): string => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Caixinhas</h1>
-          <p style="color: #8e8073; font-size: 16px; margin-top: 5px;">Sonhar juntos é o primeiro passo para conquistar.</p>
+          <div class="logo-container">
+            <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png" alt="Caixinhas Logo" class="logo">
+            <h1 class="brand-name">Caixinhas</h1>
+          </div>
+          <p class="brand-tagline">Sua vida financeira organizada</p>
+        </div>
+        <div class="greeting-section">
+          <h2 class="greeting-title">Olá, <span class="greeting-highlight">${userName}</span>! 👋</h2>
         </div>
         <div class="content">
-          <h2>Bem-vindo(a), ${userName}!</h2>
+          <h2>Bem-vindo(a) à nossa família!</h2>
           <p>Sua jornada para realizar sonhos em conjunto começa agora. Estamos muito felizes por ter você a bordo.</p>
           <p>O Caixinhas foi criado para transformar a maneira como você e seu parceiro(a) lidam com as finanças, tornando tudo mais transparente, colaborativo e, acima de tudo, motivador.</p>
           <p>Pronto(a) para começar a planejar seu futuro?</p>
