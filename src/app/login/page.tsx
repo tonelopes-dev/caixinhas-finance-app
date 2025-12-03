@@ -49,7 +49,7 @@ export default function LoginPage() {
       localStorage.setItem('CAIXINHAS_USER_ID', session.user.id);
       
       // Usar replace para evitar voltar ao login no histórico
-      router.replace('/dashboard');
+      router.replace('/vaults');
     }
   }, [session, status, router, isLoading]);
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('google', { callbackUrl: '/dashboard' });
+      await signIn('google', { callbackUrl: '/vaults' });
     } catch (error) {
       setError('Erro ao fazer login com Google');
       setIsLoading(false);

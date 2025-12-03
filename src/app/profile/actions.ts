@@ -19,9 +19,10 @@ export async function getProfileData(userId: string) {
     const cookieStore = await cookies();
     const vaultId = cookieStore.get('CAIXINHAS_VAULT_ID')?.value;
     
-    const [currentUser, currentVault] = await Promise.all([
+    const [currentUser, currentVault, userVaults] = await Promise.all([
       AuthService.getUserById(userId),
       vaultId && vaultId !== userId ? VaultService.getVaultById(vaultId) : null,
+      VaultService.getUserVaults(userId),
     ]);
 
     if (!currentUser) {
@@ -46,6 +47,7 @@ export async function getProfileData(userId: string) {
     return {
       currentUser,
       currentVault: formattedVault,
+      hasVaults: userVaults.length > 0,
     };
   } catch (error) {
     console.error('Erro ao buscar dados do perfil:', error);

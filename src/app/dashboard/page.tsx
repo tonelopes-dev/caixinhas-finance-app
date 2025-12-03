@@ -32,11 +32,16 @@ export default async function DashboardPage() {
       workspaceId = vaultId;
     }
   } else {
-    // Se não há vault definido no cookie, tenta usar o primeiro cofre do usuário
+    // Se não há vault definido no cookie, verificar se o usuário tem vaults
     const userVaults = await VaultService.getUserVaults(userId);
-    if (userVaults.length > 0) {
-      workspaceId = userVaults[0].id;
+    
+    // Se o usuário não tem nenhum vault criado, redirecionar para /vaults
+    if (userVaults.length === 0) {
+      redirect('/vaults');
     }
+    
+    // Se tem vaults, usar o workspace pessoal (userId) por padrão
+    workspaceId = userId;
   }
 
   const owner = { ownerType: workspaceId === userId ? 'user' as const : 'vault' as const, ownerId: workspaceId };

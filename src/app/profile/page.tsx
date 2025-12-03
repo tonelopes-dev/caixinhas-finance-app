@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 type ProfileData = {
   currentUser: User;
   currentVault: Vault | null;
+  hasVaults: boolean;
 };
 
 export default function ProfilePage() {
@@ -92,7 +93,7 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <Button asChild variant="ghost" className="mb-4">
-            <Link href="/dashboard">
+            <Link href={profileData?.hasVaults ? "/dashboard" : "/vaults"}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar para o Painel
             </Link>
