@@ -115,7 +115,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-6xl overflow-hidden rounded-2xl shadow-2xl md:grid md:grid-cols-2">
             <div className="relative hidden h-full md:block">
                 <Image
-                    src={landingImage?.imageUrl ?? 'https://picsum.photos/seed/3/800/1200'}
+                    src={landingImage?.imageUrl ?? 'https://www.caixinhas.app/_next/image?url=%2Fphotos%2Ffamilia-joao-clara.png&w=1920&q=75'}
                     alt="Casal planejando suas finanças juntos"
                     fill
                     objectFit="cover"
@@ -129,7 +129,7 @@ export default function RegisterPage() {
                 </div>
             </div>
             <div className="flex flex-col justify-center bg-background p-8 md:p-12">
-                <Card className="w-full max-w-md border-0 shadow-none">
+                <Card className="w-full max-w-md border-0 shadow-none p-4">
                     <CardHeader className="text-center px-0">
                         <div className="mx-auto mb-4">
                             <Logo className="h-12 w-12" />
