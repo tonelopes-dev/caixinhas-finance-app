@@ -5,22 +5,24 @@ export interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string; // Adicionado para suportar a funcionalidade de resposta
 }
 
-export async function sendEmail(to: string, subject: string, html: string, text?: string) {
+export async function sendEmail(options: EmailOptions) {
+  const { to, subject, html, text, replyTo } = options;
+
   try {
     if (!process.env.SENDGRID_API_KEY) {
       console.warn('⚠️ SENDGRID_API_KEY não configurada. Email não será enviado.');
       return false;
     }
 
-    // Configurar SendGrid com a API Key atual
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'suporte@caixinhas.app';
     const fromName = process.env.SENDGRID_FROM_NAME || 'Caixinhas Finance';
 
-    const msg = {
+    const msg: sgMail.MailDataRequired = {
       to,
       from: {
         email: fromEmail,
@@ -28,13 +30,20 @@ export async function sendEmail(to: string, subject: string, html: string, text?
       },
       subject,
       html,
-      text: text || html.replace(/<[^>]*>/g, '') // Remove HTML tags para versão texto
+      text: text || html.replace(/<[^>]*>/g, ''), // Remove HTML tags para versão texto
     };
+
+    if (replyTo) {
+      msg.replyTo = replyTo;
+    }
 
     console.log('📧 Configurações de email:');
     console.log('   📨 Para:', to);
     console.log('   📝 Assunto:', subject);
     console.log('   👤 De:', fromName, '<' + fromEmail + '>');
+    if (replyTo) {
+      console.log('   ↩️ Responder Para:', replyTo);
+    }
     console.log('   🔑 API Key:', process.env.SENDGRID_API_KEY ? 'Configurada ✅' : 'Ausente ❌');
 
     const result = await sgMail.send(msg);

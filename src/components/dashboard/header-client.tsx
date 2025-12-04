@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift } from 'lucide-react';
+import { BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift, LifeBuoy } from 'lucide-react';
 import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -103,6 +103,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
           <Link href="/vaults">
             <Building2 className="mr-2 h-4 w-4" />
             <span>Mudar de Espaço</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/support">
+            <LifeBuoy className="mr-2 h-4 w-4" />
+            <span>Suporte</span>
           </Link>
         </DropdownMenuItem>
         <ThemeSwitcher />
