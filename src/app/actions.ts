@@ -6,7 +6,7 @@
 // Ações globais ou que ainda não foram migradas podem permanecer aqui.
 
 import { sendEmail } from '@/ai/flows/send-email-flow';
-import { inviteEmailTemplate } from '@/app/_templates/emails/invite-template';
+import { inviteEmail } from '@/app/_templates/emails/invite-template';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -20,7 +20,7 @@ export async function sendGoalInvite(email: string, goalName: string): Promise<{
         await sendEmail({
             to: email,
             subject: `Você foi convidado(a) para a caixinha "${goalName}"`,
-            body: inviteEmailTemplate(senderName, goalName)
+            body: inviteEmail(senderName, goalName, '#') // TODO: Adicionar link de convite real
         });
         return { message: 'Convite enviado com sucesso!' };
     } catch (error) {

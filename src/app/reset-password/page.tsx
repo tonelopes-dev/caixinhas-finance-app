@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ import Link from 'next/link';
 import { ArrowLeft, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { resetPasswordAction } from '../forgot-password/actions';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -221,5 +221,17 @@ export default function ResetPasswordPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
