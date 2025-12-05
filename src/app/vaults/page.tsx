@@ -29,8 +29,8 @@ export default async function VaultSelectionPage() {
   const accessInfo = getAccessInfo(user);
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-4xl">
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+      <div className="mx-auto w-full max-w-6xl">
         <AccessBanner
           status={accessInfo.status}
           daysRemaining={accessInfo.daysRemaining}

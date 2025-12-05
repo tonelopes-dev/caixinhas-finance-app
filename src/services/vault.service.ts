@@ -356,8 +356,27 @@ export class VaultService {
             });
         }
         
-        // TODO: Enviar e-mail de convite (para usuários existentes e novos)
-        // Isso será implementado posteriormente ou chamado pelo controller/action
+        // Enviar e-mail de convite
+        try {
+            const { sendEmail } = await import('@/lib/sendgrid');
+            const { inviteEmail } = await import('@/app/_templates/emails/invite-template');
+            
+            // Criar link de convite - se usuário não existir, direciona para registro
+            const inviteLink = receiver 
+                ? `${process.env.NEXTAUTH_URL}/invitations` 
+                : `${process.env.NEXTAUTH_URL}/register?invite=${invitation.id}`;
+            
+            await sendEmail({
+                to: receiverEmail,
+                subject: `Convite para participar do cofre "${vault.name}"`,
+                html: inviteEmail(sender.name, vault.name, inviteLink)
+            });
+            
+            console.log(`Email de convite enviado para ${receiverEmail}`);
+        } catch (emailError) {
+            console.error('Erro ao enviar email de convite:', emailError);
+            // Não falha a operação se email não for enviado
+        }
 
     } catch (error) {
         console.error('Erro ao criar convite:', error);
@@ -365,6 +384,29 @@ export class VaultService {
             throw error;
         }
         throw new Error('Não foi possível criar o convite.');
+    }
+  }
+
+  /**
+   * Associa convites pendentes por email ao usuário após registro
+   */
+  static async linkInvitationsByEmail(userEmail: string, userId: string): Promise<void> {
+    try {
+      await prisma.invitation.updateMany({
+        where: {
+          receiverEmail: userEmail,
+          receiverId: null,
+          status: 'pending',
+          type: 'vault',
+        },
+        data: {
+          receiverId: userId,
+        },
+      });
+      
+      console.log(`✅ Convites vinculados para ${userEmail} (userId: ${userId})`);
+    } catch (error) {
+      console.error('Erro ao vincular convites por email:', error);
     }
   }
 
@@ -376,14 +418,39 @@ export class VaultService {
    */
   static async getPendingInvitations(userId: string): Promise<VaultInvitationData[]> {
     try {
+      // Primeiro buscar o usuário para ter seu email
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true }
+      });
+
+      if (!user) {
+        console.log(`❌ Usuário ${userId} não encontrado`);
+        return [];
+      }
+
       const invitations = await prisma.invitation.findMany({
         where: {
-          receiverId: userId,
-          type: 'vault',
-          status: 'pending',
+          OR: [
+            {
+              receiverId: userId,
+              type: 'vault',
+              status: 'pending',
+            },
+            {
+              receiverEmail: user.email,
+              type: 'vault', 
+              status: 'pending',
+            }
+          ]
         },
         include: {
           sender: {
+            select: {
+              name: true,
+            },
+          },
+          vault: {
             select: {
               name: true,
             },
@@ -394,7 +461,14 @@ export class VaultService {
         },
       });
 
-      return invitations;
+      console.log(`📧 Buscando convites para userId: ${userId}`);
+      console.log(`📧 Encontrados ${invitations.length} convites pendentes`);
+      
+      // Mapear os dados para incluir o targetName do cofre
+      return invitations.map(inv => ({
+        ...inv,
+        targetName: inv.vault?.name || 'Cofre sem nome'
+      }));
     } catch (error) {
       console.error('Erro ao buscar convites:', error);
       return [];
@@ -419,13 +493,22 @@ export class VaultService {
               name: true,
             },
           },
+          vault: {
+            select: {
+              name: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
         },
       });
 
-      return invitations;
+      // Mapear os dados para incluir o targetName do cofre
+      return invitations.map(inv => ({
+        ...inv,
+        targetName: inv.vault?.name || 'Cofre sem nome'
+      }));
     } catch (error) {
       console.error('Erro ao buscar convites:', error);
       return [];
@@ -548,13 +631,22 @@ export class VaultService {
               name: true,
             },
           },
+          vault: {
+            select: {
+              name: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
         },
       });
 
-      return invitations;
+      // Mapear os dados para incluir o targetName do cofre
+      return invitations.map(inv => ({
+        ...inv,
+        targetName: inv.vault?.name || 'Cofre sem nome'
+      }));
     } catch (error) {
       console.error('Erro ao buscar convites do cofre:', error);
       return [];
@@ -636,13 +728,22 @@ export class VaultService {
               avatarUrl: true,
             },
           },
+          vault: {
+            select: {
+              name: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
         },
       });
 
-      return invitations;
+      // Mapear os dados para incluir o targetName do cofre
+      return invitations.map(inv => ({
+        ...inv,
+        targetName: inv.vault?.name || 'Cofre sem nome'
+      }));
     } catch (error) {
       console.error('Erro ao buscar convites enviados:', error);
       return [];
