@@ -6,10 +6,10 @@ export const inviteEmail = (inviterName: string, vaultName: string, inviteLink: 
   return `
     ${emailHeader('Convidado')}
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-      Você foi convidado(a) por <strong>${inviterName}</strong> para participar da vault <strong>"${vaultName}"</strong> no Caixinhas App!
+      Você foi convidado(a) por <strong>${inviterName}</strong> para participar do cofre <strong>"${vaultName}"</strong> no Caixinhas App!
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-      Uma vault é um espaço colaborativo onde você pode gerenciar suas finanças e objetivos em conjunto. Para aceitar o convite e começar a colaborar, clique no link abaixo:
+      Um cofre é um espaço colaborativo onde você pode gerenciar suas finanças e objetivos em conjunto. Para aceitar o convite e começar a colaborar, clique no link abaixo:
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
       <a href="${inviteLink}" style="display: inline-block; padding: 12px 25px; background-color: #B8E6B8; color: #2E5A2E; text-decoration: none; border-radius: 5px; font-weight: bold;">Aceitar Convite</a>
@@ -18,7 +18,7 @@ export const inviteEmail = (inviterName: string, vaultName: string, inviteLink: 
       Se você não reconhece este convite, por favor, ignore este e-mail.
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-      Esperamos vê-lo(a) em breve na vault!
+      Esperamos vê-lo(a) em breve no cofre!
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px;">
       Atenciosamente,<br>
