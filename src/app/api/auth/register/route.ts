@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/services/prisma";
 import { z } from "zod";
 import { CategoryService } from "@/services/category.service";
+import { VaultService } from "@/services/vault.service";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -88,6 +89,15 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Erro ao criar categorias padrão:', error);
       // Não falha o registro se as categorias falharem
+    }
+
+    try {
+      // Vincular convites pendentes baseados no email
+      await VaultService.linkInvitationsByEmail(email, user.id);
+      console.log(`✅ Convites vinculados para usuário ${user.id} com email ${email}`);
+    } catch (error) {
+      console.error('Erro ao vincular convites:', error);
+      // Não falha o registro se a vinculação de convites falhar
     }
 
     return NextResponse.json(
