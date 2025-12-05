@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Check, Wallet, PiggyBank, BarChart3, TrendingUp } from "lucide-react"
+import { Logo } from "../logo"
 
 type FeaturesSectionProps = {
   isVisible: { [key: string]: boolean }
@@ -16,7 +17,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
           className="text-center mb-16 space-y-4"
           data-animate="features-header"
         >
-          <Badge
+          {/* <Badge
             className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
               isVisible["features-header"]
                 ? "opacity-100 translate-y-0"
@@ -24,7 +25,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             Recursos Poderosos
-          </Badge>
+          </Badge> */}
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["features-header"]
@@ -58,9 +59,9 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 : "opacity-0 -translate-x-12"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 hover:bg-primary/20 transition-colors">
-              <Wallet className="w-5 h-5 text-primary" />
-              <span className="text-primary font-bold">O Cofre</span>
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 hover:bg-cyan-900/20 transition-colors">
+              <Wallet className="w-5 h-5 text-cyan-900" />
+              <span className="text-cyan-900 font-bold">O Cofre</span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-foreground">
               Seu universo financeiro organizado
@@ -140,7 +141,8 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-4 py-2 hover:bg-accent/20 transition-colors">
-              <PiggyBank className="w-5 h-5 text-accent" />
+            <Logo w={30} h={30}/>
+              {/* <PiggyBank className="w-5 h-5 text-accent" /> */}
               <span className="text-accent font-bold">As Caixinhas</span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-foreground">

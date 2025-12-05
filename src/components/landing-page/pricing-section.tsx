@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { CouplesBadge } from "@/components/ui/couples-badge"
 import {
   Check,
   Star,
@@ -92,7 +93,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                     <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-3 hover:bg-primary/20 transition-colors">
                       <Sparkles className="w-5 h-5 text-primary" />
                       <span className="text-lg font-semibold text-primary">
-                        ou 3x de R$ 1,78mês para o primeiro trimestre
+                        ou 3x de R$ 1,78/mês para o primeiro trimestre
                       </span>
                     </div>
                     {/* <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-6 py-3 hover:bg-accent/20 transition-colors">
@@ -209,21 +210,10 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-6">
-                  <div className="bg-accent/10 border-l-4 border-accent rounded-r-xl p-6 hover:bg-accent/15 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <div className="shrink-0 w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                        <Heart className="w-6 h-6 text-accent fill-accent animate-pulse" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="font-bold text-foreground text-lg">
-                          💑 Perfeito para casais
-                        </p>
-                        <p className="text-foreground/70 leading-relaxed">
-                          Acesso total para você, colaboração ilimitada com
-                          quem você ama.
-                        </p>
-                      </div>
+                <div className="border-t border-border py-16">
+                  <div className="flex justify-center items-center px-4 min-h-[140px] md:min-h-[180px] lg:min-h-[200px]">
+                    <div className="flex justify-center items-center w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                      <CouplesBadge className="hover:scale-105 transition-all duration-300 drop-shadow-lg w-full" />
                     </div>
                   </div>
                 </div>

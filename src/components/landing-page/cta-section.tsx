@@ -34,7 +34,7 @@ export function CTASection() {
           </GradientButton>
         </div>
 
-        <div className="flex items-center justify-center gap-8 pt-8 text-primary-foreground/80 animate-fade-in-up animation-delay-300 flex-wrap">
+        {/* <div className="flex items-center justify-center gap-8 pt-8 text-primary-foreground/80 animate-fade-in-up animation-delay-300 flex-wrap">
           <div className="flex items-center gap-2 hover:scale-110 transition-transform">
             <Check className="w-5 h-5" />
             <span>Sem cartão de crédito</span>
@@ -47,7 +47,7 @@ export function CTASection() {
             <Check className="w-5 h-5" />
             <span>100% seguro</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   )

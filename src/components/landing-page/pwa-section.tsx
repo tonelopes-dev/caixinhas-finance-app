@@ -227,9 +227,9 @@ export function PWASection({ isVisible }: PWASectionProps) {
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             </Button>
-            <p className="text-foreground/60 mt-4">
+          {/*   <p className="text-foreground/60 mt-4">
               Sem cartão de crédito • Sem download • Sem complicação
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

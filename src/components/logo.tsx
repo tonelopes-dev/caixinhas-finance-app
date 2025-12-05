@@ -4,8 +4,13 @@ import { cn } from '@/lib/utils';
 
 type ImageProps = ComponentProps<typeof Image>;
 
-export function Logo(props: Partial<ImageProps>) {
-  const { className, ...rest } = props;
+interface LogoProps extends Partial<ImageProps> {
+  w?: number;
+  h?: number;
+}
+
+export function Logo(props: LogoProps) {
+  const { className, w = 48, h = 48, ...rest } = props;
   
   // Fallback para desenvolvimento local
   if (process.env.NODE_ENV === 'development') {
@@ -13,9 +18,10 @@ export function Logo(props: Partial<ImageProps>) {
       <img
         src="/logo-caixinhas.png"
         alt="Caixinhas Logo"
-        width={48}
-        height={48}
-        className={cn('h-12 w-12 object-contain', className)}
+        width={w}
+        height={h}
+        className={cn('object-contain', className)}
+        style={{ width: w, height: h }}
         {...(rest as any)}
       />
     );
@@ -25,10 +31,11 @@ export function Logo(props: Partial<ImageProps>) {
     <Image
       src="/logo-caixinhas.png"
       alt="Caixinhas Logo"
-      width={48}
-      height={48}
+      width={w}
+      height={h}
       priority
-      className={cn('h-12 w-12 object-contain', className)}
+      className={cn('object-contain', className)}
+      style={{ width: w, height: h }}
       {...rest}
     />
   );

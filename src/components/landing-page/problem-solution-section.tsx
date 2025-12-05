@@ -17,7 +17,7 @@ export function ProblemSolutionSection({
           className="max-w-4xl mx-auto text-center space-y-6 mb-16"
           data-animate="problem"
         >
-          <Badge
+         {/*  <Badge
             className={`bg-destructive/10 text-destructive border-destructive/20 text-base px-4 py-1.5 transition-all duration-700 ${
               isVisible.problem
                 ? "opacity-100 translate-y-0"
@@ -25,7 +25,7 @@ export function ProblemSolutionSection({
             }`}
           >
             O Problema
-          </Badge>
+          </Badge> */}
           <h2
             className={`text-4xl md:text-5xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible.problem
@@ -76,7 +76,7 @@ export function ProblemSolutionSection({
           className="max-w-4xl mx-auto text-center space-y-6"
           data-animate="solution"
         >
-          <Badge
+         {/*  <Badge
             className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
               isVisible.solution
                 ? "opacity-100 translate-y-0"
@@ -84,7 +84,7 @@ export function ProblemSolutionSection({
             }`}
           >
             A Solução
-          </Badge>
+          </Badge> */}
           <h2
             className={`text-4xl md:text-5xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible.solution

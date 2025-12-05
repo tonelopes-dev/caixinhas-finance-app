@@ -23,7 +23,7 @@ export function BenefitsSection({ isVisible }: BenefitsSectionProps) {
           className="text-center mb-16 space-y-4"
           data-animate="benefits-header"
         >
-          <Badge
+          {/* <Badge
             className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
               isVisible["benefits-header"]
                 ? "opacity-100 translate-y-0"
@@ -31,7 +31,7 @@ export function BenefitsSection({ isVisible }: BenefitsSectionProps) {
             }`}
           >
             Por Que Caixinhas?
-          </Badge>
+          </Badge> */}
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["benefits-header"]
@@ -39,8 +39,8 @@ export function BenefitsSection({ isVisible }: BenefitsSectionProps) {
                 : "opacity-0 translate-y-8"
             }`}
           >
-            Porque o maior ativo é a{" "}
-            <span className="text-primary">confiança</span>
+            {/* Porque */} O Maior Ativo é a{" "}
+            <span className="text-primary">Confiança</span>
           </h2>
         </div>
 
