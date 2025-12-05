@@ -1,7 +1,5 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { getProfileData } from './actions';
@@ -15,6 +13,8 @@ import { PasswordManagement } from '@/components/profile/password-management';
 import type { User, Vault } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { BackToDashboard } from '@/components/ui/back-to-dashboard';
+import Link from 'next/link';
 
 type ProfileData = {
   currentUser: User;
@@ -94,20 +94,18 @@ export default function ProfilePage() {
   const isPersonalVault = !currentVault || currentVault.id === currentUser.id;
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-6xl">
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+      <div className="mx-auto w-full max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="mb-8"
         >
-          <Button asChild variant="ghost" className="mb-4">
-            <Link href={profileData?.hasVaults ? "/dashboard" : "/vaults"}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para o Painel
-            </Link>
-          </Button>
+          <BackToDashboard 
+            href={profileData?.hasVaults ? "/dashboard" : "/vaults"} 
+            className="mb-4" 
+          />
           <h1 className="text-3xl font-headline font-bold mb-2">Configurações</h1>
           <p className="text-muted-foreground">
             Gerencie suas informações pessoais, financeiras e de acesso.

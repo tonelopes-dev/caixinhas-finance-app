@@ -34,14 +34,20 @@ export async function getProfileData(userId: string) {
     // O frontend espera members como um array de User
     let formattedVault = null;
     if (currentVault) {
-      formattedVault = {
-        ...currentVault,
-        imageUrl: currentVault.imageUrl || '',
-        members: currentVault.members.map(m => ({
-          ...m.user,
-          subscriptionStatus: 'active' as const // Valor padrão para satisfazer o tipo User
-        }))
-      };
+      // Verificar se o usuário atual é realmente membro do cofre
+      const isUserMember = currentVault.members.some(m => m.user.id === userId);
+      
+      // Só mostrar o cofre se o usuário for membro
+      if (isUserMember) {
+        formattedVault = {
+          ...currentVault,
+          imageUrl: currentVault.imageUrl || '',
+          members: currentVault.members.map(m => ({
+            ...m.user,
+            subscriptionStatus: 'active' as const // Valor padrão para satisfazer o tipo User
+          }))
+        };
+      }
     }
 
     return {
