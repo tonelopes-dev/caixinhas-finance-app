@@ -58,6 +58,8 @@ export async function getUserVaultsData(userId: string) {
       vaultName: inv.targetName,
       invitedBy: inv.sender.name,
       status: inv.status as 'pending' | 'accepted' | 'declined',
+      sender: inv.sender,
+      vault: inv.vault,
     }));
 
     return {

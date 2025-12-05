@@ -46,7 +46,19 @@ export type VaultInvitationData = {
   createdAt: Date;
   sender: {
     name: string;
+    avatarUrl: string | null;
   };
+  vault: {
+    name: string;
+    imageUrl: string | null;
+    members: {
+      user: {
+        id: string;
+        name: string;
+        avatarUrl: string | null;
+      };
+    }[];
+  } | null;
   receiver?: {
     name: string;
     email: string;
@@ -448,11 +460,25 @@ export class VaultService {
           sender: {
             select: {
               name: true,
+              avatarUrl: true,
             },
           },
           vault: {
             select: {
               name: true,
+              imageUrl: true,
+              members: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      avatarUrl: true,
+                    },
+                  },
+                },
+                take: 5, // Limitar para não sobrecarregar
+              },
             },
           },
         },

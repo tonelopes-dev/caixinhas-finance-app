@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Mail, Plus, X, MoreVertical, Pencil, Users } from 'lucide-react';
+import { Check, Mail, Plus, X, MoreVertical, Pencil, Users, Crown, Calendar, UserPlus } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
@@ -47,6 +54,21 @@ type VaultInvitation = {
   vaultName: string;
   invitedBy: string;
   status: 'pending' | 'accepted' | 'declined';
+  sender?: {
+    name: string;
+    avatarUrl: string | null;
+  };
+  vault?: {
+    name: string;
+    imageUrl: string | null;
+    members: {
+      user: {
+        id: string;
+        name: string;
+        avatarUrl: string | null;
+      };
+    }[];
+  } | null;
 };
 
 type VaultsPageClientProps = {
@@ -165,6 +187,7 @@ function InvitationCard({
 }) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState<'accept' | 'decline' | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleAccept = async () => {
     setIsLoading('accept');
@@ -200,39 +223,174 @@ function InvitationCard({
     }
   };
 
+  const vaultImageUrl = invitation.vault?.imageUrl || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1080';
+  const memberAvatars = invitation.vault?.members.slice(0, 4) || [];
+  const remainingMembers = (invitation.vault?.members.length || 0) - 4;
+
   return (
-    <motion.div
+    <TooltipProvider delayDuration={300}>
+      <motion.div
         layout
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, x: -50, transition: { duration: 0.3 } }}
-        className="flex items-center justify-between rounded-lg border p-4 bg-card"
-    >
-      <div className="font-medium">
-        <span className="font-bold">{invitation.invitedBy}</span> te convidou para o cofre{' '}
-        <span className="font-bold text-primary">{invitation.vaultName}</span>.
-      </div>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleAccept}
-          disabled={!!isLoading}
-        >
-          {isLoading === 'accept' ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <Check className="h-4 w-4" />}
-        </Button>
-        <Button
-          variant="destructive"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleDecline}
-          disabled={!!isLoading}
-        >
-          {isLoading === 'decline' ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> : <X className="h-4 w-4" />}
-        </Button>
-      </div>
-    </motion.div>
+        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, x: -50, scale: 0.95, transition: { duration: 0.3 } }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group relative rounded-xl border-2 border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-lg hover:border-primary/40 hover:shadow-xl transition-all duration-300"
+      >
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-accent/10 opacity-60" />
+        
+        {/* Vault Cover Image */}
+        <div className="relative z-10 mb-4">
+          <div className="flex items-start gap-4">
+            <div className="relative overflow-hidden rounded-lg">
+              <Image
+                src={vaultImageUrl}
+                alt={`Capa do cofre ${invitation.vaultName}`}
+                width={80}
+                height={80}
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <UserPlus className="h-4 w-4 text-primary" />
+                <Badge variant="secondary" className="text-xs">
+                  Convite Pendente
+                </Badge>
+              </div>
+              
+              <h4 className="text-lg font-bold text-foreground mb-1 truncate">
+                {invitation.vaultName}
+              </h4>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={invitation.sender?.avatarUrl || ''} />
+                  <AvatarFallback className="text-xs bg-primary/10">
+                    {invitation.invitedBy.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span>
+                  Convite de <span className="font-semibold text-foreground">{invitation.invitedBy}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Members Preview */}
+        {memberAvatars.length > 0 && (
+          <div className="relative z-10 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {invitation.vault?.members.length} {invitation.vault?.members.length === 1 ? 'membro' : 'membros'}
+              </span>
+            </div>
+            
+            <div className="flex items-center">
+              <div className="flex -space-x-2">
+                {memberAvatars.map((member, index) => (
+                  <Tooltip key={member.user.id}>
+                    <TooltipTrigger asChild>
+                      <Avatar 
+                        className="h-8 w-8 border-2 border-background hover:scale-110 hover:z-10 transition-all duration-200 cursor-pointer"
+                        style={{ zIndex: memberAvatars.length - index }}
+                      >
+                        <AvatarImage src={member.user.avatarUrl || ''} />
+                        <AvatarFallback className="text-xs bg-primary/20">
+                          {member.user.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="top" 
+                      className="z-[100] bg-popover border border-border shadow-xl px-3 py-2 rounded-lg"
+                      sideOffset={8}
+                      avoidCollisions={true}
+                    >
+                      <p className="font-medium text-sm whitespace-nowrap text-popover-foreground">
+                        {member.user.name}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+                
+                {remainingMembers > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium text-muted-foreground hover:scale-110 transition-all duration-200 cursor-pointer">
+                        +{remainingMembers}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="top" 
+                      className="z-[100] bg-popover border border-border shadow-xl px-3 py-2 rounded-lg"
+                      sideOffset={8}
+                      avoidCollisions={true}
+                    >
+                      <p className="text-sm whitespace-nowrap text-popover-foreground">
+                        Mais {remainingMembers} {remainingMembers === 1 ? 'membro' : 'membros'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="relative z-10 flex gap-3">
+          <Button
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200"
+            onClick={handleAccept}
+            disabled={!!isLoading}
+          >
+            {isLoading === 'accept' ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+            ) : (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                Aceitar Convite
+              </>
+            )}
+          </Button>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-destructive/20 hover:border-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200"
+                onClick={handleDecline}
+                disabled={!!isLoading}
+              >
+                {isLoading === 'decline' ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <X className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Recusar convite</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Hover Effect Overlay */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          animate={{ opacity: isHovered ? 1 : 0 }}
+        />
+      </motion.div>
+    </TooltipProvider>
   );
 }
 
@@ -316,10 +474,22 @@ export function VaultsPageClient({
           <AnimatePresence>
             {userInvitations.length > 0 && (
               <motion.div layout className="mb-12">
-                <h3 className="flex items-center gap-2 text-xl font-semibold mb-4">
-                  <Mail className="h-5 w-5 text-primary" /> Convites Pendentes
-                </h3>
-                <div className="grid gap-4">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      <Mail className="h-6 w-6 text-primary" /> 
+                      Convites Pendentes
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      {userInvitations.length} {userInvitations.length === 1 ? 'convite aguardando' : 'convites aguardando'} sua decisão
+                    </p>
+                  </div>
+                  <Badge variant="secondary" className="px-3 py-1">
+                    {userInvitations.length}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <AnimatePresence>
                     {userInvitations.map((inv) => (
                       <InvitationCard
