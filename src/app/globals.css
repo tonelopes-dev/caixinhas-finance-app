@@ -447,6 +447,45 @@
   }
 }
 
+/* Gradient Button Styles */
+.gradient-button {
+  position: relative;
+  background: linear-gradient(135deg, 
+    hsl(var(--primary)) 0%, 
+    hsl(var(--accent)) 50%, 
+    hsl(var(--primary)) 100%) !important;
+  background-size: 200% 200% !important;
+  animation: gradientShift 3s ease infinite;
+  border: 1px solid transparent !important;
+  box-shadow: 0 4px 15px 0 hsla(var(--primary), 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.gradient-button:hover {
+  animation-duration: 1s !important;
+  box-shadow: 0 8px 25px 0 hsla(var(--primary), 0.6) !important;
+  transform: translateY(-3px) !important;
+}
+
+.gradient-button:active {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 15px 0 hsla(var(--primary), 0.4) !important;
+}
+
+.gradient-button-variant {
+  background: linear-gradient(135deg, 
+    hsl(var(--chart-1)) 0%, 
+    hsl(var(--chart-4)) 50%, 
+    hsl(var(--chart-1)) 100%) !important;
+  background-size: 200% 200% !important;
+  animation: gradientShift 3s ease infinite;
+}
+
+.gradient-button-variant:hover {
+  box-shadow: 0 8px 25px 0 hsla(var(--chart-1), 0.6) !important;
+  transform: translateY(-3px) !important;
+}
+
 /* Destaque para celebração de meta */
 .goal-celebration-highlight {
   animation: goal-celebration-highlight 4s ease-in-out;
