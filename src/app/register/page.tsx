@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +22,8 @@ import { FcGoogle } from 'react-icons/fc';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const inviteId = searchParams.get('invite');
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -82,7 +84,12 @@ export default function RegisterPage() {
             });
 
             if (signInResult?.ok) {
-                router.push('/vaults');
+                // Se há convite, redireciona para página de convites
+                if (inviteId) {
+                    router.push('/invitations');
+                } else {
+                    router.push('/vaults');
+                }
             } else {
                 setError('Conta criada, mas houve erro no login. Tente fazer login manualmente.');
             }
