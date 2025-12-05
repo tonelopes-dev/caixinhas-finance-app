@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { HeaderClient } from './header-client';
+import { InviteButton } from './invite-button';
 
 
 type HeaderProps = {
@@ -63,12 +64,7 @@ export default async function Header({ user, partner }: HeaderProps) {
                 </Tooltip>
               </TooltipProvider>
           )}
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/invite">
-              <UserPlus className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">Convidar</span>
-            </Link>
-          </Button>
+          <InviteButton />
           
           <NotificationsDropdown 
             initialNotifications={unreadNotifications}

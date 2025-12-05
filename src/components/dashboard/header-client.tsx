@@ -16,12 +16,15 @@ import {
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { signOut } from 'next-auth/react';
+import { useTheme } from '@/hooks/use-theme';
 
 type HeaderClientProps = {
   user: User;
 };
 
 export function HeaderClient({ user }: HeaderClientProps) {
+  const { themeVersion } = useTheme(); // Force re-render on theme change
+  
   const handleLogout = async () => {
     // Limpar localStorage/sessionStorage por compatibilidade
     if (typeof window !== 'undefined') {

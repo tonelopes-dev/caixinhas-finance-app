@@ -68,7 +68,7 @@ export default async function DashboardPage() {
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col">
       <Header user={currentUser as User} partner={null} />
       <DashboardClient
         currentUser={currentUser as User}
