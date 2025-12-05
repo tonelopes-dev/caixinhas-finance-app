@@ -40,9 +40,10 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
 type InviteFormProps = {
   userVaults: { id: string; name: string }[];
   userId: string;
+  onInviteSent?: () => void;
 };
 
-export function InviteForm({ userVaults, userId }: InviteFormProps) {
+export function InviteForm({ userVaults, userId, onInviteSent }: InviteFormProps) {
   const initialState: GenericState = {};
   const [state, dispatch] = useActionState(sendPartnerInvite, initialState);
   const { toast } = useToast();
@@ -56,6 +57,10 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
       formRef.current?.reset();
       setSelectedVaultId('');
       setVaultMembers([]);
+      // Chama callback para atualizar lista de convites
+      if (onInviteSent) {
+        onInviteSent();
+      }
     } else if (state.message && state.errors) {
       // Verificar se é um erro de "aviso" (ex: convite já existe) ou erro crítico
       const isWarning = state.message.includes('já existe') || 
@@ -90,8 +95,8 @@ export function InviteForm({ userVaults, userId }: InviteFormProps) {
                 <SelectValue placeholder="Escolha um cofre para convidar" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="personal" className="text-muted-foreground font-medium">
-                  Minha Conta Pessoal (Privada)
+                <SelectItem value="personal" disabled className="text-muted-foreground font-medium">
+                  Minha Conta Pessoal (Não permite convites)
                 </SelectItem>
                 {userVaults.map((vault) => (
                   <SelectItem key={vault.id} value={vault.id}>

@@ -41,12 +41,18 @@ export async function sendPartnerInvite(
 
   const { email: receiverEmail, vaultId, userId: senderId } = validatedFields.data;
 
+  // Validar se não é conta pessoal
+  if (vaultId === 'personal') {
+    return { message: 'Não é possível enviar convites para conta pessoal. Selecione um cofre compartilhado.' };
+  }
+
   try {
     await VaultService.createInvitation(vaultId, senderId, receiverEmail);
-    // O envio de e-mail pode ser acionado aqui ou dentro do service.
-    // Por enquanto, o foco é na lógica do banco de dados.
+    
+    // Revalidar a página para atualizar a lista de convites
+    revalidatePath('/invite');
 
-    return { message: 'Convite enviado com sucesso e registrado no sistema!' };
+    return { message: 'Convite enviado com sucesso! E-mail de convite enviado.' };
   } catch (error: any) {
     // Erros de regra de negócio conhecidos não precisam de log de erro crítico
     const isKnownError = error.message.includes('já é membro') || 
@@ -99,6 +105,20 @@ export async function getUserInvitations() {
   return invitations;
 }
 
+export async function getUserSentInvitations() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  try {
+    return await VaultService.getUserSentInvitations(session.user.id);
+  } catch (error) {
+    console.error('Erro ao buscar convites enviados:', error);
+    return [];
+  }
+}
+
 export async function deleteInvitation(invitationId: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -109,13 +129,13 @@ export async function deleteInvitation(invitationId: string) {
   revalidatePath('/invite');
 }
 
-export async function getUserSentInvitations() {
+export async function getUserReceivedInvitations() {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect('/login');
   }
 
-  const invitations = await VaultService.getUserSentInvitations(session.user.id);
+  const invitations = await VaultService.getPendingInvitations(session.user.id);
   return invitations;
 }
 
