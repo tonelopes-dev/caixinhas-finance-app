@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { GradientButton } from "@/components/ui/gradient-button"
 import { Check, ChevronRight } from "lucide-react"
 
 export function CTASection() {
@@ -22,17 +23,15 @@ export function CTASection() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-fade-in-up animation-delay-200">
-          <Button
-            size="lg"
-            variant="secondary"
-            className="text-xl h-14 px-8 bg-background text-foreground hover:bg-background/90 hover:scale-110 transition-all relative overflow-hidden group"
+          <GradientButton
+            variant="variant"
+            className="text-xl h-14 px-8 hover:scale-110 transition-all group"
           >
-            <span className="relative z-10 flex items-center">
+            <span className="flex items-center">
               Começar Agora
               <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </span>
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-          </Button>
+          </GradientButton>
         </div>
 
         <div className="flex items-center justify-center gap-8 pt-8 text-primary-foreground/80 animate-fade-in-up animation-delay-300 flex-wrap">
