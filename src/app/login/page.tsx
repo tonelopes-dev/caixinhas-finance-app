@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { GradientButton } from '@/components/ui/gradient-button';
 import {
   Card,
   CardContent,
@@ -98,14 +99,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary/20 rounded-full animate-ping-slow" />
+        <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-accent/20 rounded-full animate-ping-slow animation-delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 border-primary/10 rounded-full animate-ping-slow animation-delay-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-accent/10 opacity-60" />
+      </div>
+      
+      <div className="flex min-h-screen w-full items-center justify-center px-4 relative z-10">
+        <Card className="w-full max-w-sm border-2 border-primary/20 shadow-2xl backdrop-blur-sm bg-card/95">
+        <CardHeader className="text-center relative">
           <div className="mx-auto mb-4 flex items-center justify-center">
-            <Logo className="h-16 w-16" />
+            <div className="p-3 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 rounded-2xl">
+              <Logo className="h-16 w-16 animate-float-logo" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-headline">Bem-vindo(a) de volta!</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-headline bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            Bem-vindo(a) de volta!
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-2">
             Entre com seu e-mail e senha para acessar sua conta.
           </CardDescription>
         </CardHeader>
@@ -114,26 +128,29 @@ export default function LoginPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 hover:scale-[1.02] relative overflow-hidden group"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
           >
-            <FcGoogle className="mr-2 h-4 w-4" />
-            Continuar com Google
+            <span className="relative z-10 flex items-center">
+              <FcGoogle className="mr-2 h-4 w-4" />
+              Continuar com Google
+            </span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
           </Button>
           
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-primary/20" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Ou</span>
+              <span className="bg-card px-4 py-1 text-muted-foreground font-medium rounded-full border border-primary/10">Ou</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-foreground font-medium">E-mail</Label>
               <Input
                 id="email"
                 name="email"
@@ -143,10 +160,11 @@ export default function LoginPage() {
                 onChange={handleInputChange}
                 required
                 autoComplete="email"
+                className="border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-200 hover:border-primary/30"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-foreground font-medium">Senha</Label>
               <Input
                 id="password"
                 name="password"
@@ -156,47 +174,57 @@ export default function LoginPage() {
                 onChange={handleInputChange}
                 required
                 autoComplete="current-password"
+                className="border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-200 hover:border-primary/30"
               />
             </div>
             {error && (
-              <p className="text-sm font-medium text-destructive">{error}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-sm font-medium text-destructive">{error}</p>
+              </div>
             )}
             
             <div className="flex items-center justify-between">
               <Link 
                 href="/forgot-password"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-105 relative group"
               >
-                Esqueceu a senha?
+                <span className="relative z-10">Esqueceu a senha?</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded" />
               </Link>
             </div>
             
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                  Entrando...
-                </>
-              ) : (
-                'Entrar'
+            <GradientButton className="w-full group relative overflow-hidden" type="submit" disabled={isLoading}>
+              <span className="relative z-10">
+                {isLoading ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    Entrando...
+                  </>
+                ) : (
+                  'Entrar'
+                )}
+              </span>
+              {!isLoading && (
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               )}
-            </Button>
+            </GradientButton>
           </form>
         </CardContent>
-        <CardFooter className="flex-col items-center justify-center text-sm">
-          <p>
+        <CardFooter className="flex-col items-center justify-center text-sm border-t border-primary/10 pt-6">
+          <p className="text-center">
             Não tem uma conta?{' '}
-            <Link href="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
+            <Link href="/register" className="font-semibold text-primary hover:text-primary/80 underline-offset-4 hover:underline transition-colors">
               Cadastre-se
             </Link>
           </p>
           <p className="mt-2">
-            <Link href="/terms" className="text-xs text-muted-foreground hover:underline">
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors hover:underline">
               Termos de Serviço
             </Link>
           </p>
         </CardFooter>
       </Card>
+      </div>
     </div>
   );
 }
