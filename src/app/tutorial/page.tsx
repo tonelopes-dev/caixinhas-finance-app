@@ -1,6 +1,6 @@
 
-import Link from 'next/link';
-import { ArrowLeft, PiggyBank, PlusCircle, UserPlus, FileText, Paintbrush, Edit, Wallet, Building2, User, HelpCircle } from 'lucide-react';
+import { PiggyBank, PlusCircle, UserPlus, FileText, Paintbrush, Edit, Wallet, Building2, User, HelpCircle } from 'lucide-react';
+import { BackToDashboard } from '@/components/ui/back-to-dashboard';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -61,14 +61,9 @@ const tutorialSteps = [
 
 export default function TutorialPage() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-2xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Painel
-          </Link>
-        </Button>
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+      <div className="mx-auto w-full max-w-2xl">
+        <BackToDashboard className="mb-4" />
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
