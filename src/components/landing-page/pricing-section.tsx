@@ -236,27 +236,6 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 <span>Ativação instantânea</span>
               </div>
             </div>
-
-            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent max-w-2xl mx-auto hover:border-primary/40 transition-all">
-              <CardContent className="p-8">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 text-4xl animate-bounce-slow">
-                    💰
-                  </div>
-                  <div className="text-left space-y-2">
-                    <p className="text-lg font-bold text-foreground">
-                      Quanto custa NÃO ter controle financeiro?
-                    </p>
-                    <p className="text-foreground/70 leading-relaxed">
-                      Estudos mostram que casais sem planejamento financeiro
-                      gastam em média 30% mais do que poderiam economizar. Em um
-                      ano, isso pode significar milhares de reais perdidos. O
-                      Caixinhas se paga sozinho.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

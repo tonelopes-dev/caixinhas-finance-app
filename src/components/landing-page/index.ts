@@ -7,5 +7,6 @@ export { BenefitsSection } from './benefits-section';
 export { HowItWorksSection } from './how-it-works-section';
 export { StorySection } from './story-section';
 export { PricingSection } from './pricing-section';
+export { NewsSection } from './news-section';
 export { CTASection } from './cta-section';
 export { useScrollAnimations } from './use-scroll-animations';

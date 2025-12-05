@@ -9,6 +9,7 @@ import {
   HowItWorksSection,
   StorySection,
   PricingSection,
+  NewsSection,
   CTASection,
   useScrollAnimations,
   HeroSection,
@@ -29,6 +30,7 @@ export function LandingPageClient() {
         <HowItWorksSection isVisible={isVisible} />
         <StorySection isVisible={isVisible} />
         <PricingSection isVisible={isVisible} />
+        <NewsSection />
         <CTASection />
       </div>
     </div>
