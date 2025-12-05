@@ -1,6 +1,5 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { BackToDashboard } from '@/components/ui/back-to-dashboard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getPatrimonyData } from './actions';
@@ -34,14 +33,9 @@ export default async function PatrimonioPage() {
   const grandTotal = totalLiquid + totalInvested;
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4">
-      <div className="w-full max-w-4xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para o Painel
-          </Link>
-        </Button>
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+      <div className="mx-auto w-full max-w-4xl">
+        <BackToDashboard className="mb-4" />
 
         <Card>
           <CardHeader>
