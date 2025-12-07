@@ -163,8 +163,8 @@ export function GoalCard({
                 key={p.id ?? index}
                 className="inline-block h-6 w-6 rounded-full border-2 border-card"
               >
-                <AvatarImage src={p.avatarUrl} alt={p.name} />
-                <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={p.avatarUrl} alt={p.name || 'Usuário'} />
+                <AvatarFallback>{(p.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
             ))}
             {goal.participants && goal.participants.length > 5 && (

@@ -8,11 +8,36 @@ import { prisma } from './prisma';
  */
 export class GoalService {
   /**
+   * Função auxiliar para transformar a estrutura dos participantes
+   * Converte participants[].user para participants[] diretamente
+   */
+  private static transformGoalData(goal: any) {
+    if (!goal) return goal;
+    
+    return {
+      ...goal,
+      participants: goal.participants?.map((participant: any) => ({
+        id: participant.user?.id || participant.id,
+        name: participant.user?.name || '',
+        email: participant.user?.email || '',
+        avatarUrl: participant.user?.avatarUrl || '',
+        role: participant.role || 'member'
+      })) || []
+    };
+  }
+
+  /**
+   * Função auxiliar para transformar array de goals
+   */
+  private static transformGoalsData(goals: any[]) {
+    return goals.map(goal => this.transformGoalData(goal));
+  }
+  /**
    * Busca todas as metas de um usuário
    */
   static async getUserGoals(userId: string): Promise<any[]> {
     try {
-      return await prisma.goal.findMany({
+      const goals = await prisma.goal.findMany({
         where: {
           userId: userId,
         },
@@ -34,6 +59,8 @@ export class GoalService {
           createdAt: 'desc',
         },
       });
+      
+      return this.transformGoalsData(goals);
     } catch (error) {
       console.error('Erro ao buscar metas do usuário:', error);
       throw new Error('Não foi possível buscar as metas do usuário');
@@ -45,7 +72,7 @@ export class GoalService {
    */
   static async getVaultGoals(vaultId: string): Promise<any[]> {
     try {
-      return await prisma.goal.findMany({
+      const goals = await prisma.goal.findMany({
         where: {
           vaultId: vaultId,
         },
@@ -67,6 +94,8 @@ export class GoalService {
           createdAt: 'desc',
         },
       });
+      
+      return this.transformGoalsData(goals);
     } catch (error) {
       console.error('Erro ao buscar metas do cofre:', error);
       throw new Error('Não foi possível buscar as metas do cofre');
@@ -79,7 +108,7 @@ export class GoalService {
   static async getGoals(ownerId: string, ownerType: 'user' | 'vault'): Promise<any[]> {
     try {
       const whereClause = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
-      return await prisma.goal.findMany({
+      const goals = await prisma.goal.findMany({
         where: whereClause,
         include: {
           participants: {
@@ -99,6 +128,8 @@ export class GoalService {
           createdAt: 'desc',
         },
       });
+      
+      return this.transformGoalsData(goals);
     } catch (error) {
       console.error('Erro ao buscar metas:', error);
       throw new Error('Não foi possível buscar as metas');
@@ -110,7 +141,7 @@ export class GoalService {
    */
   static async getGoalById(goalId: string): Promise<any | null> {
     try {
-      return await prisma.goal.findUnique({
+      const goal = await prisma.goal.findUnique({
         where: { id: goalId },
         include: {
           participants: {
@@ -127,6 +158,8 @@ export class GoalService {
           },
         },
       });
+      
+      return this.transformGoalData(goal);
     } catch (error) {
       console.error('Erro ao buscar meta:', error);
       throw new Error('Não foi possível buscar a meta');

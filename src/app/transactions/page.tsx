@@ -7,6 +7,7 @@ import { cookies } from 'next/headers';
 
 import { authOptions } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { BackToDashboard } from '@/components/ui/back-to-dashboard';
 import { TransactionsPageClient } from '@/components/transactions/transactions-page-client';
 import { AccountService } from '@/services/account.service';
 import { CategoryService } from '@/services/category.service';

@@ -281,11 +281,11 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
                     >
                       <div className="flex items-center gap-4">
                         <Avatar>
-                          <AvatarImage src={p.avatarUrl} alt={p.name} />
-                          <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={p.avatarUrl} alt={p.name || 'Usuário'} />
+                          <AvatarFallback>{(p.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{p.name}</p>
+                          <p className="font-medium">{p.name || 'Usuário'}</p>
                           {p.role === 'owner' && (
                             <p className="text-xs text-muted-foreground">
                               Proprietário(a)
@@ -295,7 +295,7 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
                       </div>
                       <RemoveParticipantDialog
                         participantId={p.id}
-                        participantName={p.name}
+                        participantName={p.name || 'Usuário'}
                         goalId={goal.id}
                         goalName={goal.name}
                         disabled={p.role === 'owner' || !isOwner}

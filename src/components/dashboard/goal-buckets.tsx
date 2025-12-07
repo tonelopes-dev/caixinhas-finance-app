@@ -53,7 +53,7 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
       <CardContent className="grid gap-4">
         {goalsToShow.map((goal) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
-          const participants = goal.participants ?? (goal.visibility === 'shared' ? [user, partner] : [user]);
+          const participants = goal.participants || [];
           return (
             <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-3 -m-3 transition-colors hover:bg-muted/50">
               <div className="text-4xl transition-transform group-hover:scale-110">{goal.emoji}</div>
@@ -76,8 +76,8 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
                         <div className="flex -space-x-2 overflow-hidden">
                             {participants.slice(0, 4).map((p, index) => (
                                  <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                                    <AvatarImage src={p.avatarUrl} alt={p.name} />
-                                    <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={p.avatarUrl} alt={p.name || 'Usuário'} />
+                                    <AvatarFallback>{(p.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                             ))}
                             {participants.length > 4 && (
