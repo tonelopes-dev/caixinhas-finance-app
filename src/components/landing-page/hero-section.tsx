@@ -104,7 +104,9 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
           {/* Coluna da Direita: Logo (aparece primeiro no mobile) */}
           <div className="mt-8 mb-12 lg:mb-[-345px] flex items-center justify-center order-first lg:order-last animate-fade-in-up">
             <Logo
-              className="h-full w-[600px] md:w-[800px] max-h-[472px] animate-float-logo"
+              w={1200}
+              h={900}
+              className="w-[300px] sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] h-auto max-h-[472px] animate-float-logo"
               style={{ transform: `translateY(${yMovement}px)` }}
             />
           </div>
@@ -123,7 +125,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
             <p className="animate-fade-in-up text-pretty text-lg leading-relaxed text-foreground/70 animation-delay-200 md:text-xl">
               Caixinhas não é apenas um aplicativo de finanças. É uma ferramenta
               de comunicação e confiança para transformar sonhos individuais em
-              conquistas conjuntas.
+              conquistas reais.
             </p>
 
             <div className="animate-fade-in-up animation-delay-300 space-y-8">
