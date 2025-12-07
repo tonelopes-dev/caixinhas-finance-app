@@ -194,7 +194,7 @@ export default function LoginPage() {
             </div>
             
             <GradientButton className="w-full group relative overflow-hidden" type="submit" disabled={isLoading}>
-              <span className="relative z-10">
+              <span className="relative z-10 flex items-center justify-center">
                 {isLoading ? (
                   <>
                     <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />

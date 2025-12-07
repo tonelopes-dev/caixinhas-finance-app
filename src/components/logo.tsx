@@ -31,7 +31,6 @@ export function Logo(props: LogoProps) {
         style={{ 
           width: w, 
           height: h,
-          imageRendering: 'high-quality',
           imageRendering: '-webkit-optimize-contrast'
         }}
         loading="eager"
@@ -54,9 +53,8 @@ export function Logo(props: LogoProps) {
       style={{ 
         width: w, 
         height: h,
-        imageRendering: 'high-quality',
         imageRendering: '-webkit-optimize-contrast'
-      }}
+      } as React.CSSProperties}
       sizes={`(max-width: 640px) ${Math.min(w, 300)}px, (max-width: 768px) ${Math.min(w, 400)}px, (max-width: 1024px) ${Math.min(w, 500)}px, (max-width: 1280px) ${Math.min(w, 600)}px, (max-width: 1536px) ${Math.min(w, 700)}px, ${w}px`}
       {...rest}
     />

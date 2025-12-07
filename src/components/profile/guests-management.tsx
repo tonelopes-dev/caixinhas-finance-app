@@ -255,10 +255,10 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
                     </svg>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                        Requisito para convite
+                        Como funciona o convite
                       </p>
                       <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                        O usuário precisa estar cadastrado no sistema para receber o convite. Uma notificação será enviada automaticamente.
+                        Envie o convite para qualquer e-mail. Se a pessoa não tiver cadastro, receberá instruções para se registrar e acessar o cofre compartilhado.
                       </p>
                     </div>
                   </div>
