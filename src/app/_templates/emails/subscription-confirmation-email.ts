@@ -18,7 +18,7 @@ export const subscriptionConfirmationEmail = (userName: string, subscriptionPlan
       Sua assinatura é válida até: <strong>${endDate}</strong>.
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
-      <a href="[LINK_PARA_GERENCIAR_ASSINATURA]" style="display: inline-block; padding: 12px 25px; background-color: #E7A42F; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Gerenciar Assinatura</a>
+      <a href="https://dashboard.kiwify.com/courses" style="display: inline-block; padding: 12px 25px; background-color: #E7A42F; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Gerenciar Assinatura</a>
     </p>
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
       Agradecemos por fazer parte da comunidade Caixinhas App!

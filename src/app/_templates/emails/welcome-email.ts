@@ -30,7 +30,7 @@ export const welcomeEmail = (userName: string, userEmail: string, temporaryPassw
                     <strong>Senha Temporária:</strong> ${temporaryPassword}
                   </p>
                   <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
-                    <a href="[LINK_PARA_LOGIN]" style="display: inline-block; padding: 12px 25px; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Acessar Minha Conta</a>
+                    <a href="https://www.caixinhas.app/login" style="display: inline-block; padding: 12px 25px; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Acessar Minha Conta</a>
                   </p>
                   <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: #777; margin-bottom: 10px;">
                     Recomendamos que você altere sua senha assim que fizer o primeiro login para garantir a segurança da sua conta.

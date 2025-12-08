@@ -46,7 +46,7 @@ export const welcomeEmailTemplate = (userName: string): string => {
           <p>Sua jornada para realizar sonhos em conjunto começa agora. Estamos muito felizes por ter você a bordo.</p>
           <p>O Caixinhas foi criado para transformar a maneira como você e seu parceiro(a) lidam com as finanças, tornando tudo mais transparente, colaborativo e, acima de tudo, motivador.</p>
           <p>Pronto(a) para começar a planejar seu futuro?</p>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'}/login" class="button">Acessar minha conta</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://www.caixinhas.app'}/login" class="button">Acessar minha conta</a>
           <p style="margin-top: 30px;">Com carinho,<br>Equipe Caixinhas</p>
         </div>
         <div class="footer">
