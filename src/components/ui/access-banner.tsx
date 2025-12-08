@@ -44,7 +44,7 @@ export function AccessBanner({
           </span>
           {showUpgradeButton && (
             <Button asChild size="sm" variant="default">
-              <Link href="/pricing">Ver Planos</Link>
+              <Link href="/landing">Ver Planos</Link>
             </Button>
           )}
         </AlertDescription>
@@ -69,7 +69,7 @@ export function AccessBanner({
           </div>
           {showUpgradeButton && (
             <Button asChild size="sm">
-              <Link href="/pricing">Ver Planos</Link>
+              <Link href="/landing">Ver Planos</Link>
             </Button>
           )}
         </AlertDescription>
