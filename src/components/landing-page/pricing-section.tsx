@@ -57,7 +57,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
 
         <div className="max-w-3xl mx-auto">
           <div className="relative pb-6">
-            <div className="absolute -top-0 left-[65px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
+            <div className="absolute -top-0 left-[90px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
               <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
                 Acesso Completo
@@ -91,12 +91,12 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-3 hover:bg-primary/20 transition-colors">
+                    {/* <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-3 hover:bg-primary/20 transition-colors">
                       <Sparkles className="w-5 h-5 text-primary" />
                       <span className="text-lg font-semibold text-primary">
                         ou 3x de R$ 1,78/mês para o primeiro trimestre
                       </span>
-                    </div>
+                    </div> */}
                     {/* <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-6 py-3 hover:bg-accent/20 transition-colors">
                       <Sparkles className="w-5 h-5 text-accent" />
                       <span className="text-lg font-semibold text-accent">
