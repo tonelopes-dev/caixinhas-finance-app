@@ -19,6 +19,7 @@ import {
   Heart,
   Wallet,
 } from "lucide-react"
+import { config } from "@/lib/config"
 
 type PricingSectionProps = {
   isVisible: { [key: string]: boolean }
@@ -159,25 +160,27 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 </div>
 
                 <div className="space-y-4">
-                  <Button className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 text-xl h-16 font-bold hover:scale-105 transition-all relative overflow-hidden group shadow-lg">
-                    <span className="relative z-10 flex items-center justify-center leading-7 border-0 text-sm">
-                      Começar Minha Jornada Agora
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-chevron-right ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform"
-                      >
-                        <path d="m9 18 6-6-6-6"></path>
-                      </svg>
-                    </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 text-xl h-16 font-bold hover:scale-105 transition-all relative overflow-hidden group shadow-lg">
+                    <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                      <span className="relative z-10 flex items-center justify-center leading-7 border-0 text-sm">
+                        Começar Minha Jornada Agora
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="lucide lucide-chevron-right ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform"
+                        >
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    </a>
                   </Button>
 
                   <div className="flex items-center justify-center gap-2 text-foreground/60 text-sm py-2">

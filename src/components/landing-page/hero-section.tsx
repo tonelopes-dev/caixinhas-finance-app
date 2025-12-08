@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { GradientButton } from '@/components/ui/gradient-button'
 import Link from "next/link"
 import { Logo } from "../logo"
+import { config } from "@/lib/config"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { ChevronRight } from "lucide-react"
@@ -131,9 +132,9 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
             <div className="animate-fade-in-up animation-delay-300 space-y-8">
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <GradientButton asChild className="h-14 px-8 text-lg font-semibold">
-                  <Link href="/register" className="no-underline">
+                  <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
                     Começar Agora <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
+                  </a>
                 </GradientButton>
                 <Button variant="ghost" size="lg" className="h-14 px-8 text-lg">
                   <Link href="#como-funciona">Ver Como Funciona</Link>

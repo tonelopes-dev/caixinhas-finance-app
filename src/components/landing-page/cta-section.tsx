@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { GradientButton } from "@/components/ui/gradient-button"
+import { config } from "@/lib/config"
 import { Check, ChevronRight } from "lucide-react"
 
 export function CTASection() {
@@ -24,13 +25,16 @@ export function CTASection() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-fade-in-up animation-delay-200">
           <GradientButton
+            asChild
             variant="variant"
             className="text-xl h-14 px-8 hover:scale-110 transition-all group"
           >
-            <span className="flex items-center">
-              Começar Agora
-              <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </span>
+            <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
+              <span className="flex items-center">
+                Começar Agora
+                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </span>
+            </a>
           </GradientButton>
         </div>
 

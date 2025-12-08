@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Sparkles, Zap } from "lucide-react"
+import { config } from "@/lib/config"
 
 type PWASectionProps = {
   isVisible: { [key: string]: boolean }
@@ -218,14 +219,17 @@ export function PWASection({ isVisible }: PWASectionProps) {
 
           <div className="text-center mt-12">
             <Button
+              asChild
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-xl h-14 px-8 hover:scale-105 transition-all relative overflow-hidden group"
             >
-              <span className="relative z-10 flex items-center">
-                Experimentar Agora
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                <span className="relative z-10 flex items-center">
+                  Experimentar Agora
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </a>
             </Button>
           {/*   <p className="text-foreground/60 mt-4">
               Sem cartão de crédito • Sem download • Sem complicação

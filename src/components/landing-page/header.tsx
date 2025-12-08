@@ -6,6 +6,7 @@ import {  Menu, X } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { config } from "@/lib/config"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -74,10 +75,10 @@ export function Header() {
             </Link>
           </Button>
           <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
-            <Link href="#planos">
+            <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
                 <span className="relative z-10">Começar Agora</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            </Link>
+            </a>
           </Button>
         </div>
 
@@ -141,7 +142,7 @@ export function Header() {
               <Link href="/login" onClick={handleNavClick}>Entrar</Link>
             </Button>
             <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold w-full">
-              <Link href="#planos" onClick={handleNavClick}>Começar Agora</Link>
+              <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={handleNavClick}>Começar Agora</a>
             </Button>
           </div>
         </nav>
