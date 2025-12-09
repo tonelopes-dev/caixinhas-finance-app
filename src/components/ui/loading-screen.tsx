@@ -47,7 +47,12 @@ export function LoadingScreen({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-accent/10 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+      {/* Backdrop escuro para dar destaque */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      
+      {/* Container do loading com fundo gradiente */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Partículas de fundo animadas */}
       <div className="absolute inset-0">
         {[...Array(20)].map((_, i) => (
@@ -76,7 +81,7 @@ export function LoadingScreen({
       </div>
 
       {/* Conteúdo principal */}
-      <div className="relative z-10 flex flex-col items-center justify-center space-y-8 px-8">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-8 px-8">
         {/* Logo com animações especiais */}
         <div className="relative">
           {/* Círculo de luz atrás da logo */}
@@ -134,7 +139,7 @@ export function LoadingScreen({
             
             {/* Porcentagem */}
             <div className="text-center">
-              <span className="text-sm font-semibold text-foreground/60 animate-pulse">
+              <span className="text-sm font-semibold text-white/90 animate-pulse">
                 {Math.round(progress)}%
               </span>
             </div>
@@ -154,7 +159,7 @@ export function LoadingScreen({
 
         {/* Mensagem motivacional */}
         <div className="text-center space-y-2 animate-fade-in-up" style={{ animationDelay: '1s' }}>
-          <p className="text-sm text-foreground/60 italic">
+          <p className="text-sm text-white/80 italic">
             ✨ Transformando sonhos em realidade ✨
           </p>
         </div>
@@ -164,6 +169,7 @@ export function LoadingScreen({
       <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
         <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-primary/10 to-transparent animate-wave" />
         <div className="absolute bottom-2 left-0 w-full h-12 bg-gradient-to-t from-accent/10 to-transparent animate-wave-reverse" />
+      </div>
       </div>
     </div>
   );
