@@ -1,11 +1,7 @@
 
-
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import { getAccountsData } from './actions';
 import { withPageAccess } from '@/lib/page-access';
-
-import { Button } from '@/components/ui/button';
+import { BackToDashboard } from '@/components/ui/back-to-dashboard';
 import { AccountsManagement } from '@/components/profile/accounts-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
 
