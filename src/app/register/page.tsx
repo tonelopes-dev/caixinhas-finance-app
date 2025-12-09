@@ -19,6 +19,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { FcGoogle } from 'react-icons/fc';
+import { Eye, EyeOff } from 'lucide-react';
 
 function RegisterContent() {
     const router = useRouter();
@@ -28,6 +29,8 @@ function RegisterContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -194,27 +197,59 @@ function RegisterContent() {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Crie uma Senha</Label>
-                                <Input 
-                                    id="password" 
-                                    name="password" 
-                                    type="password" 
-                                    placeholder="Pelo menos 6 caracteres" 
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    required 
-                                />
+                                <div className="relative">
+                                    <Input 
+                                        id="password" 
+                                        name="password" 
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Pelo menos 6 caracteres" 
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required 
+                                        className="pr-10"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                        ) : (
+                                            <Eye className="h-4 w-4 text-muted-foreground" />
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                                <Input 
-                                    id="confirmPassword" 
-                                    name="confirmPassword" 
-                                    type="password" 
-                                    placeholder="Digite a senha novamente" 
-                                    value={formData.confirmPassword}
-                                    onChange={handleInputChange}
-                                    required 
-                                />
+                                <div className="relative">
+                                    <Input 
+                                        id="confirmPassword" 
+                                        name="confirmPassword" 
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="Digite a senha novamente" 
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange}
+                                        required 
+                                        className="pr-10"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                        ) : (
+                                            <Eye className="h-4 w-4 text-muted-foreground" />
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                             {error && (
                                 <p className="text-sm font-medium text-destructive">{error}</p>
