@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { useActionLoading } from '@/components/providers/loading-provider';
 import {
   Card,
   CardContent,
@@ -27,6 +29,7 @@ function RegisterContent() {
     const inviteId = searchParams.get('invite');
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
     const [isLoading, setIsLoading] = useState(false);
+    const { executeWithLoading } = useActionLoading();
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -257,9 +260,14 @@ function RegisterContent() {
                             {success && (
                                 <p className="text-sm font-medium text-green-600">{success}</p>
                             )}
-                            <Button type="submit" className="w-full mt-4 py-6 text-lg" disabled={isLoading}>
-                                {isLoading ? 'Criando conta...' : 'Criar conta gratuitamente'}
-                            </Button>
+                            <LoadingButton 
+                                type="submit" 
+                                className="w-full mt-4 py-6 text-lg" 
+                                loading={isLoading}
+                                loadingText="Criando conta..."
+                            >
+                                Criar conta gratuitamente
+                            </LoadingButton>
                         </form>
                     </CardContent>
                     <CardFooter className="flex-col items-center justify-center text-sm px-0">

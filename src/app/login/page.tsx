@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { useLoading, useActionLoading } from '@/components/providers/loading-provider';
 import {
   Card,
   CardContent,
@@ -24,6 +26,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const { showLoading } = useLoading();
+  const { executeWithLoading } = useActionLoading();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,42 +64,41 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
+      await executeWithLoading(async () => {
+        const result = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        });
 
-      if (result?.error) {
-        console.log('❌ Erro no login:', result.error);
-        setError('Email ou senha incorretos');
-        setIsLoading(false);
-      } else if (result?.ok) {
-        console.log('✅ Login bem-sucedido, redirecionando...');
-        
-        // Força redirecionamento direto
-        setTimeout(() => {
-          window.location.href = '/vaults';
-        }, 500);
-      }
+        if (result?.error) {
+          console.log('❌ Erro no login:', result.error);
+          setError('Email ou senha incorretos');
+          throw new Error('Credenciais inválidas');
+        } else if (result?.ok) {
+          console.log('✅ Login bem-sucedido, redirecionando...');
+          
+          // Força redirecionamento direto
+          setTimeout(() => {
+            window.location.href = '/vaults';
+          }, 1000);
+        }
+      }, 'Fazendo login...', '✅ Login realizado! Redirecionando...');
     } catch (error) {
       console.error('❌ Erro no login:', error);
-      setError('Erro ao fazer login. Tente novamente.');
-      setIsLoading(false);
+      // Error já foi tratado no executeWithLoading
     }
   };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
     try {
+      showLoading('🚀 Conectando com Google...');
       await signIn('google', { callbackUrl: '/vaults' });
     } catch (error) {
       setError('Erro ao fazer login com Google');
-      setIsLoading(false);
     }
   };
 
@@ -133,19 +136,19 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           {/* Botão do Google */}
-          <Button
+          <LoadingButton
             type="button"
             variant="outline"
             className="w-full border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 hover:scale-[1.02] relative overflow-hidden group"
             onClick={handleGoogleSignIn}
-            disabled={isLoading}
+            loadingText="Conectando..."
           >
             <span className="relative z-10 flex items-center">
               <FcGoogle className="mr-2 h-4 w-4" />
               Continuar com Google
             </span>
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-          </Button>
+          </LoadingButton>
           
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -216,20 +219,11 @@ export default function LoginPage() {
               </Link>
             </div>
             
-            <GradientButton className="w-full group relative overflow-hidden" type="submit" disabled={isLoading}>
+            <GradientButton className="w-full group relative overflow-hidden" type="submit">
               <span className="relative z-10 flex items-center justify-center">
-                {isLoading ? (
-                  <>
-                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Entrando...
-                  </>
-                ) : (
-                  'Entrar'
-                )}
+                Entrar
               </span>
-              {!isLoading && (
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
-              )}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
             </GradientButton>
           </form>
         </CardContent>

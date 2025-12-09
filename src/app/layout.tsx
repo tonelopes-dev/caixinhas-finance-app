@@ -6,6 +6,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { LoadingProvider } from '@/components/providers/loading-provider';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -68,13 +69,15 @@ export default function RootLayout({
       <body>
         <NextAuthProvider>
           <ThemeProvider>
-            <FirebaseClientProvider>
-              <RootLayoutClient>
-                {children}
-              </RootLayoutClient>
-              <Toaster />
-              <PwaPrompt />
-            </FirebaseClientProvider>
+            <LoadingProvider>
+              <FirebaseClientProvider>
+                <RootLayoutClient>
+                  {children}
+                </RootLayoutClient>
+                <Toaster />
+                <PwaPrompt />
+              </FirebaseClientProvider>
+            </LoadingProvider>
           </ThemeProvider>
         </NextAuthProvider>
       </body>
