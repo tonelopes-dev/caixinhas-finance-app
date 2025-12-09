@@ -7,6 +7,13 @@ import { prisma } from '@/services/prisma';
 import { AuthService } from '@/services/auth.service';
 import { CategoryService } from '@/services/category.service';
 
+// Detecta automaticamente a URL base
+const getBaseUrl = () => {
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return process.env.NODE_ENV === 'production' ? 'https://caixinhas.app' : 'http://localhost:9002';
+};
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
