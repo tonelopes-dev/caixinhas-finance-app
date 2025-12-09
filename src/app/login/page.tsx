@@ -35,7 +35,9 @@ export default function LoginPage() {
   useEffect(() => {
     console.log('🔍 Status da sessão:', status);
     console.log('🔍 Dados da sessão:', session);
-  }, [session, status]);
+    console.log('🔍 Is loading:', isLoading);
+    console.log('🔍 Current pathname:', window.location.pathname);
+  }, [session, status, isLoading]);
 
   useEffect(() => {
     // Limpar dados de sessão ao carregar a página de login
@@ -47,14 +49,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     // Só redirecionar se estiver realmente autenticado e com sessão válida
-    if (status === 'authenticated' && session?.user?.id && !isLoading) {
-      console.log('✅ Usuário autenticado, redirecionando...', session.user);
+    if (status === 'authenticated' && session?.user?.id) {
+      console.log('✅ Usuário já autenticado, redirecionando...', session.user);
       localStorage.setItem('CAIXINHAS_USER_ID', session.user.id);
       
       // Usar replace para evitar voltar ao login no histórico
       router.replace('/vaults');
     }
-  }, [session, status, router, isLoading]);
+  }, [session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,14 +73,18 @@ export default function LoginPage() {
       if (result?.error) {
         console.log('❌ Erro no login:', result.error);
         setError('Email ou senha incorretos');
+        setIsLoading(false);
       } else if (result?.ok) {
-        console.log('✅ Login bem-sucedido, aguardando redirecionamento automático...');
-        // Não redirecionar manualmente aqui, deixar o useEffect fazer isso
-        // após a sessão ser atualizada
+        console.log('✅ Login bem-sucedido, redirecionando...');
+        
+        // Força redirecionamento direto
+        setTimeout(() => {
+          window.location.href = '/vaults';
+        }, 500);
       }
     } catch (error) {
+      console.error('❌ Erro no login:', error);
       setError('Erro ao fazer login. Tente novamente.');
-    } finally {
       setIsLoading(false);
     }
   };
