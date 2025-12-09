@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       </div>
     `;
 
-    const success = await sendEmail(to, subject, html);
+    const success = await sendEmail({ to, subject, html });
     
     if (success) {
       return NextResponse.json({ 

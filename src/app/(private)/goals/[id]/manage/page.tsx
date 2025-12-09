@@ -25,9 +25,36 @@ export default async function ManageGoalPage({ params }: { params: Promise<{ id:
   return (
     <ManageGoalClient
       goal={data.goal}
-      currentUser={session.user}
-      currentVault={data.currentVault as Vault}
-      userVaults={data.userVaults as Vault[]}
+      currentUser={{
+        ...session.user,
+        subscriptionStatus: 'active',
+        avatarUrl: session.user.avatarUrl || null,
+        workspaceImageUrl: session.user.workspaceImageUrl || null
+      }}
+      currentVault={data.currentVault ? {
+        ...data.currentVault,
+        imageUrl: data.currentVault.imageUrl || '',
+        members: data.currentVault.members.map(member => ({
+          id: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          avatarUrl: member.user.avatarUrl,
+          workspaceImageUrl: null,
+          subscriptionStatus: 'active' as const
+        }))
+      } : null}
+      userVaults={data.userVaults.map(vault => ({
+        ...vault,
+        imageUrl: vault.imageUrl || '',
+        members: vault.members.map(member => ({
+          id: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          avatarUrl: member.user.avatarUrl,
+          workspaceImageUrl: null,
+          subscriptionStatus: 'active' as const
+        }))
+      }))}
     />
   );
 }

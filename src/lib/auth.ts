@@ -47,7 +47,7 @@ export const authOptions: AuthOptions = {
               id: user.id,
               email: user.email,
               name: user.name,
-              image: user.avatarUrl
+              image: user.avatarUrl || undefined
             };
           }
           
@@ -113,16 +113,26 @@ export const authOptions: AuthOptions = {
         const dbUser = await AuthService.getUserById(token.id as string);
         if (dbUser) {
           session.user = {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name,
-            image: dbUser.avatarUrl,
-            ...dbUser
+            ...dbUser,
+            image: dbUser.avatarUrl || undefined,
+            avatarUrl: dbUser.avatarUrl || undefined,
+            workspaceImageUrl: dbUser.workspaceImageUrl || undefined
           };
         } else {
           // Se o usuário não existe mais no banco, invalida a sessão
           console.log('⚠️ Usuário não encontrado no banco, invalidando sessão');
-          return null;
+          // Retorna sessão com dados básicos em vez de null
+          return {
+            ...session,
+            user: {
+              id: token.id as string,
+              email: session.user?.email || '',
+              name: session.user?.name || 'Usuário',
+              image: undefined,
+              avatarUrl: undefined,
+              workspaceImageUrl: undefined
+            }
+          };
         }
       }
       return session;

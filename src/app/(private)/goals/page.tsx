@@ -35,7 +35,20 @@ export default async function GoalsPage() {
             <Button>Nova Caixinha</Button>
           </Link>
         </div>
-        <GoalsPageClient goals={data.goals} vaults={data.vaults} userId={session.user.id} />
+        <GoalsPageClient 
+          goals={data.goals} 
+          vaults={data.vaults.map(vault => ({
+            ...vault,
+            imageUrl: vault.imageUrl || '',
+            members: vault.members.map(member => ({
+              id: member.user.id,
+              name: member.user.name,
+              email: member.user.email,
+              avatarUrl: member.user.avatarUrl || ''
+            }))
+          }))}
+          userId={session.user.id} 
+        />
       </div>
     </div>
   );

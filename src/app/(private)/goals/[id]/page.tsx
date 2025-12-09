@@ -25,7 +25,18 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ id:
       goal={data.goal}
       transactions={data.transactions}
       accounts={data.accounts}
-      vaults={data.vaults}
+      vaults={data.vaults.map(vault => ({
+        ...vault,
+        imageUrl: vault.imageUrl || '',
+        members: vault.members.map(member => ({
+          id: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          avatarUrl: member.user.avatarUrl,
+          workspaceImageUrl: null,
+          subscriptionStatus: 'active' as const
+        }))
+      }))}
       userId={session.user.id}
     />
   );

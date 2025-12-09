@@ -38,8 +38,22 @@ export default async function VaultSelectionPage() {
           showUpgradeButton={accessInfo.isRestricted}
         />
         <VaultsPageClient 
-          currentUser={data.currentUser as any}
-          userVaults={data.userVaults}
+          currentUser={{
+            ...data.currentUser,
+            avatarUrl: data.currentUser.avatarUrl || null,
+            workspaceImageUrl: data.currentUser.workspaceImageUrl || null
+          }}
+          userVaults={data.userVaults.map(vault => ({
+            ...vault,
+            members: vault.members.map(member => ({
+              id: member.id,
+              name: member.name,
+              email: member.email,
+              avatarUrl: member.avatarUrl,
+              workspaceImageUrl: null,
+              subscriptionStatus: member.subscriptionStatus as 'active' | 'inactive' | 'trial'
+            }))
+          }))}
           userInvitations={data.userInvitations}
           canCreateVaults={accessInfo.canCreateVaults}
           canAccessPersonal={accessInfo.canAccessPersonalWorkspace}

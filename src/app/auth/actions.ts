@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { sendEmail } from '@/ai/flows/send-email-flow';
-import { passwordResetEmailTemplate } from '@/app/_templates/emails/password-reset-template';
+import { passwordResetEmail } from '@/app/_templates/emails/password-reset-template';
 
 const passwordResetSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
@@ -31,7 +31,7 @@ export async function sendPasswordReset(prevState: GenericState, formData: FormD
         await sendEmail({
             to: validatedFields.data.email,
             subject: 'Redefinição de Senha - Caixinhas',
-            body: passwordResetEmailTemplate(resetLink)
+            body: passwordResetEmail('Usuário', resetLink)
         });
         return { message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' };
     } catch (error) {
