@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { AnimatedDiv } from '@/components/ui/animated-div';
 import { useToast } from '@/hooks/use-toast';
 
 type Goal = {
@@ -121,49 +122,64 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
         userId={userId} 
       />
       
-    {goals.length === 0 ? (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">
-            <p className="mb-4">Parece que algo correu mal ou ainda não foram criadas metas.</p>
-            <Button asChild>
-              <Link href="/goals/new">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Criar Primeira Caixinha
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    ) : (
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl">
-            Todas as Suas Caixinhas
-          </CardTitle>
-          <CardDescription>
-            Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <GoalList
-            goals={goals as any}
-            userVaults={vaults as any}
-            userId={userId}
-            onToggleFeatured={toggleFeatured}
-            onGoToWorkspace={handleGoToWorkspace}
-          />
-        </CardContent>
-        <CardFooter className="border-t pt-6">
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/goals/new">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Criar Nova Caixinha
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    )}
+      <AnimatedDiv>
+        {goals.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center text-muted-foreground">
+                <p className="mb-6">Parece que algo correu mal ou ainda não foram criadas metas.</p>
+                <Button 
+                  size="lg" 
+                  className="transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] group shadow-lg"
+                  asChild
+                >
+                  <Link href="/goals/new">
+                    <PlusCircle className="mr-2 h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
+                    Criar Primeira Caixinha
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-2xl">
+                Todas as Suas Caixinhas
+              </CardTitle>
+              <CardDescription>
+                Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnimatedDiv transition={{ delay: 0.1 }}>
+                <GoalList
+                  goals={goals as any}
+                  userVaults={vaults as any}
+                  userId={userId}
+                  onToggleFeatured={toggleFeatured}
+                  onGoToWorkspace={handleGoToWorkspace}
+                />
+              </AnimatedDiv>
+            </CardContent>
+            <CardFooter className="border-t pt-6">
+              <AnimatedDiv transition={{ delay: 0.2 }}>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="w-full transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-[1.02] active:scale-[0.98] group" 
+                  asChild
+                >
+                  <Link href="/goals/new">
+                    <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+                    Criar Nova Caixinha
+                  </Link>
+                </Button>
+              </AnimatedDiv>
+            </CardFooter>
+          </Card>
+        )}
+      </AnimatedDiv>
     </>
   );
 }

@@ -7,6 +7,7 @@ import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { LoadingProvider } from '@/components/providers/loading-provider';
+import { NavigationLoader } from '@/components/ui/navigation-loader';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -71,6 +72,7 @@ export default function RootLayout({
           <ThemeProvider>
             <LoadingProvider>
               <FirebaseClientProvider>
+                <NavigationLoader />
                 <RootLayoutClient>
                   {children}
                 </RootLayoutClient>
