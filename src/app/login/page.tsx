@@ -35,12 +35,26 @@ export default function LoginPage() {
     password: '',
   });
 
+  // Limpar URL de parâmetros problemáticos que podem causar loops
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const hasProblematicParams = url.searchParams.has('error') || url.searchParams.has('callbackUrl');
+      
+      if (hasProblematicParams) {
+        console.log('🔍 Login Page - Limpando parâmetros problemáticos da URL');
+        window.history.replaceState({}, '', '/login');
+      }
+    }
+  }, []);
+
   // Debug da sessão
   useEffect(() => {
-    console.log('🔍 Status da sessão:', status);
-    console.log('🔍 Dados da sessão:', session);
-    console.log('🔍 Is loading:', isLoading);
-    console.log('🔍 Current pathname:', window.location.pathname);
+    console.log('🔍 Login Page - Status da sessão:', status);
+    console.log('🔍 Login Page - Dados da sessão:', session);
+    console.log('🔍 Login Page - Is loading:', isLoading);
+    console.log('🔍 Login Page - Current pathname:', window.location.pathname);
+    console.log('🔍 Login Page - URL search params:', window.location.search);
   }, [session, status, isLoading]);
 
   useEffect(() => {
@@ -52,15 +66,26 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    // Só redirecionar se estiver realmente autenticado e com sessão válida
-    if (status === 'authenticated' && session?.user?.id) {
+    // Aguardar o status ser definido e só redirecionar se estiver realmente autenticado
+    if (status === 'loading') return; // Aguardar carregamento da sessão
+    
+    if (status === 'authenticated' && session?.user?.id && !isLoading) {
       console.log('✅ Usuário já autenticado, redirecionando...', session.user);
+      
+      // Verificar se já não está em processo de redirecionamento
+      const isRedirecting = sessionStorage.getItem('redirecting');
+      if (isRedirecting) return;
+      
+      sessionStorage.setItem('redirecting', 'true');
       localStorage.setItem('CAIXINHAS_USER_ID', session.user.id);
       
-      // Usar replace para evitar voltar ao login no histórico
-      router.replace('/vaults');
+      // Usar timeout para evitar conflitos
+      setTimeout(() => {
+        router.replace('/vaults');
+        sessionStorage.removeItem('redirecting');
+      }, 100);
     }
-  }, [session, status, router]);
+  }, [session, status, router, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

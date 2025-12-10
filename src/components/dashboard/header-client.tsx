@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift, LifeBuoy } from 'lucide-react';
+import { BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift, LifeBuoy, Vault } from 'lucide-react';
 import type { User } from '@/lib/definitions';
 import {
   DropdownMenu,
@@ -26,17 +26,32 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const { themeVersion } = useTheme(); // Force re-render on theme change
   
   const handleLogout = async () => {
-    // Limpar localStorage/sessionStorage por compatibilidade
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('CAIXINHAS_USER_ID');
-      sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    try {
+      // Limpar localStorage/sessionStorage antes do signOut
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('CAIXINHAS_USER_ID');
+        sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+        // Limpar todos os dados relacionados à sessão
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      
+      // Usar NextAuth signOut sem redirecionamento automático
+      await signOut({ 
+        redirect: false
+      });
+      
+      // Redirecionamento manual para evitar loops
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Erro no logout:', error);
+      // Em caso de erro, forçar redirecionamento
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
-    
-    // Usar NextAuth signOut
-    await signOut({ 
-      callbackUrl: '/login',
-      redirect: true
-    });
   };
 
   return (
@@ -104,8 +119,8 @@ export function HeaderClient({ user }: HeaderClientProps) {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/vaults">
-            <Building2 className="mr-2 h-4 w-4" />
-            <span>Mudar de Espaço</span>
+            <Vault className="mr-2 h-4 w-4" />
+            <span>Mudar de Cofre</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

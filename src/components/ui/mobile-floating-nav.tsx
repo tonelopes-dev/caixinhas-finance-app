@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wallet, Receipt,  Vault, Gift } from "lucide-react";
+import { Wallet, Receipt, Vault, Gift } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
