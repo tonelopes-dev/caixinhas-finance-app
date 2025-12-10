@@ -9,7 +9,7 @@ const urlsToCache = [
   '/icons/icon-512x512.png'
 ];
 
-// Install - força atualização
+// Install - adiciona assets estáticos ao cache
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing new service worker...');
   event.waitUntil(
@@ -18,11 +18,8 @@ self.addEventListener('install', (event) => {
         console.log('[SW] Caching static assets');
         return cache.addAll(urlsToCache);
       })
-      .then(() => {
-        console.log('[SW] Skip waiting - force activation');
-        return self.skipWaiting(); // Força ativação imediata
-      })
   );
+  // Não chama skipWaiting aqui para evitar takeover imediato e possíveis reloads
 });
 
 // Activate - limpa caches antigos
@@ -38,72 +35,91 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => {
-      console.log('[SW] Claiming clients');
-      return self.clients.claim(); // Assume controle imediatamente
     })
   );
+  // Não chama clients.claim() para evitar tomar controle dos clients durante navegação ativa
 });
 
-// Fetch - estratégia network first para HTML, cache first para assets
+// Fetch - estratégia:
+// - Para páginas HTML sensíveis a auth (login/logout, /api/*) usa network-only
+// - Para demais páginas HTML usa network-first e atualiza cache dinâmico
+// - Para assets estáticos usa cache-first
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Apenas intercepta requests do mesmo origin
   if (url.origin !== location.origin) return;
-  
-  // Para páginas HTML, usa network first
+
+  const pathname = url.pathname;
+
+  // Nunca cachear ou interceptar rotas de API e auth (para evitar respostas stale)
+  if (pathname.startsWith('/api') || pathname.startsWith('/api/auth') || pathname === '/logout') {
+    // Rede direta, sem cache
+    event.respondWith(
+      fetch(request).catch(() => new Response(null, { status: 502 }))
+    );
+    return;
+  }
+
+  // Para páginas HTML sensíveis (login/logout) usar network-only
   if (request.headers.get('accept')?.includes('text/html')) {
+    if (pathname === '/login' || pathname === '/register' || pathname.startsWith('/landing')) {
+      event.respondWith(
+        fetch(request)
+          .then((response) => response)
+          .catch(() => {
+            return caches.match('/offline') || new Response(
+              '<!DOCTYPE html><html><body><h1>Você está offline</h1><p>Verifique sua conexão.</p></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            );
+          })
+      );
+      return;
+    }
+
+    // Para outras páginas HTML: network-first
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Se conseguiu buscar da rede, atualiza o cache
           if (response.status === 200) {
             const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => cache.put(request, responseClone));
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseClone));
           }
           return response;
         })
         .catch(() => {
-          // Se falhou na rede, tenta do cache
           console.log('[SW] Network failed, trying cache for:', request.url);
-          return caches.match(request)
-            .then((response) => {
-              if (response) {
-                return response;
-              }
-              // Se não tem no cache, retorna página de erro offline
-              return caches.match('/offline') || new Response(
-                '<!DOCTYPE html><html><body><h1>Você está offline</h1><p>Verifique sua conexão.</p></body></html>',
-                { headers: { 'Content-Type': 'text/html' } }
-              );
-            });
+          return caches.match(request).then((response) => {
+            if (response) return response;
+            return caches.match('/offline') || new Response(
+              '<!DOCTYPE html><html><body><h1>Você está offline</h1><p>Verifique sua conexão.</p></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            );
+          });
         })
     );
-  } 
-  // Para assets estáticos, usa cache first
-  else {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            return response;
-          }
-          
-          return fetch(request)
-            .then((response) => {
-              if (response.status === 200 && request.method === 'GET') {
-                const responseClone = response.clone();
-                caches.open(DYNAMIC_CACHE)
-                  .then((cache) => cache.put(request, responseClone));
-              }
-              return response;
-            });
-        })
-    );
+    return;
   }
+
+  // Para assets estáticos, usa cache-first (como antes)
+  event.respondWith(
+    caches.match(request)
+      .then((response) => {
+        if (response) return response;
+
+        return fetch(request).then((response) => {
+          if (response.status === 200 && request.method === 'GET') {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseClone));
+          }
+          return response;
+        }).catch(() => {
+          // Em caso de falha para assets, devolve fallback se existir
+          return caches.match('/offline-asset') || Response.error();
+        });
+      })
+  );
 });
 
 // Message handler - para comandos do client
