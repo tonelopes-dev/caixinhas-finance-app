@@ -64,8 +64,8 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const [amount, setAmount] = useState(transaction.amount.toString());
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer' | ''>(transaction.type);
   const [date, setDate] = useState<Date | undefined>(new Date(transaction.date));
-  const [sourceAccountId, setSourceAccountId] = useState(transaction.sourceAccountId);
-  const [destinationAccountId, setDestinationAccountId] = useState(transaction.destinationAccountId);
+  const [sourceAccountId, setSourceAccountId] = useState(transaction.sourceAccountId || '');
+  const [destinationAccountId, setDestinationAccountId] = useState(transaction.destinationAccountId || '');
   const [category, setCategory] = useState(
     isGoalTransaction ? 'Caixinha' : (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category)
   );
@@ -103,6 +103,20 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
     }
   }, [state, toast]);
 
+  // Garantir que os valores iniciais estejam definidos
+  useEffect(() => {
+    if (!sourceAccountId && transaction.sourceAccountId) {
+      setSourceAccountId(transaction.sourceAccountId);
+    }
+    if (!destinationAccountId && transaction.destinationAccountId) {
+      setDestinationAccountId(transaction.destinationAccountId);
+    }
+    // Para transações de caixinha, definir o destino corretamente
+    if (isGoalTransaction && !destinationAccountId) {
+      setDestinationAccountId(`goal-${transaction.goalId}`);
+    }
+  }, [transaction, sourceAccountId, destinationAccountId, isGoalTransaction]);
+
   useEffect(() => {
     if (chargeType === 'installment') {
         const numInstallments = parseFloat(totalInstallments);
@@ -134,11 +148,38 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const prevStep = () => setStep(s => s - 1);
   
   const isStep1Valid = description.trim() !== '' && category !== '';
-  const isStep2Valid = transactionType !== '' && date && (
-    transactionType === 'income' ? !!destinationAccountId :
-    transactionType === 'expense' ? !!sourceAccountId :
-    !!sourceAccountId && !!destinationAccountId
-  );
+  
+  // Validação mais robusta para etapa 2
+  const isStep2Valid = (() => {
+    const hasType = transactionType !== '';
+    const hasDate = !!date;
+    
+    let hasAccounts = false;
+    
+    if (transactionType === 'income') {
+      hasAccounts = !!(destinationAccountId || destinationDefaultValue);
+    } else if (transactionType === 'expense') {
+      hasAccounts = !!(sourceAccountId || sourceDefaultValue);
+    } else if (transactionType === 'transfer') {
+      hasAccounts = !!(sourceAccountId || sourceDefaultValue) && !!(destinationAccountId || destinationDefaultValue);
+    }
+    
+    const isValid = hasType && hasDate && hasAccounts;
+    
+    // Debug log (pode ser removido em produção)
+    console.log('🔍 Step 2 Validation:', {
+      transactionType,
+      hasDate,
+      sourceAccountId,
+      destinationAccountId,
+      sourceDefaultValue,
+      destinationDefaultValue,
+      hasAccounts,
+      isValid
+    });
+    
+    return isValid;
+  })();
 
   const formVariants = {
     hidden: { opacity: 0, x: 30 },
@@ -278,7 +319,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                         {(transactionType === 'expense' || transactionType === 'transfer') && (
                              <div className="space-y-2">
                                 <Label htmlFor="sourceAccountId_field">Origem</Label>
-                                <Select defaultValue={sourceDefaultValue} onValueChange={(value) => {
+                                <Select value={sourceAccountId || sourceDefaultValue || ''} onValueChange={(value) => {
                                     setSourceAccountId(value);
                                 }}>
                                     <SelectTrigger id="sourceAccountId_field"><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
@@ -290,7 +331,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                         {(transactionType === 'income' || transactionType === 'transfer') && (
                             <div className="space-y-2">
                                 <Label htmlFor="destinationAccountId_field">Destino</Label>
-                                <Select defaultValue={destinationDefaultValue} onValueChange={(value) => setDestinationAccountId(value)}>
+                                <Select value={destinationAccountId || destinationDefaultValue || ''} onValueChange={(value) => setDestinationAccountId(value)}>
                                     <SelectTrigger id="destinationAccountId_field"><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
                                     <SelectContent>{allSourcesAndDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
                                 </Select>
@@ -334,7 +375,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                         {transactionType === 'expense' && !isCreditCardTransaction && (
                             <div className="space-y-2">
                                 <Label htmlFor="paymentMethod_field">Método de Pagamento</Label>
-                                <Select defaultValue={transaction.paymentMethod || ''} onValueChange={setPaymentMethod}>
+                                <Select value={paymentMethod || transaction.paymentMethod || ''} onValueChange={setPaymentMethod}>
                                     <SelectTrigger id="paymentMethod_field"><SelectValue placeholder="Selecione o método" /></SelectTrigger>
                                     <SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent>
                                 </Select>
