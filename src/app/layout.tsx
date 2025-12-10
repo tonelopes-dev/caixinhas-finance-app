@@ -77,7 +77,7 @@ export default function RootLayout({
               <FirebaseClientProvider>
                 <ErrorBoundary>
                   <NavigationLoader />
-                  <NetworkStatusIndicator />
+                  {/* <NetworkStatusIndicator /> */}
                   <UpdateAvailableNotification />
                   <RootLayoutClient>
                     {children}

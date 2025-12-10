@@ -24,20 +24,6 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   const handleHardRefresh = () => {
-    // Limpar cache do service worker se existir
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => {
-          registration.unregister();
-        });
-      });
-    }
-    
-    // Limpar localStorage e sessionStorage
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Forçar refresh completo
     window.location.reload();
   };
 
@@ -46,20 +32,8 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   };
 
   const handleReportBug = () => {
-    // Você pode integrar com um sistema de tickets ou email
     const subject = encodeURIComponent('Bug Report - Caixinhas App');
-    const body = encodeURIComponent(`
-Descrição do erro:
-${error.toString()}
-
-URL: ${window.location.href}
-Timestamp: ${new Date().toISOString()}
-User Agent: ${navigator.userAgent}
-
-Stack trace:
-${error.stack || 'Não disponível'}
-    `);
-    
+    const body = encodeURIComponent(`Erro: ${error.toString()}\nURL: ${window.location.href}`);
     window.open(`mailto:suporte@caixinhas.app?subject=${subject}&body=${body}`, '_blank');
   };
 

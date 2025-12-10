@@ -1,57 +1,46 @@
 'use client';
 
-import { RefreshCw, Home, AlertTriangle, Smartphone, Wifi } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
-
 export default function GlobalErrorPage() {
-  const handleHardRefresh = () => {
-    // Limpar cache do service worker se existir
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => {
-          registration.unregister();
-        });
-      });
-    }
-    
-    // Limpar localStorage e sessionStorage
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Forçar refresh completo
-    window.location.reload();
-  };
-
-  const handleGoHome = () => {
-    window.location.href = '/dashboard';
-  };
 
   return (
     <html>
       <body>
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
-                <AlertTriangle className="h-8 w-8 text-orange-600" />
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ width: '100%', maxWidth: '32rem', backgroundColor: 'white', borderRadius: '0.5rem', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ 
+                width: '4rem', 
+                height: '4rem', 
+                borderRadius: '50%', 
+                backgroundColor: '#fed7aa', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                margin: '0 auto 1rem auto'
+              }}>
+                ⚠️
               </div>
-              <CardTitle className="text-xl">Ops! Erro Crítico</CardTitle>
-              <CardDescription>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Ops! Erro Crítico</h1>
+              <p style={{ color: '#64748b' }}>
                 Algo deu muito errado. Vamos resolver isso juntos!
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </p>
+            </div>
+            <div>
               {/* Instruções específicas para PWA/Mobile */}
-              <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div style={{ 
+                backgroundColor: '#f8fafc', 
+                borderRadius: '0.5rem', 
+                padding: '1rem', 
+                marginBottom: '1rem',
+                fontSize: '0.875rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.25rem' }}>📱</span>
                   <div>
-                    <p className="font-medium text-muted-foreground mb-2">
+                    <p style={{ fontWeight: '500', color: '#64748b', marginBottom: '0.5rem' }}>
                       Soluções recomendadas:
                     </p>
-                    <ol className="text-muted-foreground space-y-1 text-xs list-decimal list-inside">
+                    <ol style={{ color: '#64748b', fontSize: '0.75rem', paddingLeft: '1rem' }}>
                       <li>Limpe o cache e recarregue a página</li>
                       <li>Se estiver usando o app, remova e adicione novamente</li>
                       <li>Verifique sua conexão com a internet</li>
@@ -61,50 +50,81 @@ export default function GlobalErrorPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Button
-                  onClick={handleHardRefresh}
-                  className="w-full"
-                  size="lg"
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button 
+                  onClick={() => {
+                    if ('serviceWorker' in navigator) {
+                      navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        registrations.forEach((registration) => {
+                          registration.unregister();
+                        });
+                      });
+                    }
+                    try {
+                      localStorage.clear();
+                      sessionStorage.clear();
+                    } catch(e) {}
+                    window.location.reload();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    fontSize: '1rem'
+                  }}
                 >
-                  <Wifi className="mr-2 h-4 w-4" />
-                  Limpar Cache e Recarregar
-                </Button>
+                  🔄 Limpar Cache e Recarregar
+                </button>
 
-                <Button
-                  onClick={handleGoHome}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                >
-                  <Home className="mr-2 h-4 w-4" />
-                  Voltar ao Início
-                </Button>
+                <a href="/dashboard" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.375rem',
+                    textAlign: 'center',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    color: '#374151'
+                  }}>
+                    🏠 Voltar ao Início
+                  </div>
+                </a>
 
-                <Button
-                  onClick={() => window.location.href = '/login'}
-                  variant="secondary"
-                  className="w-full"
-                  size="lg"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Fazer Login Novamente
-                </Button>
+                <a href="/login" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '0.375rem',
+                    textAlign: 'center',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    color: '#374151'
+                  }}>
+                    🔑 Fazer Login Novamente
+                  </div>
+                </a>
               </div>
 
-              <div className="text-center pt-4 border-t">
-                <p className="text-xs text-muted-foreground">
+              <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
                   Se o problema persistir, entre em contato conosco em{' '}
                   <a 
                     href="mailto:suporte@caixinhas.app" 
-                    className="text-primary hover:underline"
+                    style={{ color: '#3b82f6', textDecoration: 'underline' }}
                   >
                     suporte@caixinhas.app
                   </a>
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </body>
     </html>
