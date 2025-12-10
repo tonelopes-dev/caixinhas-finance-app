@@ -757,3 +757,69 @@
 .animate-progress-glow {
   animation: progressGlow 2s ease-in-out infinite;
 }
+
+/* Responsividade melhorada para cards de goals */
+@media (max-width: 640px) {
+  .goal-card-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .goal-card-content {
+    padding: 1rem;
+  }
+  
+  .goal-card-emoji {
+    font-size: 2rem;
+  }
+  
+  .goal-card-title {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .goal-card-description {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .goal-card-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .goal-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .goal-card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Ajustes para texto responsivo */
+.responsive-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .responsive-truncate {
+    max-width: 120px;
+  }
+}
+
+@media (min-width: 641px) {
+  .responsive-truncate {
+    max-width: 200px;
+  }
+}

@@ -34,7 +34,7 @@ export function GoalList({
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="goal-card-grid grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {goals.map((goal) => (
         <GoalCard
           key={goal.id}
