@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { clearAuthSession } from '@/lib/auth-utils';
@@ -22,14 +22,17 @@ import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuthLoading } from '@/hooks/use-auth-loading';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const { showLoading } = useLoading();
   const { executeWithLoading } = useActionLoading();
+  const { isVisible: isAuthLoading, message: authMessage, setAuthLoading } = useAuthLoading();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -151,49 +154,71 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await executeWithLoading(async () => {
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
+      // Mostrar loading de autenticação
+      setAuthLoading(true, "Entrando em sua conta...");
 
-        if (result?.error) {
-          console.log('❌ Erro no login:', result.error);
-          
-          // Diferentes tipos de erro
-          if (result.error === 'CredentialsSignin') {
-            setError('Email ou senha incorretos');
-          } else if (result.error === 'CallbackRouteError') {
-            setError('Erro de autenticação. Tente novamente.');
-          } else {
-            setError('Erro ao fazer login. Tente novamente.');
-          }
-          
-          throw new Error('Credenciais inválidas');
-        } else if (result?.ok) {
-          console.log('✅ Login bem-sucedido, redirecionando...');
-          
-          // Força redirecionamento direto
-          setTimeout(() => {
-            window.location.href = '/vaults';
-          }, 500);
+      // Fazer o login
+      const loginPromise = signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      // Aguardar pelo menos 3 segundos
+      const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Aguardar tanto o login quanto o tempo mínimo
+      const [result] = await Promise.all([loginPromise, minimumTimePromise]);
+
+      if (result?.error) {
+        console.log('❌ Erro no login:', result.error);
+        
+        // Esconder loading antes de mostrar erro
+        setAuthLoading(false);
+        
+        // Diferentes tipos de erro
+        if (result.error === 'CredentialsSignin') {
+          setError('Email ou senha incorretos');
+        } else if (result.error === 'CallbackRouteError') {
+          setError('Erro de autenticação. Tente novamente.');
         } else {
-          console.log('⚠️ Resultado inesperado do login:', result);
-          setError('Erro inesperado. Tente novamente.');
+          setError('Erro ao fazer login. Tente novamente.');
         }
-      }, 'Fazendo login...', '✅ Login realizado! Redirecionando...');
+      } else if (result?.ok) {
+        console.log('✅ Login bem-sucedido, redirecionando...');
+        
+        // Atualizar mensagem de loading
+        setAuthLoading(true, "✅ Login realizado! Redirecionando...");
+        
+        // Aguardar mais um pouco antes de redirecionar
+        setTimeout(() => {
+          setAuthLoading(false);
+          window.location.href = '/vaults';
+        }, 1000);
+      } else {
+        console.log('⚠️ Resultado inesperado do login:', result);
+        setAuthLoading(false);
+        setError('Erro inesperado. Tente novamente.');
+      }
     } catch (error) {
       console.error('❌ Erro no login:', error);
-      // Error já foi tratado no executeWithLoading
+      setAuthLoading(false);
+      setError('Erro ao fazer login. Tente novamente.');
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      showLoading('🚀 Conectando com Google...');
-      await signIn('google', { callbackUrl: '/vaults' });
+      // Mostrar loading de autenticação
+      setAuthLoading(true, "🚀 Conectando com Google...");
+      
+      // Aguardar pelo menos 3 segundos antes de redirecionar
+      const loginPromise = signIn('google', { callbackUrl: '/vaults' });
+      const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+      
+      await Promise.all([loginPromise, minimumTimePromise]);
     } catch (error) {
+      setAuthLoading(false);
       setError('Erro ao fazer login com Google');
     }
   };
@@ -216,14 +241,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary/20 rounded-full animate-ping-slow" />
-        <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-accent/20 rounded-full animate-ping-slow animation-delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 border-primary/10 rounded-full animate-ping-slow animation-delay-500" />
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-accent/10 opacity-60" />
-      </div>
+    <>
+      {isAuthLoading && <LoadingScreen message={authMessage} />}
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary/20 rounded-full animate-ping-slow" />
+          <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-accent/20 rounded-full animate-ping-slow animation-delay-1000" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 border-primary/10 rounded-full animate-ping-slow animation-delay-500" />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-accent/10 opacity-60" />
+        </div>
       
       <div className="flex min-h-screen w-full items-center justify-center px-4 relative z-10">
         <Card className="w-full max-w-sm border-2 border-primary/20 shadow-2xl backdrop-blur-sm bg-card/95">
@@ -357,5 +384,18 @@ export default function LoginPage() {
       </Card>
       </div>
     </div>
+    </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -17,6 +17,8 @@ import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { useTheme } from '@/hooks/use-theme';
 import { performLogout } from '@/lib/auth-utils';
+import { useAuthLoading } from '@/hooks/use-auth-loading';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 
 type HeaderClientProps = {
   user: User;
@@ -24,13 +26,16 @@ type HeaderClientProps = {
 
 export function HeaderClient({ user }: HeaderClientProps) {
   const { themeVersion } = useTheme(); // Force re-render on theme change
+  const { isVisible, message, setAuthLoading } = useAuthLoading();
   
   const handleLogout = async () => {
-    await performLogout();
+    await performLogout(setAuthLoading);
   };
 
   return (
-    <DropdownMenu>
+    <>
+      {isVisible && <LoadingScreen message={message} />}
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-2 md:pr-4">
           <Avatar className="h-9 w-9 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
@@ -112,5 +117,6 @@ export function HeaderClient({ user }: HeaderClientProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }

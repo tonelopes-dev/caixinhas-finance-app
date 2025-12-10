@@ -70,20 +70,36 @@ export async function clearAuthSession(): Promise<void> {
 
 /**
  * Realiza logout completo e redireciona para login de forma segura
- * Esta função evita loops de redirecionamento
+ * Esta função evita loops de redirecionamento e mostra loading por 3 segundos
  */
-export async function performLogout(): Promise<void> {
+export async function performLogout(setLoadingCallback?: (show: boolean, message?: string) => void): Promise<void> {
   try {
-    // Adicionar um flag temporário para indicar logout em processo
+      // Mostrar loading de logout
+      if (setLoadingCallback) {
+        setLoadingCallback(true, "Encerrando sua sessão com segurança...");
+      }    // Adicionar um flag temporário para indicar logout em processo
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('logging-out', 'true');
     }
     
-    // Limpar toda a sessão
-    await clearAuthSession();
+    // Aguardar pelo menos 3 segundos para que o usuário veja o loading
+    const logoutPromise = (async () => {
+      // Limpar toda a sessão
+      await clearAuthSession();
+      
+      // Aguardar um pouco para garantir que tudo foi processado
+      await new Promise(resolve => setTimeout(resolve, 100));
+    })();
     
-    // Aguardar um pouco para garantir que tudo foi processado
-    await new Promise(resolve => setTimeout(resolve, 100));
+    const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Aguardar tanto o logout quanto o tempo mínimo
+    await Promise.all([logoutPromise, minimumTimePromise]);
+    
+    // Esconder loading
+    if (setLoadingCallback) {
+      setLoadingCallback(false);
+    }
     
     // Redirecionamento manual com parâmetro que indica logout
     if (typeof window !== 'undefined') {
@@ -96,6 +112,11 @@ export async function performLogout(): Promise<void> {
     
   } catch (error) {
     console.error('❌ Erro durante logout:', error);
+    
+    // Esconder loading em caso de erro
+    if (setLoadingCallback) {
+      setLoadingCallback(false);
+    }
     
     // Fallback - redirecionamento forçado
     if (typeof window !== 'undefined') {

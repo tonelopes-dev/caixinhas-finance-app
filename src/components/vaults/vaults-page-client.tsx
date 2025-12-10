@@ -21,6 +21,8 @@ import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/ac
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { performLogout } from '@/lib/auth-utils';
+import { useAuthLoading } from '@/hooks/use-auth-loading';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -404,6 +406,7 @@ export function VaultsPageClient({
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
   const [editingVault, setEditingVault] = useState<Vault | null>(null);
+  const { isVisible, message, setAuthLoading } = useAuthLoading();
 
   const { toast } = useToast();
 
@@ -424,7 +427,7 @@ export function VaultsPageClient({
   };
 
   const handleLogout = async () => {
-    await performLogout();
+    await performLogout(setAuthLoading);
   };
 
   const handleInvitationAction = () => {
@@ -435,6 +438,7 @@ export function VaultsPageClient({
 
   return (
     <>
+      {isVisible && <LoadingScreen message={message} />}
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
             <Logo className="h-8 w-8" />
