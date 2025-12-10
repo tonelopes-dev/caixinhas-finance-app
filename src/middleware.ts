@@ -11,20 +11,14 @@ export default withAuth(
 
         console.log('🔍 Middleware - Rota:', pathname, 'Token:', !!token);
 
-        // Se não há token e está tentando acessar rota protegida, deixa o withAuth lidar
-        if (!token && pathname !== '/login') {
-            console.log('❌ Middleware - Sem token, redirecionando para login');
-            return NextResponse.redirect(new URL('/login', origin));
-        }
-
         // Se o usuário está logado e tenta acessar a landing page, redireciona para o dashboard
         if (token && pathname.startsWith('/landing')) {
             console.log('✅ Middleware - Token válido em /landing, redirecionando para /dashboard');
             return NextResponse.redirect(new URL('/dashboard', origin));
         }
 
-        // Se está na página de login com token válido, redireciona para dashboard
-        if (token && pathname === '/login') {
+        // Se está na página de login com token válido, redireciona para dashboard (apenas se não for callback)
+        if (token && pathname === '/login' && !req.nextUrl.searchParams.has('callbackUrl')) {
             console.log('✅ Middleware - Token válido em /login, redirecionando para /dashboard');
             return NextResponse.redirect(new URL('/dashboard', origin));
         }

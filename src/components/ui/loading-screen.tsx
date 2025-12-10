@@ -32,7 +32,7 @@ export function LoadingScreen({
         if (prev >= 95) return prev;
         return prev + Math.random() * 15;
       });
-    }, 200);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
@@ -41,7 +41,7 @@ export function LoadingScreen({
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setCurrentMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
-    }, 2000);
+    }, 4000);
 
     return () => clearInterval(messageInterval);
   }, []);

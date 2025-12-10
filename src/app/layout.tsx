@@ -28,7 +28,8 @@ export default function RootLayout({
       <head>
         <title>Caixinhas</title>
         <meta name="description" content="Sonhar juntos é o primeiro passo para conquistar." />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="format-detection" content="telephone=no, email=no, address=no" />
         
         {/* PWA Meta Tags */}
         <meta name="application-name" content="Caixinhas" />

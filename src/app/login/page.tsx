@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -34,19 +34,52 @@ export default function LoginPage() {
     email: '',
     password: '',
   });
+  const isRedirectingRef = useRef(false);
+  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   // Limpar URL de parâmetros problemáticos que podem causar loops
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
-      const hasProblematicParams = url.searchParams.has('error') || url.searchParams.has('callbackUrl');
+      const hasError = url.searchParams.has('error');
+      const hasCallback = url.searchParams.has('callbackUrl');
       
-      if (hasProblematicParams) {
-        console.log('🔍 Login Page - Limpando parâmetros problemáticos da URL');
-        window.history.replaceState({}, '', '/login');
+      if (hasError || hasCallback) {
+        console.log('🔍 Login Page - Limpando parâmetros da URL:', { hasError, hasCallback });
+        // Limpar a URL sem parâmetros
+        const cleanUrl = `${url.origin}${url.pathname}`;
+        window.history.replaceState({}, '', cleanUrl);
       }
     }
   }, []);
+
+  // Prevenção específica para iOS contra loops de autofill
+  useEffect(() => {
+    if (isIOS && typeof window !== 'undefined') {
+      console.log('🍎 iOS detectado - aplicando correções de autofill');
+      
+      // Prevenir zoom automático no iOS quando o input é focado
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+      }
+      
+      // Limpar redirecting flag se estiver preso
+      const redirectingFlag = sessionStorage.getItem('redirecting');
+      if (redirectingFlag) {
+        console.log('🔧 Limpando flag de redirecionamento órfão');
+        sessionStorage.removeItem('redirecting');
+        isRedirectingRef.current = false;
+      }
+
+      return () => {
+        // Restaurar viewport ao sair
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+        }
+      };
+    }
+  }, [isIOS]);
 
   // Debug da sessão
   useEffect(() => {
@@ -69,23 +102,26 @@ export default function LoginPage() {
     // Aguardar o status ser definido e só redirecionar se estiver realmente autenticado
     if (status === 'loading') return; // Aguardar carregamento da sessão
     
-    if (status === 'authenticated' && session?.user?.id && !isLoading) {
+    if (status === 'authenticated' && session?.user?.id && !isLoading && !isRedirectingRef.current) {
       console.log('✅ Usuário já autenticado, redirecionando...', session.user);
       
       // Verificar se já não está em processo de redirecionamento
       const isRedirecting = sessionStorage.getItem('redirecting');
       if (isRedirecting) return;
       
+      isRedirectingRef.current = true;
       sessionStorage.setItem('redirecting', 'true');
       localStorage.setItem('CAIXINHAS_USER_ID', session.user.id);
       
-      // Usar timeout para evitar conflitos
+      // Timeout diferente para iOS devido ao autofill
+      const timeout = isIOS ? 500 : 100;
       setTimeout(() => {
-        router.replace('/vaults');
-        sessionStorage.removeItem('redirecting');
-      }, 100);
+        if (isRedirectingRef.current) {
+          window.location.href = '/vaults';
+        }
+      }, timeout);
     }
-  }, [session, status, router, isLoading]);
+  }, [session, status, router, isLoading, isIOS]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +137,16 @@ export default function LoginPage() {
 
         if (result?.error) {
           console.log('❌ Erro no login:', result.error);
-          setError('Email ou senha incorretos');
+          
+          // Diferentes tipos de erro
+          if (result.error === 'CredentialsSignin') {
+            setError('Email ou senha incorretos');
+          } else if (result.error === 'CallbackRouteError') {
+            setError('Erro de autenticação. Tente novamente.');
+          } else {
+            setError('Erro ao fazer login. Tente novamente.');
+          }
+          
           throw new Error('Credenciais inválidas');
         } else if (result?.ok) {
           console.log('✅ Login bem-sucedido, redirecionando...');
@@ -109,7 +154,10 @@ export default function LoginPage() {
           // Força redirecionamento direto
           setTimeout(() => {
             window.location.href = '/vaults';
-          }, 1000);
+          }, 500);
+        } else {
+          console.log('⚠️ Resultado inesperado do login:', result);
+          setError('Erro inesperado. Tente novamente.');
         }
       }, 'Fazendo login...', '✅ Login realizado! Redirecionando...');
     } catch (error) {
@@ -128,10 +176,20 @@ export default function LoginPage() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Prevenir processamento se estiver redirecionando
+    if (isRedirectingRef.current) return;
+    
+    const { name, value } = e.target;
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+    
+    // Limpar erro quando usuário digita
+    if (error) {
+      setError('');
+    }
   };
 
   return (
@@ -196,6 +254,10 @@ export default function LoginPage() {
                 onChange={handleInputChange}
                 required
                 autoComplete="email"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck="false"
+                data-form-type="other"
                 className="border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-200 hover:border-primary/30"
               />
             </div>
@@ -211,6 +273,10 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   required
                   autoComplete="current-password"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  data-form-type="other"
                   className="border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 pr-10"
                 />
                 <Button
