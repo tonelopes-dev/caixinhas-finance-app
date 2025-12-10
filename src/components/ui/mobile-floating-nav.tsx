@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wallet, Receipt, Vault, Gift, Home } from "lucide-react";
+import { Home, Receipt, Vault, Gift, ArrowRightLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ const MobileFloatingNav = () => {
     },
     { 
       id: 1, 
-      icon: <Receipt size={20} />, 
+      icon: <ArrowRightLeft size={20} />, 
       label: "Transações", 
       path: "/transactions"
     },
