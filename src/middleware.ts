@@ -2,43 +2,35 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
+// Middleware simplificado:
+// - Não realiza redirecionamentos automáticos que possam causar loops
+// - Apenas permite/nega acesso a rotas protegidas via callback `authorized`
+// - Mantém páginas públicas acessíveis sem token
 export default withAuth(
-    // A função de middleware é chamada apenas para rotas protegidas pelo matcher.
-    // O `withAuth` já lida com o redirecionamento para a página de login.
-    function middleware(req) {
-        const token = req.nextauth.token;
-        const { pathname, origin } = req.nextUrl;
-
-        console.log('🔍 Middleware - Rota:', pathname, 'Token:', !!token);
-
-        // Se o usuário está logado e tenta acessar a landing page, redireciona para o dashboard
-        if (token && pathname.startsWith('/landing')) {
-            console.log('✅ Middleware - Token válido em /landing, redirecionando para /dashboard');
-            return NextResponse.redirect(new URL('/dashboard', origin));
-        }
-
-        // Se está na página de login com token válido, redireciona para dashboard (apenas se não for callback)
-        if (token && pathname === '/login' && !req.nextUrl.searchParams.has('callbackUrl')) {
-            console.log('✅ Middleware - Token válido em /login, redirecionando para /dashboard');
-            return NextResponse.redirect(new URL('/dashboard', origin));
-        }
-
-        // Para todas as outras requisições protegidas, permite o acesso.
+    // middleware: não faz redirects automáticos, apenas passa a requisição adiante
+    (req) => {
+        const { pathname } = req.nextUrl;
+        console.log('🔍 Middleware - Rota acessada:', pathname);
         return NextResponse.next();
     },
     {
         callbacks: {
             authorized: ({ token, req }) => {
-                const { pathname } = req.nextUrl;
-                
-                // Sempre permitir acesso às páginas públicas
-                if (pathname === '/login' || pathname === '/register' || pathname === '/terms' || pathname.startsWith('/landing')) {
+                const pathname = req.nextUrl.pathname;
+                // Páginas públicas
+                if (
+                    pathname === '/login' ||
+                    pathname === '/register' ||
+                    pathname === '/terms' ||
+                    pathname.startsWith('/landing') ||
+                    pathname.startsWith('/api/auth')
+                ) {
                     return true;
                 }
-                
-                // Para rotas protegidas, exigir token
+
+                // Para todas as outras rotas, exige token válido
                 return !!token;
-            }
+            },
         },
         pages: {
             signIn: '/login',
@@ -46,22 +38,10 @@ export default withAuth(
     }
 );
 
-// O `matcher` define em quais rotas o middleware será aplicado.
-// Esta configuração protege todas as rotas, exceto as listadas.
+// Matcher: protege todas as rotas exceto arquivos estáticos e páginas públicas.
 export const config = {
-  matcher: [
-    /*
-     * Corresponde a todas as rotas, exceto aquelas que são explicitamente públicas
-     * ou arquivos estáticos. A lógica negativa `(?!...)` é usada para isso.
-     * - api: Rotas de API (incluindo as do next-auth)
-     * - _next/static: Arquivos estáticos do Next.js
-     * - _next/image: Arquivos de otimização de imagem
-     * - Várias extensões de arquivo de imagem e manifesto
-     * - Rotas públicas: login, register, terms, landing
-     * - sw.js: Service worker para PWA
-     */
-    '/((?!api|_next/static|_next/image|.*\\.png$|.*\\.svg$|.*\\.webp$|.*\\.json$|favicon.ico|sw.js|login|register|terms|landing).*)',
-    // A rota raiz (/) também é incluída para ser gerenciada pelo middleware
-    '/',
-  ],
+    matcher: [
+        '/((?!api|_next/static|_next/image|.*\\.png$|.*\\.svg$|.*\\.webp$|.*\\.json$|favicon.ico|sw.js|login|register|terms|landing).*)',
+        '/',
+    ],
 };
