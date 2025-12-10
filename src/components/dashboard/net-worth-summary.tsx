@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
 import { Wallet, PiggyBank, Eye, EyeOff } from 'lucide-react';
 import { AnimatedCounter } from '../ui/animated-counter';
 import { Button } from '../ui/button';
+import { usePrivacyMode } from '@/hooks/use-privacy-mode';
 
 type NetWorthSummaryProps = {
   liquidAssets: number;
@@ -22,7 +22,7 @@ export default function NetWorthSummary({
   liquidAssets,
   investedAssets,
 }: NetWorthSummaryProps) {
-  const [isPrivate, setIsPrivate] = useState(true);
+  const { isPrivate, togglePrivacy, isLoaded } = usePrivacyMode();
   const totalNetWorth = liquidAssets + investedAssets;
 
   const formatCurrency = (value: number) => {
@@ -49,8 +49,9 @@ export default function NetWorthSummary({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsPrivate(!isPrivate)}
+            onClick={togglePrivacy}
             aria-label={isPrivate ? 'Mostrar valores' : 'Ocultar valores'}
+            disabled={!isLoaded}
           >
             {isPrivate ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </Button>
@@ -64,7 +65,7 @@ export default function NetWorthSummary({
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Patrimônio Total</p>
             <div className="text-2xl font-bold text-primary">
-              {isPrivate ? <PrivacyBlurPrimary /> : <AnimatedCounter value={totalNetWorth} formatter={formatCurrency} />}
+              {!isLoaded || isPrivate ? <PrivacyBlurPrimary /> : <AnimatedCounter value={totalNetWorth} formatter={formatCurrency} />}
             </div>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -78,7 +79,7 @@ export default function NetWorthSummary({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Disponível Agora</p>
-              {isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={liquidAssets} formatter={formatCurrency} /></p>}
+              {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={liquidAssets} formatter={formatCurrency} /></p>}
             </div>
           </div>
           <div className="flex items-center gap-4 rounded-lg border p-4">
@@ -89,7 +90,7 @@ export default function NetWorthSummary({
               <p className="text-sm text-muted-foreground">
                 Investido p/ Sonhos
               </p>
-               {isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={investedAssets} formatter={formatCurrency} /></p>}
+               {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={investedAssets} formatter={formatCurrency} /></p>}
             </div>
           </div>
         </div>

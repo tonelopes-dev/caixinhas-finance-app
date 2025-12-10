@@ -11,8 +11,8 @@ import type { Goal } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { user, partner } from '@/lib/data';
 import { AnimatedCounter } from '../ui/animated-counter';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { usePrivacyMode } from '@/hooks/use-privacy-mode';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -20,7 +20,7 @@ type GoalBucketsProps = {
 };
 
 export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) {
-  const [isPrivate, setIsPrivate] = useState(true);
+  const { isPrivate, togglePrivacy, isLoaded } = usePrivacyMode();
   
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -43,8 +43,9 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
             <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsPrivate(!isPrivate)}
+                onClick={togglePrivacy}
                 aria-label={isPrivate ? 'Mostrar valores' : 'Ocultar valores'}
+                disabled={!isLoaded}
             >
                 {isPrivate ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </Button>
@@ -64,13 +65,13 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
                     <p className="font-semibold">{goal.name}</p>
                   </div>
                    <p className="text-sm font-bold text-primary flex items-center gap-1">
-                        {isPrivate ? <PrivacyBlurPercent /> : <><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</>}
+                        {!isLoaded || isPrivate ? <PrivacyBlurPercent /> : <><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</>}
                     </p>
                 </div>
                  <p className={cn("text-sm text-muted-foreground", goal.isFeatured && "pl-6")}>
-                    {isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
+                    {!isLoaded || isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
                 </p>
-                <Progress value={isPrivate ? undefined : progress} className="h-3 mt-2" />
+                <Progress value={!isLoaded || isPrivate ? undefined : progress} className="h-3 mt-2" />
                 <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-1">
                         <div className="flex -space-x-2 overflow-hidden">
