@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Loader2, Zap, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Gift } from 'lucide-react';
 
 export function NavigationLoader() {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,11 +88,11 @@ export function NavigationLoader() {
             }}
           />
 
-          {/* Loading indicator no canto superior direito */}
-          <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          {/* Loading indicator centralizado */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center space-x-3 bg-card/95 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-border/50 animate-pulse">
               <div className="relative">
-                <Zap className="w-4 h-4 text-primary animate-bounce" />
+                <Gift className="w-4 h-4 text-primary animate-bounce" />
                 <Sparkles className="w-2 h-2 text-accent absolute -top-1 -right-1 animate-ping" />
               </div>
               <div className="flex items-center space-x-2">
