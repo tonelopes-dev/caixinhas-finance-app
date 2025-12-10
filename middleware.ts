@@ -12,6 +12,15 @@ export default withAuth(
         const token = req.nextauth.token;
         const { pathname } = req.nextUrl;
 
+        // Verificar se há parâmetros que indicam logout ou limpeza de sessão
+        const isLoggingOut = req.nextUrl.searchParams.has('logout') || 
+                           req.nextUrl.searchParams.has('clear-session');
+
+        // Se está fazendo logout, permitir acesso ao login mesmo com token
+        if (isLoggingOut && pathname === '/login') {
+            return NextResponse.next();
+        }
+
         // Se o usuário está logado, redireciona de /landing para /vaults
         if (token && pathname.startsWith('/landing')) {
             return NextResponse.redirect(new URL('/vaults', req.url));

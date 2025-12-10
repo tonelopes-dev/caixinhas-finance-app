@@ -20,7 +20,7 @@ import { EditVaultDialog } from '@/components/vaults/edit-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
-import { signOut } from 'next-auth/react';
+import { performLogout } from '@/lib/auth-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -424,14 +424,7 @@ export function VaultsPageClient({
   };
 
   const handleLogout = async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('CAIXINHAS_USER_ID');
-      sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
-    }
-    await signOut({ 
-      callbackUrl: '/login',
-      redirect: true
-    });
+    await performLogout();
   };
 
   const handleInvitationAction = () => {

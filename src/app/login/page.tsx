@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
+import { clearAuthSession } from '@/lib/auth-utils';
 import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { LoadingButton } from '@/components/ui/loading-button';
@@ -24,6 +25,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const { showLoading } = useLoading();
@@ -91,16 +93,37 @@ export default function LoginPage() {
   }, [session, status, isLoading]);
 
   useEffect(() => {
-    // Limpar dados de sessão ao carregar a página de login
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('CAIXINHAS_USER_ID');
-      sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+    // Verificar se chegou de um logout para fazer limpeza extra
+    const isFromLogout = searchParams.get('logout') === 'true';
+    
+    if (isFromLogout) {
+      console.log('🧹 Detectado logout - fazendo limpeza completa...');
+      clearAuthSession().then(() => {
+        console.log('✅ Limpeza de logout completa');
+        // Limpar o parâmetro da URL após a limpeza
+        const url = new URL(window.location.href);
+        url.searchParams.delete('logout');
+        window.history.replaceState({}, document.title, url.toString());
+      });
+    } else {
+      // Limpeza básica apenas
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('CAIXINHAS_USER_ID');
+        sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     // Aguardar o status ser definido e só redirecionar se estiver realmente autenticado
     if (status === 'loading') return; // Aguardar carregamento da sessão
+    
+    // Se chegou de logout, não redirecionar automaticamente por um tempo
+    const isFromLogout = searchParams.get('logout') === 'true';
+    if (isFromLogout) {
+      console.log('🚫 Bloqueando redirecionamento automático - usuário fez logout');
+      return;
+    }
     
     if (status === 'authenticated' && session?.user?.id && !isLoading && !isRedirectingRef.current) {
       console.log('✅ Usuário já autenticado, redirecionando...', session.user);

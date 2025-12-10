@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
-import { signOut } from 'next-auth/react';
 import { useTheme } from '@/hooks/use-theme';
+import { performLogout } from '@/lib/auth-utils';
 
 type HeaderClientProps = {
   user: User;
@@ -26,32 +26,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const { themeVersion } = useTheme(); // Force re-render on theme change
   
   const handleLogout = async () => {
-    try {
-      // Limpar localStorage/sessionStorage antes do signOut
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('CAIXINHAS_USER_ID');
-        sessionStorage.removeItem('CAIXINHAS_VAULT_ID');
-        // Limpar todos os dados relacionados à sessão
-        localStorage.clear();
-        sessionStorage.clear();
-      }
-      
-      // Usar NextAuth signOut sem redirecionamento automático
-      await signOut({ 
-        redirect: false
-      });
-      
-      // Redirecionamento manual para evitar loops
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    } catch (error) {
-      console.error('Erro no logout:', error);
-      // Em caso de erro, forçar redirecionamento
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
+    await performLogout();
   };
 
   return (
