@@ -8,6 +8,9 @@ import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { LoadingProvider } from '@/components/providers/loading-provider';
 import { NavigationLoader } from '@/components/ui/navigation-loader';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { NetworkStatusIndicator } from '@/components/ui/network-status-indicator';
+import { UpdateAvailableNotification } from '@/components/ui/update-available-notification';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -72,12 +75,16 @@ export default function RootLayout({
           <ThemeProvider>
             <LoadingProvider>
               <FirebaseClientProvider>
-                <NavigationLoader />
-                <RootLayoutClient>
-                  {children}
-                </RootLayoutClient>
-                <Toaster />
-                <PwaPrompt />
+                <ErrorBoundary>
+                  <NavigationLoader />
+                  <NetworkStatusIndicator />
+                  <UpdateAvailableNotification />
+                  <RootLayoutClient>
+                    {children}
+                  </RootLayoutClient>
+                  <Toaster />
+                  <PwaPrompt />
+                </ErrorBoundary>
               </FirebaseClientProvider>
             </LoadingProvider>
           </ThemeProvider>
