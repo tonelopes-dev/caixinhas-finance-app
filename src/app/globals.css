@@ -823,3 +823,15 @@
     max-width: 200px;
   }
 }
+
+/* Espaçamento para navegação flutuante mobile */
+@media (max-width: 640px) {
+  .mobile-nav-padding {
+    padding-bottom: 100px;
+  }
+  
+  /* Evitar sobreposição do floating nav */
+  .floating-nav-safe-area {
+    margin-bottom: 80px;
+  }
+}
