@@ -82,14 +82,14 @@ export function NavigationLoader() {
         <>
           {/* Barra de progresso no topo */}
           <div
-            className="fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r from-primary via-accent to-primary origin-left transition-all duration-300 ease-out"
+            className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-primary via-accent to-primary origin-left transition-all duration-300 ease-out"
             style={{ 
               transform: `scaleX(${progress / 100})`,
             }}
           />
 
           {/* Loading indicator centralizado */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center space-x-3 bg-card/95 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-border/50 animate-pulse">
               <div className="relative">
                 <Gift className="w-4 h-4 text-primary animate-bounce" />
@@ -103,7 +103,7 @@ export function NavigationLoader() {
           </div>
 
           {/* Overlay sutil */}
-          <div className="fixed inset-0 z-40 bg-background/20 backdrop-blur-[1px] animate-in fade-in duration-200" />
+          <div className="fixed inset-0 z-[55] bg-background/20 backdrop-blur-[1px] animate-in fade-in duration-200" />
         </>
       )}
     </>

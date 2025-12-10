@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLoading } from '@/components/providers/loading-provider';
 
 interface QuickNavButtonProps {
   href: string;
@@ -26,12 +27,14 @@ export function QuickNavButton({
   replace = false
 }: QuickNavButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { showLoading, hideLoading } = useLoading();
   const router = useRouter();
 
   const handleClick = async () => {
     if (disabled || isLoading) return;
 
     setIsLoading(true);
+    showLoading('Navegando...');
     
     try {
       if (replace) {
@@ -40,10 +43,14 @@ export function QuickNavButton({
         router.push(href);
       }
       
-      // Pequeno delay para UX suave
-      setTimeout(() => setIsLoading(false), 500);
+      // Delay menor para UX suave
+      setTimeout(() => {
+        setIsLoading(false);
+        hideLoading();
+      }, 300);
     } catch (error) {
       setIsLoading(false);
+      hideLoading();
       console.error('Navigation error:', error);
     }
   };
@@ -75,12 +82,14 @@ export function QuickNavButton({
 // Hook para usar em componentes personalizados
 export function useQuickNav() {
   const [isNavigating, setIsNavigating] = useState(false);
+  const { showLoading, hideLoading } = useLoading();
   const router = useRouter();
 
   const navigate = async (href: string, replace = false) => {
     if (isNavigating) return;
 
     setIsNavigating(true);
+    showLoading('Navegando...');
     
     try {
       if (replace) {
@@ -89,9 +98,13 @@ export function useQuickNav() {
         router.push(href);
       }
       
-      setTimeout(() => setIsNavigating(false), 400);
+      setTimeout(() => {
+        setIsNavigating(false);
+        hideLoading();
+      }, 300);
     } catch (error) {
       setIsNavigating(false);
+      hideLoading();
       console.error('Navigation error:', error);
     }
   };

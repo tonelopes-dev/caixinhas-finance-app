@@ -6,11 +6,13 @@ import { Home, Vault, Gift, ArrowRightLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { useLoading } from "@/components/providers/loading-provider";
 
 const MobileFloatingNav = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { isLoading } = useLoading();
   const [active, setActive] = useState(0);
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,8 +22,8 @@ const MobileFloatingNav = () => {
   const publicPages = ['/landing', '/login', '/register', '/terms'];
   const isPublicPage = publicPages.some(page => pathname.startsWith(page));
   
-  // Só mostrar se usuário estiver autenticado e não estiver em página pública
-  const shouldShowNav = status === 'authenticated' && session?.user && !isPublicPage;
+  // Só mostrar se usuário estiver autenticado, não estiver em página pública e não estiver com loading global ativo
+  const shouldShowNav = status === 'authenticated' && session?.user && !isPublicPage && !isLoading;
 
   const items = [
     { 
@@ -97,7 +99,7 @@ const MobileFloatingNav = () => {
   }
 
   return (
-    <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs px-4">
+    <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
       <div
         ref={containerRef}
         className="relative flex items-center justify-between bg-card/95 backdrop-blur-md shadow-2xl rounded-2xl px-2 py-3 border border-border/50"
