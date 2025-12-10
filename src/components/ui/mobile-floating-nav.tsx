@@ -2,23 +2,32 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wallet, Receipt, Vault, Gift } from "lucide-react";
+import { Wallet, Receipt, Vault, Gift, Home } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const MobileFloatingNav = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [active, setActive] = useState(0);
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  // Páginas onde o menu mobile NÃO deve aparecer
+  const publicPages = ['/landing', '/login', '/register', '/terms'];
+  const isPublicPage = publicPages.some(page => pathname.startsWith(page));
+  
+  // Só mostrar se usuário estiver autenticado e não estiver em página pública
+  const shouldShowNav = status === 'authenticated' && session?.user && !isPublicPage;
+
   const items = [
     { 
       id: 0, 
-      icon: <Wallet size={20} />, 
-      label: "Contas", 
+      icon: <Home size={20} />, 
+      label: "Início", 
       path: "/dashboard"
     },
     { 
@@ -81,6 +90,11 @@ const MobileFloatingNav = () => {
     setActive(index);
     router.push(item.path);
   };
+
+  // Não renderizar se não deve mostrar a navegação
+  if (!shouldShowNav) {
+    return null;
+  }
 
   return (
     <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs px-4">
