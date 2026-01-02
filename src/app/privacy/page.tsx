@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
 export default function PrivacyPolicyPage() {
@@ -86,10 +85,9 @@ export default function PrivacyPolicyPage() {
               Como coletamos, usamos e protegemos suas informações
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[600px] px-6 py-4">
-              <div className="space-y-8 text-base leading-relaxed">
-                {/* Introduction */}
+          <CardContent className="p-6">
+            <div className="max-h-[600px] overflow-y-auto space-y-8 text-base leading-relaxed">
+              {/* Introduction */}
                 <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 rounded-lg border border-primary/20">
                   <h2 className="text-xl font-semibold text-foreground mb-3 flex items-center gap-2">
                     <Shield className="h-5 w-5 text-primary" />
@@ -442,8 +440,7 @@ export default function PrivacyPolicyPage() {
                     Última atualização: 2 de Janeiro de 2025
                   </p>
                 </div>
-              </div>
-            </ScrollArea>
+            </div>
           </CardContent>
         </Card>
 
