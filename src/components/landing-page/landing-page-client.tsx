@@ -11,6 +11,7 @@ import {
   PricingSection,
   NewsSection,
   CTASection,
+  Footer,
   useScrollAnimations,
   HeroSection,
 } from "@/components/landing-page"
@@ -32,6 +33,7 @@ export function LandingPageClient() {
         <PricingSection isVisible={isVisible} />
         <NewsSection />
         <CTASection />
+        <Footer />
       </div>
     </div>
   )

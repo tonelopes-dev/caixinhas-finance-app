@@ -275,6 +275,10 @@ function RegisterContent() {
                             Ao se cadastrar, você concorda com nossos{' '}
                             <Link href="/terms" className="underline hover:text-primary">
                                 Termos de Serviço
+                            </Link>
+                            {' '}e{' '}
+                            <Link href="/privacy" className="underline hover:text-primary">
+                                Política de Privacidade
                             </Link>.
                         </p>
                         <p className="mt-4">

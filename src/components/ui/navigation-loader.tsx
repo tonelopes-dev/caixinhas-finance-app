@@ -2,7 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Loader2, Sparkles, Gift } from 'lucide-react';
+
+// Componente de ícone inline para evitar problemas de HMR
+function LoaderIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
 
 export function NavigationLoader() {
   const [isLoading, setIsLoading] = useState(false);
@@ -90,15 +109,9 @@ export function NavigationLoader() {
 
           {/* Loading indicator centralizado */}
           <div className="fixed inset-0 z-[60] flex items-center justify-center animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center space-x-3 bg-card/95 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-border/50 animate-pulse">
-              <div className="relative">
-                <Gift className="w-4 h-4 text-primary animate-bounce" />
-                <Sparkles className="w-2 h-2 text-accent absolute -top-1 -right-1 animate-ping" />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Loader2 className="w-3 h-3 animate-spin text-primary" />
-                <span className="text-xs font-medium text-foreground">Navegando</span>
-              </div>
+            <div className="flex items-center space-x-3 bg-card/95 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-border/50">
+              <LoaderIcon className="w-5 h-5 animate-spin text-primary" />
+              <span className="text-sm font-medium text-foreground">Carregando...</span>
             </div>
           </div>
 

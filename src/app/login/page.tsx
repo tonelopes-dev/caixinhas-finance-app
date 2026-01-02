@@ -375,11 +375,15 @@ function LoginPageContent() {
               Cadastre-se
             </Link>
           </p>
-          <p className="mt-2">
+          <div className="flex items-center gap-3 mt-2">
+            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors hover:underline">
+              Política de Privacidade
+            </Link>
+            <span className="text-xs text-muted-foreground">•</span>
             <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors hover:underline">
               Termos de Serviço
             </Link>
-          </p>
+          </div>
         </CardFooter>
       </Card>
       </div>
