@@ -58,9 +58,9 @@ export const config = {
      * - _next/static: Arquivos estáticos do Next.js
      * - _next/image: Arquivos de otimização de imagem
      * - Várias extensões de arquivo de imagem e manifesto
-     * - Rotas públicas: login, register, terms, landing
+     * - Rotas públicas: login, register, terms, privacy, landing, forgot-password, reset-password
      */
-    '/((?!api|_next/static|_next/image|.*\.png$|.*\.svg$|.*\.webp$|.*\.json$|favicon.ico|login|register|terms|landing).*)',
+    '/((?!api|_next/static|_next/image|.*\.png$|.*\.svg$|.*\.webp$|.*\.json$|favicon.ico|login|register|terms|privacy|landing|forgot-password|reset-password).*)',
     // A rota raiz (/) também é incluída para ser gerenciada pelo middleware
     '/',
   ],
