@@ -43,11 +43,11 @@ export function QuickNavButton({
         router.push(href);
       }
       
-      // Delay menor para UX suave
+      // Mantém loading até navegação completar (mínimo de 800ms para UX)
       setTimeout(() => {
         setIsLoading(false);
         hideLoading();
-      }, 300);
+      }, 800);
     } catch (error) {
       setIsLoading(false);
       hideLoading();
@@ -98,10 +98,11 @@ export function useQuickNav() {
         router.push(href);
       }
       
+      // Mantém loading até navegação completar (mínimo de 800ms para UX)
       setTimeout(() => {
         setIsNavigating(false);
         hideLoading();
-      }, 300);
+      }, 800);
     } catch (error) {
       setIsNavigating(false);
       hideLoading();
