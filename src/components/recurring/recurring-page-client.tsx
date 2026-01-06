@@ -70,22 +70,13 @@ export function RecurringPageClient({
 }: RecurringPageClientProps) {
   const router = useRouter();
 
+  // Não agrupa mais - cada transação parcelada é única
   const groupedInstallmentExpenses = useMemo(() => {
-    return Object.values(installmentExpenses.reduce((acc: Record<string, Transaction[]>, t) => {
-        const key = t.description.trim().toLowerCase();
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(t);
-        return acc;
-      }, {})).map(group => group[0]);
+    return installmentExpenses;
   }, [installmentExpenses]);
 
   const groupedInstallmentIncomes = useMemo(() => {
-    return Object.values(installmentIncomes.reduce((acc: Record<string, Transaction[]>, t) => {
-        const key = t.description.trim().toLowerCase();
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(t);
-        return acc;
-      }, {})).map(group => group[0]);
+    return installmentIncomes;
   }, [installmentIncomes]);
 
   return (
