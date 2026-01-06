@@ -167,6 +167,8 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
     revalidatePath('/goals');
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
+    revalidatePath('/transactions');
+    revalidatePath('/recurring');
     return { success: true, message: `${type === 'deposit' ? 'Depósito' : 'Retirada'} realizado com sucesso!` };
 }
 

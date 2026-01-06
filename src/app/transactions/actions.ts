@@ -143,6 +143,7 @@ export async function addTransaction(prevState: TransactionState, formData: Form
         revalidatePath('/transactions');
         revalidatePath('/dashboard');
         revalidatePath('/reports');
+        revalidatePath('/recurring');
         if (validatedFields.data.goalId) {
             revalidatePath(`/goals/${validatedFields.data.goalId}`);
         }
@@ -222,6 +223,7 @@ export async function updateTransaction(prevState: TransactionState, formData: F
         revalidatePath('/transactions');
         revalidatePath('/dashboard');
         revalidatePath('/reports');
+        revalidatePath('/recurring');
         if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
         if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
     } catch (secondaryError) {
@@ -264,6 +266,7 @@ export async function deleteTransaction(prevState: { message: string | null }, f
             revalidatePath('/transactions');
             revalidatePath('/dashboard');
             revalidatePath('/reports');
+            revalidatePath('/recurring');
             if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
         } catch (secondaryError) {
             console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
