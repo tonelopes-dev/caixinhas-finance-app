@@ -7,13 +7,15 @@ import { Heart, Sparkles, Star } from 'lucide-react';
 interface LoadingScreenProps {
   message?: string;
   showProgress?: boolean;
+  progress?: number;
 }
 
 export function LoadingScreen({ 
   message = "Carregando sua jornada financeira...", 
-  showProgress = true 
+  showProgress = true,
+  progress: externalProgress 
 }: LoadingScreenProps) {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(externalProgress || 0);
   const [currentMessage, setCurrentMessage] = useState(message);
   
   const loadingMessages = [
@@ -25,8 +27,17 @@ export function LoadingScreen({
     "Construindo seu futuro..."
   ];
 
-  // Animação de progresso suave
+  // Sincronizar com progresso externo se fornecido
   useEffect(() => {
+    if (externalProgress !== undefined) {
+      setProgress(externalProgress);
+    }
+  }, [externalProgress]);
+
+  // Animação de progresso suave (apenas se não tiver progresso externo)
+  useEffect(() => {
+    if (externalProgress !== undefined) return; // Não usar auto-progresso se controlado externamente
+    
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 95) return prev;
@@ -35,7 +46,7 @@ export function LoadingScreen({
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [externalProgress]);
 
   // Rotação de mensagens
   useEffect(() => {
