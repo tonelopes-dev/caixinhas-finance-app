@@ -1,7 +1,7 @@
 // Configurações do aplicativo
 export const config = {
   // URLs
-  checkoutUrl: process.env.KIWIFY_URL_CHECKOUT || 'https://kiwify.app/JUDe4nb',
+  checkoutUrl: process.env.KIWIFY_URL_CHECKOUT || 'https://pay.kiwify.com.br/6ZqSVVu',
   
   // Outras configurações podem ser adicionadas aqui
   app: {

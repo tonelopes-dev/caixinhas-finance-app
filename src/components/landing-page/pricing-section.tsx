@@ -85,9 +85,9 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="flex items-baseline gap-2">
                       <span className="text-6xl md:text-7xl font-bold text-foreground animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                        R$ 5,00
+                        R$ 97,00
                       </span>
-                      <span className="text-2xl text-foreground/60">/trimestre</span>
+                      <span className="text-2xl text-foreground/60">/anual</span>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -104,9 +104,9 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                       </span>
                     </div> */}
                   </div>
-                  <p className="text-lg text-foreground/70 max-w-xl mx-auto">
+                  {/* <p className="text-lg text-foreground/70 max-w-xl mx-auto">
                     Depois renova por R$ 37,90 / trimestre
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 space-y-4">
