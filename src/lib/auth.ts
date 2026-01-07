@@ -1,6 +1,6 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { AuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+// import GoogleProvider from 'next-auth/providers/google'; // TODO: Desabilitado até aprovação do Google OAuth
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 import { prisma } from '@/services/prisma';
@@ -17,10 +17,15 @@ const getBaseUrl = () => {
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    // TODO: Google OAuth desabilitado temporariamente
+    // Pendências (Ver docs/google-oauth-setup.md):
+    // - Verificação do domínio no Google Search Console
+    // - Atualização do OAuth Consent Screen
+    // - Aprovação do Google
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID!,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    // }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -62,37 +67,39 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        const userExists = await prisma.user.findUnique({
-          where: { email: user.email! },
-        });
+      // TODO: Callback do Google OAuth comentado temporariamente
+      // Descomentar quando Google OAuth for aprovado
+      // if (account?.provider === 'google') {
+      //   const userExists = await prisma.user.findUnique({
+      //     where: { email: user.email! },
+      //   });
 
-        if (!userExists) {
-            const trialExpiresAt = new Date();
-            trialExpiresAt.setDate(trialExpiresAt.getDate() + 14);
+      //   if (!userExists) {
+      //       const trialExpiresAt = new Date();
+      //       trialExpiresAt.setDate(trialExpiresAt.getDate() + 14);
 
-            await prisma.$transaction(async (tx) => {
-                const newUser = await tx.user.create({
-                    data: {
-                        id: user.id,
-                        name: user.name!,
-                        email: user.email!,
-                        password: Math.random().toString(36).slice(-8), // Senha aleatória para usuários Google
-                        avatarUrl: user.image,
-                        subscriptionStatus: 'trial',
-                        trialExpiresAt: trialExpiresAt,
-                    },
-                });
-                await CategoryService.createDefaultCategoriesForUser(newUser.id, tx);
+      //       await prisma.$transaction(async (tx) => {
+      //           const newUser = await tx.user.create({
+      //               data: {
+      //                   id: user.id,
+      //                   name: user.name!,
+      //                   email: user.email!,
+      //                   password: Math.random().toString(36).slice(-8), // Senha aleatória para usuários Google
+      //                   avatarUrl: user.image,
+      //                   subscriptionStatus: 'trial',
+      //                   trialExpiresAt: trialExpiresAt,
+      //               },
+      //           });
+      //           await CategoryService.createDefaultCategoriesForUser(newUser.id, tx);
 
-                // Vincular convites pendentes por e-mail
-                await tx.invitation.updateMany({
-                    where: { receiverEmail: user.email!, status: 'pending' },
-                    data: { receiverId: newUser.id, receiverEmail: null }
-                });
-            });
-        }
-      }
+      //           // Vincular convites pendentes por e-mail
+      //           await tx.invitation.updateMany({
+      //               where: { receiverEmail: user.email!, status: 'pending' },
+      //               data: { receiverId: newUser.id, receiverEmail: null }
+      //           });
+      //       });
+      //   }
+      // }
       return true;
     },
 

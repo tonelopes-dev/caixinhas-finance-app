@@ -17,8 +17,7 @@ import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeSwitcher } from '../theme-switcher';
 import { useTheme } from '@/hooks/use-theme';
 import { performLogout } from '@/lib/auth-utils';
-import { useAuthLoading } from '@/hooks/use-auth-loading';
-import { LoadingScreen } from '@/components/ui/loading-screen';
+import { useLoading } from '@/components/providers/loading-provider';
 
 type HeaderClientProps = {
   user: User;
@@ -26,15 +25,21 @@ type HeaderClientProps = {
 
 export function HeaderClient({ user }: HeaderClientProps) {
   const { themeVersion } = useTheme(); // Force re-render on theme change
-  const { isVisible, message, setAuthLoading } = useAuthLoading();
+  const { showLoading, hideLoading } = useLoading();
   
   const handleLogout = async () => {
+    const setAuthLoading = (show: boolean, message?: string) => {
+      if (show) {
+        showLoading(message || 'Saindo...');
+      } else {
+        hideLoading();
+      }
+    };
     await performLogout(setAuthLoading);
   };
 
   return (
     <>
-      {isVisible && <LoadingScreen message={message} />}
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-2 md:pr-4">

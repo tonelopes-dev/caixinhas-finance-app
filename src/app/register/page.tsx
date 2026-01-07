@@ -20,7 +20,7 @@ import { Logo } from '@/components/logo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { FcGoogle } from 'react-icons/fc';
+// import { FcGoogle } from 'react-icons/fc'; // TODO: Descomentar quando Google OAuth for aprovado
 import { Eye, EyeOff } from 'lucide-react';
 
 function RegisterContent() {
@@ -106,15 +106,16 @@ function RegisterContent() {
         }
     };
 
-    const handleGoogleSignIn = async () => {
-        setIsLoading(true);
-        try {
-            await signIn('google', { callbackUrl: '/vaults' });
-        } catch (error) {
-            setError('Erro ao fazer registro com Google');
-            setIsLoading(false);
-        }
-    };
+    // TODO: Descomentar quando Google OAuth for aprovado
+    // const handleGoogleSignIn = async () => {
+    //     setIsLoading(true);
+    //     try {
+    //         await signIn('google', { callbackUrl: '/vaults' });
+    //     } catch (error) {
+    //         setError('Erro ao fazer registro com Google');
+    //         setIsLoading(false);
+    //     }
+    // };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({
@@ -153,8 +154,9 @@ function RegisterContent() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 px-0">
-                        {/* Botão do Google */}
-                        <Button
+                        {/* TODO: Botão do Google OAuth desabilitado temporariamente */}
+                        {/* Descomentar quando aprovação do Google for concluída */}
+                        {/* <Button
                             type="button"
                             variant="outline"
                             className="w-full py-6 text-lg"
@@ -172,7 +174,7 @@ function RegisterContent() {
                             <div className="relative flex justify-center text-xs uppercase">
                                 <span className="bg-background px-2 text-muted-foreground">Ou</span>
                             </div>
-                        </div>
+                        </div> */}
 
                         <form onSubmit={handleSubmit} className="grid gap-4">
                             <div className="grid gap-2">

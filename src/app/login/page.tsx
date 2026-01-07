@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
-import { FcGoogle } from 'react-icons/fc';
+// import { FcGoogle } from 'react-icons/fc'; // TODO: Descomentar quando Google OAuth for aprovado
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthLoading } from '@/hooks/use-auth-loading';
 import { LoadingScreen } from '@/components/ui/loading-screen';
@@ -207,21 +207,22 @@ function LoginPageContent() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      // Mostrar loading de autenticação
-      setAuthLoading(true, "🚀 Conectando com Google...");
-      
-      // Aguardar pelo menos 3 segundos antes de redirecionar
-      const loginPromise = signIn('google', { callbackUrl: '/vaults' });
-      const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
-      
-      await Promise.all([loginPromise, minimumTimePromise]);
-    } catch (error) {
-      setAuthLoading(false);
-      setError('Erro ao fazer login com Google');
-    }
-  };
+  // TODO: Descomentar quando Google OAuth for aprovado
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     // Mostrar loading de autenticação
+  //     setAuthLoading(true, "🚀 Conectando com Google...");
+  //     
+  //     // Aguardar pelo menos 3 segundos antes de redirecionar
+  //     const loginPromise = signIn('google', { callbackUrl: '/vaults' });
+  //     const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+  //     
+  //     await Promise.all([loginPromise, minimumTimePromise]);
+  //   } catch (error) {
+  //     setAuthLoading(false);
+  //     setError('Erro ao fazer login com Google');
+  //   }
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Prevenir processamento se estiver redirecionando
@@ -268,8 +269,9 @@ function LoginPageContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          {/* Botão do Google */}
-          <LoadingButton
+          {/* TODO: Botão do Google OAuth desabilitado temporariamente */}
+          {/* Descomentar quando aprovação do Google for concluída */}
+          {/* <LoadingButton
             type="button"
             variant="outline"
             className="w-full border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 hover:scale-[1.02] relative overflow-hidden group"
@@ -290,7 +292,7 @@ function LoginPageContent() {
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-4 py-1 text-muted-foreground font-medium rounded-full border border-primary/10">Ou</span>
             </div>
-          </div>
+          </div> */}
 
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
