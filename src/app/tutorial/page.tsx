@@ -18,44 +18,64 @@ import {
 
 const tutorialSteps = [
     {
-      trigger: "Qual a diferença entre 'Minha Conta' e um 'Cofre'?",
-      content: "Pense assim: 'Minha Conta Pessoal' é a sua carteira, só sua! Já um 'Cofre' é um cofrinho compartilhado, como o 'Família DevNutri'. Quando você convida alguém, vocês criam um cofre para juntar dinheiro para sonhos em comum, como uma reforma ou uma viagem. As coisas no cofre são de vocês, e as coisas na sua conta pessoal são só suas.",
+      trigger: "O que é o Caixinhas?",
+      content: "O Caixinhas é como um cofrinho mágico que te ajuda a guardar dinheiro para realizar seus sonhos! Quer comprar algo especial? Fazer uma viagem? Juntar dinheiro com seu amor? O Caixinhas organiza tudo de um jeito super fácil de entender.",
       icon: HelpCircle
     },
     {
-      trigger: "O que é uma 'Caixinha' e como funciona?",
-      content: "Uma 'Caixinha' é um potinho de dinheiro para cada sonho. Quer comprar um videogame? Crie a 'Caixinha do Videogame'. Querem viajar? Criem a 'Caixinha da Viagem'. Ela te ajuda a ver o quão perto você está de cada objetivo! Você pode criar uma caixinha 'Privada' (só você vê) ou 'Compartilhada' (todos no cofre veem e podem ajudar).",
-      icon: PiggyBank
-    },
-    {
-      trigger: "Como faço o dinheiro 'entrar' na minha caixinha?",
-      content: "É como mover dinheiro de um bolso para o outro! Clique em 'Adicionar' e escolha 'Transferência'. No campo 'Origem', escolha de onde o dinheiro está saindo (ex: sua conta do banco). No campo 'Destino', escolha a sua caixinha. Pronto! O dinheiro 'entrou' no seu sonho.",
-      icon: PlusCircle
-    },
-     {
-      trigger: "Para que servem os tipos 'Entrada' e 'Saída'?",
-      content: "Use 'Entrada' para registrar todo dinheiro que chega (como seu salário ou um presente). Use 'Saída' para registrar tudo o que você gasta (como um lanche ou a conta de luz). Manter isso organizado é o segredo para os relatórios mágicos da nossa IA!",
+      trigger: "O que é um 'Cofre'?",
+      content: "Imagine um cofre de verdade onde você guarda seu dinheiro. Aqui é a mesma coisa! Você tem sua 'Conta Pessoal' (seu cofre privado) e pode criar 'Cofres Compartilhados' com outras pessoas (como seu namorado, namorada ou família) para juntar dinheiro juntos. Cada cofre tem seu próprio nome e foto!",
       icon: Wallet
     },
     {
-      trigger: "Como chamo meu parceiro(a) para o aplicativo?",
-      content: "É muito fácil! No painel principal, clique em 'Convidar'. Digite o e-mail da pessoa e ela receberá um convite especial. Depois que ela aceitar, vocês podem criar um 'Cofre Compartilhado' para planejar e conquistar juntos.",
+      trigger: "O que é uma 'Caixinha'?",
+      content: "Uma Caixinha é um potinho especial dentro do seu cofre. Cada potinho é para um sonho diferente! Por exemplo: 'Caixinha da Viagem' 🏖️, 'Caixinha do Celular Novo' 📱, 'Caixinha da Festa' 🎉. Você coloca um emoji, diz quanto precisa guardar, e o app mostra quanto falta para conseguir!",
+      icon: PiggyBank
+    },
+    {
+      trigger: "Como criar minha primeira Caixinha?",
+      content: "Fácil! Vá na página 'Caixinhas' e clique no botão verde 'Criar Caixinha'. Escolha um nome legal (tipo 'Meu Videogame Novo'), coloque um emoji divertido 🎮, diga quanto dinheiro você precisa, e pronto! Sua primeira caixinha está criada!",
+      icon: PlusCircle
+    },
+    {
+      trigger: "Como colocar dinheiro na Caixinha?",
+      content: "Quando você tem dinheiro para guardar, é só clicar na sua caixinha e no botão 'Adicionar Dinheiro'. Digite quanto você quer colocar (tipo R$ 50) e confirma. O app vai mostrar uma barrinha de progresso crescendo! Quando a barra encher, você conseguiu seu objetivo! 🎯",
+      icon: PlusCircle
+    },
+    {
+      trigger: "Posso ter Caixinhas privadas e compartilhadas?",
+      content: "Sim! Quando você cria uma caixinha, pode escolher: 'Privada' significa que só você vê (tipo seu desejo de aniversário secreto 🎁). 'Compartilhada' significa que todo mundo do cofre pode ver e ajudar a juntar dinheiro (tipo a viagem da família ✈️).",
+      icon: User
+    },
+    {
+      trigger: "Como convidar alguém para o app?",
+      content: "Quer juntar dinheiro com alguém? Vai no painel principal e clica em 'Convidar'. Escreve o email da pessoa (tipo: maria@email.com) e ela vai receber um convite no email dela. Quando ela aceitar, vocês podem criar um cofre juntos e fazer caixinhas compartilhadas!",
       icon: UserPlus
     },
     {
-      trigger: "Como os Relatórios de IA me ajudam?",
-      content: "Você nos diz para onde o dinheiro foi, e a nossa IA te conta a história! Na página de 'Relatórios', escolha um mês e um ano e clique em 'Gerar'. A IA vai analisar tudo e te entregar um resumo super fácil de ler, com dicas para economizar mais e realizar seus sonhos mais rápido.",
-      icon: FileText
-    },
-     {
-      trigger: "Onde eu configuro minhas contas e cartões?",
-      content: "Deixar tudo organizado é o primeiro passo. Vá em 'Perfil' (clicando na sua foto) e procure por 'Contas e Cartões'. Lá você pode adicionar suas contas do banco e cartões de crédito. Isso ajuda na hora de registrar de onde o dinheiro saiu ou para onde ele foi.",
+      trigger: "O que fazer primeiro no Caixinhas?",
+      content: "Comece assim: 1️⃣ Configure suas contas de banco no seu Perfil (clica na sua foto). 2️⃣ Crie sua primeira Caixinha com um sonho que você tem. 3️⃣ Comece a registrar quando você gasta ou guarda dinheiro. 4️⃣ Veja a mágica acontecer quando a barra de progresso crescer!",
       icon: Building2
     },
     {
-      trigger: "Posso criar minhas próprias categorias de gastos?",
-      content: "Com certeza! Se você não encontrar uma categoria que combine com seu gasto, vá em 'Perfil' e depois em 'Categorias de Despesa'. Lá você pode criar, editar ou apagar as categorias para que o aplicativo fique com a sua cara.",
+      trigger: "O que são os Relatórios de IA?",
+      content: "A nossa Inteligência Artificial é como um assistente super inteligente! Ela olha todo o dinheiro que você gastou e guardou, e te conta uma história fácil de entender: 'Você gastou muito com comida esse mês' ou 'Você está guardando super bem para sua viagem!'. Vai em 'Relatórios' e clica em 'Gerar Relatório' para ver a mágica!",
+      icon: FileText
+    },
+    {
+      trigger: "Posso personalizar minhas categorias de gastos?",
+      content: "Claro! Todo mundo gasta dinheiro com coisas diferentes. Vai no seu 'Perfil', depois em 'Categorias de Despesa', e cria as categorias que fazem sentido pra você. Tipo: 'Videogames', 'Doces', 'Cinema', ou o que você quiser!",
       icon: Edit
+    },
+    {
+      trigger: "Como favoritar uma Caixinha?",
+      content: "Tem uma caixinha super importante pra você? Clica no coraçãozinho ❤️ nela! As caixinhas favoritas aparecem em destaque no seu painel principal, assim você sempre vê como está seu sonho mais importante!",
+      icon: PiggyBank
+    },
+    {
+      trigger: "O que é a diferença entre Entrada e Saída?",
+      content: "'Entrada' é dinheiro que CHEGA para você (seu mesadinha, um presente, seu salário). 'Saída' é dinheiro que SAI do seu bolso (quando você compra algo, paga uma conta). Registrar tudo isso ajuda você a entender para onde seu dinheiro está indo!",
+      icon: Wallet
     },
   ];
 
@@ -67,10 +87,10 @@ export default function TutorialPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">
-              Como o Caixinhas funciona?
+              Como usar o Caixinhas? 🎯
             </CardTitle>
             <CardDescription>
-              Tudo o que você precisa saber para começar a realizar seus sonhos, explicado do jeito mais fácil!
+              Tudo explicado de um jeito super fácil! Se você tem dúvidas, é só clicar nas perguntas abaixo.
             </CardDescription>
           </CardHeader>
           <CardContent>
