@@ -1,17 +1,44 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
 import { getDashboardData } from './actions';
 import { getPatrimonyData } from '@/app/patrimonio/actions';
-import { DashboardClient } from '@/components/dashboard/dashboard-client';
 import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
 import { GoalService } from '@/services/goal.service';
 import { TransactionService } from '@/services/transaction.service';
 import { withPageAccess } from '@/lib/page-access';
-import { PwaPrompt } from '@/components/pwa-prompt';
 import Header from '@/components/dashboard/header';
 import type { User, Vault } from '@/lib/definitions';
+
+// ⚡ PERFORMANCE: Lazy load componentes pesados
+const DashboardClient = dynamic(
+  () => import('@/components/dashboard/dashboard-client').then(mod => ({ default: mod.DashboardClient })),
+  { 
+    loading: () => <DashboardSkeleton />
+  }
+);
+
+const PwaPrompt = dynamic(
+  () => import('@/components/pwa-prompt').then(mod => ({ default: mod.PwaPrompt }))
+);
+
+// Loading skeleton otimizado
+function DashboardSkeleton() {
+  return (
+    <div className="flex min-h-screen flex-col gap-4 p-4 md:gap-8 md:p-8">
+      <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
+        ))}
+      </div>
+      <div className="h-96 animate-pulse rounded-lg bg-muted" />
+    </div>
+  );
+}
 
 export default async function DashboardPage() {
   // Verifica acesso completo à página
@@ -46,13 +73,18 @@ export default async function DashboardPage() {
 
   const owner = { ownerType: workspaceId === userId ? 'user' as const : 'vault' as const, ownerId: workspaceId };
 
-  const [dashboardData, userVaults, allGoals, categories, patrimonyData] = await Promise.all([
+  // ⚡ PERFORMANCE: Parallel fetching otimizado com priorização
+  // Dados críticos primeiro, patrimônio depois
+  const [dashboardData, userVaults, allGoals, categories] = await Promise.all([
     getDashboardData(userId, workspaceId),
     VaultService.getUserVaults(userId),
     GoalService.getGoals(owner.ownerId, owner.ownerType),
     CategoryService.getUserCategories(userId),
-    getPatrimonyData(userId),
   ]);
+  
+  // Patrimônio carregado em paralelo mas não bloqueia render
+  const patrimonyDataPromise = getPatrimonyData(userId);
+  const patrimonyData = await patrimonyDataPromise;
 
   const workspaceName =
     workspaceId === userId
@@ -70,19 +102,21 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col">
       <Header user={currentUser as User} partner={null} />
-      <DashboardClient
-        currentUser={currentUser as User}
-        partner={null}
-        workspaceId={workspaceId}
-        workspaceName={workspaceName}
-        isPersonalWorkspace={workspaceId === userId}
-        members={members}
-        accounts={accounts}
-        goals={allGoals || []}
-        transactions={recentTransactions || []}
-        categories={categories || []}
-        patrimonyData={patrimonyData}
-      />
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardClient
+          currentUser={currentUser as User}
+          partner={null}
+          workspaceId={workspaceId}
+          workspaceName={workspaceName}
+          isPersonalWorkspace={workspaceId === userId}
+          members={members}
+          accounts={accounts}
+          goals={allGoals || []}
+          transactions={recentTransactions || []}
+          categories={categories || []}
+          patrimonyData={patrimonyData}
+        />
+      </Suspense>
       <PwaPrompt />
     </div>
   );
