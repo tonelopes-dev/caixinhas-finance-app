@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useLoading } from "@/components/providers/loading-provider";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 const MobileFloatingNav = () => {
   const router = useRouter();
@@ -14,6 +15,8 @@ const MobileFloatingNav = () => {
   const { data: session, status } = useSession();
   const { isLoading } = useLoading();
   const [active, setActive] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [targetPath, setTargetPath] = useState<string | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -66,6 +69,38 @@ const MobileFloatingNav = () => {
     }
   }, [pathname]);
 
+  // Detectar quando a navegação foi concluída e fechar o loading após 500ms
+  useEffect(() => {
+    if (isNavigating && targetPath) {
+      // Timeout de segurança: fechar loading após 3 segundos no máximo
+      const safetyTimeout = setTimeout(() => {
+        console.warn('⚠️ Navigation timeout - forçando fechamento do loading');
+        setIsNavigating(false);
+        setTargetPath(null);
+      }, 3000);
+      
+      // Verificar se chegamos à página de destino
+      const destinationReached = 
+        (targetPath === "/dashboard" && (pathname === "/" || pathname === "/dashboard")) ||
+        pathname.startsWith(targetPath);
+      
+      if (destinationReached) {
+        // Aguardar 500ms após chegar na página antes de fechar o loading
+        const timer = setTimeout(() => {
+          setIsNavigating(false);
+          setTargetPath(null);
+        }, 500);
+        
+        return () => {
+          clearTimeout(timer);
+          clearTimeout(safetyTimeout);
+        };
+      }
+      
+      return () => clearTimeout(safetyTimeout);
+    }
+  }, [pathname, isNavigating, targetPath]);
+
   // Atualizar posição do indicador quando ativo muda ou resize
   useEffect(() => {
     const updateIndicator = () => {
@@ -89,8 +124,30 @@ const MobileFloatingNav = () => {
   }, [active]);
 
   const handleNavigation = (item: typeof items[0], index: number) => {
+    // Se já estiver na página, não fazer nada
+    if (active === index) return;
+    
+    // Validar se a rota é válida antes de navegar
+    if (!item.path || !item.path.startsWith('/')) {
+      console.error('❌ Rota inválida:', item.path);
+      return;
+    }
+    
     setActive(index);
-    router.push(item.path);
+    setTargetPath(item.path);
+    setIsNavigating(true);
+    
+    // Pequeno delay para mostrar a tela de loading antes de navegar
+    setTimeout(() => {
+      try {
+        router.push(item.path);
+      } catch (error) {
+        console.error('❌ Erro ao navegar:', error);
+        // Em caso de erro, fechar o loading imediatamente
+        setIsNavigating(false);
+        setTargetPath(null);
+      }
+    }, 300);
   };
 
   // Não renderizar se não deve mostrar a navegação
@@ -99,12 +156,16 @@ const MobileFloatingNav = () => {
   }
 
   return (
-    <div 
-      className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
-      style={{ 
-        bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
-      }}
-    >
+    <>
+      {/* Tela de loading durante navegação */}
+      {isNavigating && <LoadingScreen message="Navegando..." showProgress={false} />}
+      
+      <div 
+        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
+        style={{ 
+          bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
+        }}
+      >
       <div
         ref={containerRef}
         className="relative flex items-center justify-between bg-card/95 backdrop-blur-md shadow-2xl rounded-2xl px-2 py-3 border border-border/50"
@@ -157,6 +218,7 @@ const MobileFloatingNav = () => {
         />
       </div>
     </div>
+    </>
   );
 };
 

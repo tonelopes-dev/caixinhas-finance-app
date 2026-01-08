@@ -2,16 +2,7 @@
 
 import { useState, useEffect, useActionState } from 'react';
 import { FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { BackToDashboard } from '@/components/ui/back-to-dashboard';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { users, transactions as allTransactions } from '@/lib/data';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/definitions';
@@ -204,33 +195,36 @@ function ReportsPage() {
   });
 
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
-      <div className="mx-auto w-full max-w-4xl">
-        <BackToDashboard className="mb-4" />
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-headline text-2xl">
-              <FileText className="h-6 w-6 text-primary" />
-              Relatórios Financeiros Sob Demanda
-            </CardTitle>
-            <CardDescription>
-              Selecione um período e gere uma análise de saúde financeira profissional com nossa IA.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {hasAnyTransactions === false ? (
+    <div className="container mx-auto px-4 py-4 max-w-6xl">
+      <BackToDashboard className="mb-4" />
+      
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <FileText className="h-5 w-5 text-primary" />
+          <h1 className="font-headline text-xl md:text-2xl font-semibold">
+            Relatórios Financeiros
+          </h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Análise profissional gerada por IA
+        </p>
+      </div>
+
+      {hasAnyTransactions === false ? (
               // Regra 1: Sem transações - esconder componente e mostrar mensagem
-              <div className="text-center py-10">
-                <p className="text-muted-foreground text-lg">
-                  Assim que houver alguma transação registrada, esta função será liberada.
+              <div className="text-center py-12">
+                <div className="mb-3 text-5xl">📈</div>
+                <h3 className="font-headline text-lg font-semibold mb-1.5">Comece registrando transações</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Assim que houver transações registradas, você poderá gerar relatórios financeiros detalhados.
                 </p>
               </div>
             ) : hasAnyTransactions === true ? (
-              // Tem transações - mostrar interface completa
-              <>
-                {/* Se está gerando, mostra apenas o loading. Senão, mostra a interface normal */}
+              <div className="space-y-4">
                 {isGenerating ? (
-                  <ReportLoadingProgress isVisible={true} />
+                  <div className="py-6">
+                    <ReportLoadingProgress isVisible={true} />
+                  </div>
                 ) : (
                   <>
                     <ReportGenerator
@@ -253,17 +247,13 @@ function ReportsPage() {
                     />
                   </>
                 )}
-              </>
+              </div>
             ) : (
-              // Carregando verificação de transações
-              <div className="text-center py-10">
-                <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-muted-foreground mt-4">Verificando transações...</p>
+              <div className="text-center py-12">
+                <div className="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="text-sm text-muted-foreground mt-3">Verificando transações...</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

@@ -34,6 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# Service Worker (gerado automaticamente)
+/public/sw.js
+
 # Firebase
 /hosting-public
 firebase-debug.log

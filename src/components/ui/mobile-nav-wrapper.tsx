@@ -8,7 +8,7 @@ interface MobileNavWrapperProps {
 
 export function MobileNavWrapper({ children }: MobileNavWrapperProps) {
   return (
-    <div className="sm:pb-0 pb-20">
+    <div className="sm:pb-0 pb-28">
       {children}
     </div>
   );

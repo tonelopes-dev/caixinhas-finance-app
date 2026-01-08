@@ -1,15 +1,30 @@
 /**
- * Service Worker - Caixinhas Finance App
- * Versão: v20260108-182323
- * Build: 2026-01-08T18:23:23.967Z
- * Ambiente: PRODUCTION
+ * Script para gerar Service Worker com versionamento automático
+ * Executado durante o build para garantir que cada deploy tenha versão única
  */
 
-const VERSION = 'v20260108-182323';
-const CACHE_NAME = `caixinhas-${VERSION}`;
-const STATIC_CACHE = `caixinhas-static-${VERSION}`;
-const DYNAMIC_CACHE = `caixinhas-dynamic-${VERSION}`;
-const IS_DEV = false;
+const fs = require('fs');
+const path = require('path');
+
+// Gera versão baseada em timestamp (formato legível: YYYYMMDD-HHMMSS)
+const buildTimestamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').split('.')[0];
+const version = `v${buildTimestamp}`;
+
+// Detecta se é ambiente de desenvolvimento
+const isDev = process.env.NODE_ENV === 'development';
+
+const swContent = `/**
+ * Service Worker - Caixinhas Finance App
+ * Versão: ${version}
+ * Build: ${new Date().toISOString()}
+ * Ambiente: ${isDev ? 'DEVELOPMENT' : 'PRODUCTION'}
+ */
+
+const VERSION = '${version}';
+const CACHE_NAME = \`caixinhas-\${VERSION}\`;
+const STATIC_CACHE = \`caixinhas-static-\${VERSION}\`;
+const DYNAMIC_CACHE = \`caixinhas-dynamic-\${VERSION}\`;
+const IS_DEV = ${isDev};
 
 // Assets críticos para cache inicial
 const urlsToCache = [
@@ -23,19 +38,19 @@ const urlsToCache = [
 // INSTALL - Cacheia assets estáticos essenciais
 // ============================================================================
 self.addEventListener('install', (event) => {
-  console.log(`[SW ${VERSION}] Installing...`);
+  console.log(\`[SW \${VERSION}] Installing...\`);
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log(`[SW ${VERSION}] Caching static assets`);
+        console.log(\`[SW \${VERSION}] Caching static assets\`);
         return cache.addAll(urlsToCache);
       })
       .then(() => {
         // Em DEV: pula waiting para forçar atualização imediata
         // Em PROD: aguarda para não interromper sessões ativas
         if (IS_DEV) {
-          console.log(`[SW ${VERSION}] DEV mode: skipping waiting`);
+          console.log(\`[SW \${VERSION}] DEV mode: skipping waiting\`);
           return self.skipWaiting();
         }
       })
@@ -46,7 +61,7 @@ self.addEventListener('install', (event) => {
 // ACTIVATE - Limpa caches antigos e assume controle
 // ============================================================================
 self.addEventListener('activate', (event) => {
-  console.log(`[SW ${VERSION}] Activating...`);
+  console.log(\`[SW \${VERSION}] Activating...\`);
   
   event.waitUntil(
     caches.keys()
@@ -55,7 +70,7 @@ self.addEventListener('activate', (event) => {
           cacheNames.map((cacheName) => {
             // Remove qualquer cache que não seja da versão atual
             if (!cacheName.includes(VERSION)) {
-              console.log(`[SW ${VERSION}] Deleting old cache: ${cacheName}`);
+              console.log(\`[SW \${VERSION}] Deleting old cache: \${cacheName}\`);
               return caches.delete(cacheName);
             }
           })
@@ -65,7 +80,7 @@ self.addEventListener('activate', (event) => {
         // Em DEV: assume controle imediatamente
         // Em PROD: assume controle de novos clients apenas
         if (IS_DEV) {
-          console.log(`[SW ${VERSION}] DEV mode: claiming clients`);
+          console.log(\`[SW \${VERSION}] DEV mode: claiming clients\`);
           return self.clients.claim();
         }
       })
@@ -178,10 +193,10 @@ self.addEventListener('fetch', (event) => {
 // MESSAGE - Comandos do client
 // ============================================================================
 self.addEventListener('message', (event) => {
-  console.log(`[SW ${VERSION}] Received message:`, event.data);
+  console.log(\`[SW \${VERSION}] Received message:\`, event.data);
   
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log(`[SW ${VERSION}] Force updating...`);
+    console.log(\`[SW \${VERSION}] Force updating...\`);
     self.skipWaiting();
   }
 
@@ -200,4 +215,14 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-console.log(`[SW ${VERSION}] Service Worker loaded and ready!`);
+console.log(\`[SW \${VERSION}] Service Worker loaded and ready!\`);
+`;
+
+// Escreve o arquivo no diretório public
+const outputPath = path.join(__dirname, '..', 'public', 'sw.js');
+fs.writeFileSync(outputPath, swContent, 'utf-8');
+
+console.log(`✅ Service Worker gerado com sucesso!`);
+console.log(`📦 Versão: ${version}`);
+console.log(`🌍 Ambiente: ${isDev ? 'DEVELOPMENT' : 'PRODUCTION'}`);
+console.log(`📍 Local: ${outputPath}`);

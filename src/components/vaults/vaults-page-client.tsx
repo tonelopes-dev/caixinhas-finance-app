@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -418,6 +418,23 @@ export function VaultsPageClient({
   const { isVisible, message, setAuthLoading } = useAuthLoading();
 
   const { toast } = useToast();
+
+  // Detectar se chegamos aqui vindo do login e fechar o loading após 500ms
+  useEffect(() => {
+    const loginInProgress = sessionStorage.getItem('login_in_progress');
+    if (loginInProgress) {
+      console.log('✅ Vaults - Detectado login bem-sucedido, aguardando 500ms antes de fechar loading...');
+      
+      // Aguardar 500ms para garantir que a página está totalmente carregada
+      const timer = setTimeout(() => {
+        console.log('✅ Vaults - Fechando loading do login');
+        sessionStorage.removeItem('login_in_progress');
+        setAuthLoading(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [setAuthLoading]);
 
   const handleCreateVaultClick = () => {
     if (!canCreateVaults) {

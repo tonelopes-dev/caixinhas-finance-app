@@ -42,12 +42,34 @@ function LoginPageContent() {
   const isRedirectingRef = useRef(false);
   const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+  // Verificar se estamos voltando de um login bem-sucedido e limpar o loading
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const loginSuccess = sessionStorage.getItem('login_success');
+      if (loginSuccess) {
+        console.log('🔍 Login - Detectado flag de login bem-sucedido, removendo...');
+        sessionStorage.removeItem('login_success');
+        // Garantir que o loading está desligado
+        setAuthLoading(false);
+      }
+    }
+  }, []);
+
   // Limpar URL de parâmetros problemáticos que podem causar loops
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       const hasError = url.searchParams.has('error');
       const hasCallback = url.searchParams.has('callbackUrl');
+      const message = url.searchParams.get('message');
+      
+      // Mostrar mensagem se o usuário foi deletado
+      if (message === 'user_not_found') {
+        setError('Sua conta não foi encontrada. Por favor, entre em contato com o suporte.');
+        // Limpar a mensagem da URL
+        url.searchParams.delete('message');
+        window.history.replaceState({}, '', url.toString());
+      }
       
       if (hasError || hasCallback) {
         console.log('🔍 Login Page - Limpando parâmetros da URL:', { hasError, hasCallback });
@@ -190,11 +212,13 @@ function LoginPageContent() {
         // Atualizar mensagem de loading
         setAuthLoading(true, "✅ Login realizado! Redirecionando...");
         
-        // Aguardar mais um pouco antes de redirecionar
+        // Marcar que o login foi bem-sucedido para manter o loading ativo
+        sessionStorage.setItem('login_in_progress', 'true');
+        
+        // Redirecionar - o loading continua até chegarmos em /vaults
         setTimeout(() => {
-          setAuthLoading(false);
           window.location.href = '/vaults';
-        }, 1000);
+        }, 800);
       } else {
         console.log('⚠️ Resultado inesperado do login:', result);
         setAuthLoading(false);

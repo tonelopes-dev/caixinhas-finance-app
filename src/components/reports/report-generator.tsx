@@ -87,7 +87,7 @@ export function ReportGenerator({
     }, [year, month, monthsForSelectedYear, setMonth]);
 
     return (
-        <form action={handleGenerateReport} className="flex flex-col gap-4 rounded-lg border p-4 mb-6">
+        <form action={handleGenerateReport} className="space-y-3 rounded-lg border border-border/50 bg-card p-3 shadow-sm">
             <input type="hidden" name="ownerId" value={workspaceId} />
             <input type="hidden" name="month" value={month} />
             <input type="hidden" name="year" value={year} />
@@ -95,11 +95,19 @@ export function ReportGenerator({
             {process.env.NODE_ENV === 'development' && (
                 <input type="hidden" data-debug="true" value={`month:${month},year:${year},workspaceId:${workspaceId}`} />
             )}
-            <div className='w-full space-y-4'>
-                <div className="space-y-2">
-                    <label className='text-sm font-medium'>Ano</label>
+            
+            <div className="flex items-center gap-2">
+                <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                <h3 className="font-headline text-base font-semibold">Selecione o Período</h3>
+            </div>
+            
+            <div className='w-full grid grid-cols-1 md:grid-cols-2 gap-3'>
+                <div className="space-y-1.5">
+                    <label className='text-sm font-medium flex items-center gap-1.5'>
+                        <span>📅</span> Ano
+                    </label>
                     <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full h-9 bg-background hover:bg-accent/50 transition-colors">
                             <SelectValue placeholder="Selecione o ano" />
                         </SelectTrigger>
                         <SelectContent>
@@ -107,10 +115,12 @@ export function ReportGenerator({
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="space-y-2">
-                    <label className='text-sm font-medium'>Mês</label>
+                <div className="space-y-1.5">
+                    <label className='text-sm font-medium flex items-center gap-1.5'>
+                        <span>📆</span> Mês
+                    </label>
                     <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending || !year}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full h-9 bg-background hover:bg-accent/50 transition-colors">
                             <SelectValue placeholder={!year ? "Selecione o ano primeiro" : "Selecione o mês"} />
                         </SelectTrigger>
                         <SelectContent>
@@ -123,11 +133,14 @@ export function ReportGenerator({
                     </Select>
                 </div>
             </div>
-            <GenerateReportButton 
-                label={buttonLabel}
-                enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
-                isGenerating={isGenerating}
-            />
+            
+            <div className="pt-1">
+                <GenerateReportButton 
+                    label={buttonLabel}
+                    enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
+                    isGenerating={isGenerating}
+                />
+            </div>
         </form>
     );
 }

@@ -13,6 +13,7 @@ import { NetworkStatusIndicator } from '@/components/ui/network-status-indicator
 import { UpdateAvailableNotification } from '@/components/ui/update-available-notification';
 import MobileFloatingNav from '@/components/ui/mobile-floating-nav';
 import { MobileNavWrapper } from '@/components/ui/mobile-nav-wrapper';
+import { SessionValidator } from '@/components/auth/session-validator';
 
 const APP_NAME = "Caixinhas";
 const APP_DESCRIPTION = "Sonhar juntos é o primeiro passo para conquistar.";
@@ -79,6 +80,7 @@ export default function RootLayout({
             <LoadingProvider>
               <FirebaseClientProvider>
                 <ErrorBoundary>
+                  <SessionValidator />
                   <NavigationLoader />
                   {/* <NetworkStatusIndicator /> */}
                   <UpdateAvailableNotification />

@@ -135,20 +135,9 @@ export const authOptions: AuthOptions = {
             workspaceImageUrl: dbUser.workspaceImageUrl || undefined
           };
         } else {
-          // Se o usuário não existe mais no banco, invalida a sessão
-          console.log('⚠️ Usuário não encontrado no banco, invalidando sessão');
-          // Retorna sessão com dados básicos em vez de null
-          return {
-            ...session,
-            user: {
-              id: token.id as string,
-              email: session.user?.email || '',
-              name: session.user?.name || 'Usuário',
-              image: undefined,
-              avatarUrl: undefined,
-              workspaceImageUrl: undefined
-            }
-          };
+          // Se o usuário não existe mais no banco, invalida a sessão retornando null
+          console.log('⚠️ Usuário não encontrado no banco (foi deletado), invalidando sessão');
+          throw new Error('USER_NOT_FOUND');
         }
       }
       return session;
