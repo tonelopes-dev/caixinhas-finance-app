@@ -6,6 +6,22 @@ import { VaultsPageClient } from '@/components/vaults';
 import { AuthService } from '@/services/auth.service';
 import { getAccessInfo } from '@/lib/access-control';
 import { AccessBanner } from '@/components/ui/access-banner';
+import { cache } from 'react';
+
+// ⚡ PERFORMANCE: Cache das consultas principais
+const getCachedUserVaultsData = cache(async (userId: string) => {
+  console.time('🔍 Vaults: Loading user data');
+  const data = await getUserVaultsData(userId);
+  console.timeEnd('🔍 Vaults: Loading user data');
+  return data;
+});
+
+const getCachedUserById = cache(async (userId: string) => {
+  console.time('🔍 Vaults: Loading user profile');
+  const user = await AuthService.getUserById(userId);
+  console.timeEnd('🔍 Vaults: Loading user profile');
+  return user;
+});
 
 export default async function VaultSelectionPage() {
   const session = await getServerSession(authOptions);
@@ -15,9 +31,11 @@ export default async function VaultSelectionPage() {
   }
 
   const userId = session.user.id;
+  
+  // ⚡ PARALLEL FETCHING: Executa queries em paralelo com cache
   const [data, user] = await Promise.all([
-    getUserVaultsData(userId),
-    AuthService.getUserById(userId),
+    getCachedUserVaultsData(userId),
+    getCachedUserById(userId),
   ]);
 
   if (!data || !user || !data.currentUser || !data.userVaults || !data.userInvitations) {

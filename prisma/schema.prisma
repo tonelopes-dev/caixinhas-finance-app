@@ -76,6 +76,10 @@ model VaultMember {
   updatedAt DateTime? @updatedAt
 
   @@unique([vaultId, userId])
+  // ⚡ PERFORMANCE: Índices para acesso rápido aos memberships
+  @@index([userId], name: "idx_vault_members_user")
+  @@index([vaultId], name: "idx_vault_members_vault")
+  @@index([userId, vaultId, role], name: "idx_vault_members_user_vault_role")
   @@map("vault_members")
 }
 
@@ -103,6 +107,10 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // ⚡ PERFORMANCE: Índices para consultas de contas
+  @@index([ownerId, scope], name: "idx_accounts_owner_scope")
+  @@index([vaultId], name: "idx_accounts_vault")
+  @@index([ownerId, type], name: "idx_accounts_owner_type")
   @@map("accounts")
 }
 
@@ -127,10 +135,18 @@ model Goal {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // ⚡ PERFORMANCE: Índices para consultas de objetivos
+  @@index([userId, createdAt(sort: Desc)], name: "idx_goals_user_created")
+  @@index([vaultId, createdAt(sort: Desc)], name: "idx_goals_vault_created")
+  @@index([vaultId, isFeatured], name: "idx_goals_vault_featured")
+  @@index([userId, visibility], name: "idx_goals_user_visibility")
   @@map("goals")
 }
 
 model GoalParticipant {
+  // ⚡ PERFORMANCE: Índices para consultas de participação em goals
+  @@index([goalId], name: "idx_goal_participants_goal")
+  @@index([userId], name: "idx_goal_participants_user")
   id     String @id @default(cuid())
   goalId String
   userId String
@@ -182,6 +198,14 @@ model Transaction {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // ⚡ PERFORMANCE: Índices críticos para acelerar consultas
+  @@index([userId, date(sort: Desc)], name: "idx_transactions_user_date")
+  @@index([vaultId, date(sort: Desc)], name: "idx_transactions_vault_date")
+  @@index([actorId, date(sort: Desc)], name: "idx_transactions_actor_date")
+  @@index([userId, type, date(sort: Desc)], name: "idx_transactions_user_type_date")
+  @@index([categoryId, date(sort: Desc)], name: "idx_transactions_category_date")
+  @@index([goalId, date(sort: Desc)], name: "idx_transactions_goal_date")
+  @@index([recurringId, isRecurring], name: "idx_transactions_recurring")
   @@map("transactions")
 }
 
@@ -202,6 +226,11 @@ model Invitation {
   receiver User?  @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   vault    Vault? @relation(fields: [targetId], references: [id], onDelete: Cascade)
 
+  // ⚡ PERFORMANCE: Índices para consultas de convites
+  @@index([receiverId, status], name: "idx_invitations_receiver_status")
+  @@index([receiverEmail, status], name: "idx_invitations_email_status")
+  @@index([senderId, createdAt(sort: Desc)], name: "idx_invitations_sender_date")
+  @@index([receiverId, type, status], name: "idx_invitations_receiver_type_status")
   @@map("invitations")
 }
 
@@ -218,6 +247,9 @@ model Notification {
   // Relações
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // ⚡ PERFORMANCE: Índices críticos para dashboard
+  @@index([userId, isRead, createdAt(sort: Desc)], name: "idx_notifications_user_unread_date")
+  @@index([userId, createdAt(sort: Desc)], name: "idx_notifications_user_date")
   @@map("notifications")
 }
 
@@ -230,6 +262,8 @@ model SavedReport {
   updatedAt    DateTime @updatedAt
 
   @@unique([ownerId, monthYear])
+  // ⚡ PERFORMANCE: Índice para consultas de relatórios
+  @@index([ownerId, monthYear(sort: Desc)], name: "idx_saved_reports_owner_month")
   @@map("saved_reports")
 }
 
@@ -244,5 +278,7 @@ model Category {
   Transaction Transaction[]
 
   @@unique([name, ownerId])
+  // ⚡ PERFORMANCE: Índice para consultas de categorias ordenadas
+  @@index([ownerId, name(sort: Asc)], name: "idx_categories_owner_name")
   @@map("categories")
 }

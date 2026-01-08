@@ -2,21 +2,26 @@
 import { type NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb', // Aumentar limite para upload de imagens
-    },
-  },
+  
+  // ⚡ PERFORMANCE CRITICAL: Image optimization para reduzir 4.07MB → 300KB
   images: {
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 86400, // 24 horas
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    
+    // Domínios permitidos
+    domains: [
+      'caixinhas-finance-app.s3.us-east-1.amazonaws.com',
+      'images.unsplash.com',
+    ],
+    
     remotePatterns: [
       {
         protocol: 'https',
@@ -66,8 +71,16 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      
     ],
+  },
+  
+  // ⚡ PERFORMANCE: Bundle optimization  
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
 };
 

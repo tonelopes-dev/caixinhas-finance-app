@@ -15,7 +15,16 @@ const getBaseUrl = () => {
 };
 
 export const authOptions: AuthOptions = {
+  // ⚡ PERFORMANCE: Usar JWT ao invés de database sessions
+  // Evita query no banco a cada verificação de sessão
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 dias
+  },
+  
+  // Adapter apenas para criar/atualizar usuários, não para sessões
   adapter: PrismaAdapter(prisma),
+  
   providers: [
     // TODO: Google OAuth desabilitado temporariamente
     // Pendências (Ver docs/google-oauth-setup.md):

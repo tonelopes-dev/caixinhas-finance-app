@@ -149,7 +149,16 @@ function WorkspaceCard({
           <Card className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full">
             <CardHeader className="p-0">
               <div className="relative h-40 w-full">
-                <Image src={imageUrl} alt={name} fill className="object-cover rounded-t-lg" />
+                <Image 
+                  src={imageUrl} 
+                  alt={name} 
+                  fill 
+                  className="object-cover rounded-t-lg"
+                  priority={false}
+                  loading="lazy"
+                  quality={60}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               </div>
             </CardHeader>

@@ -21,6 +21,8 @@
     "test:email:templates": "tsx scripts/test-all-email-templates.ts",
     "test:email:send": "tsx scripts/test-all-email-templates.ts --send",
     "test:all": "npm run test && npm run test:e2e",
+    "test:benchmark": "tsx scripts/benchmark-api.ts",
+    "test:benchmark:nav": "tsx scripts/benchmark-navigation.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name sync-schema",
     "prisma:studio": "prisma studio",
