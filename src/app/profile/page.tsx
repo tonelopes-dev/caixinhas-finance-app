@@ -11,7 +11,7 @@ import { NotificationsManagement } from '@/components/profile/notifications-mana
 import { VaultSettings } from '@/components/profile/vault-settings';
 import { PasswordManagement } from '@/components/profile/password-management';
 import type { User, Vault } from '@/lib/definitions';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { BackToDashboard } from '@/components/ui/back-to-dashboard';
 import Link from 'next/link';
@@ -51,14 +51,14 @@ export default function ProfilePage() {
     fetchData();
   }, [session, status, router]);
 
-  const refreshProfileData = async () => {
+  const refreshProfileData = useCallback(async () => {
     if (session?.user) {
       const data = await getProfileData(session.user.id);
       if (data?.currentUser) {
         setProfileData(data as ProfileData);
       }
     }
-  };
+  }, [session]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

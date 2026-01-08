@@ -20,7 +20,7 @@ import { updateProfileAction, type ProfileActionState } from '@/app/profile/acti
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 // Avatares padrão baseados em iniciais e ícones financeiros
 const generateAvatarUrl = (text: string, bgColor: string, textColor: string = 'white') => 
@@ -63,23 +63,29 @@ export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUp
   const [selectedImage, setSelectedImage] = useState(user.avatarUrl || generateAvatarUrl('👤', colorOptions[0].value, '#333'));
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const processedStateRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (state.message && !state.errors) {
-      toast({
-        title: "Sucesso!",
-        description: state.message,
-      });
-      // Atualizar os dados do perfil após sucesso
-      if (onProfileUpdate) {
-        onProfileUpdate();
+    // Previne processamento duplicado do mesmo state
+    if (state.message && processedStateRef.current !== state.message) {
+      processedStateRef.current = state.message;
+      
+      if (!state.errors) {
+        toast({
+          title: "Sucesso!",
+          description: state.message,
+        });
+        // Atualizar os dados do perfil após sucesso
+        if (onProfileUpdate) {
+          onProfileUpdate();
+        }
+      } else {
+        toast({
+          title: "Erro de Validação",
+          description: state.message,
+          variant: "destructive",
+        });
       }
-    } else if (state.message && state.errors) {
-      toast({
-        title: "Erro de Validação",
-        description: state.message,
-        variant: "destructive",
-      });
     }
   }, [state, toast, onProfileUpdate]);
 
