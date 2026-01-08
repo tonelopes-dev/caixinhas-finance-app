@@ -7,7 +7,8 @@ interface LoadingContextType {
   isLoading: boolean;
   message: string;
   progress: number;
-  showLoading: (message?: string) => void;
+  showProgress: boolean;
+  showLoading: (message?: string, showProgress?: boolean) => void;
   hideLoading: () => void;
   setLoadingMessage: (message: string) => void;
   setProgress: (progress: number) => void;
@@ -24,18 +25,21 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('Carregando...');
   const [progress, setProgressState] = useState(0);
+  const [showProgress, setShowProgress] = useState(true);
   
-  const showLoading = (customMessage?: string) => {
+  const showLoading = (customMessage?: string, showProgressBar: boolean = true) => {
     if (customMessage) {
       setMessage(customMessage);
     }
     setProgressState(0); // Reset progress ao abrir
+    setShowProgress(showProgressBar);
     setIsLoading(true);
   };
 
   const hideLoading = () => {
     setIsLoading(false);
     setProgressState(0); // Reset ao fechar
+    setShowProgress(true); // Reset para padrão
   };
 
   const setLoadingMessage = (newMessage: string) => {
@@ -65,6 +69,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
     isLoading,
     message,
     progress,
+    showProgress,
     showLoading,
     hideLoading,
     setLoadingMessage,
@@ -75,7 +80,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
   return (
     <LoadingContext.Provider value={value}>
       {children}
-      {isLoading && <LoadingScreen message={message} progress={progress} />}
+      {isLoading && <LoadingScreen message={message} progress={progress} showProgress={showProgress} />}
     </LoadingContext.Provider>
   );
 }

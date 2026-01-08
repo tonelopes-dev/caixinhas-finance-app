@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,7 +22,7 @@ import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
 import { performLogout } from '@/lib/auth-utils';
 import { useAuthLoading } from '@/hooks/use-auth-loading';
-import { LoadingScreen } from '@/components/ui/loading-screen';
+import { useLoading } from '@/components/providers/loading-provider';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -106,6 +106,43 @@ function WorkspaceCard({
   isOwner?: boolean;
   ownerId?: string;
 }) {
+  const router = useRouter();
+  const { showLoading } = useLoading();
+  
+  const handleWorkspaceClick = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+      console.log('🔵 [WorkspaceCard] Iniciando navegação para:', name);
+      
+      // Mostra loading global sem barra de progresso (como no mobile nav)
+      showLoading(`Abrindo ${name}...`, false);
+      
+      // Salva no localStorage para o dashboard saber quando fechar
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('workspace-navigation-pending', 'true');
+      }
+      
+      // Executa a action
+      const formData = new FormData(e.currentTarget);
+      console.log('🔵 [WorkspaceCard] Executando setWorkspaceAction...');
+      await setWorkspaceAction(formData);
+      console.log('🔵 [WorkspaceCard] setWorkspaceAction concluída');
+      
+      // Pequeno delay antes de navegar
+      setTimeout(() => {
+        console.log('🔵 [WorkspaceCard] Navegando para /dashboard');
+        router.push('/dashboard');
+      }, 300);
+      
+    } catch (error) {
+      console.error('❌ [WorkspaceCard] Erro ao trocar workspace:', error);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('workspace-navigation-pending');
+      }
+    }
+  };
+  
   return (
     <motion.div
       layout
@@ -142,7 +179,7 @@ function WorkspaceCard({
         </div>
       )}
 
-      <form action={setWorkspaceAction} className="h-full">
+      <form onSubmit={handleWorkspaceClick} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
         <button type="submit" className="h-full w-full text-left">
