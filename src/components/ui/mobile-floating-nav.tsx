@@ -99,7 +99,12 @@ const MobileFloatingNav = () => {
   }
 
   return (
-    <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+    <div 
+      className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
+      style={{ 
+        bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
+      }}
+    >
       <div
         ref={containerRef}
         className="relative flex items-center justify-between bg-card/95 backdrop-blur-md shadow-2xl rounded-2xl px-2 py-3 border border-border/50"

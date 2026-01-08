@@ -450,7 +450,12 @@ export function TransactionsPageClient({
           </CardContent>
           </Card>
       </motion.div>
-      <div className="fixed bottom-6 right-6 md:hidden">
+      <div 
+        className="fixed right-6 md:hidden"
+        style={{ 
+          bottom: 'calc(5.5rem + env(safe-area-inset-bottom))'
+        }}
+      >
           <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
       </div>
     </>
