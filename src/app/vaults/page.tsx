@@ -46,6 +46,21 @@ export default async function VaultSelectionPage() {
   // Usa o sistema centralizado de controle de acesso
   const accessInfo = getAccessInfo(user);
 
+  // Verificar o workspace atual do cookie
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const cookies = await cookieStore;
+  const vaultId = cookies.get('CAIXINHAS_VAULT_ID')?.value;
+  
+  // Se há um vaultId no cookie e o usuário é membro, esse é o workspace ativo
+  let currentWorkspaceId = userId; // Padrão é o workspace pessoal
+  if (vaultId) {
+    const { VaultService } = await import('@/services/vault.service');
+    const isMember = await VaultService.isMember(vaultId, userId);
+    if (isMember) {
+      currentWorkspaceId = vaultId;
+    }
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
       <div className="mx-auto w-full max-w-6xl">
@@ -75,6 +90,7 @@ export default async function VaultSelectionPage() {
           userInvitations={data.userInvitations}
           canCreateVaults={accessInfo.canCreateVaults}
           canAccessPersonal={accessInfo.canAccessPersonalWorkspace}
+          currentWorkspaceId={currentWorkspaceId}
         />
       </div>
     </div>

@@ -79,6 +79,7 @@ type VaultsPageClientProps = {
   userInvitations: VaultInvitation[];
   canCreateVaults?: boolean;
   canAccessPersonal?: boolean;
+  currentWorkspaceId?: string;
 };
 
 function WorkspaceCard({
@@ -93,6 +94,7 @@ function WorkspaceCard({
   onConvert,
   isOwner = false,
   ownerId,
+  isActive = false,
 }: {
   id: string;
   name: string;
@@ -105,12 +107,19 @@ function WorkspaceCard({
   onConvert?: () => void;
   isOwner?: boolean;
   ownerId?: string;
+  isActive?: boolean;
 }) {
   const router = useRouter();
   const { showLoading } = useLoading();
   
   const handleWorkspaceClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Se já estiver ativo, não faz nada
+    if (isActive) {
+      console.log('ℹ️ [WorkspaceCard] Já está no workspace:', name);
+      return;
+    }
     
     try {
       console.log('🔵 [WorkspaceCard] Iniciando navegação para:', name);
@@ -182,10 +191,22 @@ function WorkspaceCard({
       <form onSubmit={handleWorkspaceClick} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
-        <button type="submit" className="h-full w-full text-left">
-          <Card className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl group h-full flex flex-col w-full">
+        <button type="submit" className="h-full w-full text-left" disabled={isActive}>
+          <Card className={`transition-all group h-full flex flex-col w-full ${
+            isActive 
+              ? 'bg-primary/10 border-primary/50 border-2 shadow-lg' 
+              : 'cursor-pointer hover:scale-[1.02] hover:shadow-xl'
+          }`}>
             <CardHeader className="p-0">
               <div className="relative h-40 w-full">
+                {isActive && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Badge className="bg-primary text-primary-foreground shadow-md">
+                      <Check className="h-3 w-3 mr-1" />
+                      Ativo
+                    </Badge>
+                  </div>
+                )}
                 <Image 
                   src={imageUrl} 
                   alt={name} 
@@ -448,6 +469,7 @@ export function VaultsPageClient({
   userInvitations,
   canCreateVaults = true,
   canAccessPersonal = true,
+  currentWorkspaceId,
 }: VaultsPageClientProps) {
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
@@ -583,6 +605,7 @@ export function VaultsPageClient({
                     isOwner={vault.ownerId === currentUser.id}
                     ownerId={vault.ownerId}
                     onEdit={handleEditClick}
+                    isActive={currentWorkspaceId === vault.id}
                   />
                 ))}
               </AnimatePresence>

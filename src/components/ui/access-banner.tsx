@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Terminal, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { PremiumBadge } from '@/components/ui/premium-badge';
 
 export type AccessBannerProps = {
   status: 'active' | 'trial' | 'inactive';
@@ -25,9 +26,13 @@ export function AccessBanner({
   message,
   showUpgradeButton = true,
 }: AccessBannerProps) {
-  // Não mostra banner para usuários ativos sem mensagem específica
+  // Para usuários ativos, mostra o PremiumBadge interativo
   if (status === 'active' && !message) {
-    return null;
+    return (
+      <div className="mb-6">
+        <PremiumBadge />
+      </div>
+    );
   }
 
   // Banner para trial ativo (aviso nos últimos 7 dias)

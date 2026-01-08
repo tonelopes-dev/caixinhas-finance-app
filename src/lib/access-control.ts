@@ -177,7 +177,7 @@ export function getAccessInfo(user: UserWithoutPassword) {
 function getAccessMessage(status: SubscriptionStatus, daysRemaining: number): string {
   switch (status) {
     case 'active':
-      return 'Você tem acesso completo a todas as funcionalidades.';
+      return ''; // Não mostra mensagem para usuários ativos (vai exibir o PremiumBadge)
     case 'trial':
       return `Você está no período de teste. ${daysRemaining} ${daysRemaining === 1 ? 'dia restante' : 'dias restantes'}.`;
     case 'inactive':
