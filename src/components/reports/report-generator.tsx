@@ -87,7 +87,7 @@ export function ReportGenerator({
     }, [year, month, monthsForSelectedYear, setMonth]);
 
     return (
-        <form action={handleGenerateReport} className="flex flex-col md:flex-row items-center gap-4 rounded-lg border p-4 mb-6">
+        <form action={handleGenerateReport} className="flex flex-col gap-4 rounded-lg border p-4 mb-6">
             <input type="hidden" name="ownerId" value={workspaceId} />
             <input type="hidden" name="month" value={month} />
             <input type="hidden" name="year" value={year} />
@@ -95,11 +95,11 @@ export function ReportGenerator({
             {process.env.NODE_ENV === 'development' && (
                 <input type="hidden" data-debug="true" value={`month:${month},year:${year},workspaceId:${workspaceId}`} />
             )}
-            <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='w-full space-y-4'>
                 <div className="space-y-2">
                     <label className='text-sm font-medium'>Ano</label>
                     <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione o ano" />
                         </SelectTrigger>
                         <SelectContent>
@@ -110,7 +110,7 @@ export function ReportGenerator({
                 <div className="space-y-2">
                     <label className='text-sm font-medium'>Mês</label>
                     <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending || !year}>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                             <SelectValue placeholder={!year ? "Selecione o ano primeiro" : "Selecione o mês"} />
                         </SelectTrigger>
                         <SelectContent>
@@ -123,13 +123,11 @@ export function ReportGenerator({
                     </Select>
                 </div>
             </div>
-            <div className='self-stretch flex items-end'>
-                <GenerateReportButton 
-                    label={buttonLabel}
-                    enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
-                    isGenerating={isGenerating}
-                />
-            </div>
+            <GenerateReportButton 
+                label={buttonLabel}
+                enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
+                isGenerating={isGenerating}
+            />
         </form>
     );
 }

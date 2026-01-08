@@ -338,6 +338,17 @@ export function TransactionsPageClient({
                       <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
                   </div>
                 </div>
+                
+                {/* Botão mobile logo após os filtros */}
+                <div className="mt-4 md:hidden">
+                    <AddTransactionDialog 
+                      accounts={allAccounts} 
+                      goals={allGoals} 
+                      ownerId={workspaceId} 
+                      categories={allCategories}
+                      fullWidth={true}
+                    />
+                </div>
               </div>
           </CardHeader>
           <CardContent className='overflow-hidden p-0 md:p-6'>
@@ -518,14 +529,6 @@ export function TransactionsPageClient({
           </CardContent>
           </Card>
       </motion.div>
-      <div 
-        className="fixed right-6 md:hidden"
-        style={{ 
-          bottom: 'calc(5.5rem + env(safe-area-inset-bottom))'
-        }}
-      >
-          <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
-      </div>
     </>
   );
 }

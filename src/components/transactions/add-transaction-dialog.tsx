@@ -54,9 +54,10 @@ interface AddTransactionDialogProps {
   ownerId: string;
   categories: any[];
   chargeType?: 'single' | 'recurring' | 'installment';
+  fullWidth?: boolean;
 }
 
-export function AddTransactionDialog({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single' }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single', fullWidth = false }: AddTransactionDialogProps) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -223,7 +224,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
       <Dialog open={open} onOpenChange={setOpen}>
-        <Button size="sm" onClick={handleTriggerClick}>
+        <Button 
+          size="sm" 
+          onClick={handleTriggerClick}
+          className={cn(fullWidth && "w-full justify-center")}
+        >
           {initialChargeType === 'recurring' ? (
             <>
               <Repeat className="mr-2 h-4 w-4" />

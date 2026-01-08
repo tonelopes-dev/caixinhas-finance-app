@@ -27,127 +27,45 @@ const reportPrompt = ai.definePrompt({
   name: 'financialReportPrompt',
   input: { schema: FinancialReportInputSchema },
   output: { schema: FinancialReportOutputSchema },
-  prompt: `Você é um analista financeiro de elite, especialista em finanças para casais, com um toque de coach motivacional. Sua tarefa é criar um relatório de saúde financeira para o mês de {{month}}, baseado nas transações fornecidas.
+  prompt: `Você é um CFP (Certified Financial Planner) brasileiro especializado em análise financeira pessoal.
 
-**Tarefa:**
-Gere um relatório completo e visualmente atraente usando **exclusivamente** o formato HTML especificado abaixo. Use classes do Tailwind CSS para estilização, conforme os exemplos. O tom deve ser encorajador, profissional e direto.
+**REGRAS ABSOLUTAS:**
+❌ NUNCA invente dados ou transações que não existem no JSON
+❌ NUNCA use nomes de meses em inglês - use apenas português ({{month}} já está correto)
+✅ Use APENAS dados reais das transações fornecidas
+✅ Se faltar dados para alguma análise, OMITA essa seção
+✅ Formato: R$ 1.234,56 (português do Brasil)
 
-**Dados para Análise (Transações do Mês em JSON):**
+**ANÁLISES OBRIGATÓRIAS (calcule dos dados reais):**
+1. Receitas vs Despesas (separe por tipo: INCOME vs EXPENSE)
+2. Taxa de Poupança (saldo/receita)
+3. Gastos por Categoria (agrupe por category.name)
+4. Métodos de Pagamento (agrupe por paymentMethod)
+5. Parcelamentos Ativos (APENAS se isInstallment=true)
+6. Patrimônio Líquido (saldo acumulado do mês)
+7. Pontos Positivos e de Atenção (baseados nos dados)
+8. Recomendações Práticas (baseadas em problemas reais identificados)
+
+**Dados (Transações do mês {{month}} em JSON):**
 {{{transactions}}}
 
----
+**Dados (Transações do mês {{month}} em JSON):**
+{{{transactions}}}
 
-**Formato de Saída HTML Obrigatório (Use este template como base):**
-\`\`\`html
-<div class="space-y-6">
-    <!-- Seção Saúde Financeira -->
-    <div class="p-6 rounded-lg bg-card border flex justify-between items-center">
-        <div>
-            <h3 class="font-headline text-xl font-bold">Saúde Financeira: 80/100</h3>
-            <p class="text-muted-foreground mt-1">Seu saldo positivo, investimentos regulares e controle de despesas são indicativos de uma boa saúde financeira, mas ainda há espaço para otimização.</p>
-        </div>
-        <div class="text-5xl font-bold text-green-500">80</div>
-    </div>
+**Gere um relatório HTML usando Tailwind CSS com estas seções:**
 
-    <!-- Seção Visão Geral -->
-    <div class="p-6 rounded-lg bg-card border">
-        <h3 class="font-headline text-lg font-bold mb-2">Visão Geral</h3>
-        <p class="text-muted-foreground">Novembro foi um mês de conquistas! Com uma receita total de R$ 1800, você está mostrando um ótimo controle financeiro, mantendo suas despesas abaixo do esperado e ainda conseguindo investir. Parabéns pela disciplina!</p>
-    </div>
+1. **Saúde Financeira** (score 0-100 baseado em: poupança, comprometimento)
+2. **Cards de Métricas** (receitas, despesas, saldo, média diária)
+3. **Visão Executiva** (parágrafo resumindo o mês)
+4. **Patrimônio** (saldo final, taxa poupança, contas movimentadas)
+5. **Gastos por Categoria** (tabela ou cards com valores e %)
+6. **Métodos de Pagamento** (distribuição real encontrada)
+7. **Parcelamentos** (SOMENTE se existirem nos dados)
+8. **Pontos Positivos e de Atenção** (listas baseadas nos dados)
+9. **Recomendações Práticas** (3-5 ações priorizadas por impacto)
+10. **Mensagem Motivacional** (personalizada aos acertos)
 
-    <!-- Cards de Resumo -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div class="p-4 rounded-lg bg-card border">
-            <p class="text-sm text-muted-foreground">Receitas</p>
-            <p class="text-2xl font-bold text-green-500">R$ 1.800,00</p>
-        </div>
-        <div class="p-4 rounded-lg bg-card border">
-            <p class="text-sm text-muted-foreground">Despesas</p>
-            <p class="text-2xl font-bold text-red-500">R$ 1.152,50</p>
-        </div>
-        <div class="p-4 rounded-lg bg-card border">
-            <p class="text-sm text-muted-foreground">Investimentos</p>
-            <p class="text-2xl font-bold text-blue-500">R$ 400,00</p>
-        </div>
-        <div class="p-4 rounded-lg bg-card border">
-            <p class="text-sm text-muted-foreground">Saldo</p>
-            <p class="text-2xl font-bold text-primary">R$ 247,50</p>
-            <p class="text-xs text-muted-foreground">Taxa de poupança: 13.8%</p>
-        </div>
-    </div>
-    
-    <!-- Seções Pontos Positivos e de Atenção -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-6 rounded-lg bg-card border">
-            <h3 class="font-headline text-lg font-bold mb-4">✅ Pontos Positivos</h3>
-            <ul class="space-y-3 text-muted-foreground">
-                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Você gerou uma receita sólida de R$ 1800, o que demonstra um bom planejamento financeiro.</span></li>
-                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Seu saldo final de R$ 247,50 é um excelente resultado, mostrando que você está vivendo dentro de suas possibilidades.</span></li>
-                <li class="flex items-start"><span class="mr-2 mt-1">✔</span><span>Investir R$ 400,00 é uma atitude muito positiva que contribuirá para o seu futuro financeiro.</span></li>
-            </ul>
-        </div>
-        <div class="p-6 rounded-lg bg-card border">
-            <h3 class="font-headline text-lg font-bold mb-4">⚠️ Pontos de Atenção</h3>
-            <ul class="space-y-3 text-muted-foreground">
-                <li class="flex items-start"><span class="mr-2 mt-1">👉</span><span>A categoria de moradia representa 52.1% das suas despesas. Considere revisar se há opções mais econômicas.</span></li>
-                <li class="flex items-start"><span class="mr-2 mt-1">👉</span><span>A despesa de transporte com gasolina foi de R$ 150,50, que pode ser uma área para explorar alternativas mais baratas.</span></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Dicas Personalizadas -->
-    <div>
-        <h3 class="font-headline text-xl font-bold mb-4">Dicas Personalizadas</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <div class="p-4 rounded-lg bg-card border">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold">Revisão de Aluguel</h4>
-                    <span class="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded-full">ALTA</span>
-                </div>
-                <p class="text-sm text-muted-foreground">Considere negociar o aluguel ou buscar opções mais acessíveis para reduzir significativamente suas despesas mensais.</p>
-            </div>
-            <div class="p-4 rounded-lg bg-card border">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold">Transporte Alternativo</h4>
-                     <span class="text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full">MÉDIA</span>
-                </div>
-                <p class="text-sm text-muted-foreground">Use transporte público ou caronas para economizar na gasolina, o que pode reduzir gastos em até 30%.</p>
-            </div>
-             <div class="p-4 rounded-lg bg-card border">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold">Fundo de Emergência</h4>
-                    <span class="text-xs font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-full">BAIXA</span>
-                </div>
-                <p class="text-sm text-muted-foreground">Destine uma parte do saldo final para um fundo de emergência para garantir sua segurança financeira.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gastos por Categoria -->
-    <div>
-        <h3 class="font-headline text-xl font-bold mb-4">Gastos por Categoria</h3>
-        <div class="p-4 rounded-lg bg-card border space-y-4">
-            <div class="flex justify-between items-center">
-                <span class="font-medium">Moradia</span>
-                <span class="font-bold">R$ 600,00 <span class="text-sm font-normal text-muted-foreground">(52.1%)</span></span>
-            </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full" style="width: 52.1%"></div></div>
-            
-            <div class="flex justify-between items-center">
-                <span class="font-medium">Transporte</span>
-                <span class="font-bold">R$ 178,50 <span class="text-sm font-normal text-muted-foreground">(15.5%)</span></span>
-            </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-orange-500 h-2.5 rounded-full" style="width: 15.5%"></div></div>
-
-            <div class="flex justify-between items-center">
-                <span class="font-medium">Outros</span>
-                <span class="font-bold">R$ 115,00 <span class="text-sm font-normal text-muted-foreground">(10.0%)</span></span>
-            </div>
-            <div class="w-full bg-muted rounded-full h-2.5"><div class="bg-yellow-500 h-2.5 rounded-full" style="width: 10.0%"></div></div>
-        </div>
-    </div>
-</div>
-\`\`\`
+Use classes Tailwind: bg-card, border, rounded-lg, p-4/p-6, text-primary, text-muted-foreground, font-bold, grid, flex, space-y-4, etc.
 `,
 });
 
@@ -158,8 +76,8 @@ const generateReportFlow = ai.defineFlow(
     outputSchema: FinancialReportOutputSchema,
   },
   async (input) => {
-    // Implementar retry com backoff exponencial
-    const maxRetries = 3;
+    // Retry com backoff exponencial mais agressivo para Gemini
+    const maxRetries = 5;
     let lastError;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -169,15 +87,19 @@ const generateReportFlow = ai.defineFlow(
       } catch (error: any) {
         lastError = error;
         
-        // Se for erro 503 (overloaded) e ainda temos tentativas, espera e tenta novamente
-        if (error.code === 503 && attempt < maxRetries) {
-          const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-          console.warn(`🔄 Gemini sobrecarregado, tentativa ${attempt}/${maxRetries}. Aguardando ${waitTime}ms...`);
+        // Verifica se é erro de sobrecarga (503 ou status UNAVAILABLE)
+        const isOverloaded = error.code === 503 || error.status === 'UNAVAILABLE';
+        
+        if (isOverloaded && attempt < maxRetries) {
+          // Backoff mais agressivo: 3s, 6s, 12s, 24s
+          const waitTime = Math.pow(2, attempt) * 1500;
+          console.warn(`🔄 Gemini sobrecarregado. Tentativa ${attempt}/${maxRetries}. Aguardando ${waitTime/1000}s...`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
         
         // Para outros erros ou última tentativa, lança o erro
+        console.error(`❌ Falha na geração do relatório (tentativa ${attempt}/${maxRetries}):`, error.message);
         throw error;
       }
     }
