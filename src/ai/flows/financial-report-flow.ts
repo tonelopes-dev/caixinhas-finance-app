@@ -158,7 +158,30 @@ const generateReportFlow = ai.defineFlow(
     outputSchema: FinancialReportOutputSchema,
   },
   async (input) => {
-    const { output } = await reportPrompt(input);
-    return output!;
+    // Implementar retry com backoff exponencial
+    const maxRetries = 3;
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const { output } = await reportPrompt(input);
+        return output!;
+      } catch (error: any) {
+        lastError = error;
+        
+        // Se for erro 503 (overloaded) e ainda temos tentativas, espera e tenta novamente
+        if (error.code === 503 && attempt < maxRetries) {
+          const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          console.warn(`🔄 Gemini sobrecarregado, tentativa ${attempt}/${maxRetries}. Aguardando ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        
+        // Para outros erros ou última tentativa, lança o erro
+        throw error;
+      }
+    }
+    
+    throw lastError;
   }
 );

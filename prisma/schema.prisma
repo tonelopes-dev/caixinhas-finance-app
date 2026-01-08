@@ -254,12 +254,13 @@ model Notification {
 }
 
 model SavedReport {
-  id           String   @id @default(cuid())
-  ownerId      String   // Pode ser um userId ou um vaultId
-  monthYear    String
-  analysisHtml String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  ownerId           String   // Pode ser um userId ou um vaultId
+  monthYear         String
+  analysisHtml      String
+  transactionCount  Int      @default(0) // Número de transações quando o relatório foi gerado
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([ownerId, monthYear])
   // ⚡ PERFORMANCE: Índice para consultas de relatórios

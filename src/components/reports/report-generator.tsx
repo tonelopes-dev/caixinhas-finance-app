@@ -67,6 +67,11 @@ export function ReportGenerator({
     // Filtra meses do ano selecionado
     const monthsForSelectedYear = availableMonths.filter(m => m.year.toString() === year);
     
+    // Verifica se os valores necessários estão presentes
+    const hasValidValues = Boolean(month && year && workspaceId);
+    
+    console.log('🔍 ReportGenerator - valores:', { month, year, workspaceId, hasValidValues, buttonEnabled });
+    
     // Atualiza mês quando o ano muda
     React.useEffect(() => {
         if (year && monthsForSelectedYear.length > 0) {
@@ -86,6 +91,10 @@ export function ReportGenerator({
             <input type="hidden" name="ownerId" value={workspaceId} />
             <input type="hidden" name="month" value={month} />
             <input type="hidden" name="year" value={year} />
+            {/* Debug: mostra valores atuais */}
+            {process.env.NODE_ENV === 'development' && (
+                <input type="hidden" data-debug="true" value={`month:${month},year:${year},workspaceId:${workspaceId}`} />
+            )}
             <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div className="space-y-2">
                     <label className='text-sm font-medium'>Ano</label>
@@ -117,7 +126,7 @@ export function ReportGenerator({
             <div className='self-stretch flex items-end'>
                 <GenerateReportButton 
                     label={buttonLabel}
-                    enabled={buttonEnabled && month && year && monthsForSelectedYear.length > 0}
+                    enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
                     isGenerating={isGenerating}
                 />
             </div>

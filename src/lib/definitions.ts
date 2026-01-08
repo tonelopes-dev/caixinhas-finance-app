@@ -123,7 +123,9 @@ export type SavedReport = {
   ownerId: string;
   monthYear: string;
   analysisHtml: string;
+  transactionCount: number;
   createdAt: Date;
+  updatedAt: Date;
 };
 
 export type Category = {

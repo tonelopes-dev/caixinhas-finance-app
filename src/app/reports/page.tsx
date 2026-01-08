@@ -111,11 +111,13 @@ function ReportsPage() {
     if (!workspaceId || !month || !year) return;
 
     const checkReportStatus = async () => {
-      // Encontra o mês selecionado nos meses disponíveis
-      const selectedMonth = availableMonths.find(m => m.value === month && m.year.toString() === year);
-      if (!selectedMonth) return;
+      // Constrói o monthYear diretamente sem depender de availableMonths
+      const monthIndex = parseInt(month, 10) - 1;
+      const yearNum = parseInt(year, 10);
+      const monthName = new Date(yearNum, monthIndex).toLocaleString('pt-BR', { month: 'long' });
+      const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
       
-      const statusResult = await getReportStatusAction(workspaceId, selectedMonth.label);
+      const statusResult = await getReportStatusAction(workspaceId, monthYear);
       if (!statusResult.success) {
         console.error('Erro ao verificar status:', statusResult.message);
         return;
@@ -123,8 +125,9 @@ function ReportsPage() {
       const status = statusResult.data;
       setReportStatus(status);
       
-      // Se existe relatório e não está desatualizado, exibe o HTML salvo
-      if (status.exists && !status.isOutdated && status.report) {
+      // Se existe relatório (mesmo desatualizado), exibe o HTML salvo
+      // O botão "Atualizar Relatório" ficará disponível se estiver desatualizado
+      if (status.exists && status.report) {
         setReportHtml(status.report.analysisHtml);
       } else {
         setReportHtml(null);
@@ -132,20 +135,50 @@ function ReportsPage() {
     };
     
     checkReportStatus();
-  }, [workspaceId, month, year, availableMonths]);
+  }, [workspaceId, month, year]);
 
   useEffect(() => {
     if (reportState?.isNewReport) {
         setReportHtml(reportState.reportHtml ?? null);
         setIsGenerating(false);
+        
+        // Recarrega o status do relatório após gerar um novo
+        const reloadStatus = async () => {
+          if (!workspaceId || !month || !year) return;
+          
+          const monthIndex = parseInt(month, 10) - 1;
+          const yearNum = parseInt(year, 10);
+          const monthName = new Date(yearNum, monthIndex).toLocaleString('pt-BR', { month: 'long' });
+          const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
+          
+          const statusResult = await getReportStatusAction(workspaceId, monthYear);
+          if (statusResult.success) {
+            setReportStatus(statusResult.data);
+          }
+        };
+        
+        reloadStatus();
     }
     if (reportState?.error) {
         console.error(reportState.error);
         setIsGenerating(false);
     }
-  }, [reportState]);
+  }, [reportState, workspaceId, month, year]);
 
   const handleGenerateReport = (formData: FormData) => {
+    console.log('📊 Gerando relatório - month:', month, 'year:', year, 'workspaceId:', workspaceId);
+    
+    // Validação antes de enviar
+    if (!month || !year || !workspaceId) {
+      console.error('❌ Dados faltando:', { month, year, workspaceId });
+      return;
+    }
+    
+    // Se o relatório está desatualizado, força regeneração
+    if (reportStatus.isOutdated) {
+      formData.append('forceRegenerate', 'true');
+    }
+    
     // Só limpa o HTML se for gerar um novo relatório
     if (reportStatus.isOutdated || !reportStatus.exists) {
       setReportHtml(null);
@@ -159,6 +192,16 @@ function ReportsPage() {
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
+
+  console.log('📊 ReportsPage render - state:', { 
+    month, 
+    year, 
+    workspaceId, 
+    hasAnyTransactions,
+    availableMonths: availableMonths.length,
+    availableYears: availableYears.length,
+    reportStatus 
+  });
 
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">

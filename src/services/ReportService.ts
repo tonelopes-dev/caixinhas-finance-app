@@ -31,6 +31,7 @@ export class ReportService {
     ownerId: string;
     monthYear: string;
     analysisHtml: string;
+    transactionCount?: number;
   }): Promise<SavedReport | null> {
     try {
       const report = await prisma.savedReport.upsert({
@@ -42,11 +43,13 @@ export class ReportService {
         },
         update: {
           analysisHtml: data.analysisHtml,
+          transactionCount: data.transactionCount ?? 0,
         },
         create: {
           ownerId: data.ownerId,
           monthYear: data.monthYear,
           analysisHtml: data.analysisHtml,
+          transactionCount: data.transactionCount ?? 0,
         }
       });
 
@@ -220,13 +223,14 @@ export class ReportService {
   }
 
   /**
-   * Verifica se há novas transações desde a geração do relatório
+   * Verifica se houve mudanças nas transações ou dados relacionados desde a geração do relatório
+   * Detecta: novas transações, edições, exclusões e mudanças em categorias/contas
    */
-  static async hasNewTransactionsSince(ownerId: string, monthYear: string, reportCreatedAt: Date): Promise<boolean> {
+  static async hasTransactionChanges(ownerId: string, monthYear: string, report: SavedReport): Promise<boolean> {
     try {
       // Extrai ano e mês do monthYear (ex: "Novembro de 2024")
       const monthYearParts = monthYear.split(' de ');
-      if (monthYearParts.length !== 2) return true; // Se não conseguir parsear, assume que há mudanças
+      if (monthYearParts.length !== 2) return true;
       
       const monthName = monthYearParts[0].toLowerCase();
       const year = parseInt(monthYearParts[1]);
@@ -244,25 +248,159 @@ export class ReportService {
       const startOfMonth = new Date(year, monthIndex, 1);
       const endOfMonth = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
       
-      const newTransactionsCount = await prisma.transaction.count({
+      // 1. Verificar se o número de transações mudou (detecta exclusões)
+      const currentCount = await prisma.transaction.count({
         where: {
           OR: [
-            { userId: ownerId },
-            { vaultId: ownerId }
+            { actorId: ownerId },
+            { 
+              vault: {
+                OR: [
+                  { ownerId: ownerId },
+                  { 
+                    members: {
+                      some: {
+                        userId: ownerId
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          date: {
+            gte: startOfMonth,
+            lte: endOfMonth
+          }
+        }
+      });
+
+      if (currentCount !== report.transactionCount) {
+        console.log(`🔍 Mudança detectada: contagem de transações mudou de ${report.transactionCount} para ${currentCount}`);
+        return true;
+      }
+
+      // 2. Verificar se há transações criadas ou editadas após o relatório
+      const modifiedTransactions = await prisma.transaction.count({
+        where: {
+          OR: [
+            { actorId: ownerId },
+            { 
+              vault: {
+                OR: [
+                  { ownerId: ownerId },
+                  { 
+                    members: {
+                      some: {
+                        userId: ownerId
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           ],
           date: {
             gte: startOfMonth,
             lte: endOfMonth
           },
-          createdAt: {
-            gt: reportCreatedAt
-          }
+          OR: [
+            {
+              createdAt: {
+                gt: report.updatedAt
+              }
+            },
+            {
+              updatedAt: {
+                gt: report.updatedAt
+              }
+            }
+          ]
         }
       });
 
-      return newTransactionsCount > 0;
+      if (modifiedTransactions > 0) {
+        console.log(`🔍 Mudança detectada: ${modifiedTransactions} transações criadas/editadas`);
+        return true;
+      }
+
+      // 3. Verificar se houve mudanças em categorias ou contas relacionadas
+      // Busca IDs das categorias e contas usadas nas transações do período
+      const transactions = await prisma.transaction.findMany({
+        where: {
+          OR: [
+            { actorId: ownerId },
+            { 
+              vault: {
+                OR: [
+                  { ownerId: ownerId },
+                  { 
+                    members: {
+                      some: {
+                        userId: ownerId
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          date: {
+            gte: startOfMonth,
+            lte: endOfMonth
+          }
+        },
+        select: {
+          categoryId: true,
+          sourceAccountId: true,
+          destinationAccountId: true
+        }
+      });
+
+      const categoryIds = [...new Set(transactions.map(t => t.categoryId).filter(Boolean))] as string[];
+      const accountIds = [...new Set([
+        ...transactions.map(t => t.sourceAccountId).filter(Boolean),
+        ...transactions.map(t => t.destinationAccountId).filter(Boolean)
+      ])] as string[];
+
+      // Verifica se alguma categoria foi atualizada
+      if (categoryIds.length > 0) {
+        const updatedCategories = await prisma.category.count({
+          where: {
+            id: { in: categoryIds },
+            updatedAt: {
+              gt: report.updatedAt
+            }
+          }
+        });
+
+        if (updatedCategories > 0) {
+          console.log(`🔍 Mudança detectada: ${updatedCategories} categorias relacionadas foram atualizadas`);
+          return true;
+        }
+      }
+
+      // Verifica se alguma conta foi atualizada
+      if (accountIds.length > 0) {
+        const updatedAccounts = await prisma.account.count({
+          where: {
+            id: { in: accountIds },
+            updatedAt: {
+              gt: report.updatedAt
+            }
+          }
+        });
+
+        if (updatedAccounts > 0) {
+          console.log(`🔍 Mudança detectada: ${updatedAccounts} contas relacionadas foram atualizadas`);
+          return true;
+        }
+      }
+
+      console.log(`✅ Nenhuma mudança detectada para ${monthYear}`);
+      return false;
     } catch (error) {
-      console.error('Erro ao verificar novas transações:', error);
+      console.error('Erro ao verificar mudanças:', error);
       return true; // Em caso de erro, assume que há mudanças
     }
   }
@@ -290,9 +428,9 @@ export class ReportService {
         };
       }
       
-      const hasNewTransactions = await this.hasNewTransactionsSince(ownerId, monthYear, report.createdAt);
+      const hasChanges = await this.hasTransactionChanges(ownerId, monthYear, report);
       
-      if (hasNewTransactions) {
+      if (hasChanges) {
         return {
           exists: true,
           isOutdated: true,

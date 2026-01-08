@@ -6,9 +6,10 @@ import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { ReportService } from '@/services/ReportService';
 
 const generateReportSchema = z.object({
-    month: z.string(),
-    year: z.string(),
-    ownerId: z.string(),
+    month: z.string().min(1, 'Mês é obrigatório'),
+    year: z.string().min(1, 'Ano é obrigatório'),
+    ownerId: z.string().min(1, 'Workspace ID é obrigatório'),
+    forceRegenerate: z.string().optional(), // Para forçar regeneração
 });
 
 export type FinancialReportState = {
@@ -18,17 +19,26 @@ export type FinancialReportState = {
 };
 
 export async function generateNewFinancialReport(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
+    console.log('📊 Dados do formulário:', { 
+        month: formData.get('month'),
+        year: formData.get('year'),
+        ownerId: formData.get('ownerId'),
+        forceRegenerate: formData.get('forceRegenerate')
+    });
+    
     const validatedFields = generateReportSchema.safeParse({
         month: formData.get('month'),
         year: formData.get('year'),
         ownerId: formData.get('ownerId'),
+        forceRegenerate: formData.get('forceRegenerate'),
     });
 
     if (!validatedFields.success) {
-        return { error: 'Dados inválidos para gerar o relatório.' };
+        console.error('❌ Validação falhou:', validatedFields.error.format());
+        return { error: 'Dados inválidos para gerar o relatório. Verifique se o mês e ano foram selecionados.' };
     }
 
-    const { month, year, ownerId } = validatedFields.data;
+    const { month, year, ownerId, forceRegenerate } = validatedFields.data;
     
     const monthIndex = parseInt(month, 10) - 1;
     const yearNum = parseInt(year, 10);
@@ -36,7 +46,8 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
     const monthYear = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${yearNum}`;
     
     // Verifica se já existe relatório salvo no banco
-    const cachedReport = await ReportService.getReport(ownerId, monthYear);
+    // Se forceRegenerate estiver definido (botão "Atualizar"), pula o cache
+    const cachedReport = forceRegenerate ? null : await ReportService.getReport(ownerId, monthYear);
     if (cachedReport) {
         return {
             reportHtml: cachedReport.analysisHtml,
@@ -64,11 +75,12 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
             transactions: JSON.stringify(relevantTransactions, null, 2),
         });
 
-        // Salva o relatório no banco de dados
+        // Salva o relatório no banco de dados com a contagem de transações
         const savedReport = await ReportService.saveReport({
             ownerId,
             monthYear,
-            analysisHtml: result.analysisHtml
+            analysisHtml: result.analysisHtml,
+            transactionCount: relevantTransactions.length
         });
 
         if (!savedReport) {
@@ -79,9 +91,19 @@ export async function generateNewFinancialReport(prevState: FinancialReportState
             reportHtml: result.analysisHtml,
             isNewReport: true,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error generating financial report:', error);
-        return { error: 'Ocorreu um erro ao gerar o relatório. Tente novamente.' };
+        
+        // Mensagens de erro específicas para melhor UX
+        if (error.code === 503) {
+            return { error: 'O serviço de IA está temporariamente sobrecarregado. Tente novamente em alguns minutos.' };
+        } else if (error.code === 429) {
+            return { error: 'Muitas solicitações. Aguarde um momento antes de tentar novamente.' };
+        } else if (error.message?.includes('quota')) {
+            return { error: 'Cota da IA excedida. Tente novamente mais tarde ou entre em contato com o suporte.' };
+        } else {
+            return { error: 'Erro temporário ao gerar o relatório. Tente novamente em alguns instantes.' };
+        }
     }
 }
 
