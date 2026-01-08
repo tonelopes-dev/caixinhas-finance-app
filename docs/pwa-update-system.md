@@ -31,6 +31,12 @@ Antes, o PWA tinha problemas de cache que afetavam tanto desenvolvimento quanto 
 
 ### 3. **Sistema de Atualização para Usuários**
 
+#### Exibição Inteligente
+- ✅ Apenas para usuários **autenticados**
+- ✅ Apenas em **rotas privadas** (não mostra em /landing, /login, etc.)
+- ✅ Evita confusão para visitantes e novos usuários
+- ✅ Foco na experiência de usuários ativos do app
+
 #### Detecção Automática
 - Verifica atualizações a cada 30 minutos
 - Verifica quando usuário volta ao app (tab focus)

@@ -5,15 +5,44 @@ import { RefreshCw, Download, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+
+// Rotas públicas onde NÃO deve mostrar notificação de atualização
+const PUBLIC_ROUTES = [
+  '/landing',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/terms',
+  '/privacy',
+];
 
 export function UpdateAvailableNotification() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<string>('');
   const [newVersion, setNewVersion] = useState<string>('');
+  
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  // Verifica se está em rota pública
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
+  
+  // Só mostra notificação se:
+  // 1. Usuário está autenticado
+  // 2. Não está em rota pública
+  // 3. Há atualização disponível
+  const shouldShowNotification = session && !isPublicRoute && updateAvailable;
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    // Não ativa sistema de update em rotas públicas ou se não autenticado
+    if (typeof window === 'undefined' || 
+        !('serviceWorker' in navigator) || 
+        isPublicRoute || 
+        status === 'unauthenticated') {
       return;
     }
 
@@ -105,7 +134,7 @@ export function UpdateAvailableNotification() {
       clearInterval(updateInterval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [isPublicRoute, status]); // Reinicia quando muda rota ou status de autenticação
 
   const handleUpdate = async () => {
     if (!navigator.serviceWorker) return;
@@ -159,7 +188,8 @@ export function UpdateAvailableNotification() {
     });
   };
 
-  if (!updateAvailable) {
+  // Não renderiza se não deve mostrar
+  if (!shouldShowNotification) {
     return null;
   }
 
