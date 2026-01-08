@@ -25,8 +25,9 @@ const MobileFloatingNav = () => {
   const publicPages = ['/landing', '/login', '/register', '/terms'];
   const isPublicPage = publicPages.some(page => pathname.startsWith(page));
   
-  // Só mostrar se usuário estiver autenticado, não estiver em página pública e não estiver com loading global ativo
-  const shouldShowNav = status === 'authenticated' && session?.user && !isPublicPage && !isLoading;
+  // Só mostrar se usuário estiver autenticado e não estiver em página pública
+  // REMOVIDO: !isLoading - não devemos ocultar o menu durante loading global (ex: navegação de workspace)
+  const shouldShowNav = status === 'authenticated' && session?.user && !isPublicPage;
 
   const items = [
     { 
@@ -64,10 +65,11 @@ const MobileFloatingNav = () => {
       return pathname.startsWith(item.path);
     });
     
-    if (currentItem !== -1) {
+    if (currentItem !== -1 && currentItem !== active) {
+      console.log('📍 [MobileNav] Atualizando active de', active, 'para', currentItem, '(pathname:', pathname, ')');
       setActive(currentItem);
     }
-  }, [pathname]);
+  }, [pathname, items]); // Removido 'active' das dependências para evitar loops
 
   // Detectar quando a navegação foi concluída e fechar o loading após 500ms
   useEffect(() => {
@@ -127,12 +129,19 @@ const MobileFloatingNav = () => {
     // Se já estiver na página, não fazer nada
     if (active === index) return;
     
+    // Se já estiver navegando, prevenir múltiplos cliques
+    if (isNavigating || isLoading) {
+      console.warn('⚠️ [MobileNav] Navegação já em andamento, ignorando clique');
+      return;
+    }
+    
     // Validar se a rota é válida antes de navegar
     if (!item.path || !item.path.startsWith('/')) {
       console.error('❌ Rota inválida:', item.path);
       return;
     }
     
+    console.log('🚀 [MobileNav] Iniciando navegação para:', item.path);
     setActive(index);
     setTargetPath(item.path);
     setIsNavigating(true);
@@ -177,9 +186,11 @@ const MobileFloatingNav = () => {
               btnRefs.current[index] = el;
             }}
             onClick={() => handleNavigation(item, index)}
+            disabled={isNavigating || isLoading}
             className={cn(
               "relative flex flex-col items-center justify-center flex-1 px-3 py-2 text-sm font-medium transition-all duration-200",
               "hover:scale-105 active:scale-95",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
               active === index 
                 ? "text-primary" 
                 : "text-muted-foreground"
