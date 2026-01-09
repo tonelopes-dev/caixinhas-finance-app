@@ -60,24 +60,8 @@ export function HeaderClient({ user }: HeaderClientProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/patrimonio">
-            <Wallet className="mr-2 h-4 w-4" />
-            <span>Patrimônio</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/accounts">
-            <Landmark className="mr-2 h-4 w-4" />
-            <span>Contas</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/reports">
-            <FileText className="mr-2 h-4 w-4" />
-            <span>Relatórios</span>
-          </Link>
-        </DropdownMenuItem>
+        
+        {/* 🔥 Ações Frequentes - Mais usadas */}
         <DropdownMenuItem asChild>
           <Link href="/transactions">
             <ArrowRightLeft className="mr-2 h-4 w-4" />
@@ -91,6 +75,38 @@ export function HeaderClient({ user }: HeaderClientProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link href="/vaults">
+            <Vault className="mr-2 h-4 w-4" />
+            <span>Mudar de Cofre</span>
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* 💰 Gestão Financeira */}
+        <DropdownMenuItem asChild>
+          <Link href="/accounts">
+            <Landmark className="mr-2 h-4 w-4" />
+            <span>Contas</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/patrimonio">
+            <Wallet className="mr-2 h-4 w-4" />
+            <span>Patrimônio</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/reports">
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Relatórios</span>
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* ⚙️ Configurações & Ajuda */}
+        <DropdownMenuItem asChild>
           <Link href="/profile">
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Perfil</span>
@@ -103,19 +119,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/vaults">
-            <Vault className="mr-2 h-4 w-4" />
-            <span>Mudar de Cofre</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href="/support">
             <LifeBuoy className="mr-2 h-4 w-4" />
             <span>Suporte</span>
           </Link>
         </DropdownMenuItem>
+        
         <ThemeSwitcher />
+        
         <DropdownMenuSeparator />
+        
+        {/* 🚪 Sair */}
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           Sair
