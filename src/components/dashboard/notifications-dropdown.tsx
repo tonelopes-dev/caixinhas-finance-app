@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Bell, CircleDot } from 'lucide-react';
+import { Bell, CircleDot, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import type { NotificationData } from '@/services/notification.service';
@@ -66,48 +66,102 @@ export function NotificationsDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={cn(
+            "relative transition-all duration-200 hover:scale-105",
+            unreadCount > 0 && "animate-pulse"
+          )}
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-lg ring-2 ring-background animate-in zoom-in-50">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
-          <span className="sr-only">Notificações</span>
+          <span className="sr-only">Notificações {unreadCount > 0 ? `(${unreadCount} não lidas)` : ''}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-screen max-w-md" align="end">
-        <DropdownMenuLabel className="flex justify-between items-center">
-          Notificações
-          <Link href="/notifications" className='text-xs font-normal text-primary hover:underline'>Ver todas</Link>
+      <DropdownMenuContent className="w-screen max-w-md" align="end" sideOffset={8}>
+        <DropdownMenuLabel className="flex justify-between items-center py-3 px-4">
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            <span>Notificações</span>
+            {unreadCount > 0 && (
+              <span className="text-xs text-muted-foreground">
+                ({unreadCount} {unreadCount === 1 ? 'nova' : 'novas'})
+              </span>
+            )}
+          </div>
+          <Link 
+            href="/notifications" 
+            className="text-xs font-normal text-primary hover:underline flex items-center gap-1"
+          >
+            Ver todas
+          </Link>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {recentUnreadNotifications.length > 0 ? (
-          recentUnreadNotifications.map((notification) => (
-            <DropdownMenuItem key={notification.id} asChild>
-              <Link 
-                href={notification.link || '/notifications'} 
-                className={cn("flex items-start gap-3 p-3", 'font-semibold')}
-                onClick={() => handleNotificationClick(notification.id)}
+          <>
+            {recentUnreadNotifications.map((notification) => (
+              <DropdownMenuItem 
+                key={notification.id} 
+                asChild
+                className="focus:bg-accent/50"
               >
-                <Avatar className='h-8 w-8 mt-1 border-2 border-primary/50'>
-                  {getNotificationIcon(notification.type)}
-                  <AvatarFallback><Bell /></AvatarFallback>
-                </Avatar>
-                <div className="flex-1 whitespace-normal">
-                  <p className="text-sm font-medium">{notification.message}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(notification.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                  </p>
-                </div>
-                <CircleDot className="h-4 w-4 text-primary mt-1" />
+                <Link 
+                  href={notification.link || '/notifications'} 
+                  className={cn(
+                    "flex items-start gap-3 p-3 cursor-pointer transition-colors",
+                    "hover:bg-accent/50 border-l-2 border-transparent hover:border-primary"
+                  )}
+                  onClick={() => handleNotificationClick(notification.id)}
+                >
+                  <Avatar className="h-9 w-9 mt-0.5 border-2 border-primary/30 bg-primary/5">
+                    {getNotificationIcon(notification.type)}
+                    <AvatarFallback>
+                      <Bell className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-snug">{notification.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      {new Date(notification.createdAt).toLocaleDateString('pt-BR', { 
+                        day: '2-digit', 
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <CircleDot className="h-3 w-3 text-primary mt-1 flex-shrink-0 animate-pulse" />
+                </Link>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <div className="p-2 text-center">
+              <Link
+                href="/notifications"
+                className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 py-2"
+              >
+                <CheckCheck className="h-3 w-3" />
+                Ver todas as notificações
               </Link>
-            </DropdownMenuItem>
-          ))
+            </div>
+          </>
         ) : (
-          <p className="p-4 text-center text-sm text-muted-foreground">
-            Nenhuma notificação nova.
-          </p>
+          <div className="p-8 text-center">
+            <div className="mb-3 mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <Bell className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Nenhuma notificação nova.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Você está em dia! 🎉
+            </p>
+          </div>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
