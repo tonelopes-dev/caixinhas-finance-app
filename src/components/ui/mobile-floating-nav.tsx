@@ -38,15 +38,15 @@ const MobileFloatingNav = () => {
     },
     { 
       id: 1, 
-      icon: <ArrowRightLeft size={20} />, 
-      label: "Transações", 
-      path: "/transactions"
-    },
-    { 
-      id: 2, 
       icon: <Gift size={20} />, 
       label: "Caixinhas", 
       path: "/goals"
+    },
+    { 
+      id: 2, 
+      icon: <ArrowRightLeft size={20} />, 
+      label: "Transações", 
+      path: "/transactions"
     },
     { 
       id: 3, 
