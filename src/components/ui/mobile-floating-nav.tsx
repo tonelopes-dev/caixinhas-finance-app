@@ -65,11 +65,16 @@ const MobileFloatingNav = () => {
       return pathname.startsWith(item.path);
     });
     
-    if (currentItem !== -1 && currentItem !== active) {
+    // Se a rota atual não corresponde a nenhum item do menu, desativa todos (ex: /profile)
+    if (currentItem === -1) {
+      console.log('📍 [MobileNav] Rota não encontrada no menu, desativando (pathname:', pathname, ')');
+      setActive(-1);
+    } else if (currentItem !== active) {
       console.log('📍 [MobileNav] Atualizando active de', active, 'para', currentItem, '(pathname:', pathname, ')');
       setActive(currentItem);
     }
-  }, [pathname, items]); // Removido 'active' das dependências para evitar loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]); // Apenas pathname como dependência
 
   // Detectar quando a navegação foi concluída e fechar o loading após 500ms
   useEffect(() => {
@@ -126,12 +131,19 @@ const MobileFloatingNav = () => {
   }, [active]);
 
   const handleNavigation = (item: typeof items[0], index: number) => {
-    // Se já estiver na página, não fazer nada
-    if (active === index) return;
-    
     // Se já estiver navegando, prevenir múltiplos cliques
     if (isNavigating || isLoading) {
       console.warn('⚠️ [MobileNav] Navegação já em andamento, ignorando clique');
+      return;
+    }
+    
+    // Se já estiver na página de destino, não fazer nada
+    const isAlreadyThere = 
+      (item.path === "/dashboard" && (pathname === "/" || pathname === "/dashboard")) ||
+      pathname.startsWith(item.path);
+    
+    if (isAlreadyThere) {
+      console.log('ℹ️ [MobileNav] Já está em:', item.path);
       return;
     }
     
