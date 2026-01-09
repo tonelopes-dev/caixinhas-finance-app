@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import type { NotificationData } from '@/services/notification.service';
 import { markNotificationAsRead } from '@/app/notifications/actions';
+import { useLoading } from '@/components/providers/loading-provider';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -41,6 +42,8 @@ export function NotificationsDropdown({
   initialNotifications = [],
   initialUnreadCount = 0,
 }: NotificationsDropdownProps) {
+  const router = useRouter();
+  const { showLoading, hideLoading } = useLoading();
   const [notifications, setNotifications] = useState<NotificationData[]>(initialNotifications);
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
 
@@ -61,7 +64,17 @@ export function NotificationsDropdown({
     }
   };
 
+  const handleViewAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    showLoading('Carregando notificações...', false);
+    
+    setTimeout(() => {
+      router.push('/notifications');
+    }, 300);
+  };
+
   const recentUnreadNotifications = notifications.filter(n => !n.isRead).slice(0, 4);
+  const { isLoading } = useLoading();
 
   return (
     <DropdownMenu>
@@ -94,12 +107,13 @@ export function NotificationsDropdown({
               </span>
             )}
           </div>
-          <Link 
-            href="/notifications" 
-            className="text-xs font-normal text-primary hover:underline flex items-center gap-1"
+          <button
+            onClick={handleViewAll}
+            disabled={isLoading}
+            className="text-xs font-normal text-primary hover:underline flex items-center gap-1 transition-colors disabled:opacity-50"
           >
             Ver todas
-          </Link>
+          </button>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {recentUnreadNotifications.length > 0 ? (
@@ -141,13 +155,14 @@ export function NotificationsDropdown({
             ))}
             <DropdownMenuSeparator />
             <div className="p-2 text-center">
-              <Link
-                href="/notifications"
-                className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 py-2"
+              <button
+                onClick={handleViewAll}
+                disabled={isLoading}
+                className="w-full text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 py-2 disabled:opacity-50"
               >
                 <CheckCheck className="h-3 w-3" />
                 Ver todas as notificações
-              </Link>
+              </button>
             </div>
           </>
         ) : (

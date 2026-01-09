@@ -13,6 +13,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getNotifications } from './actions';
 import { NotificationsManager } from '@/components/notifications/notifications-manager';
+import { NotificationsPageHandler } from '@/components/notifications/notifications-page-handler';
 
 
 export default async function NotificationsPage() {
@@ -26,6 +27,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+      <NotificationsPageHandler />
       <div className="mx-auto w-full max-w-3xl">
         <BackToDashboard className="mb-4" />
         <Card>
