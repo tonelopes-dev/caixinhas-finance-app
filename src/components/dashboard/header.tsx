@@ -44,7 +44,7 @@ export default async function Header({ user, partner }: HeaderProps) {
       <div className="container flex items-center justify-between">
         <Link href="/vaults" className="flex items-center gap-2">
           <Logo w={32} h={32} />
-          <h1 className="font-headline hidden sm:block text-xl font-bold text-foreground">Caixinhas</h1>
+          <h1 className="font-headline sm:block text-xl font-bold text-foreground">Caixinhas</h1>
         </Link>
         <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           {partner && (
