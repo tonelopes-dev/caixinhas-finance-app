@@ -143,7 +143,7 @@ const MobileFloatingNav = () => {
   return (
     <>
       <div 
-        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-[100] w-full max-w-xs px-4"
+        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
         style={{ 
           bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
         }}
