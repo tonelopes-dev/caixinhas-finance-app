@@ -29,6 +29,7 @@ import type { Account, Goal } from '@/lib/definitions';
 import { AddAccountPromptDialog } from '../transactions/add-account-prompt-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from '../ui/checkbox';
+import { useLoading } from '@/components/providers/loading-provider';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -61,6 +62,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
   const [open, setOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
@@ -108,6 +110,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
 
   useEffect(() => {
     if (state.success === true) {
+      hideLoading();
       toast({
         title: "Sucesso!",
         description: state.message,
@@ -115,13 +118,14 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
       resetFormState();
       setOpen(false);
     } else if (state.success === false && state.message) {
+      hideLoading();
       toast({
         title: "Erro",
         description: state.message,
         variant: "destructive",
       });
     }
-  }, [state, toast, initialChargeType]);
+  }, [state, toast, initialChargeType, hideLoading]);
 
   useEffect(() => {
     if (chargeType === 'installment') {
@@ -179,6 +183,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     if (totalInstallments) formData.append('totalInstallments', totalInstallments);
     formData.append('amount', amount);
     if (projectRecurring) formData.append('projectRecurring', 'true');
+    
+    showLoading('Salvando transação...', false);
     
     startTransition(() => {
       dispatch(formData);

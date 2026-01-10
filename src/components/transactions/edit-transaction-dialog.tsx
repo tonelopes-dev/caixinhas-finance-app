@@ -28,6 +28,7 @@ import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLoading } from '@/components/providers/loading-provider';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -51,6 +52,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(updateTransaction, initialState);
   const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
   const [open, setOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -89,19 +91,21 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
 
   useEffect(() => {
     if (state.success) {
+      hideLoading();
       toast({
         title: "Sucesso!",
         description: state.message,
       });
       setOpen(false);
     } else if (state.message) {
+      hideLoading();
       toast({
         title: "Erro",
         description: state.message,
         variant: "destructive",
       });
     }
-  }, [state, toast]);
+  }, [state, toast, hideLoading]);
 
   // Garantir que os valores iniciais estejam definidos
   useEffect(() => {
@@ -247,7 +251,13 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
             ))}
         </div>
 
-        <form action={dispatch} className="flex flex-1 flex-col justify-between overflow-hidden">
+        <form 
+          action={dispatch} 
+          onSubmit={(e) => {
+            showLoading('Atualizando transação...', false);
+          }}
+          className="flex flex-1 flex-col justify-between overflow-hidden"
+        >
           <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
             {/* Hidden inputs for form data */}
             <input type="hidden" name="id" value={transaction.id} />

@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
 import { AddAccountPromptDialog } from '@/components/transactions/add-account-prompt-dialog';
 import type { Account } from '@/lib/definitions';
+import { useLoading } from '@/components/providers/loading-provider';
 
 const initialState = {
   message: '',
@@ -45,6 +46,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
   const [isOpen, setIsOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
   
   const hasNoAccounts = accounts.length === 0;
   
@@ -73,13 +75,15 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
 
   useEffect(() => {
     if (state.success) {
+      hideLoading();
       toast({ title: 'Sucesso!', description: state.message });
       setIsOpen(false);
       onComplete?.();
     } else if (state.message) {
+      hideLoading();
       toast({ title: 'Erro', description: state.message, variant: 'destructive' });
     }
-  }, [state, toast, onComplete]);
+  }, [state, toast, onComplete, hideLoading]);
 
   // Limpa o estado ao fechar o diálogo
   useEffect(() => {
@@ -110,7 +114,13 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
             Insira o valor e selecione a conta que deseja {type === 'deposit' ? 'usar para depositar' : 'receber a retirada'}.
           </DialogDescription>
         </DialogHeader>
-        <form action={formAction}>
+        <form 
+          action={formAction}
+          onSubmit={(e) => {
+            const action = type === 'deposit' ? 'Depositando' : 'Retirando';
+            showLoading(`${action}...`, false);
+          }}
+        >
           <input type="hidden" name="goalId" value={goalId} />
           <div className="grid gap-4 py-4">
             {/* CORRIGIDO: Campo de seleção de conta adicionado */}

@@ -19,15 +19,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useActionState } from 'react';
 import { deleteTransaction } from '@/app/transactions/actions';
 import { cn } from '@/lib/utils';
+import { useLoading } from '@/components/providers/loading-provider';
 
 
 export function DeleteTransactionDialog({ transactionId }: { transactionId: string }) {
   const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
   const [open, setOpen] = useState(false);
   const [state, dispatch] = useActionState(deleteTransaction, { message: null, success: false });
 
   useEffect(() => {
     if (state?.message) {
+      hideLoading();
       toast({
         title: state.success ? "Sucesso" : "Erro",
         description: state.message,
@@ -37,7 +40,7 @@ export function DeleteTransactionDialog({ transactionId }: { transactionId: stri
         setOpen(false);
       }
     }
-  }, [state, toast]);
+  }, [state, toast, hideLoading]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -48,7 +51,12 @@ export function DeleteTransactionDialog({ transactionId }: { transactionId: stri
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <form action={dispatch}>
+        <form 
+          action={dispatch}
+          onSubmit={(e) => {
+            showLoading('Excluindo transação...', false);
+          }}
+        >
           <input type="hidden" name="id" value={transactionId} />
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
