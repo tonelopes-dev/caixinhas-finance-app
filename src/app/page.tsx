@@ -4,32 +4,29 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useLoading } from '@/components/providers/loading-provider';
 
 function HomePage() {
   const { status } = useSession();
   const router = useRouter();
-  const { showLoading, hideLoading } = useLoading();
 
   useEffect(() => {
-    // Mostrar loading durante verificação da sessão
-    if (status === 'loading') {
-      showLoading('Verificando sessão...', false);
-      return;
-    }
+    // Aguardar o status ser definitivo antes de redirecionar
+    if (status === 'loading') return;
     
     // Redireciona com base no status da autenticação
     if (status === 'unauthenticated') {
-      hideLoading();
       router.replace('/landing');
     } else if (status === 'authenticated') {
-      hideLoading();
       router.replace('/dashboard');
     }
-  }, [status, router, showLoading, hideLoading]);
+  }, [status, router]);
 
-  // LoadingScreen global vai aparecer por cima
-  return <div className="min-h-screen bg-background" />;
+  // Enquanto a sessão está sendo verificada, mostramos um loader.
+  return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
 }
 
 export default HomePage;
