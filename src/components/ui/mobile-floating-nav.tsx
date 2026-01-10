@@ -7,13 +7,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useLoading } from "@/components/providers/loading-provider";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 
 const MobileFloatingNav = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const { isLoading } = useLoading();
+  const { isLoading, showLoading, hideLoading } = useLoading();
   const [active, setActive] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
   const [targetPath, setTargetPath] = useState<string | null>(null);
@@ -76,38 +75,6 @@ const MobileFloatingNav = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]); // Apenas pathname como dependência
 
-  // Detectar quando a navegação foi concluída e fechar o loading após 500ms
-  useEffect(() => {
-    if (isNavigating && targetPath) {
-      // Timeout de segurança: fechar loading após 3 segundos no máximo
-      const safetyTimeout = setTimeout(() => {
-        console.warn('⚠️ Navigation timeout - forçando fechamento do loading');
-        setIsNavigating(false);
-        setTargetPath(null);
-      }, 3000);
-      
-      // Verificar se chegamos à página de destino
-      const destinationReached = 
-        (targetPath === "/dashboard" && (pathname === "/" || pathname === "/dashboard")) ||
-        pathname.startsWith(targetPath);
-      
-      if (destinationReached) {
-        // Aguardar 500ms após chegar na página antes de fechar o loading
-        const timer = setTimeout(() => {
-          setIsNavigating(false);
-          setTargetPath(null);
-        }, 500);
-        
-        return () => {
-          clearTimeout(timer);
-          clearTimeout(safetyTimeout);
-        };
-      }
-      
-      return () => clearTimeout(safetyTimeout);
-    }
-  }, [pathname, isNavigating, targetPath]);
-
   // Atualizar posição do indicador quando ativo muda ou resize
   useEffect(() => {
     const updateIndicator = () => {
@@ -132,7 +99,7 @@ const MobileFloatingNav = () => {
 
   const handleNavigation = (item: typeof items[0], index: number) => {
     // Se já estiver navegando, prevenir múltiplos cliques
-    if (isNavigating || isLoading) {
+    if (isLoading) {
       console.warn('⚠️ [MobileNav] Navegação já em andamento, ignorando clique');
       return;
     }
@@ -155,8 +122,7 @@ const MobileFloatingNav = () => {
     
     console.log('🚀 [MobileNav] Iniciando navegação para:', item.path);
     setActive(index);
-    setTargetPath(item.path);
-    setIsNavigating(true);
+    showLoading('Navegando...', false);
     
     // Pequeno delay para mostrar a tela de loading antes de navegar
     setTimeout(() => {
@@ -164,9 +130,7 @@ const MobileFloatingNav = () => {
         router.push(item.path);
       } catch (error) {
         console.error('❌ Erro ao navegar:', error);
-        // Em caso de erro, fechar o loading imediatamente
-        setIsNavigating(false);
-        setTargetPath(null);
+        hideLoading();
       }
     }, 300);
   };
@@ -178,11 +142,8 @@ const MobileFloatingNav = () => {
 
   return (
     <>
-      {/* Tela de loading durante navegação */}
-      {isNavigating && <LoadingScreen message="Navegando..." showProgress={false} />}
-      
       <div 
-        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
+        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-[100] w-full max-w-xs px-4"
         style={{ 
           bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
         }}
@@ -198,7 +159,7 @@ const MobileFloatingNav = () => {
               btnRefs.current[index] = el;
             }}
             onClick={() => handleNavigation(item, index)}
-            disabled={isNavigating || isLoading}
+            disabled={isLoading}
             className={cn(
               "relative flex flex-col items-center justify-center flex-1 px-3 py-2 text-sm font-medium transition-all duration-200",
               "hover:scale-105 active:scale-95",
