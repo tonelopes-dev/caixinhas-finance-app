@@ -28,8 +28,8 @@ function HomePage() {
     }
   }, [status, router, showLoading, hideLoading]);
 
-  // Não renderiza nada - deixa apenas o LoadingScreen global aparecer
-  return null;
+  // LoadingScreen global vai aparecer por cima
+  return <div className="min-h-screen bg-background" />;
 }
 
 export default HomePage;
