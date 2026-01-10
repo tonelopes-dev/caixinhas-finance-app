@@ -7,8 +7,8 @@ import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { LoadingProvider } from '@/components/providers/loading-provider';
-import { NavigationLoader } from '@/components/ui/navigation-loader';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { InitialLoadingHandler } from '@/components/ui/initial-loading-handler';
 import { NetworkStatusIndicator } from '@/components/ui/network-status-indicator';
 import { UpdateAvailableNotification } from '@/components/ui/update-available-notification';
 import MobileFloatingNav from '@/components/ui/mobile-floating-nav';
@@ -80,8 +80,8 @@ export default function RootLayout({
             <LoadingProvider>
               <FirebaseClientProvider>
                 <ErrorBoundary>
+                  <InitialLoadingHandler />
                   <SessionValidator />
-                  <NavigationLoader />
                   {/* <NetworkStatusIndicator /> */}
                   <UpdateAvailableNotification />
                   <RootLayoutClient>

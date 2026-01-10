@@ -22,10 +22,10 @@ interface LoadingProviderProps {
 }
 
 export function LoadingProvider({ children }: LoadingProviderProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Começa com loading ativo
   const [message, setMessage] = useState('Carregando...');
   const [progress, setProgressState] = useState(0);
-  const [showProgress, setShowProgress] = useState(true);
+  const [showProgress, setShowProgress] = useState(false); // Sem barra de progresso no inicial
   
   const showLoading = (customMessage?: string, showProgressBar: boolean = true) => {
     if (customMessage) {

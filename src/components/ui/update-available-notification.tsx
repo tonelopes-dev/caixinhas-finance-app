@@ -40,6 +40,30 @@ export function UpdateAvailableNotification() {
   // 3. Há atualização disponível
   const shouldShowNotification = session && !isPublicRoute && updateAvailable;
 
+  // Verifica se acabou de atualizar e mostra celebração
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const justUpdated = localStorage.getItem('app_just_updated');
+    
+    if (justUpdated === 'true') {
+      // Limpa o flag
+      localStorage.removeItem('app_just_updated');
+      
+      // Aguarda o app renderizar completamente (500ms)
+      setTimeout(() => {
+        setIsSuccess(true);
+        setShowConfetti(true);
+        
+        // Esconde a celebração após 1500ms
+        setTimeout(() => {
+          setIsSuccess(false);
+          setShowConfetti(false);
+        }, 1500);
+      }, 500);
+    }
+  }, []);
+
   useEffect(() => {
     // Não ativa sistema de update em rotas públicas ou se não autenticado
     if (typeof window === 'undefined' || 
@@ -147,17 +171,11 @@ export function UpdateAvailableNotification() {
     try {
       const registration = await navigator.serviceWorker.getRegistration();
       
-      // Timeout de segurança: força reload após 3 segundos
-      const safetyTimeout = setTimeout(() => {
-        console.log('⏱️ Timeout de segurança - forçando reload');
-        window.location.reload();
-      }, 3000);
-      
       if (registration?.waiting) {
         // Avisa ao service worker em waiting para tomar controle
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         
-        // Aguarda o service worker assumir controle (com timeout)
+        // Aguarda o service worker assumir controle
         const controllerChangePromise = new Promise<void>((resolve) => {
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             console.log('🔄 Service worker assumiu controle');
@@ -165,10 +183,10 @@ export function UpdateAvailableNotification() {
           }, { once: true });
         });
         
-        // Aguarda no máximo 2.5s para o SW assumir controle
+        // Aguarda no máximo 2s para o SW assumir controle
         await Promise.race([
           controllerChangePromise,
-          new Promise(resolve => setTimeout(resolve, 2500))
+          new Promise(resolve => setTimeout(resolve, 2000))
         ]);
         
         // Limpa storage API cache
@@ -181,40 +199,23 @@ export function UpdateAvailableNotification() {
             });
           });
         }
-        
-        // Mostra animação de sucesso
-        setIsSuccess(true);
-        setShowConfetti(true);
-        
-        // Espera 3 segundos para mostrar animação e confetes
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        clearTimeout(safetyTimeout);
-        
-        // Recarrega a página
-        window.location.reload();
       } else {
-        // Se não há worker waiting, força update e mostra sucesso
+        // Se não há worker waiting, força update
         await registration?.update();
-        
-        setIsSuccess(true);
-        setShowConfetti(true);
-        
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        clearTimeout(safetyTimeout);
-        window.location.reload();
       }
+      
+      // Salva flag para mostrar celebração DEPOIS do reload
+      localStorage.setItem('app_just_updated', 'true');
+      
+      // Recarrega imediatamente
+      window.location.reload();
+      
     } catch (error) {
       console.error('Erro ao atualizar:', error);
       
-      // Mesmo com erro, tenta recarregar após 3s
-      setIsSuccess(true);
-      setShowConfetti(true);
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      // Mesmo com erro, tenta recarregar
+      localStorage.setItem('app_just_updated', 'true');
+      window.location.reload();
     }
   };
 
@@ -243,64 +244,87 @@ export function UpdateAvailableNotification() {
 
   return (
     <>
-      {/* Confetes */}
+      {/* Confetes de Celebração */}
       {showConfetti && (
         <Confetti
           width={window.innerWidth}
           height={window.innerHeight}
           recycle={false}
-          numberOfPieces={500}
-          gravity={0.3}
-          colors={['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5']}
+          numberOfPieces={600}
+          gravity={0.25}
+          colors={['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', '#fbbf24', '#f59e0b']}
         />
       )}
-      
-      <div className="fixed bottom-20 right-4 left-4 md:left-auto md:bottom-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
-        <Card className={cardClass}>
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 mt-0.5">
-                <div className={iconBgClass}>
-                  {isSuccess ? (
-                    <Check className="h-5 w-5 text-white" />
-                  ) : (
-                    <Zap className="h-5 w-5 text-white" />
-                  )}
+
+      {/* Modal de Sucesso (aparece por cima de tudo) */}
+      {isSuccess && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-green-950 dark:via-gray-900 dark:to-emerald-950 rounded-2xl shadow-2xl p-8 max-w-md mx-4 animate-in zoom-in-95 duration-500 border-2 border-green-200 dark:border-green-800">
+            {/* Ícone de Sucesso Animado */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />
+                <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                  <Check className="h-10 w-10 text-white animate-in zoom-in duration-500" strokeWidth={3} />
                 </div>
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <p className={`text-sm font-semibold transition-colors duration-500 ${
-                    isSuccess 
-                      ? 'text-green-900 dark:text-green-100' 
-                      : 'text-blue-900 dark:text-blue-100'
-                  }`}>
-                    {isSuccess ? 'Atualização completa!' : 'Nova versão disponível!'}
-                  </p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full transition-colors duration-500 ${
-                    isSuccess
-                      ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200'
-                      : 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
-                  }`}>
-                    {isSuccess ? '✨' : '🎉'}
-                  </span>
+            </div>
+
+            {/* Mensagem de Sucesso */}
+            <div className="text-center space-y-3">
+              <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 animate-in slide-in-from-bottom-2 duration-500">
+                ✨ App Atualizado!
+              </h2>
+              <p className="text-sm text-green-700 dark:text-green-300 animate-in slide-in-from-bottom-3 duration-700">
+                Seu Caixinhas foi atualizado com sucesso!<br />
+                Preparando a melhor experiência para você...
+              </p>
+              
+              {/* Barra de progresso animada */}
+              <div className="mt-6 pt-4 animate-in slide-in-from-bottom-4 duration-1000">
+                <div className="h-1.5 bg-green-200 dark:bg-green-900 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full animate-pulse"
+                    style={{ 
+                      width: '100%',
+                      animation: 'pulse 1.5s ease-in-out'
+                    }}
+                  />
                 </div>
-                <p className={`text-xs leading-relaxed transition-colors duration-500 ${
-                  isSuccess
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-blue-700 dark:text-blue-300'
-                }`}>
-                  {isSuccess 
-                    ? 'Recarregando com a nova versão...' 
-                    : 'Uma versão atualizada do Caixinhas está pronta com melhorias e correções. Atualize agora para a melhor experiência.'
-                  }
-                </p>
-                {currentVersion && !isSuccess && (
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">
-                    Versão atual: {currentVersion.substring(0, 16)}...
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Card de Notificação (apenas quando não está em sucesso) */}
+      {!isSuccess && (
+        <div className="fixed bottom-20 right-4 left-4 md:left-auto md:bottom-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <Card className={cardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className={iconBgClass}>
+                    <Zap className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                      Nova versão disponível!
+                    </p>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
+                      🎉
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-blue-700 dark:text-blue-300">
+                    Uma versão atualizada do Caixinhas está pronta com melhorias e correções. Atualize agora para a melhor experiência.
                   </p>
-                )}
-                {!isSuccess && (
+                  {currentVersion && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">
+                      Versão atual: {currentVersion.substring(0, 16)}...
+                    </p>
+                  )}
                   <div className="flex gap-2 mt-3 pt-2 border-t border-blue-200 dark:border-blue-800">
                     <Button
                       size="sm"
@@ -330,12 +354,12 @@ export function UpdateAvailableNotification() {
                       Depois
                     </Button>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   );
 }
