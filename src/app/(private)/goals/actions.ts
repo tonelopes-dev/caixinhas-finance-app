@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import prisma from '@/services/prisma';
 
 // --- TIPOS DE ESTADO PARA ACTIONS ---
 export type GoalFormState = {
@@ -212,8 +213,28 @@ export async function getGoalManageData(goalId: string, userId: string) {
 
   const currentVault = goal.vaultId ? await VaultService.getVaultById(goal.vaultId) : null;
   const userVaults = await VaultService.getUserVaults(userId);
+  
+  // Buscar convites pendentes relacionados ao cofre (quando a caixinha é de cofre)
+  // Não mostramos convites específicos de goal porque o sistema atual não os suporta
+  const pendingInvitations = goal.vaultId ? await prisma.invitation.findMany({
+    where: {
+      targetId: goal.vaultId,
+      type: 'vault',
+      status: 'pending',
+    },
+    include: {
+      receiver: {
+        select: {
+          name: true,
+          email: true,
+          avatarUrl: true,
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' },
+  }) : [];
 
-  return { goal, currentVault, userVaults };
+  return { goal, currentVault, userVaults, pendingInvitations };
 }
 
 export async function getUserAllGoals(userId: string) {
@@ -269,6 +290,50 @@ export async function toggleFeaturedGoalAction(goalId: string) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
     return { success: false, message: `Erro ao alterar o destaque: ${errorMessage}` };
+  }
+}
+
+export async function cancelGoalRelatedInvitation(invitationId: string, goalId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { success: false, message: 'Não autorizado' };
+  }
+
+  try {
+    // Buscar o convite para verificar permissões
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        vault: {
+          select: { ownerId: true }
+        }
+      }
+    });
+
+    if (!invitation) {
+      return { success: false, message: 'Convite não encontrado' };
+    }
+
+    // Verificar se o usuário é o dono do cofre ou quem enviou o convite
+    const isOwner = invitation.vault?.ownerId === session.user.id;
+    const isSender = invitation.senderId === session.user.id;
+
+    if (!isOwner && !isSender) {
+      return { success: false, message: 'Você não tem permissão para cancelar este convite' };
+    }
+
+    // Deletar o convite
+    await prisma.invitation.delete({
+      where: { id: invitationId }
+    });
+
+    revalidatePath(`/goals/${goalId}/manage`);
+    revalidatePath('/invite');
+    
+    return { success: true, message: 'Convite cancelado com sucesso' };
+  } catch (error) {
+    console.error('Erro ao cancelar convite:', error);
+    return { success: false, message: 'Erro ao cancelar convite' };
   }
 }
 

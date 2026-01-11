@@ -355,6 +355,42 @@ export async function inviteToVaultAction(
   }
 }
 
+export async function inviteToVaultWithContext(
+  vaultId: string,
+  email: string,
+  goalName: string
+): Promise<{ success: boolean; message: string }> {
+  const { getServerSession } = await import('next-auth');
+  const { authOptions } = await import('@/lib/auth');
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) return { success: false, message: 'Não autorizado' };
+  const userId = session.user.id;
+
+  try {
+    const vault = await VaultService.getVaultById(vaultId);
+    if (!vault || vault.ownerId !== userId) {
+      return { success: false, message: 'Você não tem permissão para convidar para este cofre' };
+    }
+    
+    // Passar contexto de goalName para o template de email
+    await VaultService.createInvitation(vaultId, userId, email, {
+      source: 'goal',
+      goalName
+    });
+    
+    revalidatePath(`/vaults/${vaultId}/manage`);
+    revalidatePath(`/goals`);
+    return { success: true, message: 'Convite enviado com sucesso!' };
+  } catch (error) {
+    console.error('Erro ao enviar convite:', error);
+    if (error instanceof Error) {
+        return { success: false, message: error.message };
+    }
+    return { success: false, message: 'Erro ao enviar convite. Tente novamente.' };
+  }
+}
+
 export async function getVaultPendingInvitationsAction(
   vaultId: string
 ): Promise<{ id: string; targetName: string; senderName: string; status: string }[]> {

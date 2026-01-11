@@ -55,6 +55,7 @@ export default async function ManageGoalPage({ params }: { params: Promise<{ id:
           subscriptionStatus: 'active' as const
         }))
       }))}
+      pendingInvitations={data.pendingInvitations || []}
     />
   );
 }

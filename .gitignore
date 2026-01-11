@@ -48,3 +48,11 @@ firebase-debug.log
 nul
 test-results/
 playwright-report/
+
+
+# Adicione ao .gitignore
+.env.development
+.env.staging
+.env.production
+.env.local
+.env*.local

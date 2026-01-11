@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, ChevronsRight, Users, Lock } from 'lucide-react';
+import { Heart, ChevronsRight, Users, Lock, ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -73,7 +73,7 @@ export function GoalCard({
       key={goal.id}
       data-goal-id={goal.id}
       className={cn(
-        "group flex h-full min-h-[280px] flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer",
+        "group flex h-full min-h-[280px] flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer hover:border-primary/30",
         progress >= 100 ? 'ring-2 ring-green-200 dark:ring-green-800 bg-green-50/50 dark:bg-green-900/10' : '',
         goal.isFeatured ? 'ring-2 ring-amber-200 dark:ring-amber-800 bg-amber-50/50 dark:bg-amber-900/10' : ''
       )}
@@ -147,8 +147,8 @@ export function GoalCard({
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
             )}
           </div>
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
               {goal.visibility === 'shared' ? (
                 <Users className="h-3 w-3" />
               ) : (
@@ -163,6 +163,13 @@ export function GoalCard({
                 value={progress}
                 formatter={(v) => Math.round(v).toString()}
               />%
+            </p>
+          </div>
+          
+          <div className="text-center pt-1">
+            <p className="text-xs text-muted-foreground/70 flex items-center justify-center gap-1">
+              <span>Clique no card para ver detalhes</span>
+              <ArrowRight className="h-3 w-3" />
             </p>
           </div>
         </Link>

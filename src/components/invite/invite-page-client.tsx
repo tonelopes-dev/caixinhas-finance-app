@@ -44,10 +44,16 @@ export function InvitePageClient({
 
   return (
     <div className="space-y-6">
-      {/* Formulário de Convite */}
+      {/* Gerenciamento de Convites - PRIMEIRO */}
+      <InvitationsManager
+        initialInvitations={receivedInvitations}
+        initialSentInvitations={sentInvitations}
+      />
+
+      {/* Formulário de Convite - POR ÚLTIMO */}
       <Card>
         <CardHeader>
-          <CardTitle>Enviar Convite</CardTitle>
+          <CardTitle>Enviar Novo Convite</CardTitle>
           <CardDescription>
             Convide alguém para participar de um dos seus cofres
           </CardDescription>
@@ -60,12 +66,6 @@ export function InvitePageClient({
           />
         </CardContent>
       </Card>
-
-      {/* Gerenciamento de Convites */}
-      <InvitationsManager
-        initialInvitations={receivedInvitations}
-        initialSentInvitations={sentInvitations}
-      />
     </div>
   );
 }

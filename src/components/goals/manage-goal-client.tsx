@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useActionState } from 'react';
+import { useState, useEffect, useActionState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lock, Users } from 'lucide-react';
+import { ArrowLeft, Lock, Users, AlertCircle, Trash2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,8 @@ import {
   CardTitle,
   CardFooter
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -55,21 +57,33 @@ interface ManageGoalClientProps {
   currentUser: User;
   currentVault: Vault | null;
   userVaults: Vault[];
+  pendingInvitations: Array<{
+    id: string;
+    receiverEmail: string | null;
+    createdAt: Date;
+    receiver: {
+      name: string;
+      email: string;
+      avatarUrl: string | null;
+    } | null;
+  }>;
 }
 
 const initialState = { message: '', errors: undefined, success: false };
 
-export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }: ManageGoalClientProps) {
+export function ManageGoalClient({ goal, currentUser, currentVault, userVaults, pendingInvitations }: ManageGoalClientProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
   
-  const [visibility, setVisibility] = useState<Goal['visibility']>(goal.visibility || 'shared');
-  const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
-  
-  // Determine initial owner
+  // Determine initial owner baseado nos dados reais da goal
   const initialOwnerType = goal.vaultId ? 'vault' : 'user';
   const initialOwnerId = goal.vaultId || currentUser.id;
-
+  // IMPORTANTE: Usar goal.visibility se existir, senão calcular baseado no tipo
+  const initialVisibility: Goal['visibility'] = goal.visibility || (initialOwnerType === 'vault' ? 'shared' : 'private');
+  
+  const [visibility, setVisibility] = useState<Goal['visibility']>(initialVisibility);
+  const [pendingVisibility, setPendingVisibility] = useState<Goal['visibility'] | null>(null);
   const [ownerType, setOwnerType] = useState<'user' | 'vault'>(initialOwnerType);
   const [ownerId, setOwnerId] = useState<string>(initialOwnerId);
 
@@ -83,21 +97,34 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
     }
   }, [state, toast]);
 
-  const participants = [{
-    id: currentUser.id,
-    name: currentUser.name || '',
-    avatarUrl: currentUser.avatarUrl || '',
-    role: 'owner' as const
-  }];
+  // Montar lista de participantes do banco, garantindo que o owner apareça primeiro
+  const allParticipants = goal.participants?.map(p => ({
+    id: p.user.id,
+    name: p.user.name,
+    avatarUrl: p.user.avatarUrl || '',
+    role: p.role || 'member'
+  })) || [];
 
-  // Lógica corrigida para determinar o proprietário e contexto
-  const isPersonal = goal.userId ? true : (goal.ownerType === 'user');
+  // Verificar se o currentUser já está nos participantes
+  const currentUserInParticipants = allParticipants.find(p => p.id === currentUser.id);
   
-  const isOwner = isPersonal 
-    ? goal.userId === currentUser.id
-    : currentVault?.ownerId === currentUser.id;
+  const participants = currentUserInParticipants
+    ? allParticipants // Usar apenas os participantes do banco (já inclui o owner)
+    : [
+        // Se o owner não estiver nos participantes, adicionar manualmente
+        {
+          id: currentUser.id,
+          name: currentUser.name || '',
+          avatarUrl: currentUser.avatarUrl || '',
+          role: 'owner' as const
+        },
+        ...allParticipants
+      ];
 
-  const ownerName = isPersonal ? 'Espaço Pessoal' : (currentVault?.name || 'Cofre');
+  // Lógica corrigida: verificar se o usuário é owner pela lista de participantes
+  const isOwner = currentUserInParticipants?.role === 'owner' || goal.ownerId === currentUser.id;
+
+  const ownerName = goal.vaultId ? (currentVault?.name || 'Cofre') : 'Espaço Pessoal';
 
   const handleVisibilityChange = (newVisibility: Goal['visibility']) => {
     if (newVisibility !== visibility) {
@@ -109,18 +136,17 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
     if (pendingVisibility) {
       setVisibility(pendingVisibility);
       
-      // Logic to switch owner based on visibility
+      // Sincronizar owner com visibilidade
       if (pendingVisibility === 'private') {
+        // Privada -> sempre user
         setOwnerType('user');
         setOwnerId(currentUser.id);
       } else {
-        // If switching to shared, default to current vault or first available vault
-        if (ownerType === 'user') {
-           setOwnerType('vault');
-           // Prefer current vault if available, otherwise first vault
-           const targetVaultId = currentVault?.id || userVaults[0]?.id || '';
-           setOwnerId(targetVaultId);
-        }
+        // Compartilhada -> sempre vault
+        setOwnerType('vault');
+        // Se já tinha um vault, manter; senão usar o primeiro disponível
+        const targetVaultId = (ownerType === 'vault' ? ownerId : undefined) || userVaults[0]?.id || '';
+        setOwnerId(targetVaultId);
       }
 
       setPendingVisibility(null);
@@ -129,6 +155,24 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
 
   const cancelVisibilityChange = () => {
     setPendingVisibility(null);
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    startTransition(async () => {
+      try {
+        const { cancelGoalRelatedInvitation } = await import('@/app/(private)/goals/actions');
+        const result = await cancelGoalRelatedInvitation(invitationId, goal.id);
+        
+        if (result.success) {
+          toast({ title: 'Sucesso!', description: result.message });
+          router.refresh();
+        } else {
+          toast({ title: 'Erro', description: result.message, variant: 'destructive' });
+        }
+      } catch (error) {
+        toast({ title: 'Erro', description: 'Erro ao cancelar convite', variant: 'destructive' });
+      }
+    });
   };
 
   return (
@@ -147,8 +191,20 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Caixinha</CardTitle>
-              <CardDescription>
-                Ajuste os detalhes da caixinha localizada em <span className="font-medium text-primary">{ownerName}</span>.
+              <CardDescription className="flex flex-wrap items-center gap-2">
+                Ajuste os detalhes da caixinha localizada em{' '}
+                <span className="font-medium text-primary">{ownerName}</span>
+                {currentVault ? (
+                  <Badge variant="secondary" className="ml-2">
+                    <Users className="h-3 w-3 mr-1" />
+                    Compartilhada
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="ml-2">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Pessoal
+                  </Badge>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -195,7 +251,7 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
                 <div className="space-y-3">
                   <Label className="font-semibold">Visibilidade da Caixinha</Label>
                   <RadioGroup
-                    defaultValue={visibility}
+                    value={visibility}
                     className="grid grid-cols-2 gap-4"
                     onValueChange={(value) => handleVisibilityChange(value as Goal['visibility'])}
                   >
@@ -266,12 +322,19 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold text-lg">Participantes</h3>
-                  <InviteParticipantDialog 
-                    goalName={goal.name} 
-                    disabled={!isOwner} 
-                    vaultId={currentVault?.id}
-                    vaultName={currentVault?.name}
-                  />
+                  <div className="flex flex-col items-end gap-2">
+                    <InviteParticipantDialog 
+                      goalName={goal.name} 
+                      disabled={!isOwner || !currentVault}
+                      vaultId={currentVault?.id}
+                      vaultName={currentVault?.name}
+                    />
+                    {!currentVault && isOwner && (
+                      <p className="text-xs text-muted-foreground text-right max-w-xs">
+                        💡 Para convidar participantes, mova esta caixinha para um cofre compartilhado.
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-4">
                   {participants.map((p) => (
@@ -307,20 +370,85 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults }
 
               <Separator />
 
+              <div className="flex items-center">
+                <SubmitButton disabled={!isOwner} />
+                {!isOwner && <p className="text-sm text-muted-foreground ml-4">Apenas o proprietário da caixinha pode salvar as alterações.</p>}
+              </div>
+
+              {/* Seção de Convites Pendentes */}
+              {currentVault && pendingInvitations.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Convites Pendentes do Cofre</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Pessoas que foram convidadas para o cofre "{currentVault.name}" mas ainda não aceitaram.
+                      Quando aceitarem, terão acesso a esta caixinha.
+                    </p>
+                    <div className="space-y-3">
+                      {pendingInvitations.map((invitation) => (
+                        <div 
+                          key={invitation.id} 
+                          className="flex items-center justify-between rounded-lg border border-dashed p-3 bg-muted/30"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                              <UserPlus className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">
+                                {invitation.receiver?.name || invitation.receiverEmail}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs h-5 px-2 bg-yellow-500/10 text-yellow-600 border-yellow-200">
+                                  Pendente
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={() => handleCancelInvitation(invitation.id)}
+                            disabled={!isOwner || isPending}
+                            title="Cancelar convite"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <Separator />
+
               <div>
                 <h3 className="font-semibold text-lg text-destructive">Zona de Perigo</h3>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
                   Ações nesta seção são permanentes e não podem ser desfeitas.
                 </p>
+                
+                {goal.currentAmount > 0 && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Atenção!</AlertTitle>
+                    <AlertDescription>
+                      Esta caixinha possui R$ {goal.currentAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} guardados.
+                      Ao deletar, todo o histórico e o progresso serão perdidos permanentemente.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <DeleteGoalDialog goalId={goal.id} goalName={goal.name} disabled={!isOwner} />
               </div>
             </CardContent>
-            <CardFooter className="border-t pt-6">
-              <div className="flex items-center">
-                <SubmitButton disabled={!isOwner} />
-                {!isOwner && <p className="text-sm text-muted-foreground ml-4">Apenas o proprietário da caixinha pode salvar as alterações.</p>}
-              </div>
-            </CardFooter>
           </Card>
         </form>
       </div>

@@ -9,7 +9,7 @@ import { prisma } from './prisma';
 export class GoalService {
   /**
    * Função auxiliar para transformar a estrutura dos participantes
-   * Converte participants[].user para participants[] diretamente
+   * Mantém a estrutura aninhada user: {...}
    */
   private static transformGoalData(goal: any) {
     if (!goal) return goal;
@@ -17,11 +17,14 @@ export class GoalService {
     return {
       ...goal,
       participants: goal.participants?.map((participant: any) => ({
-        id: participant.user?.id || participant.id,
-        name: participant.user?.name || '',
-        email: participant.user?.email || '',
-        avatarUrl: participant.user?.avatarUrl || '',
-        role: participant.role || 'member'
+        id: participant.id,
+        role: participant.role || 'member',
+        user: {
+          id: participant.user?.id || '',
+          name: participant.user?.name || '',
+          email: participant.user?.email || '',
+          avatarUrl: participant.user?.avatarUrl || ''
+        }
       })) || []
     };
   }

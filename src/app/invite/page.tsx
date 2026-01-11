@@ -42,10 +42,10 @@ export default async function InvitePage() {
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 <Users className="h-6 w-6 text-primary" />
-                Gerenciar Convites
+                Convites
               </h1>
               <p className="text-muted-foreground text-sm">
-                Convide pessoas para seus cofres e gerencie seus convites
+                Gerencie todos os seus convites de cofres e caixinhas
               </p>
             </div>
           </div>

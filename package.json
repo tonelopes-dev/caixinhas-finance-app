@@ -35,7 +35,15 @@
     "db:reset:force": "prisma migrate reset --force && npm run db:seed",
     "db:push": "prisma db push",
     "db:switch:postgres": "node scripts/switch-db.js postgres",
-    "db:switch:sqlite": "node scripts/switch-db.js sqlite"
+    "db:switch:sqlite": "node scripts/switch-db.js sqlite",
+    "db:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
+    "db:migrate:staging": "dotenv -e .env.staging -- prisma migrate deploy",
+    "db:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
+    "db:studio:dev": "dotenv -e .env.development -- prisma studio",
+    "db:studio:staging": "dotenv -e .env.staging -- prisma studio",
+    "db:seed:dev": "dotenv -e .env.development -- tsx prisma/seed.ts",
+    "feature": "node scripts/create-feature-branch.js",
+    "git:sync": "git fetch origin && git merge origin/main"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.943.0",

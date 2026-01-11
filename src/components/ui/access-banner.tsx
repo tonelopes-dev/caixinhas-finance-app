@@ -29,7 +29,7 @@ export function AccessBanner({
   // Para usuários ativos, mostra o PremiumBadge interativo
   if (status === 'active' && !message) {
     return (
-      <div className="mb-6">
+      <div className="mb-6 max-w-xl">
         <PremiumBadge />
       </div>
     );

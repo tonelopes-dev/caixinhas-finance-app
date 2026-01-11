@@ -128,7 +128,7 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
                 Convites Recebidos
               </CardTitle>
               <CardDescription>
-                Convites de cofres que você pode aceitar ou recusar.
+                Convites de cofres e caixinhas que você pode aceitar ou recusar.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -138,7 +138,7 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
                     <Mail className="h-8 w-8 text-muted-foreground/60" />
                   </div>
                   <h3 className="font-medium text-muted-foreground mb-2">Nenhum convite pendente</h3>
-                  <p className="text-sm text-muted-foreground/70">Quando alguém convidar você para um cofre, aparecerá aqui.</p>
+                  <p className="text-sm text-muted-foreground/70">Quando alguém convidar você para um cofre ou caixinha, aparecerá aqui.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -236,7 +236,7 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
                     <UserPlus className="h-8 w-8 text-muted-foreground/60" />
                   </div>
                   <h3 className="font-medium text-muted-foreground mb-2">Nenhum convite enviado</h3>
-                  <p className="text-sm text-muted-foreground/70">Use o formulário ao lado para convidar pessoas para seus cofres.</p>
+                  <p className="text-sm text-muted-foreground/70">Use o formulário abaixo para convidar pessoas para seus cofres.</p>
                 </div>
               ) : (
                 <div className="space-y-4">

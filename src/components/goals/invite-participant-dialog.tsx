@@ -62,7 +62,9 @@ export function InviteParticipantDialog({ goalName, disabled, vaultId, vaultName
         let result;
         
         if (vaultId) {
-           result = await inviteToVaultAction(vaultId, email);
+           // Passar goalName como contexto para o template de email
+           const { inviteToVaultWithContext } = await import('@/app/vaults/actions');
+           result = await inviteToVaultWithContext(vaultId, email, goalName);
         } else {
            result = await sendGoalInvite(email, goalName);
         }

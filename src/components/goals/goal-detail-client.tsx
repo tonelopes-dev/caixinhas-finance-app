@@ -53,6 +53,8 @@ type Goal = {
   isFeatured: boolean;
   ownerId: string;
   ownerType: 'user' | 'vault';
+  userId?: string | null;
+  vaultId?: string | null;
   participants: {
     id: string;
     name: string;
@@ -121,8 +123,10 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
 
   const progress = (currentAmount / goal.targetAmount) * 100;
 
-  const ownerName = goal.ownerType === 'vault' 
-    ? vaults.find(v => v.id === goal.ownerId)?.name || 'Cofre Desconhecido'
+  // Usar vaultId/userId como fonte da verdade para determinar o tipo da caixinha
+  const isVaultGoal = !!goal.vaultId;
+  const ownerName = isVaultGoal
+    ? vaults.find(v => v.id === goal.vaultId)?.name || 'Cofre Desconhecido'
     : 'Caixinha Pessoal';
 
   const handleTransactionComplete = () => {

@@ -2,12 +2,24 @@
 import { emailHeader } from './email-header';
 import { emailFooter } from './email-footer';
 
-export const inviteEmail = (inviterName: string, vaultName: string, inviteLink: string) => {
+export const inviteEmail = (
+  inviterName: string, 
+  vaultName: string, 
+  inviteLink: string,
+  goalName?: string // Parâmetro opcional
+) => {
+  const contextText = goalName 
+    ? `<p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
+         Este convite veio através da caixinha <strong>"${goalName}"</strong>.
+       </p>`
+    : '';
+
   return `
     ${emailHeader('Convidado')}
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
       Você foi convidado(a) por <strong>${inviterName}</strong> para participar do cofre <strong>"${vaultName}"</strong> no Caixinhas App!
     </p>
+    ${contextText}
     <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
       Um cofre é um espaço colaborativo onde você pode gerenciar suas finanças e objetivos em conjunto. Para aceitar o convite e começar a colaborar, clique no link abaixo:
     </p>

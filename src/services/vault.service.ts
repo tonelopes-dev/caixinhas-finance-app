@@ -305,7 +305,12 @@ export class VaultService {
   /**
    * Cria um convite para um cofre
    */
-  static async createInvitation(vaultId: string, senderId: string, receiverEmail: string): Promise<void> {
+  static async createInvitation(
+    vaultId: string, 
+    senderId: string, 
+    receiverEmail: string,
+    context?: { source: 'goal', goalName: string } // Contexto opcional
+  ): Promise<void> {
     try {
         const [vault, sender] = await Promise.all([
             prisma.vault.findUnique({ where: { id: vaultId } }),
@@ -378,10 +383,15 @@ export class VaultService {
                 ? `${process.env.NEXTAUTH_URL}/invitations` 
                 : `${process.env.NEXTAUTH_URL}/register?invite=${invitation.id}`;
             
+            // Adicionar contexto ao subject se fornecido
+            const subject = context 
+                ? `Convite para o cofre "${vault.name}" através da caixinha "${context.goalName}"`
+                : `Convite para participar do cofre "${vault.name}"`;
+            
             await sendEmail({
                 to: receiverEmail,
-                subject: `Convite para participar do cofre "${vault.name}"`,
-                html: inviteEmail(sender.name, vault.name, inviteLink)
+                subject,
+                html: inviteEmail(sender.name, vault.name, inviteLink, context?.goalName)
             });
             
             console.log(`Email de convite enviado para ${receiverEmail}`);

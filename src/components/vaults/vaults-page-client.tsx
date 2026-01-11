@@ -115,11 +115,8 @@ function WorkspaceCard({
   const handleWorkspaceClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Se já estiver ativo, não faz nada
-    if (isActive) {
-      console.log('ℹ️ [WorkspaceCard] Já está no workspace:', name);
-      return;
-    }
+    // Sempre permite navegar, mesmo se já estiver ativo
+    // Isso garante que o usuário possa sair da tela de vaults
     
     try {
       console.log('🔵 [WorkspaceCard] Iniciando navegação para:', name);
@@ -191,10 +188,10 @@ function WorkspaceCard({
       <form onSubmit={handleWorkspaceClick} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
-        <button type="submit" className="h-full w-full text-left" disabled={isActive}>
+        <button type="submit" className="h-full w-full text-left">
           <Card className={`transition-all group h-full flex flex-col w-full ${
             isActive 
-              ? 'bg-primary/10 border-primary/50 border-2 shadow-lg' 
+              ? 'bg-primary/10 border-primary/50 border-2 shadow-lg cursor-pointer hover:scale-[1.02] hover:shadow-xl' 
               : 'cursor-pointer hover:scale-[1.02] hover:shadow-xl'
           }`}>
             <CardHeader className="p-0">
