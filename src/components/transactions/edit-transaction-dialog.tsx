@@ -315,13 +315,33 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                             <Label htmlFor="date_field">Data</Label>
                             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                                 <PopoverTrigger asChild>
-                                    <Button id="date_field" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                    <Button 
+                                        id="date_field" 
+                                        variant={"outline"} 
+                                        type="button"
+                                        className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                                        style={{ touchAction: 'manipulation' }}
+                                    >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
                                         {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={date} onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }} initialFocus locale={ptBR} />
+                                <PopoverContent 
+                                    className="w-auto p-0" 
+                                    align="center"
+                                    side="bottom"
+                                    sideOffset={8}
+                                >
+                                    <Calendar 
+                                        mode="single" 
+                                        selected={date} 
+                                        onSelect={(newDate) => { 
+                                            setDate(newDate || undefined); 
+                                            setPopoverOpen(false); 
+                                        }} 
+                                        initialFocus 
+                                        locale={ptBR} 
+                                    />
                                 </PopoverContent>
                             </Popover>
                              {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}

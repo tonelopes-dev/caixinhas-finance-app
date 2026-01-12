@@ -884,6 +884,50 @@
   [data-radix-dialog-content] select {
     touch-action: manipulation;
   }
+  
+  /* Força z-index alto para popovers dentro de modals */
+  [data-radix-popover-content] {
+    z-index: 10000 !important;
+  }
+}
+
+/* Correções específicas para iOS */
+@supports (-webkit-touch-callout: none) {
+  /* Detecta dispositivos iOS */
+  
+  /* Melhora interação com popovers no iOS */
+  [data-radix-popover-trigger] {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  
+  /* Garante que popover apareça acima de tudo no iOS */
+  [data-radix-popover-content] {
+    z-index: 999999 !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    position: fixed !important;
+  }
+  
+  /* Fix para calendário dentro de modals no iOS */
+  [data-radix-dialog-content] [data-radix-popover-content] {
+    z-index: 1000000 !important;
+    position: fixed !important;
+  }
+  
+  /* Previne zoom acidental em inputs no iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 /* Ajustes para dispositivos com notch/ilha dinâmica */
