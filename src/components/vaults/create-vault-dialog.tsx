@@ -138,7 +138,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   return (
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
             <DialogHeader className="sr-only">
               <DialogTitle>Criar Novo Vault</DialogTitle>
             </DialogHeader>
@@ -252,29 +252,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                         {/* Imagens predefinidas */}
                         <div className="space-y-3">
                             <Label className="text-sm text-muted-foreground">Ou escolha uma imagem predefinida</Label>
-                        <div className="relative h-40 w-full rounded-md border flex items-center justify-center overflow-hidden">
-                            {displayImageUrl ? (
-                                <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
-                            ) : (
-                                <span className="text-muted-foreground">Sem imagem</span>
-                            )}
-                            {localImageFile && ( 
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute top-2 right-2 rounded-full bg-background/80"
-                                    onClick={handleRemoveImage}
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            )}
-                        </div>
-
-
-
-                            <div className="grid grid-cols-3 gap-3">
-                            {coverImages.map(imgSrc => (
+                            <div className="grid grid-cols-3 gap-3">{coverImages.map(imgSrc => (
                                 <button 
                                     type="button" 
                                     key={imgSrc} 
