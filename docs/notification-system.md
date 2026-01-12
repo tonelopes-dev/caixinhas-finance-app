@@ -11,7 +11,7 @@ O sistema foi projetado para ser flexível, permitindo a criação de diferentes
 As notificações são categorizadas por tipo para permitir um tratamento e exibição diferenciados na interface do usuário. Os tipos de notificação definidos são:
 
 *   `vault_invite`: Notificação enviada quando um usuário é convidado para um cofre.
-*   `goal_invite`: Notificação enviada quando um usuário é convidado para uma meta.
+*   `vault_invite`: Notificação enviada quando um usuário é convidado para um cofre.
 *   `transaction_added`: Notificação que pode ser usada para informar sobre novas transações (especialmente em cofres compartilhados).
 *   `goal_progress`: Notificação para alertar sobre o progresso ou mudanças em metas.
 *   `vault_member_added`: Notificação enviada quando um usuário é adicionado como membro a um cofre.

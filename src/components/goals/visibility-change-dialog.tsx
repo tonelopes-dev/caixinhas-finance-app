@@ -36,7 +36,7 @@ export function VisibilityChangeDialog({
     private: {
       title: 'Tornar a Caixinha Privada?',
       description:
-        'Apenas você e os participantes que você convidar diretamente poderão ver esta caixinha. Ela não será visível para outros membros do cofre. Você confirma esta ação?',
+        'Apenas você e os membros do cofre poderão ver esta caixinha. Você confirma esta ação?',
     },
   };
 

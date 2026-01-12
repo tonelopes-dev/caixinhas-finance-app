@@ -35,7 +35,7 @@ export function DeclineInvitationDialog({ invitation }: { invitation: Invitation
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Você irá recusar o convite de <span className="font-bold">{invitation.invitedBy}</span> para {invitation.type === 'vault' ? 'o cofre' : 'a caixinha'} <span className="font-bold text-foreground">{invitation.goalName}</span>.
+              Esta ação não pode ser desfeita. Você irá recusar o convite de <span className="font-bold">{invitation.invitedBy}</span> para o cofre <span className="font-bold text-foreground">{invitation.goalName}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className='mt-4'>

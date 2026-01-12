@@ -106,7 +106,7 @@ export type Guest = {
 
 export type Notification = {
   id: string;
-  type: 'vault_invite' | 'goal_invite' | 'transaction_added' | 'goal_progress' | 'report_ready';
+  type: 'vault_invite' | 'transaction_added' | 'goal_progress' | 'report_ready';
   actor?: {
     name: string;
     avatarUrl: string;

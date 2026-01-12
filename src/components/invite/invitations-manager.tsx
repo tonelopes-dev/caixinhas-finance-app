@@ -147,7 +147,7 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
                     <Mail className="h-8 w-8 text-muted-foreground/60" />
                   </div>
                   <h3 className="font-medium text-muted-foreground mb-2">Nenhum convite pendente</h3>
-                  <p className="text-sm text-muted-foreground/70">Quando alguém convidar você para um cofre ou caixinha, aparecerá aqui.</p>
+                  <p className="text-sm text-muted-foreground/70">Quando alguém convidar você para um cofre, aparecerá aqui.</p>
                 </div>
               ) : (
                 <div className="space-y-4">

@@ -9,7 +9,6 @@ import { prisma } from './prisma';
 
 export type NotificationType = 
   | 'vault_invite'
-  | 'goal_invite'
   | 'transaction_added'
   | 'goal_progress'
   | 'vault_member_added'

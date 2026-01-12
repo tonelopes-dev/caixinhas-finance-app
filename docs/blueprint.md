@@ -5,7 +5,7 @@
 - Transaction Recording: Log financial transactions with customizable categories.
 - Dashboard Overview: Provide an intuitive dashboard displaying total balance, income, expenses, and shared goals.
 - Collaborative Goal Buckets: Enable creation of shared 'goal buckets' for dreams and projects.
-- Partner Invitation: Allow users to invite partners to share and track progress towards goals.
+- Partner Invitation: Allow users to invite partners to share vaults (cofres) and collaborate on financial goals.
 - Intelligent Filters: Offer smart filters for historical data and reports by period or category.
 - Motivational Notifications: Send encouraging notifications and gentle reminders to keep partners aligned with their goals.
 - Personalized Budget Analysis: Leverage generative AI to provide personalized analysis of spending patterns and suggest ways to optimize savings towards shared goals, considering individual financial habits and income levels, offering this insight as a tool the users can use or disregard.
