@@ -23,8 +23,8 @@ function HomePage() {
 
   // Enquanto a sessão está sendo verificada, mostramos um loader.
   return (
-    <div className="flex items-center justify-center p-4 border rounded-lg">
-      <InlineLoading size="lg" message="Grande" />
+    <div className="min-h-screen flex items-center justify-center">
+      <InlineLoading size="lg" message="Carregando..." />
     </div>
   );
 }

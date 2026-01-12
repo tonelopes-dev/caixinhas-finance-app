@@ -1,15 +1,23 @@
 import sgMail from '@sendgrid/mail';
 
+export interface EmailAttachment {
+  content: string; // base64 encoded content
+  filename: string;
+  type: string;
+  disposition: 'attachment' | 'inline';
+}
+
 export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
   text?: string;
-  replyTo?: string; // Adicionado para suportar a funcionalidade de resposta
+  replyTo?: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmail(options: EmailOptions) {
-  const { to, subject, html, text, replyTo } = options;
+  const { to, subject, html, text, replyTo, attachments } = options;
 
   try {
     if (!process.env.SENDGRID_API_KEY) {
@@ -37,12 +45,22 @@ export async function sendEmail(options: EmailOptions) {
       msg.replyTo = replyTo;
     }
 
+    if (attachments && attachments.length > 0) {
+      msg.attachments = attachments;
+    }
+
     console.log('📧 Configurações de email:');
     console.log('   📨 Para:', to);
     console.log('   📝 Assunto:', subject);
     console.log('   👤 De:', fromName, '<' + fromEmail + '>');
     if (replyTo) {
       console.log('   ↩️ Responder Para:', replyTo);
+    }
+    if (attachments && attachments.length > 0) {
+      console.log('   📎 Anexos:', attachments.length);
+      attachments.forEach((att, index) => {
+        console.log(`     ${index + 1}. ${att.filename} (${att.type})`);
+      });
     }
     console.log('   🔑 API Key:', process.env.SENDGRID_API_KEY ? 'Configurada ✅' : 'Ausente ❌');
 
