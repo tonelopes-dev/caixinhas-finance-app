@@ -5,7 +5,7 @@ import React, { useEffect, useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose
-} from '@/components/ui/dialog';
+} from '@/components/ui/mobile-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -107,7 +107,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
             {buttonLabel}
           </Button>
         </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] md:max-h-none" mobileOptimized={true}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>

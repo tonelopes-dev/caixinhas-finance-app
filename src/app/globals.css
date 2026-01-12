@@ -807,3 +807,62 @@
     margin-bottom: 80px;
   }
 }
+
+/* Melhorias para teclado virtual em dispositivos móveis */
+@supports (height: 100dvh) {
+  /* Usa dynamic viewport height quando disponível */
+  .mobile-modal-viewport {
+    max-height: 90dvh;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Ajustes específicos para mobile */
+  .mobile-modal-content {
+    /* Garante que modals não ultrapassem a área visível */
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+  }
+  
+  /* Melhora o scroll em modais no mobile */
+  .mobile-modal-content .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Ajusta inputs quando teclado virtual está ativo */
+  .virtual-keyboard-active {
+    /* Reduz altura de elementos para dar mais espaço ao teclado */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Melhora foco em inputs em dispositivos móveis */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    /* Garante que o elemento focado seja visível */
+    scroll-margin-top: 2rem;
+    scroll-margin-bottom: 2rem;
+  }
+}
+
+/* Detecção de teclado virtual usando viewport units */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Provavelmente teclado virtual está aberto em landscape */
+  .dialog-content-mobile {
+    top: 20% !important;
+    transform: translateX(-50%) translateY(-20%) !important;
+    max-height: 80vh !important;
+  }
+}
+
+/* Ajustes para dispositivos com notch/ilha dinâmica */
+@supports (env(safe-area-inset-top)) {
+  .safe-area-modal {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}

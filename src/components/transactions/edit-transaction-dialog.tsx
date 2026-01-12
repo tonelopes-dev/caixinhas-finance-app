@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/mobile-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -228,7 +228,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
             </button>
         </DialogTrigger>
       </DropdownMenuItem>
-      <DialogContent className="flex flex-col">
+      <DialogContent className="flex flex-col max-h-[90vh] md:max-h-none" mobileOptimized={true}>
         <DialogHeader>
           <DialogTitle>Editar Transação</DialogTitle>
           <DialogDescription>
@@ -256,9 +256,9 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
           onSubmit={(e) => {
             showLoading('Atualizando transação...', false);
           }}
-          className="flex flex-1 flex-col justify-between overflow-hidden"
+          className="flex flex-1 flex-col justify-between overflow-hidden min-h-0"
         >
-          <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
+          <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4 min-h-0 overscroll-contain">
             {/* Hidden inputs for form data */}
             <input type="hidden" name="id" value={transaction.id} />
             <input type="hidden" name="ownerId" value={transaction.ownerId} />

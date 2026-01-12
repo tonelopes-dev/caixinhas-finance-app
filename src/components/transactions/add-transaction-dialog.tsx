@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/mobile-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -184,7 +184,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     formData.append('amount', amount);
     if (projectRecurring) formData.append('projectRecurring', 'true');
     
-    showLoading('Salvando transação...', false);
+    showLoading('Salvando transação...');
     
     startTransition(() => {
       dispatch(formData);
@@ -247,7 +247,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             </>
           )}
         </Button>
-        <DialogContent className="flex flex-col">
+        <DialogContent className="flex flex-col max-h-[90vh] md:max-h-none" mobileOptimized={true}>
           <DialogHeader>
             <DialogTitle>Adicionar Transação</DialogTitle>
             <DialogDescription>
@@ -269,8 +269,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             ))}
           </div>
 
-          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden">
-            <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
+          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden min-h-0">
+            <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4 min-h-0 overscroll-contain">
               <AnimatePresence mode="wait">
                   {step === 1 && (
                       <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">

@@ -123,7 +123,7 @@ function WorkspaceCard({
       console.log('🔵 [WorkspaceCard] Iniciando navegação para:', name);
       
       // Mostra loading global sem barra de progresso (como no mobile nav)
-      showLoading(`Abrindo ${name}...`, false);
+      showLoading(`Abrindo ${name}...`);
       
       // Salva no localStorage para o dashboard saber quando fechar
       if (typeof window !== 'undefined') {

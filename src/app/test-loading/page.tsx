@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { LoadingButton } from '@/components/ui/loading-button';
 import { Button } from '@/components/ui/button';
-import { useLoading, useActionLoading, useNavigationLoading } from '@/components/providers/loading-provider';
+import { useLoading, useActionLoading } from '@/components/providers/loading-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InlineLoading } from '@/components/ui/loading-screen';
 
@@ -11,7 +11,6 @@ export default function LoadingTestPage() {
   const [buttonLoading, setButtonLoading] = useState(false);
   const { showLoading, hideLoading } = useLoading();
   const { executeWithLoading } = useActionLoading();
-  const { navigateWithLoading } = useNavigationLoading();
 
   const handleGlobalLoading = () => {
     showLoading('🎨 Testando tela de loading global...');
@@ -37,13 +36,14 @@ export default function LoadingTestPage() {
 
   const handleNavigationLoading = async () => {
     try {
-      await navigateWithLoading(
+      await executeWithLoading(
         async () => {
           // Simula navegação
           await new Promise(resolve => setTimeout(resolve, 2000));
           window.location.href = '/dashboard';
         },
-        '🚀 Navegando para o dashboard...'
+        '🚀 Navegando para o dashboard...',
+        '✅ Redirecionando...'
       );
     } catch (error) {
       console.error('Erro na navegação:', error);
