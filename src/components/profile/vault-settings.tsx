@@ -83,8 +83,8 @@ export function VaultSettings({ vaultId, vaultName, isOwner }: VaultSettingsProp
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-background p-4">
-          <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 rounded-lg border border-destructive/20 bg-background p-4">
+          <div className="space-y-1 flex-1">
             <p className="font-medium">Excluir este cofre</p>
             <p className="text-sm text-muted-foreground">
               Isso excluirá permanentemente o cofre e removerá todos os membros.
@@ -93,7 +93,7 @@ export function VaultSettings({ vaultId, vaultName, isOwner }: VaultSettingsProp
           
           <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Excluir Cofre</Button>
+              <Button variant="destructive" className="w-full sm:w-auto sm:shrink-0">Excluir Cofre</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>

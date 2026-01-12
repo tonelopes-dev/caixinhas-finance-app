@@ -190,141 +190,139 @@ export function GuestsManagement({ members, vaultOwnerId, currentUserId, vaultId
   return (
     <Card className="border-2">
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <div>
-                <CardTitle className="text-xl font-bold">Membros do Cofre</CardTitle>
-                <CardDescription className="text-sm mt-0.5">
-                  Gerencie quem tem acesso a este cofre
-                </CardDescription>
-              </div>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
             </div>
-            
-            {/* Stats */}
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <span className="font-medium">{members?.length || 0}</span>
-                <span className="text-muted-foreground">
-                  {members?.length === 1 ? 'membro ativo' : 'membros ativos'}
-                </span>
-              </div>
+            <div className="flex-1">
+              <CardTitle className="text-xl font-bold">Membros do Cofre</CardTitle>
+              <CardDescription className="text-sm mt-0.5">
+                Gerencie quem tem acesso a este cofre
+              </CardDescription>
             </div>
           </div>
           
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                size="sm" 
-                disabled={!isCurrentUserOwner}
-                className="gap-2 shadow-sm"
-              >
-                <UserPlus className="h-4 w-4" />
-                Adicionar Membro
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <form action={dispatch} ref={formRef}>
-              <input type="hidden" name="vaultId" value={vaultId} />
-              <DialogHeader className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-primary/10 p-3">
-                    <UserPlus className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-xl">Convidar Novo Membro</DialogTitle>
-                    <DialogDescription className="text-sm">
-                      Adicione alguém ao seu cofre compartilhado
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-              
-              <div className="grid gap-5 py-6">
-                {/* Info alert */}
-                <div className="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 p-4 border border-blue-200/50 dark:border-blue-800/50">
-                  <div className="flex gap-3">
-                    <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                        Como funciona o convite
-                      </p>
-                      <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                        Envie o convite para qualquer e-mail. Se a pessoa não tiver cadastro, receberá instruções para se registrar e acessar o cofre compartilhado.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Email input */}
-                <div className="space-y-3">
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    E-mail do Convidado
-                  </Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="exemplo@email.com"
-                      className="pl-10 h-11"
-                      required
-                    />
-                  </div>
-                  {state?.errors?.email && (
-                    <div className="flex items-center gap-2 text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-lg">
-                      <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      {state.errors.email[0]}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <DialogFooter className="gap-2 sm:gap-0">
+          {/* Stats and Button Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="font-medium">{members?.length || 0}</span>
+              <span className="text-muted-foreground">
+                {members?.length === 1 ? 'membro ativo' : 'membros ativos'}
+              </span>
+            </div>
+            
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
                 <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setOpen(false)}
-                  disabled={isPending}
+                  size="sm" 
+                  disabled={!isCurrentUserOwner}
+                  className="gap-2 shadow-sm w-full sm:w-auto"
                 >
-                  Cancelar
+                  <UserPlus className="h-4 w-4" />
+                  Adicionar Membro
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isPending}
-                  className="gap-2"
-                >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Enviando convite...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" />
-                      Enviar Convite
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <form action={dispatch} ref={formRef}>
+                  <input type="hidden" name="vaultId" value={vaultId} />
+                  <DialogHeader className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-primary/10 p-3">
+                        <UserPlus className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <DialogTitle className="text-xl">Convidar Novo Membro</DialogTitle>
+                        <DialogDescription className="text-sm">
+                          Adicione alguém ao seu cofre compartilhado
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-5 py-6">
+                    {/* Info alert */}
+                    <div className="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 p-4 border border-blue-200/50 dark:border-blue-800/50">
+                      <div className="flex gap-3">
+                        <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                            Como funciona o convite
+                          </p>
+                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                            Envie o convite para qualquer e-mail. Se a pessoa não tiver cadastro, receberá instruções para se registrar e acessar o cofre compartilhado.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Email input */}
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        E-mail do Convidado
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder="exemplo@email.com"
+                          className="pl-10 h-11"
+                          required
+                        />
+                      </div>
+                      {state?.errors?.email && (
+                        <div className="flex items-center gap-2 text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-lg">
+                          <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                          {state.errors.email[0]}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <DialogFooter className="gap-2 sm:gap-0">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setOpen(false)}
+                      disabled={isPending}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={isPending}
+                      className="gap-2"
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Enviando convite...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" />
+                          Enviar Convite
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-6">
