@@ -12,7 +12,7 @@ export const emailHeader = (userName: string) => `
                       <table cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; width: 55px; height: 55px;">
                         <tr>
                           <td align="center" valign="middle" style="line-height: 55px;">
-                            <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.webp"
+                            <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png"
                              alt="Logo" width="40" style="display: block; border: 0; vertical-align: middle;">
                           </td>
                         </tr>

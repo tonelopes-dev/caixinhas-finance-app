@@ -11,6 +11,15 @@ import bcrypt from 'bcryptjs';
  */
 export async function requestPasswordResetAction(email: string) {
   try {
+    // Validar formato do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return {
+        success: false,
+        message: 'Por favor, insira um endereço de email válido.'
+      };
+    }
+    
     // Verificar se o usuário existe
     const user = await AuthService.getUserByEmail(email);
     
@@ -36,7 +45,24 @@ export async function requestPasswordResetAction(email: string) {
     });
 
     // Enviar email com link de recuperação
-    await sendPasswordResetEmail(email, user.name, resetToken);
+    try {
+      await sendPasswordResetEmail(email, user.name, resetToken);
+    } catch (emailError) {
+      console.error('Erro específico no envio de email:', emailError);
+      // Remover o token se o email falhou
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetToken: null,
+          resetTokenExpiry: null,
+        },
+      });
+      
+      return {
+        success: false,
+        message: 'Erro ao enviar email de recuperação. Por favor, verifique se seu endereço de email está correto e tente novamente.'
+      };
+    }
 
     return {
       success: true,
@@ -46,7 +72,7 @@ export async function requestPasswordResetAction(email: string) {
     console.error('Erro ao solicitar reset de senha:', error);
     return {
       success: false,
-      message: 'Erro interno do servidor. Tente novamente.'
+      message: 'Erro interno do servidor. Tente novamente em alguns minutos.'
     };
   }
 }
@@ -150,7 +176,7 @@ async function sendPasswordResetEmail(email: string, name: string, token: string
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 /**
@@ -181,5 +207,5 @@ async function sendPasswordChangedEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }

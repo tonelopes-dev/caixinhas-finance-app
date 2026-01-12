@@ -30,7 +30,7 @@ export async function sendEmail(options: EmailOptions) {
       },
       subject,
       html,
-      text: text || html.replace(/<[^>]*>/g, ''), // Remove HTML tags para versão texto
+      text: text || (html ? html.replace(/<[^>]*>/g, '') : ''), // Remove HTML tags para versão texto
     };
 
     if (replyTo) {
@@ -61,7 +61,8 @@ export async function sendEmail(options: EmailOptions) {
       console.error('   Body:', JSON.stringify(sgError.response?.body, null, 2));
     }
     
-    return false;
+    // Throw error para que possa ser capturado pelo código que chama
+    throw new Error(`Falha ao enviar email: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
   }
 }
 
