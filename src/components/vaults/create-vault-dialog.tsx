@@ -299,19 +299,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                 </div>
                 
                 {/* Rodapé com botões */}
-                <div className="flex flex-col sm:flex-row gap-3 p-6 bg-muted/30 border-t">
+                <div className="flex flex-col-reverse sm:flex-row gap-3 p-4 sm:p-6 bg-muted/30 border-t">
                     <Button 
                         type="button" 
                         variant="outline" 
                         onClick={() => onOpenChange(false)}
-                        className="flex-1 font-medium"
+                        className="flex-1 font-medium h-12 sm:h-10"
                     >
                         Cancelar
                     </Button>
                     <Button 
                         type="submit" 
                         disabled={isPending || !vaultName.trim()}
-                        className="flex-1 font-medium bg-primary hover:bg-primary/90"
+                        className="flex-1 font-medium bg-primary hover:bg-primary/90 h-12 sm:h-10"
                     >
                         {isPending ? (
                             <>
