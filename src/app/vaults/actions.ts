@@ -340,9 +340,18 @@ export async function inviteToVaultAction(
 
   try {
     const vault = await VaultService.getVaultById(vaultId);
-    if (!vault || vault.ownerId !== userId) {
+    if (!vault) {
+      return { success: false, message: 'Cofre não encontrado' };
+    }
+    
+    // Verificar se o usuário é o dono do vault OU se é um membro com role 'owner'
+    const isOwner = vault.ownerId === userId;
+    const isOwnerMember = vault.members.some(m => m.userId === userId && m.role === 'owner');
+    
+    if (!isOwner && !isOwnerMember) {
       return { success: false, message: 'Você não tem permissão para convidar para este cofre' };
     }
+    
     await VaultService.createInvitation(vaultId, userId, email); // Usar createInvitation do VaultService
     revalidatePath(`/vaults/${vaultId}/manage`);
     return { success: true, message: 'Convite enviado com sucesso!' };
@@ -369,7 +378,15 @@ export async function inviteToVaultWithContext(
 
   try {
     const vault = await VaultService.getVaultById(vaultId);
-    if (!vault || vault.ownerId !== userId) {
+    if (!vault) {
+      return { success: false, message: 'Cofre não encontrado' };
+    }
+    
+    // Verificar se o usuário é o dono do vault OU se é um membro com role 'owner'
+    const isOwner = vault.ownerId === userId;
+    const isOwnerMember = vault.members.some(m => m.userId === userId && m.role === 'owner');
+    
+    if (!isOwner && !isOwnerMember) {
       return { success: false, message: 'Você não tem permissão para convidar para este cofre' };
     }
     

@@ -31,7 +31,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { updateGoalAction } from '@/app/(private)/goals/actions';
-import { InviteParticipantDialog } from '@/components/goals/invite-participant-dialog';
 import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
@@ -323,15 +322,13 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults, 
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold text-lg">Participantes</h3>
                   <div className="flex flex-col items-end gap-2">
-                    <InviteParticipantDialog 
-                      goalName={goal.name} 
-                      disabled={!isOwner || !currentVault}
-                      vaultId={currentVault?.id}
-                      vaultName={currentVault?.name}
-                    />
-                    {!currentVault && isOwner && (
+                    {!currentVault ? (
                       <p className="text-xs text-muted-foreground text-right max-w-xs">
-                        💡 Para convidar participantes, mova esta caixinha para um cofre compartilhado.
+                        💡 Para gerenciar participantes, mova esta caixinha para um cofre compartilhado.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-right max-w-xs">
+                        💡 Convites são enviados para o cofre "{currentVault.name}" através da página de gerenciamento do cofre.
                       </p>
                     )}
                   </div>
