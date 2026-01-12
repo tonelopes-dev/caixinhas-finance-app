@@ -29,7 +29,9 @@ export default async function InvitePage() {
     getUserSentInvitations()
   ]);
 
-  const formattedVaults = userVaults.map((v) => ({ id: v.id, name: v.name }));
+  // Filtrar apenas cofres compartilhados (não privados) - apenas estes permitem convites
+  const sharedVaults = userVaults.filter(v => !v.isPrivate);
+  const formattedVaults = sharedVaults.map((v) => ({ id: v.id, name: v.name }));
 
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">

@@ -57,6 +57,7 @@ export async function sendPartnerInvite(
     // Erros de regra de negócio conhecidos não precisam de log de erro crítico
     const isKnownError = error.message.includes('já é membro') || 
                         error.message.includes('convite pendente') || 
+                        error.message.includes('privado') ||
                         error.message.includes('não encontrado');
 
     if (!isKnownError) {
@@ -75,6 +76,13 @@ export async function sendPartnerInvite(
       return { 
         message: 'Já existe um convite pendente para este usuário neste cofre.',
         errors: { email: ['Convite já enviado anteriormente'] }
+      };
+    }
+
+    if (error.message.includes('privado')) {
+      return { 
+        message: 'Este cofre é privado e não permite convites. Selecione um cofre compartilhado.',
+        errors: { vaultId: ['Cofre privado não permite convites'] }
       };
     }
     
@@ -112,7 +120,8 @@ export async function getUserSentInvitations() {
   }
 
   try {
-    return await VaultService.getUserSentInvitations(session.user.id);
+    const invitations = await VaultService.getUserSentInvitations(session.user.id);
+    return invitations;
   } catch (error) {
     console.error('Erro ao buscar convites enviados:', error);
     return [];
@@ -162,4 +171,5 @@ export async function respondToInvitation(invitationId: string, action: 'accept'
   }
   
   revalidatePath('/invite');
+  revalidatePath('/invitations');
 }

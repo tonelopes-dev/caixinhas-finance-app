@@ -57,9 +57,11 @@ export function InviteForm({ userVaults, userId, onInviteSent }: InviteFormProps
       formRef.current?.reset();
       setSelectedVaultId('');
       setVaultMembers([]);
-      // Chama callback para atualizar lista de convites
+      // Chama callback para atualizar lista de convites com pequeno delay
       if (onInviteSent) {
-        onInviteSent();
+        setTimeout(() => {
+          onInviteSent();
+        }, 300);
       }
     } else if (state.message && state.errors) {
       // Verificar se é um erro de "aviso" (ex: convite já existe) ou erro crítico

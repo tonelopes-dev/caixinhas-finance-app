@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mail, CheckCircle2, XCircle, Clock, Trash2, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,6 +59,15 @@ export function InvitationsManager({ initialInvitations, initialSentInvitations 
   const [sentInvitations, setSentInvitations] = useState<VaultInvitationData[]>(initialSentInvitations);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+
+  // Sincronizar com props quando mudarem
+  useEffect(() => {
+    setInvitations(initialInvitations);
+  }, [initialInvitations]);
+
+  useEffect(() => {
+    setSentInvitations(initialSentInvitations);
+  }, [initialSentInvitations]);
 
   const handleDeleteInvitation = (invitationId: string) => {
     startTransition(async () => {

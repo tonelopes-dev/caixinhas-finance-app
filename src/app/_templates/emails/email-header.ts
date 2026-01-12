@@ -11,7 +11,10 @@ export const emailHeader = (userName: string) => `
                 <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
                   <tr>
                     <td style="vertical-align: middle; padding-right: 15px;">
-                      <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png" alt="Caixinhas Logo" style="width: 50px; height: 50px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                      <!-- Logo como emoji para garantir visibilidade universal -->
+                      <div style="width: 50px; height: 50px; background-color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        🎁
+                      </div>
                     </td>
                     <td style="vertical-align: middle;">
                       <h1 style="font-family: 'Alegreya', serif; color: #ffffff; font-size: 32px; font-weight: bold; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: -0.5px;">Caixinhas</h1>
