@@ -28,17 +28,22 @@ export function useVirtualKeyboard() {
       const currentViewportHeight = getViewportHeight();
       const heightDifference = initialHeight - currentViewportHeight;
       
-      // Ajusta threshold baseado no dispositivo
-      const keyboardThreshold = window.innerWidth > 768 ? 200 : 150;
+      // Ajusta threshold baseado no dispositivo - mais sensível para mobile
+      const keyboardThreshold = window.innerWidth > 768 ? 150 : 100;
       const isKeyboardOpen = heightDifference > keyboardThreshold;
       
-      // Adiciona uma pequena tolerância para evitar falsos positivos
-      if (Math.abs(heightDifference) < 50) {
-        setIsVirtualKeyboardOpen(false);
-      } else {
-        setIsVirtualKeyboardOpen(isKeyboardOpen);
+      // Log para debug no mobile
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Virtual Keyboard Detection:', {
+          initial: initialHeight,
+          current: currentViewportHeight,
+          difference: heightDifference,
+          threshold: keyboardThreshold,
+          isOpen: isKeyboardOpen
+        });
       }
       
+      setIsVirtualKeyboardOpen(isKeyboardOpen);
       setViewportHeight(currentViewportHeight);
     };
 

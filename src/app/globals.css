@@ -845,15 +845,44 @@
     scroll-margin-top: 2rem;
     scroll-margin-bottom: 2rem;
   }
+  
+  /* Modal reposicionado quando teclado virtual está ativo */
+  [data-radix-dialog-content][data-keyboard-open="true"] {
+    position: fixed !important;
+    top: 10px !important;
+    bottom: auto !important;
+    transform: translateX(-50%) translateY(0) !important;
+    max-height: calc(100vh - 20px) !important;
+    height: auto !important;
+  }
+  
+  /* Overlay menos opaco quando teclado está ativo para melhor visualização */
+  [data-radix-dialog-overlay][data-keyboard-open="true"] {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+  }
 }
 
 /* Detecção de teclado virtual usando viewport units */
 @media (max-height: 500px) and (orientation: landscape) {
   /* Provavelmente teclado virtual está aberto em landscape */
   .dialog-content-mobile {
-    top: 20% !important;
-    transform: translateX(-50%) translateY(-20%) !important;
-    max-height: 80vh !important;
+    top: 5px !important;
+    transform: translateX(-50%) translateY(0) !important;
+    max-height: calc(100vh - 10px) !important;
+  }
+}
+
+/* Força z-index alto para modais de transação no mobile */
+@media (max-width: 768px) {
+  [data-radix-dialog-content] {
+    z-index: 9999 !important;
+  }
+  
+  /* Garante que campos de input sejam acessíveis */
+  [data-radix-dialog-content] input,
+  [data-radix-dialog-content] textarea,
+  [data-radix-dialog-content] select {
+    touch-action: manipulation;
   }
 }
 

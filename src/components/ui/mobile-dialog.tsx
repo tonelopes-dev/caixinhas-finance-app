@@ -46,38 +46,83 @@ const DialogContent = React.forwardRef<
       
       const targetElement = event.target;
       const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(targetElement.tagName);
-      if (!isInput || !isVirtualKeyboardOpen) return;
+      if (!isInput) return;
 
-      // Aguardar a animação do teclado
+      // Aguardar a animação do teclado e o reposicionamento do modal
       setTimeout(() => {
+        // Scroll suave para o elemento focado
         targetElement.scrollIntoView({
           behavior: 'smooth',
-          block: 'center'
+          block: 'nearest', // Mudança para 'nearest' em vez de 'center'
+          inline: 'nearest'
         });
-      }, 300);
+        
+        // Scroll adicional para garantir visibilidade no viewport
+        const rect = targetElement.getBoundingClientRect();
+        const viewportHeight = window.visualViewport?.height || window.innerHeight;
+        
+        if (rect.bottom > viewportHeight * 0.7) {
+          window.scrollBy({
+            top: rect.bottom - (viewportHeight * 0.6),
+            behavior: 'smooth'
+          });
+        }
+      }, 400); // Aumentado para 400ms para dar tempo do modal se reposicionar
+    };
+
+    const handleFocusOut = () => {
+      // Pequeno delay para verificar se ainda há campo focado
+      setTimeout(() => {
+        const activeElement = document.activeElement;
+        const isStillFocused = activeElement && 
+          activeElement instanceof HTMLElement &&
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName);
+          
+        if (!isStillFocused) {
+          // Volta o scroll para o topo do modal se não há mais campos focados
+          const modalContent = document.querySelector('[data-radix-dialog-content]');
+          if (modalContent) {
+            modalContent.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }
+      }, 100);
     };
 
     document.addEventListener('focusin', handleFocus);
-    return () => document.removeEventListener('focusin', handleFocus);
-  }, [isVirtualKeyboardOpen, mobileOptimized]);
+    document.addEventListener('focusout', handleFocusOut);
+    
+    return () => {
+      document.removeEventListener('focusin', handleFocus);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, [mobileOptimized]);
 
   const mobileStyles = mobileOptimized && isVirtualKeyboardOpen ? {
-    transform: 'translateX(-50%) translateY(-50%)',
-    top: '40%',
-    maxHeight: `${viewportHeight * 0.85}px`,
+    transform: 'translateX(-50%) translateY(0)',
+    top: '10px',
+    bottom: 'auto',
+    maxHeight: `${viewportHeight * 0.95}px`,
+    position: 'fixed' as const,
   } : {};
 
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay data-keyboard-open={mobileOptimized && isVirtualKeyboardOpen} />
       <DialogPrimitive.Content
         ref={ref}
+        data-keyboard-open={mobileOptimized && isVirtualKeyboardOpen}
         className={cn(
           "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
           mobileOptimized && [
             "max-h-[90vh] overflow-hidden",
             "md:max-h-none md:overflow-visible",
-            isVirtualKeyboardOpen && "transition-all duration-300 ease-in-out"
+            // Classes específicas para quando teclado virtual está ativo
+            isVirtualKeyboardOpen && [
+              "!top-[10px] !translate-y-0 !max-h-[95vh]", 
+              "transition-all duration-300 ease-in-out",
+              // Garante que modal fique acima do teclado
+              "!z-[9999]"
+            ]
           ],
           className
         )}
