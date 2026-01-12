@@ -3,12 +3,14 @@
 import React, { useState, useRef } from 'react';
 import {
   Dialog,
-  DialogContent,
+  DialogPortal,
+  DialogOverlay,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -138,7 +140,18 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   return (
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
+            <DialogPortal>
+                <DialogOverlay />
+                <DialogPrimitive.Content
+                    className="fixed left-[50%] top-[50%] z-50 grid w-full sm:max-w-[600px] max-h-[90vh] overflow-y-auto translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg p-0"
+                >
+            <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="bg-white/90 hover:bg-white text-gray-900 shadow-lg font-medium"
+                        onClick={() => onOpenChange(false)}
+                    >Fechar</Button>
             <DialogHeader className="sr-only">
               <DialogTitle>Criar Novo Vault</DialogTitle>
             </DialogHeader>
@@ -152,8 +165,13 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                     />
                 )}
                 
+                {/* Botão fechar modal - acima da imagem */}
+                <div className="absolute top-4 right-4 z-10">
+                    
+                </div>
+                
                 {/* Header com imagem de fundo */}
-                <div className="relative h-48 w-full overflow-hidden">
+                <div className="relative h-48 w-full overflow-hidden pt-12">
                     {displayImageUrl ? (
                         <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
                     ) : (
@@ -167,8 +185,9 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                             type="button"
                             variant="secondary"
                             size="icon"
-                            className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900"
+                            className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900 shadow-lg"
                             onClick={handleRemoveImage}
+                            title="Remover imagem"
                         >
                             <X className="h-4 w-4" />
                         </Button>
@@ -313,7 +332,8 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                     </Button>
                 </div>
             </form>
-        </DialogContent>
+                </DialogPrimitive.Content>
+            </DialogPortal>
         </Dialog>
         <VaultCreationSuccessDialog open={isSuccessModalOpen} onOpenChange={setSuccessModalOpen} />
     </>
