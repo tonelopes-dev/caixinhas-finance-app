@@ -1,0 +1,12 @@
+{
+  "name": "bank-logo-processor",
+  "version": "1.0.0",
+  "description": "Processa e padroniza logos de bancos",
+  "scripts": {
+    "process-logos": "node scripts/process-bank-logos.js",
+    "optimize-banks": "npm run process-logos"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.0"
+  }
+}

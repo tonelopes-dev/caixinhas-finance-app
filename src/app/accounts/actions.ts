@@ -112,6 +112,7 @@ export async function updateAccount(accountId: string, formData: FormData) {
   const name = formData.get('account-name') as string;
   const bank = formData.get('bank-name') as string;
   const logoUrl = formData.get('logoUrl') as string;
+  const bankCode = formData.get('bankCode') as string;
   const balance = parseFloat(formData.get('balance') as string) || 0;
   const creditLimit = parseFloat(formData.get('credit-limit') as string) || 0;
 

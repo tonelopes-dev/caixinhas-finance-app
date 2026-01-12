@@ -6,16 +6,21 @@ import type { User, Vault, Account, Goal, Transaction, VaultInvitation, SavedRep
 
 // --- UTILIDADES ---
 
-// Array de logos de bancos (mantido pois pode ser usado em formulários)
+// Array de logos de bancos (atualizadas com imagens processadas)
 export const bankLogos = [
-  'https://logo.clearbit.com/nubank.com.br',
-  'https://logo.clearbit.com/itau.com.br', 
-  'https://logo.clearbit.com/bradesco.com.br',
-  'https://logo.clearbit.com/santander.com.br',
-  'https://logo.clearbit.com/bb.com.br',
-  'https://logo.clearbit.com/caixa.gov.br',
-  'https://logo.clearbit.com/inter.co',
-  'https://logo.clearbit.com/c6bank.com.br'
+  '/images/banks/nubank.png',
+  '/images/banks/itau.png', 
+  '/images/banks/bradesco.png',
+  '/images/banks/santander.png',
+  '/images/banks/banco-do-brasil.png',
+  '/images/banks/caixa.png',
+  '/images/banks/inter.png',
+  '/images/banks/c6bank.png',
+  '/images/banks/btg.png',
+  '/images/banks/pag-bank.png',
+  '/images/banks/safra-bank.png',
+  '/images/banks/logo-sicredi-icon-256.png',
+  '/images/banks/generic-bank.png' // Ícone genérico para outros bancos
 ];
 
 // Função helper para trabalhar com dados do banco (se necessário no futuro)
