@@ -1,7 +1,6 @@
 import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { PwaPrompt } from '@/components/pwa-prompt';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
@@ -91,7 +90,6 @@ export default function RootLayout({
                   </RootLayoutClient>
                   <MobileFloatingNav />
                   <Toaster />
-                  <PwaPrompt />
                 </ErrorBoundary>
               </FirebaseClientProvider>
             </LoadingProvider>
