@@ -53,6 +53,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                       alt="Clara"
                       width={80}
                       height={80}
+                      quality={100}
                       data-ai-hint="woman portrait"
                       className="w-20 h-20 rounded-full border-4 border-background shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300"
                     />
@@ -63,6 +64,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                       alt="João"
                       width={80}
                       height={80}
+                      quality={100}
                       data-ai-hint="man portrait"
                       className="w-20 h-20 rounded-full border-4 border-background shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
                     />
@@ -129,6 +131,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                         src="/photos/familia-joao-clara.png"
                         alt="Família Clara e João com filha"
                         fill
+                        quality={100}
                         className="object-cover rounded-r-xl"
                         data-ai-hint="family smiling"
                       />
@@ -154,6 +157,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                       alt="João"
                       width={48}
                       height={48}
+                      quality={100}
                       data-ai-hint="man portrait"
                       className="w-12 h-12 rounded-full border-2 border-primary"
                     />
@@ -192,6 +196,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                     alt="Clara"
                     width={56}
                     height={56}
+                    quality={100}
                     data-ai-hint="woman portrait"
                     className="w-14 h-14 rounded-full border-2 border-accent"
                   />
@@ -223,6 +228,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
                     alt="João"
                     width={56}
                     height={56}
+                    quality={100}
                     data-ai-hint="man portrait"
                     className="w-14 h-14 rounded-full border-2 border-primary"
                   />

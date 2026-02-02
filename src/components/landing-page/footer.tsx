@@ -19,6 +19,7 @@ export function Footer() {
                 alt="Caixinhas Logo"
                 width={32}
                 height={32}
+                quality={100}
                 className="w-8 h-8"
               />
               <span className="text-xl font-bold text-foreground">

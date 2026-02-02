@@ -37,7 +37,7 @@ function PhotoCarousel() {
     "https://images.unsplash.com/photo-1618220179428-22790b461013?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1497436072909-60f360e1d4b0?w=900&auto=format&fit=crop&q=60",
+    "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1522770179533-24471fcdba45?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=900&auto=format&fit=crop&q=60",
@@ -79,6 +79,7 @@ function PhotoCarousel() {
                     src={src}
                     alt={`Foto de demonstração ${i + 1}`}
                     fill
+                    quality={100}
                     className="object-cover"
                     sizes="(max-width: 768px) 128px, 192px"
                   />

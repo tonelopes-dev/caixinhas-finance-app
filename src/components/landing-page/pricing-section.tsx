@@ -192,6 +192,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                       alt="Kiwify"
                       width={60}
                       height={20}
+                      quality={100}
                       data-ai-hint="logo company"
                       className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
                     />

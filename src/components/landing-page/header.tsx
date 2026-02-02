@@ -24,6 +24,7 @@ export function Header() {
             alt="Caixinhas Logo"
             width={40}
             height={40}
+            quality={100}
             className="w-10 h-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
           />
           <span className="text-xl md:text-2xl font-bold text-foreground">

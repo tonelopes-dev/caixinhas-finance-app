@@ -102,6 +102,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 alt="Seleção de Espaços de Trabalho"
                 width={400}
                 height={800}
+                quality={100}
                 data-ai-hint="app workspace"
                 className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
               />
@@ -122,14 +123,16 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 rounded-3xl blur-2xl animate-pulse-slow" />
-            <div className="relative z-10 group">
+            <div className="relative z-10 group overflow-hidden rounded-2xl inline-block">
               <Image
                 src="/screenshots/all-boxes-view.png"
                 alt="Visualização de Todas as Caixinhas"
                 width={400}
                 height={800}
+                quality={100}
                 data-ai-hint="app goals"
-                className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500 mx-[-2px] my-[-2px] px-[-2px] py-[-2px]"
+                className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                style={{ marginLeft: '-2px', marginTop: '-2px' }}
               />
             </div>
           </div>
@@ -229,6 +232,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 alt="Painel com Resumo do Patrimônio"
                 width={400}
                 height={800}
+                quality={100}
                 data-ai-hint="app dashboard"
                 className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
               />
@@ -255,6 +259,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 alt="Detalhes da Caixinha com Progresso"
                 width={400}
                 height={800}
+                quality={100}
                 data-ai-hint="app goal"
                 className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
               />
