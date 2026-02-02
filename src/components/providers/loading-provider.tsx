@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 
 interface LoadingContextType {
@@ -18,7 +19,11 @@ interface LoadingProviderProps {
 }
 
 export function LoadingProvider({ children }: LoadingProviderProps) {
-  const [isLoading, setIsLoading] = useState(true); // Começa com loading ativo
+  const pathname = usePathname();
+  // Não mostrar loading inicial na página landing
+  const shouldStartWithLoading = pathname !== '/landing';
+  
+  const [isLoading, setIsLoading] = useState(shouldStartWithLoading);
   const [message, setMessage] = useState('Carregando...');
   
   const showLoading = (customMessage?: string) => {
