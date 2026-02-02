@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,19 +11,40 @@ type PWASectionProps = {
   isVisible: { [key: string]: boolean }
 }
 
+type FloatingDot = {
+  left: number
+  top: number
+  delay: number
+  duration: number
+}
+
 export function PWASection({ isVisible }: PWASectionProps) {
+  const [floatingDots, setFloatingDots] = useState<FloatingDot[]>([])
+
+  useEffect(() => {
+    // Generate random values only on client side to avoid hydration mismatch
+    setFloatingDots(
+      [...Array(15)].map(() => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 5,
+        duration: 8 + Math.random() * 7,
+      }))
+    )
+  }, [])
+
   return (
     <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-30">
-        {[...Array(15)].map((_, i) => (
+        {floatingDots.map((dot, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-primary rounded-full animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${8 + Math.random() * 7}s`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
+              animationDelay: `${dot.delay}s`,
+              animationDuration: `${dot.duration}s`,
             }}
           />
         ))}

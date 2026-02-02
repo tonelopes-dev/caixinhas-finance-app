@@ -39,14 +39,17 @@ export function ProblemSolutionSection({
             {[
               {
                 emoji: "😰",
+                image: "/images/photos/porquinho-nao-fala-sobre-dinheiro.jpeg",
                 text: "Não sei como falar sobre dinheiro com meu parceiro(a)",
               },
               {
                 emoji: "🤔",
+                image: "/images/photos/bagunca-entre-dinheiro-contas-cartoes.jpeg",
                 text: "Misturamos tudo e não sabemos para onde o dinheiro foi",
               },
               {
                 emoji: "😔",
+                image: "/images/photos/porquinho-olhando-para-uma-estrela-distante.jpeg",
                 text: "Nossos sonhos parecem distantes e impossíveis",
               },
             ].map((problem, i) => (
@@ -60,8 +63,16 @@ export function ProblemSolutionSection({
                 style={{ transitionDelay: `${200 + i * 100}ms` }}
               >
                 <CardContent className="p-6 space-y-3">
-                  <div className="text-4xl animate-bounce-slow">
-                    {problem.emoji}
+                  <div className="text-4xl">
+                    {problem.image ? (
+                      <img
+                        src={problem.image}
+                        alt={problem.text}
+                        className="w-64 h-64 rounded-lg object-cover mx-auto"
+                      />
+                    ) : (
+                      problem.emoji
+                    )}
                   </div>
                   <p className="text-lg text-foreground/80 font-medium">
                     {problem.text}
