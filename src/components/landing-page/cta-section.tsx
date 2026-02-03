@@ -23,7 +23,7 @@ export function CTASection() {
           vidas financeiras com o Caixinhas
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-fade-in-up animation-delay-200">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-fade-in-up animation-delay-200 w-96 mx-auto">
           <GradientButton
             asChild
             variant="variant"

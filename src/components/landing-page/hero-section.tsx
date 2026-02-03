@@ -137,9 +137,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
                     Começar Agora <ChevronRight className="ml-2 h-5 w-5" />
                   </a>
                 </GradientButton>
-                <Button variant="ghost" size="lg" className="h-14 px-8 text-lg">
-                  <Link href="#como-funciona">Ver Como Funciona</Link>
-                </Button>
+               
               </div>
 
               <div className="flex items-center gap-4">

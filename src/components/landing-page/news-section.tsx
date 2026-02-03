@@ -8,10 +8,10 @@ export function NewsSection() {
     <section className="py-20 px-4 bg-white">
       <div className="container mx-auto">
         <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl md:text-6xl font-bold text-foreground text-balance">
+         {/*  <h2 className="text-4xl md:text-6xl font-bold text-foreground text-balance">
             O que especialistas dizem
-          </h2>
-          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+          </h2> */}
+          <p className="text-xl text-foreground/90 max-w-2xl mx-auto">
             Dados e pesquisas comprovam a importância do planejamento financeiro para casais
           </p>
         </div>

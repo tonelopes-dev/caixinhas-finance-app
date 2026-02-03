@@ -57,7 +57,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
 
         <div className="max-w-3xl mx-auto">
           <div className="relative pb-6">
-            <div className="absolute -top-0 left-[90px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
+            <div className="absolute -top-5 left-[90px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
               <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
                 Acesso Completo
@@ -79,7 +79,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 }`}
               >
                 <div className="text-center space-y-4">
-                  <h3 className="text-3xl md:text-4xl font-bold text-foreground">
+                  <h3 className="text-2xl md:text-4xl font-bold text-foreground">
                     Assinatura Caixinhas
                   </h3>
                   <div className="flex items-center justify-center gap-4 flex-wrap">

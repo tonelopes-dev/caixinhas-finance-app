@@ -44,7 +44,7 @@ export default withAuth(
 // Matcher: protege todas as rotas exceto arquivos estáticos e páginas públicas.
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|.*\.png$|.*\.svg$|.*\.webp$|.*\.json$|favicon.ico|sw.js|login|register|terms|privacy|landing|forgot-password|reset-password).*)',
+        '/((?!api|_next/static|_next/image|.*\\.png$|.*\\.svg$|.*\\.webp$|.*\\.jpeg$|.*\\.jpg$|.*\\.json$|favicon.ico|sw.js|login|register|terms|privacy|landing|forgot-password|reset-password).*)',
         '/',
     ],
 };
