@@ -85,9 +85,9 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="flex items-baseline gap-2">
                       <span className="text-6xl md:text-7xl font-bold text-foreground animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                        R$ 97,00
+                        R$ 10,03
                       </span>
-                      <span className="text-2xl text-foreground/60">/anual</span>
+                      <span className="text-2xl text-foreground/60">/mensal</span>
                     </div>
                   </div>
                   <div className="space-y-2">
