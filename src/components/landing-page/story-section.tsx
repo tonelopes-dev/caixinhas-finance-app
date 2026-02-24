@@ -3,7 +3,12 @@
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Heart, Star } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Heart, Star, Quote } from "lucide-react"
+import { motion, useAnimationControls, useMotionValue, useAnimationFrame } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
+import { wrap } from "framer-motion"
+import { testimonials } from "@/lib/testimonials"
 
 type StorySectionProps = {
   isVisible: { [key: string]: boolean }
@@ -13,7 +18,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
   return (
     <section
       id="historia"
-      className="py-20 px-4 bg-gradient-to-br from-primary/5 to-accent/5 relative overflow-hidden"
+      className="py-24 px-4 bg-gradient-to-b from-[#fdfcf7] to-primary/10 relative overflow-hidden"
     >
       <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float animation-delay-1000" />
@@ -23,7 +28,6 @@ export function StorySection({ isVisible }: StorySectionProps) {
           className="text-center mb-16 space-y-4"
           data-animate="story-header"
         >
-         
           <h2
             className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
               isVisible["story-header"]
@@ -38,7 +42,7 @@ export function StorySection({ isVisible }: StorySectionProps) {
 
         <div className="max-w-5xl mx-auto" data-animate="story-card">
           <Card
-            className={`border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${
+            className={`border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.01] ${
               isVisible["story-card"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-12"
@@ -179,84 +183,128 @@ export function StorySection({ isVisible }: StorySectionProps) {
                   <Badge className="bg-accent text-accent-foreground px-4 py-2 text-base hover:scale-110 transition-transform">
                     3 Anos Usando Caixinhas
                   </Badge>
-                  <Badge className="bg-primary/20 text-primary px-4 py-2 text-base hover:scale-110 transition-transform">
+                  <Badge className="bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 text-base hover:scale-110 transition-transform">
                     12+ Sonhos Realizados
                   </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
 
-          <div className="mt-8 grid md:grid-cols-2 gap-6">
-            <Card className="border-2 border-accent/20 hover:border-accent hover:scale-105 transition-all duration-300">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/photos/clara-perfil.png"
-                    alt="Clara"
-                    width={56}
-                    height={56}
-                    quality={100}
-                    data-ai-hint="woman portrait"
-                    className="w-14 h-14 rounded-full border-2 border-accent"
-                  />
-                  <div>
-                    <p className="font-bold text-foreground">Clara Ribeiro</p>
-                    <p className="text-sm text-foreground/60">
-                      Mãe e Empreendedora
-                    </p>
-                  </div>
-                </div>
-                <p className="text-foreground/80 leading-relaxed italic">
-                  "Antes eu tinha vergonha de falar sobre dinheiro. Hoje,
-                  planejar nosso futuro é um dos momentos mais íntimos e
-                  especiais do nosso casamento."
-                </p>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="w-4 h-4 text-accent fill-accent" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-primary/20 hover:border-primary hover:scale-105 transition-all duration-300">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/photos/joao-perfil.png"
-                    alt="João"
-                    width={56}
-                    height={56}
-                    quality={100}
-                    data-ai-hint="man portrait"
-                    className="w-14 h-14 rounded-full border-2 border-primary"
-                  />
-                  <div>
-                    <p className="font-bold text-foreground">João Ribeiro</p>
-                    <p className="text-sm text-foreground/60">
-                      Pai e Planejador Financeiro
-                    </p>
-                  </div>
-                </div>
-                <p className="text-foreground/80 leading-relaxed italic">
-                  "Ver nossos sonhos tomando forma na tela do celular
-                  transformou completamente como enxergamos o dinheiro. Agora,
-                  cada real tem um propósito."
-                </p>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      className="w-4 h-4 text-primary fill-primary"
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Marquee de Depoimentos */}
+      <div className="mt-24 relative">
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        
+        <div className="flex flex-col gap-8 py-10 overflow-hidden">
+          <TestimonialMarquee testimonials={testimonials} speed={35} />
         </div>
       </div>
     </section>
   )
+}
+
+function TestimonialMarquee({ 
+  testimonials, 
+  speed = 50, 
+  reverse = false 
+}: { 
+  testimonials: typeof import("@/lib/testimonials").testimonials, 
+  speed?: number,
+  reverse?: boolean
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [contentWidth, setContentWidth] = useState(0)
+  const x = useMotionValue(0)
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      // O conteúdo real é metade do scrollWidth porque duplicamos os itens
+      setContentWidth(containerRef.current.scrollWidth / 2)
+    }
+  }, [testimonials])
+
+  useAnimationFrame((t, delta) => {
+    if (contentWidth === 0 || isPaused) return
+
+    // Calcula o movimento baseado no tempo e velocidade
+    const moveBy = (delta / 1000) * speed
+    const currentX = x.get()
+    let newX = reverse ? currentX + moveBy : currentX - moveBy
+    
+    // Aplica o wrapping para manter o valor dentro de [0, -contentWidth]
+    // O wrap do Framer Motion funciona como um modulo inteligente
+    x.set(wrap(-contentWidth, 0, newX))
+  })
+
+  return (
+    <div className="overflow-hidden">
+      <motion.div
+        className="flex gap-6 cursor-grab active:cursor-grabbing"
+        style={{ x }}
+        drag="x"
+        onDragStart={() => setIsPaused(true)}
+        onDragEnd={() => setIsPaused(false)}
+        // O drag deve atualizar o motion value diretamente
+        onDrag={(event, info) => {
+          const currentX = x.get()
+          x.set(wrap(-contentWidth, 0, currentX + info.delta.x))
+        }}
+      >
+        <div ref={containerRef} className="flex gap-6">
+          {/* Triplicamos para garantir cobertura total durante o drag rápido */}
+          {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
+            <TestimonialCard key={`${testimonial.name}-${index}`} testimonial={testimonial} index={index} />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function TestimonialCard({ 
+  testimonial, 
+  index 
+}: { 
+  testimonial: typeof import("@/lib/testimonials").testimonials[0],
+  index: number
+}) {
+    const isCouple = testimonial.name.includes("&") || testimonial.name.includes(" e ")
+    
+    return (
+      <Card className={`min-w-[350px] md:min-w-[400px] max-w-[400px] border border-gray-100/50 bg-white shadow-lg hover:shadow-xl transition-all duration-300 group ${index % 3 === 0 ? 'border-l-4 border-l-yellow-500' : ''}`}>
+        <CardContent className="p-6 space-y-4">
+          <Quote className="w-8 h-8 text-primary/20 group-hover:text-primary/40 transition-colors" />
+          
+          <p className="text-slate-600 leading-relaxed italic text-lg relative z-10">
+            &ldquo;{testimonial.text}&rdquo;
+          </p>
+
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <Avatar className={`w-12 h-12 border-2 ${isCouple ? "border-accent" : "border-primary"}`}>
+              <AvatarFallback className={`${isCouple ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"} font-bold`}>
+                {testimonial.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-slate-800 font-bold group-hover:text-primary transition-colors">
+                {testimonial.name}
+              </p>
+              <p className="text-slate-500 text-sm">
+                {testimonial.role}
+              </p>
+            </div>
+            
+            <div className="ml-auto flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star key={i} className="w-3 h-3 text-yellow-500" fill="currentColor" />
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
 }

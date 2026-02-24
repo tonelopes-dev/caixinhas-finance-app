@@ -117,24 +117,24 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
           <div className="z-10 space-y-8 lg:order-first">
             <div className="flex items-center gap-4">
               <h1 className="animate-fade-in-up text-balance text-4xl font-bold leading-tight text-foreground animation-delay-100 md:text-5xl lg:text-7xl">
-                Sonhar juntos é o primeiro{" "}
+                Transforme seus maiores sonhos em metas reais.{" "}
                 <span className="animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                  passo para conquistar
+                  Para você, ou para vocês.
                 </span>
               </h1>
             </div>
 
             <p className="animate-fade-in-up text-pretty text-lg leading-relaxed text-foreground/70 animation-delay-200 md:text-xl">
-              Caixinhas não é apenas um aplicativo de finanças. É uma ferramenta
-              de comunicação e confiança para transformar sonhos individuais em
-              conquistas reais.
+              O aplicativo financeiro para quem quer conquistar o primeiro apê,
+              organizar a reforma ou planejar o futuro a dois. Suas metas, suas
+              regras.
             </p>
 
             <div className="animate-fade-in-up animation-delay-300 space-y-8">
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <GradientButton asChild className="h-14 px-8 text-lg font-semibold">
                   <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
-                    Começar Agora <ChevronRight className="ml-2 h-5 w-5" />
+                    Começar a planejar <ChevronRight className="ml-2 h-5 w-5" />
                   </a>
                 </GradientButton>
                
@@ -173,10 +173,10 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
                 </div>
                 <div>
                   <p className="font-bold text-foreground text-lg">
-                    +10.000 casais
+                    +10.000 pessoas
                   </p>
                   <p className="text-muted-foreground">
-                    realizando sonhos juntos
+                    conquistando seus sonhos
                   </p>
                 </div>
               </div>

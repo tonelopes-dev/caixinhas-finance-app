@@ -19,6 +19,7 @@ import {
   Heart,
   Wallet,
 } from "lucide-react"
+import { motion } from "framer-motion"
 import { config } from "@/lib/config"
 
 type PricingSectionProps = {
@@ -27,24 +28,57 @@ type PricingSectionProps = {
 
 export function PricingSection({ isVisible }: PricingSectionProps) {
   return (
-    <section id="planos" className="py-20 px-4">
-      <div className="container mx-auto">
+    <section id="planos" className="py-24 px-4 relative overflow-hidden bg-[#fdfcf7]">
+      {/* Background Criativo - Sophisticated Premium Grid & Lights */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Grid de Dashboard Sutil */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]" 
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, #D4A15E 1px, transparent 1px),
+              linear-gradient(to bottom, #D4A15E 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }} 
+        />
+
+        {/* Orbes de Brilho */}
+        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] animation-delay-3000" />
+
+        {/* Feixes de Luz Passando (Moving Light Beams) */}
+        <motion.div
+          initial={{ x: "-100%", y: "-100%", opacity: 0 }}
+          animate={{ x: "200%", y: "200%", opacity: [0, 0.3, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 1 }}
+          className="absolute top-0 left-0 w-[1000px] h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent -rotate-45 blur-sm"
+        />
+        <motion.div
+          initial={{ x: "-100%", y: "-100%", opacity: 0 }}
+          animate={{ x: "200%", y: "200%", opacity: [0, 0.2, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear", delay: 5 }}
+          className="absolute top-0 left-0 w-[1200px] h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent -rotate-45 blur-sm"
+        />
+      </div>
+
+      <div className="container mx-auto relative z-10">
         <div
           className="text-center mb-16 space-y-4"
           data-animate="pricing-header"
         >
           
           <h2
-            className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
+            className={`text-4xl md:text-6xl font-bold text-stone-900 text-balance transition-all duration-700 delay-100 ${
               isVisible["pricing-header"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
             }`}
           >
-            Invista no futuro do seu relacionamento
+            Invista no seu futuro (e nas suas conquistas)
           </h2>
           <p
-            className={`text-xl text-foreground/70 max-w-2xl mx-auto transition-all duration-700 delay-200 ${
+            className={`text-xl text-stone-900/70 max-w-2xl mx-auto transition-all duration-700 delay-200 ${
               isVisible["pricing-header"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -58,7 +92,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
         <div className="max-w-3xl mx-auto">
           <div className="relative pb-6">
             <div className="absolute -top-5 left-[90px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
-              <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-base px-6 py-2 shadow-lg">
+              <Badge className="bg-gradient-to-r from-primary to-accent text-white hover:text-yellow-400 text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
                 Acesso Completo
               </Badge>
@@ -79,12 +113,12 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 }`}
               >
                 <div className="text-center space-y-4">
-                  <h3 className="text-2xl md:text-4xl font-bold text-foreground">
+                  <h3 className="text-2xl md:text-4xl font-bold text-stone-900">
                     Assinatura Caixinhas
                   </h3>
                   <div className="flex flex-col items-center justify-center gap-2">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl text-foreground/40 line-through decoration-primary/40">
+                      <span className="text-2xl text-stone-900/40 line-through decoration-primary/40">
                         De R$ 97,00
                       </span>
                       <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold">
@@ -92,10 +126,10 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                       </Badge>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-6xl md:text-7xl font-bold text-foreground animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
+                      <span className="md:text-7xl text-5xl   font-bold text-stone-900 animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
                         R$ 27,00
                       </span>
-                      <span className="text-2xl text-foreground/60">/anual</span>
+                      <span className="text-2xl text-stone-900/60">/anual</span>
                     </div>
                     <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-2 hover:bg-primary/20 transition-colors mt-2">
                       <span className="text-lg font-semibold text-primary">
@@ -103,13 +137,13 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                       </span>
                     </div>
                   </div>
-                  <p className="text-lg text-foreground/70 max-w-xl mx-auto">
+                  <p className="text-lg text-stone-900/70 max-w-xl mx-auto">
                     Aproveite nossa oferta por tempo limitado!
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 space-y-4">
-                  <h4 className="text-2xl font-bold text-foreground text-center mb-6">
+                <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl py-8 px-4 space-y-4">
+                  <h4 className="text-2xl font-bold text-stone-900 text-center mb-6">
                     Tudo que você precisa, incluído:
                   </h4>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -150,7 +184,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                         <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
                           <feature.icon className="w-5 h-5 text-primary" />
                         </div>
-                        <span className="text-base text-foreground/80 leading-relaxed pt-1.5">
+                        <span className="text-base text-stone-900/80 leading-relaxed pt-1.5">
                           {feature.text}
                         </span>
                       </div>
@@ -159,7 +193,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 </div>
 
                 <div className="space-y-4">
-                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 text-xl h-16 font-bold hover:scale-105 transition-all relative overflow-hidden group shadow-lg">
+                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 text-xl h-16 font-bold hover:scale-105 transition-all relative overflow-hidden group shadow-lg">
                     <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
                       <span className="relative z-10 flex items-center justify-center leading-7 border-0 text-sm">
                         Começar Minha Jornada Agora
@@ -182,22 +216,9 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                     </a>
                   </Button>
 
-                  <div className="flex items-center justify-center gap-2 text-foreground/60 text-sm py-2">
-                    <Lock className="w-4 h-4" />
-                    <span>Pagamento seguro processado por</span>
-                    <Image
-                      priority
-                      src="/logo-kiwify.webp"
-                      alt="Kiwify"
-                      width={60}
-                      height={20}
-                      quality={100}
-                      data-ai-hint="logo company"
-                      className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
-                    />
-                  </div>
+                  
 
-                  <div className="flex items-center justify-center gap-6 text-foreground/60 text-sm flex-wrap">
+                  <div className="flex items-center justify-center pt-6 gap-6 text-stone-900/60 text-sm flex-wrap">
                     <div className="flex items-center gap-2 hover:text-primary transition-colors">
                       <Check className="w-5 h-5 text-primary" />
                       <span>Garantia de 7 dias</span>
@@ -213,11 +234,22 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                   </div>
                 </div>
 
-                <div className="border-t border-border py-16">
-                  <div className="flex justify-center items-center px-4 min-h-[140px] md:min-h-[180px] lg:min-h-[200px]">
+                <div className="border-t border-border py-4 flex justify-center items-center">
                     <div className="flex justify-center items-center w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                      <CouplesBadge className="hover:scale-105 transition-all duration-300 drop-shadow-lg w-full" />
-                    </div>
+                    <div className="flex sm:flex-row flex-col items-center justify-center gap-2 text-stone-900/60 text-sm py-2">
+                    <div className="flex items-center gap-2"><Lock className="w-4 h-4" />
+                    <span>Pagamento processado por</span></div>
+                    <Image
+                      priority
+                      src="/logo-kiwify.webp"
+                      alt="Kiwify"
+                      width={60}
+                      height={20}
+                      quality={100}
+                      data-ai-hint="logo company"
+                      className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  </div>
                   </div>
                 </div>
               </CardContent>
@@ -225,7 +257,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
           </div>
 
           <div className="mt-12 text-center space-y-6">
-            <div className="flex items-center justify-center gap-8 text-foreground/60 flex-wrap">
+            <div className="flex items-center justify-center gap-8 text-stone-900/60 flex-wrap">
               <div className="flex items-center gap-2 hover:scale-110 transition-transform">
                 <Shield className="w-5 h-5" />
                 <span>Pagamento 100% seguro</span>

@@ -11,23 +11,34 @@ type FeaturesSectionProps = {
 
 export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
   return (
-    <section id="recursos" className="py-20 px-4 ">
-      <div className="container mx-auto">
+    <section id="recursos" className="py-24 px-4 relative overflow-hidden bg-[#fdfcf7]">
+      {/* Background Criativo - Sophisticated Premium / Dashboard Grid */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Orbes de Brilho - Cores da Marca (Suaves) */}
+        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] animation-delay-3000" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[80px]" />
+
+        {/* Grid de Dashboard Dourado Sutil */}
+        <div 
+          className="absolute inset-0 opacity-[0.08]" 
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, #D4A15E 1px, transparent 1px),
+              linear-gradient(to bottom, #D4A15E 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px'
+          }} 
+        />
+</div>
+
+      <div className="container mx-auto relative z-10">
         <div
-          className="text-center mb-16 space-y-4"
+          className="text-center mb-24 space-y-4"
           data-animate="features-header"
         >
-          {/* <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["features-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            Recursos Poderosos
-          </Badge> */}
           <h2
-            className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
+            className={`text-4xl md:text-6xl font-bold text-stone-900 text-balance transition-all duration-700 delay-100 ${
               isVisible["features-header"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -36,54 +47,54 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             Como o Caixinhas funciona?
           </h2>
           <p
-            className={`text-xl text-foreground/70 max-w-2xl mx-auto text-pretty transition-all duration-700 delay-200 ${
+            className={`text-xl text-stone-600 max-w-2xl mx-auto text-pretty transition-all duration-700 delay-200 ${
               isVisible["features-header"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
             }`}
           >
             Conheça os conceitos simples e poderosos que tornam o Caixinhas
-            único
+            único e transformam sua relação com o dinheiro.
           </p>
         </div>
 
         {/* Recurso 1: O Cofre */}
         <div
-          className="grid lg:grid-cols-2 gap-12 items-center mb-24"
+          className="grid lg:grid-cols-2 gap-16 items-center mb-32"
           data-animate="feature-1"
         >
           <div
-            className={`space-y-6 transition-all duration-700 ${
+            className={`space-y-8 transition-all duration-700 ${
               isVisible["feature-1"]
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 -translate-x-12"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 hover:bg-cyan-900/20 transition-colors">
-              <Wallet className="w-5 h-5 text-cyan-900" />
-              <span className="text-cyan-900 font-bold">O Cofre</span>
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-2 border border-primary/20">
+              <Wallet className="w-5 h-5 text-primary" />
+              <span className="text-primary font-bold uppercase tracking-wide text-sm">O Cofre</span>
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-foreground">
-              Seu universo financeiro organizado
+            <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+              O seu espaço financeiro <span className="text-primary">inteligente</span>
             </h3>
-            <p className="text-xl text-foreground/70 leading-relaxed">
-              O <strong>Cofre</strong> é o coração do Caixinhas. Você tem seu
-              espaço pessoal privado e pode criar cofres compartilhados com seu
-              parceiro(a) para organizar finanças conjuntas.
+            <p className="text-xl text-stone-600 leading-relaxed">
+              Seu ambiente privado para organizar todas as suas contas e
+              cartões. Compartilhe apenas as <strong>Caixinhas</strong> que
+              quiser, com quem quiser — sem abrir mão da sua privacidade.
             </p>
-            <ul className="space-y-4">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                "Cofre pessoal totalmente privado",
-                "Cofres compartilhados com visibilidade total",
-                "Adicione contas bancárias e cartões",
-                "Alterne facilmente entre espaços",
+                "Cofre pessoal privado",
+                "Metas compartilhadas",
+                "Contas e cartões",
+                "Fácil alternância",
               ].map((item, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 hover:translate-x-2 transition-transform"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white border border-stone-200 hover:border-primary/50 transition-all group shadow-sm"
                 >
-                  <Check className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
-                  <span className="text-lg text-foreground/80">{item}</span>
+                  <Check className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-stone-700 font-medium">{item}</span>
                 </li>
               ))}
             </ul>
@@ -95,8 +106,8 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 : "opacity-0 translate-x-12"
             }`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl blur-2xl animate-pulse-slow" />
-            <div className="relative z-10 group">
+            <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-[80px] opacity-40" />
+            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
               <Image
                 src="/screenshots/workspace-selection.png"
                 alt="Seleção de Espaços de Trabalho"
@@ -104,7 +115,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 height={800}
                 quality={100}
                 data-ai-hint="app workspace"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
           </div>
@@ -112,7 +123,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
 
         {/* Recurso 2: As Caixinhas */}
         <div
-          className="grid lg:grid-cols-2 gap-12 items-center mb-24"
+          className="grid lg:grid-cols-2 gap-16 items-center mb-32"
           data-animate="feature-2"
         >
           <div
@@ -122,8 +133,8 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 : "opacity-0 -translate-x-12"
             }`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 rounded-3xl blur-2xl animate-pulse-slow" />
-            <div className="relative z-10 group overflow-hidden rounded-2xl inline-block">
+            <div className="absolute inset-0 bg-accent/10 rounded-3xl blur-[80px] opacity-40" />
+            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden text-center">
               <Image
                 src="/screenshots/all-boxes-view.png"
                 alt="Visualização de Todas as Caixinhas"
@@ -131,44 +142,43 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 height={800}
                 quality={100}
                 data-ai-hint="app goals"
-                className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 inline-block"
                 style={{ marginLeft: '-2px', marginTop: '-2px' }}
               />
             </div>
           </div>
           <div
-            className={`space-y-6 order-1 lg:order-2 transition-all duration-700 delay-200 ${
+            className={`space-y-8 order-1 lg:order-2 transition-all duration-700 delay-200 ${
               isVisible["feature-2"]
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 translate-x-12"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-4 py-2 hover:bg-accent/20 transition-colors">
-            <Logo w={30} h={30}/>
-              {/* <PiggyBank className="w-5 h-5 text-accent" /> */}
-              <span className="text-accent font-bold">As Caixinhas</span>
+            <div className="inline-flex items-center gap-2 bg-accent/10 rounded-xl px-4 py-2 border border-accent/20">
+              <Logo w={24} h={24}/>
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">As Caixinhas</span>
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-foreground">
-              Onde seus sonhos ganham vida
+            <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+              Seus sonhos no <span className="text-accent">centro</span> de tudo
             </h3>
-            <p className="text-xl text-foreground/70 leading-relaxed">
+            <p className="text-xl text-stone-600 leading-relaxed">
               A <strong>Caixinha</strong> é a representação visual de um
               objetivo. Dê nome, escolha um ícone, defina a meta e acompanhe o
               progresso em tempo real.
             </p>
-            <ul className="space-y-4">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                "Crie caixinhas para cada sonho do casal",
-                "Veja a barra de progresso avançar",
-                "Caixinhas compartilhadas ou privadas",
-                "Contribua e celebre cada conquista",
+                "Metas personalizadas",
+                "Progresso visual",
+                "Caixinhas em grupo",
+                "Foco no objetivo",
               ].map((item, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 hover:translate-x-2 transition-transform"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white border border-stone-200 hover:border-accent/50 transition-all group shadow-sm"
                 >
-                  <Check className="w-6 h-6 text-accent mt-1 flex-shrink-0" />
-                  <span className="text-lg text-foreground/80">{item}</span>
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-stone-700 font-medium">{item}</span>
                 </li>
               ))}
             </ul>
@@ -177,43 +187,43 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
 
         {/* Recurso 3: Resumo do Patrimônio */}
         <div
-          className="grid lg:grid-cols-2 gap-12 items-center mb-24"
+          className="grid lg:grid-cols-2 gap-16 items-center mb-32"
           data-animate="feature-3"
         >
           <div
-            className={`space-y-6 transition-all duration-700 ${
+            className={`space-y-8 transition-all duration-700 ${
               isVisible["feature-3"]
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 -translate-x-12"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 hover:bg-primary/20 transition-colors">
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-2 border border-primary/20">
               <BarChart3 className="w-5 h-5 text-primary" />
-              <span className="text-primary font-bold">
-                Resumo do Patrimônio
+              <span className="text-primary font-bold uppercase tracking-wide text-sm">
+                Patrimônio
               </span>
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-foreground">
-              Veja o quadro completo, sempre
+            <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+              Veja o quadro completo com <span className="text-primary">clareza</span>
             </h3>
-            <p className="text-xl text-foreground/70 leading-relaxed">
+            <p className="text-xl text-stone-600 leading-relaxed">
               Acompanhe seu patrimônio total, quanto está disponível e quanto
               já foi investido nos seus sonhos. Tudo em uma visualização clara
               e encorajadora.
             </p>
-            <ul className="space-y-4">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                "Patrimônio total atualizado em tempo real",
-                "Saldo líquido e investimentos separados",
-                "Transações recentes organizadas",
-                "Filtros e categorização inteligente",
+                "Saldo em tempo real",
+                "Líquido vs Investido",
+                "Histórico inteligente",
+                "Filtros avançados",
               ].map((item, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 hover:translate-x-2 transition-transform"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white border border-stone-200 hover:border-primary/50 transition-all group shadow-sm"
                 >
-                  <Check className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
-                  <span className="text-lg text-foreground/80">{item}</span>
+                  <Check className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-stone-700 font-medium">{item}</span>
                 </li>
               ))}
             </ul>
@@ -225,8 +235,8 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 : "opacity-0 translate-x-12"
             }`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl blur-2xl animate-pulse-slow" />
-            <div className="relative z-10 group">
+            <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-[80px] opacity-40" />
+            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
               <Image
                 src="/screenshots/personal-dashboard.png"
                 alt="Painel com Resumo do Patrimônio"
@@ -234,7 +244,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 height={800}
                 quality={100}
                 data-ai-hint="app dashboard"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
           </div>
@@ -242,7 +252,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
 
         {/* Recurso 4: Acompanhamento de Progresso */}
         <div
-          className="grid lg:grid-cols-2 gap-12 items-center"
+          className="grid lg:grid-cols-2 gap-16 items-center"
           data-animate="feature-4"
         >
           <div
@@ -252,8 +262,8 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 : "opacity-0 -translate-x-12"
             }`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 rounded-3xl blur-2xl animate-pulse-slow" />
-            <div className="relative z-10 group">
+            <div className="absolute inset-0 bg-accent/10 rounded-3xl blur-[80px] opacity-40" />
+            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
               <Image
                 src="/screenshots/savings-box-detail.png"
                 alt="Detalhes da Caixinha com Progresso"
@@ -261,42 +271,41 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 height={800}
                 quality={100}
                 data-ai-hint="app goal"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
           </div>
           <div
-            className={`space-y-6 order-1 lg:order-2 transition-all duration-700 delay-200 ${
+            className={`space-y-8 order-1 lg:order-2 transition-all duration-700 delay-200 ${
               isVisible["feature-4"]
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 translate-x-12"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-4 py-2 hover:bg-accent/20 transition-colors">
+            <div className="inline-flex items-center gap-2 bg-accent/10 rounded-xl px-4 py-2 border border-accent/20">
               <TrendingUp className="w-5 h-5 text-accent" />
-              <span className="text-accent font-bold">Progresso Visual</span>
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">Privacidade & União</span>
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-foreground">
-              Celebre cada passo da jornada
+            <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+              Independência e <span className="text-accent">Colaboração</span>
             </h3>
-            <p className="text-xl text-foreground/70 leading-relaxed">
-              Ver a barra de progresso da "Viagem com Amigos" enchendo é muito
-              mais poderoso do que apenas ver um número na conta. Acompanhe o
-              histórico de cada contribuição.
+            <p className="text-xl text-stone-600 leading-relaxed">
+              Gerencie sua vida financeira solo ou convide quem você ama para
+              colaborar em metas em comum, sem perder a sua privacidade.
             </p>
-            <ul className="space-y-4">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                "Barra de progresso visual e motivadora",
-                "Histórico completo de atividades",
-                "Veja quem contribuiu e quando",
-                "Compartilhe conquistas com parceiros",
+                "Histórico detalhado",
+                "Gestão de acessos",
+                "Conquistas em equipe",
+                "Feedback motivador",
               ].map((item, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 hover:translate-x-2 transition-transform"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white border border-stone-200 hover:border-accent/50 transition-all group shadow-sm"
                 >
-                  <Check className="w-6 h-6 text-accent mt-1 flex-shrink-0" />
-                  <span className="text-lg text-foreground/80">{item}</span>
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-stone-700 font-medium">{item}</span>
                 </li>
               ))}
             </ul>

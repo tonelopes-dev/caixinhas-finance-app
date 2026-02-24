@@ -16,105 +16,126 @@ type BenefitsSectionProps = {
 }
 
 export function BenefitsSection({ isVisible }: BenefitsSectionProps) {
+  const benefits = [
+    {
+      icon: Shield,
+      title: "Clareza Mental",
+      description: "Elimine o estresse da incerteza financeira. Tenha um panorama completo e terreno seguro para decisões inteligentes.",
+      color: "bg-primary",
+      delay: 100,
+    },
+    {
+      icon: Sparkles,
+      title: "Insights Reais",
+      description: "Relatórios inteligentes que traduzem números em conselhos práticos para acelerar a conquista de cada meta.",
+      color: "bg-accent",
+      delay: 200,
+    },
+    {
+      icon: Heart,
+      title: "Realização",
+      description: "Celebrar cada meta alcançada fortalece o foco e torna a jornada financeira muito mais gratificante.",
+      color: "bg-accent",
+      delay: 300,
+    },
+    {
+      icon: Lock,
+      title: "Privacidade Total",
+      description: "Seus Cofres Pessoais são 100% privados. Você decide exatamente o que e quando compartilhar.",
+      color: "bg-primary",
+      delay: 400,
+    },
+    {
+      icon: Target,
+      title: "Metas Visuais",
+      description: "Transforme números frios em objetivos reais. Visualize seu progresso e mantenha o foco no que importa.",
+      color: "bg-primary",
+      delay: 500,
+    },
+     {
+      icon: Zap,
+      title: "Futuro Sólido",
+      description: "Construa uma história de vida cheia de conquistas memoráveis e total controle sobre seu patrimônio.",
+      color: "bg-accent",
+      delay: 600,
+    },
+  ]
+
   return (
-    <section className="py-20 bg-card px-4">
-      <div className="container mx-auto">
+    <section className="py-24 px-4 relative overflow-hidden bg-[#fdfcf7]">
+      {/* Background Decorativo - Sophisticated Aura & Texture */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-24 -right-24 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px]" />
+        
+        {/* Padrão de Pontos Dourados Sutil */}
+        <div 
+          className="absolute inset-0 opacity-[0.1]" 
+          style={{ 
+            backgroundImage: 'radial-gradient(#D4A15E 1px, transparent 1px)',
+            backgroundSize: '40px 40px'
+          }} 
+        />
+
+        {/* Textura de Grão sutil */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
+      </div>
+
+      <div className="container mx-auto relative z-10">
         <div
-          className="text-center mb-16 space-y-4"
+          className="text-center mb-20 space-y-4"
           data-animate="benefits-header"
         >
-          {/* <Badge
-            className={`bg-primary/10 text-primary border-primary/20 text-base px-4 py-1.5 transition-all duration-700 ${
-              isVisible["benefits-header"]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-          >
-            Por Que Caixinhas?
-          </Badge> */}
           <h2
-            className={`text-4xl md:text-6xl font-bold text-foreground text-balance transition-all duration-700 delay-100 ${
+            className={`text-4xl md:text-6xl font-bold text-stone-900 text-balance transition-all duration-700 delay-100 ${
               isVisible["benefits-header"]
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
             }`}
           >
-            {/* Porque */} O Maior Ativo é a{" "}
-            <span className="text-primary">Confiança</span>
+            O maior ativo do projeto é a <span className="text-primary italic">Confiança</span>
           </h2>
+          <p className="text-xl text-stone-600 max-w-2xl mx-auto text-pretty">
+            Desenhamos uma experiência que vai além de números, focada na harmonia
+            e no sucesso da sua jornada financeira.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Shield,
-              title: "Reduzam o Estresse",
-              description:
-                "Menos brigas sobre dinheiro, mais conversas sobre o futuro. Um terreno neutro para decisões financeiras.",
-              color: "bg-primary",
-            },
-            {
-              icon: Heart,
-              title: "Aumentem a Cumplicidade",
-              description:
-                "Celebrar cada meta alcançada, por menor que seja, fortalece o vínculo e a parceria do casal.",
-              color: "bg-accent",
-            },
-            {
-              icon: Target,
-              title: "Alcancem Objetivos Mais Rápido",
-              description:
-                "Com clareza e foco, o caminho para realizar sonhos se torna mais curto e eficiente.",
-              color: "bg-primary",
-            },
-            {
-              icon: Sparkles,
-              title: "Insights com IA",
-              description:
-                "Relatórios mensais com linguagem humana, pontos de atenção e dicas práticas e encorajadoras.",
-              color: "bg-accent",
-            },
-            {
-              icon: Lock,
-              title: "Privacidade Garantida",
-              description:
-                "Mantenha suas contas pessoais privadas enquanto compartilha apenas o que deseja com seu parceiro(a).",
-              color: "bg-primary",
-            },
-            {
-              icon: Zap,
-              title: "Construam um Legado",
-              description:
-                "Não apenas patrimônio, mas uma história de vida compartilhada, cheia de conquistas e memórias.",
-              color: "bg-accent",
-            },
-          ].map((benefit, index) => (
-            <Card
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {benefits.map((benefit, index) => (
+            <div
               key={index}
-              className="border-2 hover:border-primary transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group cursor-pointer"
+              className={`group relative rounded-3xl overflow-hidden border border-white bg-white/50 backdrop-blur-xl shadow-xl shadow-stone-200/50 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-2 ${
+                isVisible[`benefit-${index}`]
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${benefit.delay}ms` }}
               data-animate={`benefit-${index}`}
             >
-              <CardContent
-                className={`p-8 space-y-4 transition-all duration-700 ${
-                  isVisible[`benefit-${index}`]
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8"
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
+              {/* Overlay de gradiente interno sutil */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="p-8 space-y-6 relative z-10">
                 <div
-                  className={`${benefit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}
+                  className={`${benefit.color} w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-black/5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
                 >
-                  <benefit.icon className="w-8 h-8 text-background" />
+                  <benefit.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground">
-                  {benefit.title}
-                </h3>
-                <p className="text-lg text-foreground/70 leading-relaxed">
-                  {benefit.description}
-                </p>
-              </CardContent>
-            </Card>
+                
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-bold text-stone-900 leading-tight">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-[17px] text-stone-600 leading-relaxed group-hover:text-stone-800 transition-colors">
+                    {benefit.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Detalhe Decorativo de Fundo no Card */}
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+            </div>
           ))}
         </div>
       </div>

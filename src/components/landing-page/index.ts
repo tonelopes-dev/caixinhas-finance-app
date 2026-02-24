@@ -8,6 +8,8 @@ export { HowItWorksSection } from './how-it-works-section';
 export { StorySection } from './story-section';
 export { PricingSection } from './pricing-section';
 export { NewsSection } from './news-section';
+export { FAQSection } from './faq-section';
 export { CTASection } from './cta-section';
 export { Footer } from './footer';
 export { useScrollAnimations } from './use-scroll-animations';
+

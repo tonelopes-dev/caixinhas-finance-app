@@ -230,11 +230,11 @@ export const CouplesBadge = ({ className = "" }: CouplesBadgeProps) => {
             fontWeight="700" 
             fill="hsl(var(--foreground))" 
             x="175" 
-            y="35" 
+            y="50" 
             textAnchor="middle"
           >
             <tspan fontSize="24">
-              💑
+              
               <animateTransform
                 attributeName="transform"
                 attributeType="XML"
@@ -244,33 +244,9 @@ export const CouplesBadge = ({ className = "" }: CouplesBadgeProps) => {
                 repeatCount="indefinite"
               />
             </tspan>
-            <tspan dx="6">Perfeito para casais</tspan>
+            <tspan dx="6">Perfeito para Você 💝</tspan>
           </text>
           
-          {/* Subtitle */}
-          <text 
-            fontFamily="system-ui, -apple-system, sans-serif" 
-            fontSize="13" 
-            fill="hsl(var(--foreground))" 
-            fillOpacity="0.75" 
-            x="175" 
-            y="55" 
-            textAnchor="middle"
-          >
-            Acesso total para você, colaboração ilimitada
-          </text>
-          
-          <text 
-            fontFamily="system-ui, -apple-system, sans-serif" 
-            fontSize="13" 
-            fill="hsl(var(--foreground))" 
-            fillOpacity="0.75" 
-            x="175" 
-            y="72" 
-            textAnchor="middle"
-          >
-            com quem você ama.
-          </text>
           
           {/* Animated overlays */}
           <g style={{ mixBlendMode: "overlay" }} mask="url(#couplesMask)">

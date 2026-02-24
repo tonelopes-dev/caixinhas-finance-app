@@ -8,7 +8,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-gradient-to-br from-background to-secondary/20 border-t border-border">
+    <footer className="bg-gradient-to-br from-primary/20 to-accent/80  border-t border-border">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo e Descrição */}
@@ -27,8 +27,8 @@ export function Footer() {
               </span>
             </div>
             <p className="text-muted-foreground max-w-md mb-4">
-              A plataforma de gestão financeira que ajuda casais e famílias a 
-              realizarem seus sonhos juntos através da transparência e organização.
+              A plataforma de gestão financeira inteligente para você conquistar
+              seus próprios sonhos ou planejar a vida a dois com total organização.
             </p>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Mail className="w-4 h-4" />
@@ -113,7 +113,7 @@ export function Footer() {
               © {currentYear} Caixinhas. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Feito com ❤️ para casais</span>
+              <span>Feito com ❤️ para as suas conquistas</span>
             </div>
           </div>
         </div>

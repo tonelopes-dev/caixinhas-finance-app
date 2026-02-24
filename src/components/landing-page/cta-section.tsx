@@ -7,51 +7,61 @@ import { Check, ChevronRight } from "lucide-react"
 
 export function CTASection() {
   return (
-    <section className="py-20 bg-gradient-to-br from-primary via-primary to-accent relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary-foreground rounded-full animate-ping-slow" />
-        <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-primary-foreground rounded-full animate-ping-slow animation-delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 border-primary-foreground rounded-full animate-ping-slow animation-delay-500" />
+    <section className="py-24 bg-stone-900 relative overflow-hidden">
+      {/* Background Criativo - Sophisticated Dark/Gold */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] animation-delay-3000" />
+        
+        {/* Grid Sutil Dark */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]" 
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, #D4A15E 1px, transparent 1px),
+              linear-gradient(to bottom, #D4A15E 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }} 
+        />
       </div>
 
-      <div className="container mx-auto relative text-center space-y-8">
-        <h2 className="text-4xl md:text-6xl font-bold text-primary-foreground text-balance animate-fade-in-up">
-          Pronto para realizar seus sonhos juntos?
+      <div className="container mx-auto relative z-10 text-center space-y-10">
+        <h2 className="text-4xl md:text-7xl font-bold text-white text-balance leading-tight">
+          Sua jornada para a <span className="text-primary italic">liberdade financeira</span> começa aqui.
         </h2>
-        <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto text-pretty animate-fade-in-up animation-delay-100">
-          Junte-se a mais de 10.000 casais que já estão transformando suas
-          vidas financeiras com o Caixinhas
+        <p className="text-xl md:text-2xl text-stone-400 max-w-2xl mx-auto text-pretty">
+          Junte-se a milhares de pessoas que já transformaram seus sonhos em metas reais com o Caixinhas.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-fade-in-up animation-delay-200 w-96 mx-auto">
-          <GradientButton
-            asChild
-            variant="variant"
-            className="text-xl h-14 px-8 hover:scale-110 transition-all group"
-          >
-            <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
-              <span className="flex items-center">
-                Começar Agora
-                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-              </span>
-            </a>
-          </GradientButton>
-        </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 animate-fade-in-up animation-delay-200">
+           <Button
+             asChild
+             className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-xl h-16 px-12 rounded-2xl hover:scale-110 transition-all group font-bold shadow-2xl shadow-primary/20"
+           >
+             <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
+               <span className="flex items-center text-white">
+                 Começar Agora
+                 <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+               </span>
+             </a>
+           </Button>
+         </div>
 
-        {/* <div className="flex items-center justify-center gap-8 pt-8 text-primary-foreground/80 animate-fade-in-up animation-delay-300 flex-wrap">
-          <div className="flex items-center gap-2 hover:scale-110 transition-transform">
-            <Check className="w-5 h-5" />
-            <span>Sem cartão de crédito</span>
-          </div>
-          <div className="flex items-center gap-2 hover:scale-110 transition-transform">
-            <Check className="w-5 h-5" />
-            <span>Cancele quando quiser</span>
-          </div>
-          <div className="flex items-center gap-2 hover:scale-110 transition-transform">
-            <Check className="w-5 h-5" />
-            <span>100% seguro</span>
-          </div>
-        </div> */}
+         <div className="flex items-center justify-center gap-10 pt-10 text-stone-400 animate-fade-in-up animation-delay-300 flex-wrap">
+           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
+             <Check className="w-5 h-5 text-primary" />
+             <span className="font-medium">Garantia de 7 dias</span>
+           </div>
+           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
+             <Check className="w-5 h-5 text-primary" />
+             <span className="font-medium">Cancele quando quiser</span>
+           </div>
+           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
+             <Check className="w-5 h-5 text-primary" />
+             <span className="font-medium">100% seguro</span>
+           </div>
+         </div>
       </div>
     </section>
   )
