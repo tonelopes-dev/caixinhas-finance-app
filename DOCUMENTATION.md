@@ -65,7 +65,7 @@ A paleta de cores transmite calor, otimismo e confiança.
 - **Transações (Transaction):** Registros de movimentações financeiras.
   - **Entrada (Income):** Dinheiro que entra no sistema (ex: salário).
   - **Saída (Expense):** Dinheiro que sai do sistema (ex: uma compra).
-  - **Transferência (Transfer):** Dinheiro que se move *dentro* do sistema (ex: da conta corrente para uma caixinha).
+  - **Transferência (Transfer):** Dinheiro que se move _dentro_ do sistema (ex: da conta corrente para uma caixinha).
 
 ### 3.2. Fluxo Principal do Usuário
 
@@ -107,4 +107,5 @@ A paleta de cores transmite calor, otimismo e confiança.
 - O `sessionStorage` armazena o `Caixinhas_VAULT_ID`, que define o cofre ativo na sessão atual. Isso permite que o usuário navegue entre diferentes espaços de trabalho.
 
 ---
-*Este documento deve ser mantido atualizado à medida que o projeto evolui.*
+
+_Este documento deve ser mantido atualizado à medida que o projeto evolui._
