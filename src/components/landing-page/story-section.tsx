@@ -1,18 +1,23 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Heart, Star, Quote } from "lucide-react"
-import { motion, useAnimationControls, useMotionValue, useAnimationFrame } from "framer-motion"
-import { useEffect, useRef, useState } from "react"
-import { wrap } from "framer-motion"
-import { testimonials } from "@/lib/testimonials"
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Heart, Star, Quote } from "lucide-react";
+import {
+  motion,
+  useAnimationControls,
+  useMotionValue,
+  useAnimationFrame,
+} from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { wrap } from "framer-motion";
+import { testimonials } from "@/lib/testimonials";
 
 type StorySectionProps = {
-  isVisible: { [key: string]: boolean }
-}
+  isVisible: { [key: string]: boolean };
+};
 
 export function StorySection({ isVisible }: StorySectionProps) {
   return (
@@ -145,9 +150,9 @@ export function StorySection({ isVisible }: StorySectionProps) {
 
                 <p className="text-xl">
                   Anos se passaram. A 'Caixinha: Entrada da Casa Nova' tem uma
-                  marca de 'Concluído!' ao lado. Eles a alcançaram 8 meses
-                  antes do previsto. O pequeno Leo agora corre no jardim que
-                  eles sonharam.
+                  marca de 'Concluído!' ao lado. Eles a alcançaram 8 meses antes
+                  do previsto. O pequeno Leo agora corre no jardim que eles
+                  sonharam.
                 </p>
 
                 <div className="bg-gradient-to-r from-primary/20 to-accent/20 p-6 md:p-8 rounded-2xl border-2 border-primary/30 hover:scale-[1.02] transition-all">
@@ -195,50 +200,50 @@ export function StorySection({ isVisible }: StorySectionProps) {
 
       {/* Marquee de Depoimentos */}
       <div className="mt-24 relative">
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
-        
+        <div className="absolute inset-y-0 left-0 w-8 sm:w-32 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="absolute inset-y-0 right-0 w-8 sm:w-32 bg-gradient-to-l from-background to-transparent z-10" />
+
         <div className="flex flex-col gap-8 py-10 overflow-hidden">
           <TestimonialMarquee testimonials={testimonials} speed={35} />
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-function TestimonialMarquee({ 
-  testimonials, 
-  speed = 50, 
-  reverse = false 
-}: { 
-  testimonials: typeof import("@/lib/testimonials").testimonials, 
-  speed?: number,
-  reverse?: boolean
+function TestimonialMarquee({
+  testimonials,
+  speed = 50,
+  reverse = false,
+}: {
+  testimonials: typeof import("@/lib/testimonials").testimonials;
+  speed?: number;
+  reverse?: boolean;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [contentWidth, setContentWidth] = useState(0)
-  const x = useMotionValue(0)
-  const [isPaused, setIsPaused] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [contentWidth, setContentWidth] = useState(0);
+  const x = useMotionValue(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (containerRef.current) {
       // O conteúdo real é metade do scrollWidth porque duplicamos os itens
-      setContentWidth(containerRef.current.scrollWidth / 2)
+      setContentWidth(containerRef.current.scrollWidth / 2);
     }
-  }, [testimonials])
+  }, [testimonials]);
 
   useAnimationFrame((t, delta) => {
-    if (contentWidth === 0 || isPaused) return
+    if (contentWidth === 0 || isPaused) return;
 
     // Calcula o movimento baseado no tempo e velocidade
-    const moveBy = (delta / 1000) * speed
-    const currentX = x.get()
-    let newX = reverse ? currentX + moveBy : currentX - moveBy
-    
+    const moveBy = (delta / 1000) * speed;
+    const currentX = x.get();
+    let newX = reverse ? currentX + moveBy : currentX - moveBy;
+
     // Aplica o wrapping para manter o valor dentro de [0, -contentWidth]
     // O wrap do Framer Motion funciona como um modulo inteligente
-    x.set(wrap(-contentWidth, 0, newX))
-  })
+    x.set(wrap(-contentWidth, 0, newX));
+  });
 
   return (
     <div className="overflow-hidden">
@@ -250,61 +255,81 @@ function TestimonialMarquee({
         onDragEnd={() => setIsPaused(false)}
         // O drag deve atualizar o motion value diretamente
         onDrag={(event, info) => {
-          const currentX = x.get()
-          x.set(wrap(-contentWidth, 0, currentX + info.delta.x))
+          const currentX = x.get();
+          x.set(wrap(-contentWidth, 0, currentX + info.delta.x));
         }}
       >
         <div ref={containerRef} className="flex gap-6">
           {/* Triplicamos para garantir cobertura total durante o drag rápido */}
-          {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
-            <TestimonialCard key={`${testimonial.name}-${index}`} testimonial={testimonial} index={index} />
-          ))}
+          {[...testimonials, ...testimonials, ...testimonials].map(
+            (testimonial, index) => (
+              <TestimonialCard
+                key={`${testimonial.name}-${index}`}
+                testimonial={testimonial}
+                index={index}
+              />
+            ),
+          )}
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
 
-function TestimonialCard({ 
-  testimonial, 
-  index 
-}: { 
-  testimonial: typeof import("@/lib/testimonials").testimonials[0],
-  index: number
+function TestimonialCard({
+  testimonial,
+  index,
+}: {
+  testimonial: (typeof import("@/lib/testimonials").testimonials)[0];
+  index: number;
 }) {
-    const isCouple = testimonial.name.includes("&") || testimonial.name.includes(" e ")
-    
-    return (
-      <Card className={`min-w-[350px] md:min-w-[400px] max-w-[400px] border border-gray-100/50 bg-white shadow-lg hover:shadow-xl transition-all duration-300 group ${index % 3 === 0 ? 'border-l-4 border-l-yellow-500' : ''}`}>
-        <CardContent className="p-6 space-y-4">
-          <Quote className="w-8 h-8 text-primary/20 group-hover:text-primary/40 transition-colors" />
-          
-          <p className="text-slate-600 leading-relaxed italic text-lg relative z-10">
-            &ldquo;{testimonial.text}&rdquo;
-          </p>
+  const isCouple =
+    testimonial.name.includes("&") || testimonial.name.includes(" e ");
 
-          <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-            <Avatar className={`w-12 h-12 border-2 ${isCouple ? "border-accent" : "border-primary"}`}>
-              <AvatarFallback className={`${isCouple ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"} font-bold`}>
-                {testimonial.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-slate-800 font-bold group-hover:text-primary transition-colors">
-                {testimonial.name}
-              </p>
-              <p className="text-slate-500 text-sm">
-                {testimonial.role}
-              </p>
-            </div>
-            
-            <div className="ml-auto flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} className="w-3 h-3 text-yellow-500" fill="currentColor" />
-              ))}
-            </div>
+  return (
+    <Card
+      className={`min-w-[350px] md:min-w-[400px] max-w-[400px] border border-gray-100/50 bg-white shadow-lg hover:shadow-xl transition-all duration-300 group ${index % 3 === 0 ? "border-l-4 border-l-yellow-500" : ""}`}
+    >
+      <CardContent className="p-6 space-y-4">
+        <Quote className="w-8 h-8 text-primary/20 group-hover:text-primary/40 transition-colors" />
+
+        <p className="text-slate-600 leading-relaxed italic text-lg relative z-10">
+          &ldquo;{testimonial.text}&rdquo;
+        </p>
+
+        <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+          <Avatar
+            className={`w-12 h-12 border-2 ${isCouple ? "border-accent" : "border-primary"}`}
+          >
+            <AvatarFallback
+              className={`${isCouple ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"} font-bold`}
+            >
+              {testimonial.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-slate-800 font-bold group-hover:text-primary transition-colors">
+              {testimonial.name}
+            </p>
+            <p className="text-slate-500 text-sm">{testimonial.role}</p>
           </div>
-        </CardContent>
-      </Card>
-    )
+
+          <div className="ml-auto flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star
+                key={i}
+                className="w-3 h-3 text-yellow-500"
+                fill="currentColor"
+              />
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

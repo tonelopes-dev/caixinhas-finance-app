@@ -1,16 +1,15 @@
+"use client";
 
-"use client"
-
-import { useEffect, useState } from "react"
-import { Button } from '@/components/ui/button'
-import { GradientButton } from '@/components/ui/gradient-button'
-import Link from "next/link"
-import { Logo } from "../logo"
-import { config } from "@/lib/config"
-import Image from "next/image"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
-import { ChevronRight } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { GradientButton } from "@/components/ui/gradient-button";
+import Link from "next/link";
+import { Logo } from "../logo";
+import { config } from "@/lib/config";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { ChevronRight } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const images = [
   PlaceHolderImages.find((img) => img.id === "couple-planning")?.imageUrl,
@@ -25,7 +24,7 @@ const images = [
   "/screenshots/all-boxes-view.png",
   "/screenshots/personal-dashboard.png",
   "/screenshots/savings-box-detail.png",
-]
+];
 
 function PhotoCarousel() {
   const allImages = [
@@ -45,17 +44,17 @@ function PhotoCarousel() {
     "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1520085601670-ee14aa5fa3e8?w=900&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=900&auto=format&fit=crop&q=60",
-  ]
+  ];
 
   const rowConfigs = [
     { rotation: 20, duration: 560, sizeClass: "h-24 w-20 md:h-32 md:w-24" }, // Pequeno e mais lento
     { rotation: -20, duration: 480, sizeClass: "h-36 w-28 md:h-48 md:w-36" }, // Médio
     { rotation: 20, duration: 400, sizeClass: "h-48 w-32 md:h-64 md:w-48" }, // Grande e mais rápido
-  ]
+  ];
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#f6f3f1] via-[#f6f3f1] to-transparent z-10" />
       <div className="absolute inset-x-0 top-0 flex flex-col justify-start gap-4 lg:inset-y-auto lg:justify-center">
         {rowConfigs.map(({ rotation, duration, sizeClass }, rowIndex) => (
           <div
@@ -90,14 +89,14 @@ function PhotoCarousel() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
-  const yMovement = -scrollY / 10
+  const yMovement = -scrollY / 10;
 
   return (
-    <section className="relative flex min-h-[600px] items-center pt-32 pb-20">
+    <section className="relative flex min-h-[600px] items-center pt-32 pb-20 bg-[hsl(24,22%,95%)]">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <PhotoCarousel />
       </div>
@@ -118,7 +117,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
             <div className="flex items-center gap-4">
               <h1 className="animate-fade-in-up text-balance text-4xl font-bold leading-tight text-foreground animation-delay-100 md:text-5xl lg:text-7xl">
                 Transforme seus maiores sonhos em metas reais.{" "}
-                <span className="animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
+                <span className="animate-gradient-text bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto]">
                   Para você, ou para vocês.
                 </span>
               </h1>
@@ -132,12 +131,19 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
 
             <div className="animate-fade-in-up animation-delay-300 space-y-8">
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <GradientButton asChild className="h-14 px-8 text-lg font-semibold">
-                  <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
-                    Começar a planejar <ChevronRight className="ml-2 h-5 w-5" />
+                <Button
+                  asChild
+                  className="h-16 px-10 text-xl font-bold bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow shadow-2xl shadow-[#ff6b7b]/30 hover:scale-110 transition-all border-none text-white"
+                >
+                  <a
+                    href={config.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center no-underline"
+                  >
+                    Começar a planejar <ChevronRight className="ml-2 h-6 w-6" />
                   </a>
-                </GradientButton>
-               
+                </Button>
               </div>
 
               <div className="flex items-center gap-4">
@@ -185,5 +191,5 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
         </div>
       </div>
     </section>
-  )
+  );
 }

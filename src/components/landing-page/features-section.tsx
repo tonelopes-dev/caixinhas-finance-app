@@ -1,17 +1,29 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Check, Wallet, PiggyBank, BarChart3, TrendingUp } from "lucide-react"
-import { Logo } from "../logo"
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import {
+  Check,
+  Wallet,
+  PiggyBank,
+  BarChart3,
+  TrendingUp,
+  ChevronRight,
+} from "lucide-react";
+import { Logo } from "../logo";
+import { Button } from "@/components/ui/button";
+import { config } from "@/lib/config";
 
 type FeaturesSectionProps = {
-  isVisible: { [key: string]: boolean }
-}
+  isVisible: { [key: string]: boolean };
+};
 
 export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
   return (
-    <section id="recursos" className="py-24 px-4 relative overflow-hidden bg-[#fdfcf7]">
+    <section
+      id="recursos"
+      className="py-24 px-4 relative overflow-hidden bg-[#fdfcf7]"
+    >
       {/* Background Criativo - Sophisticated Premium / Dashboard Grid */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Orbes de Brilho - Cores da Marca (Suaves) */}
@@ -20,17 +32,17 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[80px]" />
 
         {/* Grid de Dashboard Dourado Sutil */}
-        <div 
-          className="absolute inset-0 opacity-[0.08]" 
-          style={{ 
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
             backgroundImage: `
               linear-gradient(to right, #D4A15E 1px, transparent 1px),
               linear-gradient(to bottom, #D4A15E 1px, transparent 1px)
             `,
-            backgroundSize: '80px 80px'
-          }} 
+            backgroundSize: "80px 80px",
+          }}
         />
-</div>
+      </div>
 
       <div className="container mx-auto relative z-10">
         <div
@@ -72,10 +84,13 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
           >
             <div className="inline-flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-2 border border-primary/20">
               <Wallet className="w-5 h-5 text-primary" />
-              <span className="text-primary font-bold uppercase tracking-wide text-sm">O Cofre</span>
+              <span className="text-primary font-bold uppercase tracking-wide text-sm">
+                O Cofre
+              </span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
-              O seu espaço financeiro <span className="text-primary">inteligente</span>
+              O seu espaço financeiro{" "}
+              <span className="text-primary">inteligente</span>
             </h3>
             <p className="text-xl text-stone-600 leading-relaxed">
               Seu ambiente privado para organizar todas as suas contas e
@@ -143,7 +158,7 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
                 quality={100}
                 data-ai-hint="app goals"
                 className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 inline-block"
-                style={{ marginLeft: '-2px', marginTop: '-2px' }}
+                style={{ marginLeft: "-2px", marginTop: "-2px" }}
               />
             </div>
           </div>
@@ -155,8 +170,10 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="inline-flex items-center gap-2 bg-accent/10 rounded-xl px-4 py-2 border border-accent/20">
-              <Logo w={24} h={24}/>
-              <span className="text-accent font-bold uppercase tracking-wide text-sm">As Caixinhas</span>
+              <Logo w={24} h={24} />
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">
+                As Caixinhas
+              </span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
               Seus sonhos no <span className="text-accent">centro</span> de tudo
@@ -204,12 +221,13 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
               </span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
-              Veja o quadro completo com <span className="text-primary">clareza</span>
+              Veja o quadro completo com{" "}
+              <span className="text-primary">clareza</span>
             </h3>
             <p className="text-xl text-stone-600 leading-relaxed">
-              Acompanhe seu patrimônio total, quanto está disponível e quanto
-              já foi investido nos seus sonhos. Tudo em uma visualização clara
-              e encorajadora.
+              Acompanhe seu patrimônio total, quanto está disponível e quanto já
+              foi investido nos seus sonhos. Tudo em uma visualização clara e
+              encorajadora.
             </p>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
@@ -284,13 +302,15 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
           >
             <div className="inline-flex items-center gap-2 bg-accent/10 rounded-xl px-4 py-2 border border-accent/20">
               <TrendingUp className="w-5 h-5 text-accent" />
-              <span className="text-accent font-bold uppercase tracking-wide text-sm">Privacidade & União</span>
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">
+                Privacidade & União
+              </span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
               Independência e <span className="text-accent">Colaboração</span>
             </h3>
             <p className="text-xl text-stone-600 leading-relaxed">
-              Gerencie sua vida financeira solo ou convide quem você ama para
+              Gerencie sua vida financeira só ou convide quem você ama para
               colaborar em metas em comum, sem perder a sua privacidade.
             </p>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -311,7 +331,30 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             </ul>
           </div>
         </div>
+
+        {/* CTA Final da Seção */}
+        <div
+          className={`mt-24 flex justify-center transition-all duration-1000 delay-300 ${
+            isVisible["feature-4"]
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-12"
+          }`}
+        >
+          <Button
+            asChild
+            className="h-16 px-12 text-xl font-bold bg-gradient-to-r from-primary to-accent text-white shadow-2xl shadow-primary/20 hover:scale-110 transition-all border-none rounded-2xl"
+          >
+            <a
+              href={config.checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center no-underline"
+            >
+              Criar meu Cofre agora <ChevronRight className="ml-2 h-6 w-6" />
+            </a>
+          </Button>
+        </div>
       </div>
     </section>
-  )
+  );
 }

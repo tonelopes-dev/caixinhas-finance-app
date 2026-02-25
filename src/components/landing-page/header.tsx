@@ -1,19 +1,18 @@
+"use client";
 
-"use client"
-
-import { useState } from "react"
-import {  Menu, X } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { config } from "@/lib/config"
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { config } from "@/lib/config";
 
 export function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleNavClick = () => {
-    setIsMobileMenuOpen(false)
-  }
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#fdfcf7]/70 backdrop-blur-xl border-b border-stone-200/50 transition-all duration-300 shadow-sm">
@@ -39,28 +38,28 @@ export function Header() {
             className="text-foreground/70 hover:text-foreground transition-colors text-lg relative group"
           >
             Recursos
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ff6b7b] transition-all duration-300 group-hover:w-full" />
           </a>
           <a
             href="#como-funciona"
             className="text-foreground/70 hover:text-foreground transition-colors text-lg relative group"
           >
             Como Funciona
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ff6b7b] transition-all duration-300 group-hover:w-full" />
           </a>
           <a
             href="#historia"
             className="text-foreground/70 hover:text-foreground transition-colors text-lg relative group"
           >
             História
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ff6b7b] transition-all duration-300 group-hover:w-full" />
           </a>
           <a
             href="#planos"
             className="text-foreground/70 hover:text-foreground transition-colors text-lg relative group"
           >
             Planos
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ff6b7b] transition-all duration-300 group-hover:w-full" />
           </a>
         </nav>
 
@@ -71,14 +70,18 @@ export function Header() {
             className="text-foreground text-lg hover:bg-primary/80 transition-all"
             asChild
           >
-            <Link href="/login">
-            Entrar
-            </Link>
+            <Link href="/login">Entrar</Link>
           </Button>
-          <Button asChild className="bg-primary text-white hover:bg-primary/90 text-lg font-semibold hover:scale-105 transition-transform relative overflow-hidden group">
-            <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
-                <span className="relative z-10">Começar Agora</span>
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          <Button
+            asChild
+            className="bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white text-lg font-semibold hover:scale-105 transition-all relative overflow-hidden group border-none shadow-lg shadow-[#ff6b7b]/20"
+          >
+            <a
+              href={config.checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="relative z-10">Começar Agora</span>
             </a>
           </Button>
         </div>
@@ -140,14 +143,26 @@ export function Header() {
               className="text-foreground text-lg hover:bg-primary/10 transition-all w-full"
               asChild
             >
-              <Link href="/login" onClick={handleNavClick}>Entrar</Link>
+              <Link href="/login" onClick={handleNavClick}>
+                Entrar
+              </Link>
             </Button>
-            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold w-full">
-              <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={handleNavClick}>Começar Agora</a>
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white text-lg font-semibold w-full border-none shadow-lg shadow-[#ff6b7b]/20"
+            >
+              <a
+                href={config.checkoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleNavClick}
+              >
+                Começar Agora
+              </a>
             </Button>
           </div>
         </nav>
       </div>
     </header>
-  )
+  );
 }
