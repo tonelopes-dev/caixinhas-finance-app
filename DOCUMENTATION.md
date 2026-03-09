@@ -11,11 +11,11 @@
 
 ### 1.2. Slogan
 
-> “Sonhar juntos é o primeiro passo para conquistar.”
+> “Transforme seus maiores sonhos em metas reais.”
 
 ### 1.3. Público-Alvo
 
-Casais em qualquer estágio do relacionamento (namorados, noivos, casados) que buscam alinhar suas vidas financeiras, aumentar a transparência e trabalhar em equipe para alcançar objetivos comuns.
+Para você, ou para vocês. Casais em qualquer estágio do relacionamento (namorados, noivos, casados) ou indivíduos que buscam alinhar suas vidas financeiras, aumentar a transparência e trabalhar com foco em objetivos reais.
 
 ### 1.4. Benefícios e Proposta de Valor
 
@@ -105,6 +105,31 @@ A paleta de cores transmite calor, otimismo e confiança.
 - No login, um cookie `Caixinhas_USER_ID` é definido para ser lido pelo `middleware`.
 - O `middleware.ts` protege as rotas, redirecionando usuários não autenticados para `/login`.
 - O `sessionStorage` armazena o `Caixinhas_VAULT_ID`, que define o cofre ativo na sessão atual. Isso permite que o usuário navegue entre diferentes espaços de trabalho.
+
+## 5. Perguntas Frequentes & Detalhes Técnicos
+
+### 5.1. Complexidade Técnica
+
+- **IA de Análise Comportamental:** Uso de GenAI para processar centenas de transações e gerar relatórios mensais em linguagem humana, identificando padrões de gastos e oferecendo conselhos práticos.
+- **Arquitetura de Serviços:** Lógica de negócio desacoplada em `src/services` para garantir testabilidade e manutenibilidade.
+- **Gestão de Transações Complexas:** Implementação de transações recorrentes, parcelamentos de cartão de crédito e fluxos de transferência entre contas e objetivos ("Caixinhas").
+- **Protocolo de Convites & RBAC:** Sistema sofisticado de convites com controle de acesso baseado em roles para membros de Cofres.
+
+### 5.2. Autenticação & Segurança
+
+Implementada com **NextAuth.js**, suportando fluxos de credenciais e persistência segura no banco de dados via Prisma.
+
+### 5.3. Banco de Dados
+
+Utiliza **PostgreSQL** para o ambiente de produção, garantindo integridade referencial e performance. O projeto também possui automação para alternar para **SQLite** em ambientes de desenvolvimento local ou CI.
+
+### 5.4. Multi-tenant
+
+A arquitetura é centrada em **Cofres (Vaults)**. Cada usuário possui seu próprio "Tenant" pessoal e pode participar de múltiplos tenants compartilhados. O isolamento de dados é garantido por esquemas de relacionamento fortes no banco de dados (`vaultId` e `ownerId`).
+
+### 5.5. Performance
+
+Consultas ao banco otimizadas com índices estratégicos (sub-100ms). Otimização de LCP (Largest Contentful Paint) usando `Critters`. Estratégia de Cache e PWA para carregamento instantâneo. Scripts dedicados de benchmark (`benchmark-api.ts`) para auditoria contínua de latência.
 
 ---
 

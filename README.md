@@ -8,9 +8,9 @@
 ![PWA](https://img.shields.io/badge/PWA-Ready-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
 
-**Empowering couples to transform taboo financial conversations into shared dreams.**
+**Transform dreams into real goals. For you, or for you both.**
 
-[The Manifesto](./about-project.md) • [Architecture Guide](./docs/ARCHITECTURE.md) • [Performance Report](./PERFORMANCE-STATUS.md)
+[The Manifesto](./docs/about-the-app.md) • [Architecture Guide](./DOCUMENTATION.md) • [Performance Report](./PERFORMANCE-STATUS.md)
 
 </div>
 
@@ -18,7 +18,7 @@
 
 ## 🚀 Vision & Strategy
 
-**Caixinhas** is not just another finance tracker. It’s a **Collaborative Financial Operating System** designed for couples. In a world where money is often a source of friction, Caixinhas provides a neutral, transparent, and encouraging space where equity meets individual autonomy.
+**Caixinhas** is not just another finance tracker. It’s a **Collaborative Financial Operating System**. In a world where money is often a source of friction, Caixinhas provides a neutral, transparent, and encouraging space where dreams are transformed into real goals, and equity meets individual autonomy.
 
 ### The Problem
 
