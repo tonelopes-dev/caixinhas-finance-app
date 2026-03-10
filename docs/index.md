@@ -6,12 +6,13 @@
 
 ## 📖 Guide (Produto & Estratégia)
 
-| Documento                          | Descrição                                                                               |
-| ---------------------------------- | --------------------------------------------------------------------------------------- |
-| [manifesto.md](guide/manifesto.md) | Manifesto da marca, público-alvo, storytelling e proposta de valor                      |
-| [product.md](guide/product.md)     | Regras de negócio, conceitos (Cofres, Caixinhas), identidade visual e fluxos do usuário |
-| [summary.md](guide/summary.md)     | Resumo técnico-estratégico do projeto para portfólio                                    |
-| [blueprint.md](blueprint.md)       | Core features e style guidelines originais                                              |
+| Documento                                                  | Descrição                                                                               |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [manifesto.md](guide/manifesto.md)                         | Manifesto da marca, público-alvo, storytelling e proposta de valor                      |
+| [product.md](guide/product.md)                             | Regras de negócio, conceitos (Cofres, Caixinhas), identidade visual e fluxos do usuário |
+| [summary.md](guide/summary.md)                             | Resumo técnico-estratégico do projeto para portfólio                                    |
+| [blueprint.md](blueprint.md)                               | Core features e style guidelines originais                                              |
+| [LINKEDIN_PROJECT_SUMMARY.md](LINKEDIN_PROJECT_SUMMARY.md) | Resumo consolidado do projeto para posts no LinkedIn                                    |
 
 ## 🏗️ Architecture (Stack & Estrutura)
 
@@ -47,7 +48,6 @@
 | [access-control-implementation.md](access-control-implementation.md) | Implementação do controle de acesso |
 | [user-access-control.md](user-access-control.md)                     | Controle de acesso de usuários      |
 | [user-management.md](user-management.md)                             | Gerenciamento de usuários           |
-| [user-account-creation.md](user-account-creation.md)                 | Criação de contas de usuários       |
 | [user-update-guide.md](user-update-guide.md)                         | Guia de atualização de usuários     |
 
 ## 🔧 Development (Setup & Workflow)
@@ -59,7 +59,6 @@
 | [workflow-desenvolvimento.md](workflow-desenvolvimento.md)             | Workflow de desenvolvimento              |
 | [TESTING.md](TESTING.md)                                               | Guia de testes (Jest + Playwright)       |
 | [email-testing-guide.md](email-testing-guide.md)                       | Guia de testes de e-mail                 |
-| [testing-guide-old.md](testing-guide-old.md)                           | Guia de testes antigo (referência)       |
 | [dashboard-optimization-guide.md](dashboard-optimization-guide.md)     | Guia de otimização do dashboard          |
 
 ## 🗄️ Database

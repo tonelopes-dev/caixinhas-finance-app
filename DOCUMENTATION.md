@@ -87,7 +87,8 @@ A paleta de cores transmite calor, otimismo e confiança.
 - **UI Components:** ShadCN UI, Tailwind CSS
 - **Estilo:** CSS Variables para theming dinâmico.
 - **Inteligência Artificial:** Google Genkit com modelos Gemini.
-- **Backend (BaaS):** Firebase (Authentication e Firestore).
+- **Backend & Database:** Prisma ORM com banco de dados PostgreSQL (Produção) e SQLite (Dev/Test).
+- **Autenticação:** NextAuth.js para gestão segura de sessões e autenticação de usuários.
 
 ### 4.2. Estrutura do Projeto
 
@@ -96,15 +97,14 @@ A paleta de cores transmite calor, otimismo e confiança.
 - **/src/lib/**: Lógica de negócio, definições de tipo (TypeScript) e dados simulados (mock data).
 - **/src/ai/**: Fluxos e configurações do Genkit para funcionalidades de IA.
 - **/src/firebase/**: Configuração e hooks do Firebase.
-- **/docs/backend.json**: Define a estrutura de dados (schema) para o Firestore e Auth, servindo como "verdade" para a geração de código e regras de segurança.
-- **/firestore.rules**: Regras de segurança do Firestore, que são automaticamente aplicadas com base na estrutura definida.
+- **/src/lib/auth.ts**: Configuração do NextAuth.js.
+- **/prisma/schema.prisma**: Definição do esquema do banco de dados e modelos (User, Vault, Goal, Transaction, etc.).
 
 ### 4.3. Lógica de Autenticação e Sessão
 
-- A autenticação é gerenciada pelo Firebase Authentication.
-- No login, um cookie `Caixinhas_USER_ID` é definido para ser lido pelo `middleware`.
+- A autenticação é gerenciada pelo NextAuth.js.
 - O `middleware.ts` protege as rotas, redirecionando usuários não autenticados para `/login`.
-- O `sessionStorage` armazena o `Caixinhas_VAULT_ID`, que define o cofre ativo na sessão atual. Isso permite que o usuário navegue entre diferentes espaços de trabalho.
+- A sessão armazena o `vaultId` ativo, permitindo que o usuário navegue entre diferentes espaços de trabalho.
 
 ## 5. Perguntas Frequentes & Detalhes Técnicos
 
