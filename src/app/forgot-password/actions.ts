@@ -1,7 +1,7 @@
 "use server";
 
 import { AuthService } from '@/services/auth.service';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/email.service';
 import crypto from 'crypto';
 import { prisma } from '@/services/prisma';
 import bcrypt from 'bcryptjs';
@@ -142,14 +142,14 @@ export async function resetPasswordAction(token: string, newPassword: string) {
 async function sendPasswordResetEmail(email: string, name: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:9002'}/reset-password?token=${token}`;
   
-  const subject = 'Recuperação de Senha - Caixinhas Finance 🔐';
+  const subject = 'Recuperação de Senha - Caixinhas App 🔐';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Recuperação de Senha 🔐</h2>
       
       <p>Olá <strong>${name}</strong>!</p>
       
-      <p>Recebemos uma solicitação para redefinir a senha da sua conta no Caixinhas Finance.</p>
+      <p>Recebemos uma solicitação para redefinir a senha da sua conta no Caixinhas App.</p>
       
       <p>Clique no botão abaixo para criar uma nova senha:</p>
       
@@ -170,7 +170,7 @@ async function sendPasswordResetEmail(email: string, name: string, token: string
       
       <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
       <p style="font-size: 12px; color: #6b7280;">
-        Este email foi enviado automaticamente pelo sistema Caixinhas Finance. 
+        Este email foi enviado automaticamente pelo sistema Caixinhas App. 
         Não responda este email.
       </p>
     </div>
@@ -183,7 +183,7 @@ async function sendPasswordResetEmail(email: string, name: string, token: string
  * Envia email de confirmação de alteração de senha
  */
 async function sendPasswordChangedEmail(email: string, name: string) {
-  const subject = 'Senha Alterada - Caixinhas Finance ✅';
+  const subject = 'Senha Alterada - Caixinhas App ✅';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #16a34a;">Senha Alterada com Sucesso ✅</h2>

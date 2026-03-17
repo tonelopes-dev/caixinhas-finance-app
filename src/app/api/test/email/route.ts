@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/email.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,12 +12,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subject = 'Teste de Email - Caixinhas Finance';
+    const subject = 'Teste de Email - Caixinhas App';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Teste de Email! ✅</h2>
         
-        <p>Este é um email de teste do sistema Caixinhas Finance.</p>
+        <p>Este é um email de teste do sistema Caixinhas App.</p>
         
         <p>Se você recebeu este email, significa que:</p>
         <ul>

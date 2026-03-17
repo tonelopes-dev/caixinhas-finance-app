@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/services/prisma';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/email.service';
 import bcrypt from 'bcryptjs';
 
 // Tipos para o webhook da Kiwify
@@ -329,10 +329,10 @@ async function handleSubscriptionLate(data: WebhookData) {
 
 // Funções de envio de email
 async function sendWelcomeEmail(email: string, name: string, tempPassword: string) {
-  const subject = 'Bem-vindo ao Caixinhas Finance! 🎉';
+  const subject = 'Bem-vindo ao Caixinhas App! 🎉';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #2563eb;">Bem-vindo ao Caixinhas Finance! 🎉</h2>
+      <h2 style="color: #2563eb;">Bem-vindo ao Caixinhas App! 🎉</h2>
       
       <p>Olá <strong>${name}</strong>!</p>
       
@@ -350,22 +350,22 @@ async function sendWelcomeEmail(email: string, name: string, tempPassword: strin
         Acessar Plataforma
       </a>
       
-      <p>Obrigado por escolher o Caixinhas Finance!</p>
+      <p>Obrigado por escolher o Caixinhas App!</p>
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendRenewalEmail(email: string, name: string) {
-  const subject = 'Assinatura Renovada - Caixinhas Finance ✅';
+  const subject = 'Assinatura Renovada - Caixinhas App ✅';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #16a34a;">Assinatura Renovada! ✅</h2>
       
       <p>Olá <strong>${name}</strong>!</p>
       
-      <p>Sua assinatura do Caixinhas Finance foi renovada com sucesso!</p>
+      <p>Sua assinatura do Caixinhas App foi renovada com sucesso!</p>
       
       <p>Você pode continuar aproveitando todas as funcionalidades da plataforma.</p>
       
@@ -376,11 +376,11 @@ async function sendRenewalEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendRejectionEmail(email: string, name: string) {
-  const subject = 'Problema com o pagamento - Caixinhas Finance ⚠️';
+  const subject = 'Problema com o pagamento - Caixinhas App ⚠️';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #dc2626;">Problema com o pagamento ⚠️</h2>
@@ -393,11 +393,11 @@ async function sendRejectionEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendCancellationEmail(email: string, name: string) {
-  const subject = 'Assinatura Cancelada - Caixinhas Finance 😔';
+  const subject = 'Assinatura Cancelada - Caixinhas App 😔';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #dc2626;">Assinatura Cancelada 😔</h2>
@@ -410,11 +410,11 @@ async function sendCancellationEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendPaymentFailedEmail(email: string, name: string) {
-  const subject = 'Falha no pagamento - Caixinhas Finance ⚠️';
+  const subject = 'Falha no pagamento - Caixinhas App ⚠️';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #dc2626;">Falha no pagamento ⚠️</h2>
@@ -427,11 +427,11 @@ async function sendPaymentFailedEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendRefundEmail(email: string, name: string) {
-  const subject = 'Reembolso Processado - Caixinhas Finance 💰';
+  const subject = 'Reembolso Processado - Caixinhas App 💰';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #059669;">Reembolso Processado 💰</h2>
@@ -446,11 +446,11 @@ async function sendRefundEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendChargebackEmail(email: string, name: string) {
-  const subject = 'Contestação de Pagamento - Caixinhas Finance ⚠️';
+  const subject = 'Contestação de Pagamento - Caixinhas App ⚠️';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #dc2626;">Contestação de Pagamento ⚠️</h2>
@@ -465,11 +465,11 @@ async function sendChargebackEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 async function sendSubscriptionLateEmail(email: string, name: string) {
-  const subject = 'Pagamento em Atraso - Caixinhas Finance ⏰';
+  const subject = 'Pagamento em Atraso - Caixinhas App ⏰';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #f59e0b;">Pagamento em Atraso ⏰</h2>
@@ -487,7 +487,7 @@ async function sendSubscriptionLateEmail(email: string, name: string) {
     </div>
   `;
   
-  await sendEmail(email, subject, html);
+  await sendEmail({ to: email, subject, html });
 }
 
 // Handler principal da API

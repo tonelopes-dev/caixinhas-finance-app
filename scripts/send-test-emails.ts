@@ -2,7 +2,7 @@
 import { config } from "dotenv";
 config(); // Carrega as variáveis de ambiente do arquivo .env
 
-import { sendEmail } from "../src/lib/sendgrid";
+import { sendEmail } from "../src/lib/email.service";
 import { welcomeEmail } from "../src/app/_templates/emails/welcome-email";
 import { passwordResetEmail } from "../src/app/_templates/emails/password-reset-template";
 import { inviteEmail } from "../src/app/_templates/emails/invite-template";
@@ -72,7 +72,12 @@ Qualquer dúvida, é só nos chamar!
 Atenciosamente,
 Equipe Caixinhas App`;
 
-    await sendEmail(DEV_EMAIL, "Bem-vindo(a) ao Caixinhas App! (Teste)", htmlContent, textContent);
+    await sendEmail({
+      to: DEV_EMAIL,
+      subject: "Bem-vindo(a) ao Caixinhas App! (Teste)",
+      html: htmlContent,
+      text: textContent
+    });
     console.log("E-mail de Boas-Vindas enviado com sucesso.");
   } catch (error) {
     console.error("Falha ao enviar e-mail de Boas-Vindas:", error);
@@ -95,7 +100,12 @@ Se você não solicitou uma redefinição de senha, por favor, ignore este e-mai
 Atenciosamente,
 Equipe Caixinhas App`;
 
-    await sendEmail(DEV_EMAIL, "Redefinição de Senha do Caixinhas App (Teste)", htmlContent, textContent);
+    await sendEmail({
+      to: DEV_EMAIL,
+      subject: "Redefinição de Senha do Caixinhas App (Teste)",
+      html: htmlContent,
+      text: textContent
+    });
     console.log("E-mail de Redefinição de Senha enviado com sucesso.");
   } catch (error) {
     console.error("Falha ao enviar e-mail de Redefinição de Senha:", error);
@@ -121,7 +131,12 @@ Esperamos vê-lo(a) em breve na vault!
 Atenciosamente,
 Equipe Caixinhas App`;
 
-    await sendEmail(DEV_EMAIL, "Você foi convidado(a) para uma Vault no Caixinhas App! (Teste)", htmlContent, textContent);
+    await sendEmail({
+      to: DEV_EMAIL,
+      subject: "Você foi convidado(a) para uma Vault no Caixinhas App! (Teste)",
+      html: htmlContent,
+      text: textContent
+    });
     console.log("E-mail de Convite para Vault enviado com sucesso.");
   } catch (error) {
     console.error("Falha ao enviar e-mail de Convite para Vault:", error);
@@ -158,7 +173,12 @@ Agradecemos por fazer parte da comunidade Caixinhas App!
 Atenciosamente,
 Equipe Caixinhas App`;
 
-      await sendEmail(DEV_EMAIL, `Assinatura ${subscriptionPlan} Ativada! (Teste)`, htmlContent, textContent);
+      await sendEmail({
+        to: DEV_EMAIL,
+        subject: `Assinatura ${subscriptionPlan} Ativada! (Teste)`,
+        html: htmlContent,
+        text: textContent
+      });
       console.log(`E-mail de ${subscriptionPlan} enviado com sucesso. Válido até: ${endDate}`);
       
       // Pequena pausa entre os emails
@@ -198,7 +218,12 @@ Continue assim! Seu futuro financeiro está sendo construído com cada conquista
 Com muito orgulho,
 Equipe Caixinhas`;
 
-    await sendEmail(DEV_EMAIL, "🎉 Parabéns! Meta Alcançada - Caixinhas (Teste)", htmlContent, textContent);
+    await sendEmail({
+      to: DEV_EMAIL,
+      subject: "🎉 Parabéns! Meta Alcançada - Caixinhas (Teste)",
+      html: htmlContent,
+      text: textContent
+    });
     console.log("E-mail de Celebração de Meta enviado com sucesso.");
     
     // Pequena pausa
@@ -236,7 +261,12 @@ Ver Meu Progresso: https://caixinhas.app/dashboard
 Celebrando sua conquista,
 Equipe Caixinhas`;
 
-    await sendEmail(DEV_EMAIL, "✨ Marco Especial Alcançado - Caixinhas (Teste)", htmlContent, textContent);
+    await sendEmail({
+      to: DEV_EMAIL,
+      subject: "✨ Marco Especial Alcançado - Caixinhas (Teste)",
+      html: htmlContent,
+      text: textContent
+    });
     console.log("E-mail de Marco Especial enviado com sucesso.");
     
   } catch (error) {

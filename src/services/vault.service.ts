@@ -375,7 +375,7 @@ export class VaultService {
         
         // Enviar e-mail de convite
         try {
-            const { sendEmail } = await import('@/lib/sendgrid');
+            const { sendEmail } = await import('@/lib/email.service');
             const { inviteEmail } = await import('@/app/_templates/emails/invite-template');
             
             // Criar link de convite - se usuário não existir, direciona para registro
@@ -527,6 +527,7 @@ export class VaultService {
           sender: {
             select: {
               name: true,
+              avatarUrl: true,
             },
           },
           vault: {
@@ -665,6 +666,7 @@ export class VaultService {
           sender: {
             select: {
               name: true,
+              avatarUrl: true,
             },
           },
           vault: {
@@ -755,6 +757,7 @@ export class VaultService {
           sender: {
             select: {
               name: true,
+              avatarUrl: true,
             },
           },
           receiver: {

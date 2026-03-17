@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import sgMail from '@sendgrid/mail';
+import { sendEmail as coreSendEmail } from '@/lib/email.service';
 
 const SendEmailInputSchema = z.object({
   to: z.string().email().describe('The recipient email address.'),
@@ -28,31 +28,22 @@ const sendEmailFlow = ai.defineFlow(
     outputSchema: z.object({ success: z.boolean(), error: z.string().optional() }),
   },
   async (input) => {
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error('SENDGRID_API_KEY is not set.');
-      return { success: false, error: 'SendGrid API key is not configured.' };
-    }
-
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-    const msg = {
-      to: input.to,
-      // IMPORTANT: This 'from' email must be a verified sender in your SendGrid account.
-      from: 'suporte@caixinhas.app', 
-      subject: input.subject,
-      html: input.body,
-    };
-
     try {
-      await sgMail.send(msg);
-      console.log(`Email sent to ${input.to}`);
-      return { success: true };
-    } catch (error: any) {
-      console.error('Error sending email with SendGrid:', error);
-      if (error.response) {
-        console.error(error.response.body);
+      const success = await coreSendEmail({
+        to: input.to,
+        subject: input.subject,
+        html: input.body,
+      });
+      
+      if (success) {
+        console.log(`Email sent to ${input.to} via Resend flow`);
+        return { success: true };
+      } else {
+        return { success: false, error: 'Failed to send email.' };
       }
-      return { success: false, error: 'Failed to send email.' };
+    } catch (error: any) {
+      console.error('Error sending email with Resend flow:', error);
+      return { success: false, error: error.message || 'Failed to send email.' };
     }
   }
 );

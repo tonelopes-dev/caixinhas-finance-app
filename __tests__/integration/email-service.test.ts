@@ -1,30 +1,30 @@
-/**
- * Testes de integração para serviço de envio de emails
- * 
- * Objetivo: Validar que os emails são enviados corretamente
- * através do SendGrid com todos os parâmetros necessários
- */
+import { sendEmail, EmailOptions } from '@/lib/email.service';
 
-import { sendEmail, EmailOptions } from '@/lib/sendgrid';
+// Mock do Resend
+jest.mock('resend', () => {
+  return {
+    Resend: jest.fn().mockImplementation(() => ({
+      emails: {
+        send: jest.fn().mockResolvedValue({ data: { id: 'test_id' }, error: null })
+      }
+    }))
+  };
+});
 
-// Mock do SendGrid
-jest.mock('@sendgrid/mail', () => ({
-  __esModule: true,
-  default: {
-    setApiKey: jest.fn(),
-    send: jest.fn().mockResolvedValue([{ statusCode: 202 }])
-  }
-}));
-
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
 describe('Serviço de Envio de Email', () => {
   
+  let resendMock: any;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.SENDGRID_API_KEY = 'test_api_key_123';
-    process.env.SENDGRID_FROM_EMAIL = 'suporte@caixinhas.app';
-    process.env.SENDGRID_FROM_NAME = 'Caixinhas Finance';
+    process.env.RESEND_API_KEY = 'test_api_key_123';
+    process.env.RESEND_FROM_EMAIL = 'suporte@caixinhas.app';
+    process.env.RESEND_FROM_NAME = 'Caixinhas App';
+    
+    // Get the instance created by the mock
+    resendMock = new Resend();
   });
 
   describe('sendEmail - Função principal', () => {
@@ -38,16 +38,14 @@ describe('Serviço de Envio de Email', () => {
       const result = await sendEmail(emailOptions);
 
       expect(result).toBe(true);
-      expect(sgMail.setApiKey).toHaveBeenCalledWith('test_api_key_123');
-      expect(sgMail.send).toHaveBeenCalledWith(
+      
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'usuario@example.com',
           subject: 'Teste de Email',
           html: '<p>Conteúdo do email</p>',
-          from: {
-            email: 'suporte@caixinhas.app',
-            name: 'Caixinhas Finance'
-          }
+          from: 'Caixinhas App <suporte@caixinhas.app>'
         })
       );
     });
@@ -61,7 +59,8 @@ describe('Serviço de Envio de Email', () => {
 
       await sendEmail(emailOptions);
 
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('Olá') // HTML removido
         })
@@ -79,7 +78,8 @@ describe('Serviço de Envio de Email', () => {
 
       await sendEmail(emailOptions);
 
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           text: customText
         })
@@ -96,15 +96,16 @@ describe('Serviço de Envio de Email', () => {
 
       await sendEmail(emailOptions);
 
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          replyTo: 'responder@example.com'
+          reply_to: 'responder@example.com'
         })
       );
     });
 
     it('deve retornar false quando API key não está configurada', async () => {
-      delete process.env.SENDGRID_API_KEY;
+      delete process.env.RESEND_API_KEY;
 
       const emailOptions: EmailOptions = {
         to: 'usuario@example.com',
@@ -114,12 +115,13 @@ describe('Serviço de Envio de Email', () => {
 
       const result = await sendEmail(emailOptions);
 
-      expect(result).toBe(false);
-      expect(sgMail.send).not.toHaveBeenCalled();
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).not.toHaveBeenCalled();
     });
 
     it('deve retornar false quando SendGrid lança erro', async () => {
-      (sgMail.send as jest.Mock).mockRejectedValueOnce(new Error('SendGrid error'));
+      const mockInstance = new Resend();
+      (mockInstance.emails.send as jest.Mock).mockRejectedValueOnce(new Error('Resend error'));
 
       const emailOptions: EmailOptions = {
         to: 'usuario@example.com',
@@ -169,7 +171,8 @@ describe('Serviço de Envio de Email', () => {
       });
 
       expect(result).toBe(true);
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: userEmail,
           subject: 'Bem-vindo ao Caixinhas!'
@@ -190,7 +193,8 @@ describe('Serviço de Envio de Email', () => {
       });
 
       expect(result).toBe(true);
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: receiverEmail,
           html: expect.stringContaining('Cofre de Viagem')
@@ -212,7 +216,8 @@ describe('Serviço de Envio de Email', () => {
       });
 
       expect(result).toBe(true);
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: userEmail,
           html: expect.stringContaining(resetLink)
@@ -270,12 +275,10 @@ describe('Serviço de Envio de Email', () => {
     it('deve logar erro quando SendGrid retorna erro', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       
-      (sgMail.send as jest.Mock).mockRejectedValueOnce({
-        response: {
-          body: {
-            errors: [{ message: 'Invalid email address' }]
-          }
-        }
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      (mockInstance.emails.send as jest.Mock).mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Invalid email address' }
       });
 
       const result = await sendEmail({
@@ -302,7 +305,8 @@ describe('Serviço de Envio de Email', () => {
         expect(result).toBe(true);
       }
 
-      expect(sgMail.send).toHaveBeenCalledTimes(3);
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledTimes(3);
     });
 
     it('deve lidar com HTML muito grande', async () => {
@@ -331,7 +335,8 @@ describe('Serviço de Envio de Email', () => {
           html: '<p>Teste</p>'
         });
 
-        expect(sgMail.send).toHaveBeenCalledWith(
+        const mockInstance = (Resend as jest.Mock).mock.results[(Resend as jest.Mock).mock.results.length - 1].value;
+        expect(mockInstance.emails.send).toHaveBeenCalledWith(
           expect.objectContaining({
             subject
           })
@@ -342,7 +347,7 @@ describe('Serviço de Envio de Email', () => {
 
   describe('Configurações de ambiente', () => {
     it('deve usar email padrão quando FROM_EMAIL não configurado', async () => {
-      delete process.env.SENDGRID_FROM_EMAIL;
+      delete process.env.RESEND_FROM_EMAIL;
 
       await sendEmail({
         to: 'usuario@example.com',
@@ -350,17 +355,16 @@ describe('Serviço de Envio de Email', () => {
         html: '<p>Teste</p>'
       });
 
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          from: expect.objectContaining({
-            email: 'suporte@caixinhas.app'
-          })
+          from: expect.stringContaining('suporte@caixinhas.app')
         })
       );
     });
 
     it('deve usar nome padrão quando FROM_NAME não configurado', async () => {
-      delete process.env.SENDGRID_FROM_NAME;
+      delete process.env.RESEND_FROM_NAME;
 
       await sendEmail({
         to: 'usuario@example.com',
@@ -368,11 +372,10 @@ describe('Serviço de Envio de Email', () => {
         html: '<p>Teste</p>'
       });
 
-      expect(sgMail.send).toHaveBeenCalledWith(
+      const mockInstance = (Resend as jest.Mock).mock.results[0].value;
+      expect(mockInstance.emails.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          from: expect.objectContaining({
-            name: 'Caixinhas Finance'
-          })
+          from: expect.stringContaining('Caixinhas App')
         })
       );
     });

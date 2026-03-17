@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/email.service';
 
 export async function POST(request: Request) {
   try {

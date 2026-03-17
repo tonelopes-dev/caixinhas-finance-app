@@ -15,7 +15,7 @@ config();
 
 import fs from 'fs';
 import path from 'path';
-import { sendEmail } from '../src/lib/sendgrid';
+import { sendEmail } from '../src/lib/email.service';
 import { inviteEmail } from '../src/app/_templates/emails/invite-template';
 import { passwordResetEmail } from '../src/app/_templates/emails/password-reset-template';
 import { welcomeEmail } from '../src/app/_templates/emails/welcome-email';
