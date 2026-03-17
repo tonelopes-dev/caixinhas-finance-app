@@ -128,9 +128,7 @@ export function DashboardClient({
                   )}
                 </div>
                 <p className="text-muted-foreground">
-                  {isPersonalWorkspace
-                    ? 'Seu centro de comando financeiro pessoal.'
-                    : '"Sonhar juntos é o primeiro passo para conquistar."'}
+                   'Seu centro de comando financeiro pessoal.'
                 </p>
               </div>
             </AnimatedDiv>
