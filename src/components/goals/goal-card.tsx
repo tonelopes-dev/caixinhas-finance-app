@@ -74,149 +74,97 @@ export function GoalCard({
       key={goal.id}
       data-goal-id={goal.id}
       className={cn(
-        "group flex h-full min-h-[280px] flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer hover:border-primary/30",
-        progress >= 100 ? 'ring-2 ring-green-200 dark:ring-green-800 bg-green-50/50 dark:bg-green-900/10' : '',
-        goal.isFeatured ? 'ring-2 ring-amber-200 dark:ring-amber-800 bg-amber-50/50 dark:bg-amber-900/10' : ''
+        "group relative flex flex-col gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl cursor-pointer",
+        goal.isFeatured && "border-[#ff6b7b]/10 bg-white/60"
       )}
     >
-      <CardHeader className="flex-row items-start gap-3 p-4 pb-2">
-        <Link
-          href={`/goals/${goal.id}`}
-          className="flex-1 flex items-start gap-3 group-hover:scale-[1.01] transition-transform duration-200 min-w-0"
-        >
-          <span className="text-4xl transition-transform duration-300 group-hover:scale-110 flex-shrink-0">{goal.emoji}</span>
-          <div className="flex-1 min-w-0 space-y-1">
-            <CardTitle className="text-base leading-tight line-clamp-2">{goal.name}</CardTitle>
-            <p className="text-xs font-medium text-amber-800 dark:text-amber-600 truncate">
-              {isPersonal ? 'Caixinha Pessoal' : `Cofre: ${ownerName}`}
-            </p>
-            <CardDescription className="text-xs space-y-0.5">
-              <div className="font-medium">
-                <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} />
-              </div>
-              <div className="text-muted-foreground">de {formatCurrency(goal.targetAmount)}</div>
-            </CardDescription>
-          </div>
-        </Link>
-        <div className="flex-shrink-0">
-          {goal.visibility === 'private' ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex h-8 w-8 items-center justify-center text-muted-foreground/50 cursor-help">
-                    <Lock className="h-4 w-4" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Caixinhas privadas não aparecem nos destaques da página inicial.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground transition-colors duration-200 hover:text-[#ff6b7b] hover:bg-red-50 dark:hover:bg-red-950/20"
-                    onClick={() => onToggleFeatured(goal.id)}
-                  >
-                    <Heart
-                      className={cn(
-                        'h-4 w-4 transition-all duration-200',
-                        goal.isFeatured && 'fill-[#ff6b7b] text-[#ff6b7b]'
-                      )}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {goal.isFeatured ? 'Remover dos favoritos' : 'Favoritar no painel'}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+      <div className="flex items-center gap-5">
+        <div className="text-5xl bg-white p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
+          {goal.emoji}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 p-4 pt-2">
-        <Link href={`/goals/${goal.id}`} className="block space-y-3">
-          <div className="relative">
-            <Progress value={progress} className="h-2 transition-all duration-700 ease-out" />
-            {progress >= 100 && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Link 
+                href={`/goals/${goal.id}`}
+                className="font-black text-xl truncate tracking-tight text-[#2D241E] hover:text-[#ff6b7b] transition-colors"
+              >
+                {goal.name}
+              </Link>
+              {goal.isFeatured && <Heart className="h-4 w-4 text-[#ff6b7b] fill-[#ff6b7b] shrink-0" />}
+            </div>
+            <p className="text-base font-black text-[#ff6b7b]">
+              <AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%
+            </p>
+          </div>
+          <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic">
+            <AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de {formatCurrency(goal.targetAmount)}
+          </p>
+        </div>
+        
+        <div className="flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 text-muted-foreground/30 transition-all duration-300 rounded-full",
+                goal.isFeatured ? "text-[#ff6b7b] bg-[#ff6b7b]/5" : "hover:text-[#ff6b7b] hover:bg-[#ff6b7b]/5"
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleFeatured(goal.id);
+              }}
+            >
+              <Heart className={cn("h-5 w-5", goal.isFeatured && "fill-[#ff6b7b]")} />
+            </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="relative h-4 w-full bg-[#2D241E]/5 rounded-full overflow-hidden">
+          <div 
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#ff6b7b] to-[#fa8292] rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${Math.min(progress, 100)}%` }}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MemberAvatars 
+              members={(goal.participants?.map((p: any) => ({
+                name: p.user?.name || p.name || 'Usuário',
+                avatarUrl: p.user?.avatarUrl || p.avatarUrl
+              })) || []) as any} 
+              size="md" 
+              limit={3} 
+            />
+            {goal.participants && goal.participants.length > 0 && (
+              <span className="text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[2px]">Partic.</span>
             )}
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              {goal.visibility === 'shared' ? (
-                <Users className="h-3 w-3" />
-              ) : (
-                <Lock className="h-3 w-3" />
-              )}
-              <span>
-                {goal.visibility === 'shared' ? 'Compartilhada' : 'Privada'}
-              </span>
-            </div>
-            <p className="font-bold text-primary">
-              <AnimatedCounter
-                value={progress}
-                formatter={(v) => Math.round(v).toString()}
-              />%
-            </p>
-          </div>
           
-          <div className="text-center pt-1">
-            <p className="text-xs text-muted-foreground/70 flex items-center justify-center gap-1">
-              <span>Clique no card para ver detalhes</span>
-              <ArrowRight className="h-3 w-3" />
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest">
+              {goal.visibility === 'shared' ? <Users className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+              <span>{goal.visibility === 'shared' ? 'Pública' : 'Privada'}</span>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full border border-[#2D241E]/5 bg-white text-[#2D241E]/40 hover:text-primary hover:border-primary/20 transition-all"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onGoToWorkspace(isPersonal ? userId : (vaultId || ''));
+              }}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
-        </Link>
-      </CardContent>
-      <CardFooter className="flex items-center justify-between gap-2 p-4 pt-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <MemberAvatars 
-            members={goal.participants?.map((p: any) => ({
-              name: p.user?.name || p.name || 'Usuário',
-              avatarUrl: p.user?.avatarUrl || p.avatarUrl
-            })) as any} 
-            size="sm" 
-            limit={3} 
-            borderColor="border-card"
-          />
-          <span className="text-xs text-muted-foreground truncate">
-            {goal.participants && goal.participants.length > 1
-              ? (
-                  <>
-                    <span>{goal.participants.length}</span>
-                    <span className="hidden sm:inline"> participantes</span>
-                  </>
-                )
-              : 'Só você'}
-          </span>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="transition-all duration-300 hover:scale-105 active:scale-95 flex-shrink-0 px-2 sm:px-3"
-                onClick={() => onGoToWorkspace(isPersonal ? userId : (ownerVault?.id || vaultId || ''))}
-                disabled={!isPersonal && !ownerVault}
-              >
-                <span className="text-xs truncate max-w-[80px] sm:max-w-none">{ownerName}</span>
-                <ChevronsRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Ir para o {isPersonal ? 'espaço pessoal' : `cofre ${ownerName}`}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </CardFooter>
+      </div>
     </Card>
   );
 }

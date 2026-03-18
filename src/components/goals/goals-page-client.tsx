@@ -124,60 +124,46 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
       
       <AnimatedDiv>
         {goals.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center text-muted-foreground">
-                <p className="mb-6">Parece que algo correu mal ou ainda não foram criadas metas.</p>
-                <Button 
-                  size="lg" 
-                  className="transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] group shadow-lg"
-                  asChild
-                >
-                  <Link href="/goals/new">
-                    <PlusCircle className="mr-2 h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
-                    Criar Primeira Caixinha
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-24 px-4 bg-white/40 backdrop-blur-sm rounded-[40px] border border-white/50 shadow-xl text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+              <PlusCircle className="w-10 h-10 text-primary opacity-40" />
+            </div>
+            <h3 className="font-headline text-3xl font-bold text-[#2D241E] mb-2">Sem metas ainda?</h3>
+            <p className="text-muted-foreground text-lg mb-8 max-w-md">
+              Não deixe seus sonhos apenas no papel. Comece a poupar agora mesmo criando sua primeira caixinha!
+            </p>
+            <Link href="/goals/new">
+              <Button 
+                className="h-14 px-10 rounded-[20px] font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-base uppercase tracking-widest"
+              >
+                <PlusCircle className="mr-2 h-6 w-6" />
+                Criar Primeira Caixinha
+              </Button>
+            </Link>
+          </div>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">
-                Todas as Suas Caixinhas
-              </CardTitle>
-              <CardDescription>
-                Acompanhe, gerencie e favorite seus sonhos. As caixinhas favoritadas com um coração aparecerão em destaque no seu painel.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AnimatedDiv transition={{ delay: 0.1 }}>
-                <GoalList
-                  goals={goals as any}
-                  userVaults={vaults as any}
-                  userId={userId}
-                  onToggleFeatured={toggleFeatured}
-                  onGoToWorkspace={handleGoToWorkspace}
-                />
-              </AnimatedDiv>
-            </CardContent>
-            <CardFooter className="border-t pt-6">
-              <AnimatedDiv transition={{ delay: 0.2 }}>
+          <div className="space-y-12">
+            <AnimatedDiv transition={{ delay: 0.1 }}>
+              <GoalList
+                goals={goals as any}
+                userVaults={vaults as any}
+                userId={userId}
+                onToggleFeatured={toggleFeatured}
+                onGoToWorkspace={handleGoToWorkspace}
+              />
+            </AnimatedDiv>
+            
+            <AnimatedDiv transition={{ delay: 0.2 }} className="flex justify-center">
+              <Link href="/goals/new" className="w-full max-w-md">
                 <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="w-full transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-[1.02] active:scale-[0.98] group" 
-                  asChild
+                  className="w-full h-14 rounded-[20px] font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-base uppercase tracking-widest"
                 >
-                  <Link href="/goals/new">
-                    <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
-                    Criar Nova Caixinha
-                  </Link>
+                  <PlusCircle className="mr-2 h-6 w-6" />
+                  Criar Nova Caixinha
                 </Button>
-              </AnimatedDiv>
-            </CardFooter>
-          </Card>
+              </Link>
+            </AnimatedDiv>
+          </div>
         )}
       </AnimatedDiv>
     </>

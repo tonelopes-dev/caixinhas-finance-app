@@ -467,9 +467,9 @@
 .gradient-button {
   position: relative;
   background: linear-gradient(135deg, 
-    hsl(var(--primary)) 0%, 
-    hsl(var(--accent)) 50%, 
-    hsl(var(--primary)) 100%) !important;
+    #ff6b7b 0%, 
+    #fa8292 50%, 
+    #ff6b7b 100%) !important;
   background-size: 200% 200% !important;
   animation: gradientShift 3s ease infinite;
   border: 1px solid transparent !important;
@@ -479,13 +479,13 @@
 
 .gradient-button:hover {
   animation-duration: 1s !important;
-  box-shadow: 0 8px 25px 0 hsla(var(--primary), 0.6) !important;
+  box-shadow: 0 8px 25px 0 rgba(255, 107, 123, 0.6) !important;
   transform: translateY(-3px) !important;
 }
 
 .gradient-button:active {
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 15px 0 hsla(var(--primary), 0.4) !important;
+  box-shadow: 0 4px 15px 0 rgba(255, 107, 123, 0.4) !important;
 }
 
 .gradient-button-variant {
@@ -815,7 +815,7 @@
 /* Espaçamento para navegação flutuante mobile */
 @media (max-width: 640px) {
   .mobile-nav-padding {
-    padding-bottom: 100px;
+    padding-bottom: 120px;
   }
   
   /* Evitar sobreposição do floating nav */

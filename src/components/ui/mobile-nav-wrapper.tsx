@@ -7,5 +7,5 @@ interface MobileNavWrapperProps {
 }
 
 export function MobileNavWrapper({ children }: MobileNavWrapperProps) {
-  return <div>{children}</div>;
+  return <div className="mobile-nav-padding">{children}</div>;
 }
