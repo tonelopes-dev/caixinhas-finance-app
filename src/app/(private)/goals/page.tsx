@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { BackToDashboard } from '@/components/ui/back-to-dashboard';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
 import { getGoalsPageData } from './actions';
@@ -32,7 +32,7 @@ export default async function GoalsPage() {
       
       <div className="relative z-10 flex flex-1 flex-col px-4 md:px-8 pt-24 pb-32">
         <div className="mx-auto w-full max-w-5xl">
-          <BackToDashboard className="mb-6 opacity-80 hover:opacity-100 transition-opacity" />
+          <StandardBackButton href="/dashboard" label="Voltar para o Painel" className="mb-6 opacity-80 hover:opacity-100 transition-opacity" />
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div className="space-y-2">
@@ -57,11 +57,9 @@ export default async function GoalsPage() {
               ...vault,
               imageUrl: vault.imageUrl || '',
               members: vault.members.map(member => ({
-                id: member.user.id,
-                name: member.user.name,
-                email: member.user.email,
+                ...member.user,
                 avatarUrl: member.user.avatarUrl || ''
-              }))
+              } as any))
             }))}
             userId={session.user.id} 
           />

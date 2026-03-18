@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '@/hooks/use-toast';
 import { createGoalAction, getUserVaultsAction, getCurrentVaultContextAction } from '@/app/(private)/goals/actions';
 import { cn } from '@/lib/utils';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -148,13 +149,7 @@ export default function NewGoalPage() {
             animate={{ opacity: 1, x: 0 }}
             className="mb-8 flex items-center justify-between"
           >
-            <Link 
-              href="/goals" 
-              className="group flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm hover:bg-white transition-all text-[#2D241E]/50 hover:text-[#2D241E] font-black uppercase tracking-widest text-[10px]"
-            >
-              <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-              Voltar
-            </Link>
+            <StandardBackButton href="/goals" label="Voltar" className="mb-0" />
             
             <div className="text-right">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b7b]">Novo Objetivo</p>

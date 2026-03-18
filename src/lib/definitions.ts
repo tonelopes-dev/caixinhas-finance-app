@@ -94,8 +94,8 @@ export type User = {
   email: string;
   // Corrigido: avatarUrl pode ser nulo
   avatarUrl: string | null;
-  workspaceImageUrl: string | null;
-  subscriptionStatus: 'active' | 'inactive' | 'trial';
+  workspaceImageUrl?: string | null;
+  subscriptionStatus?: 'active' | 'inactive' | 'trial';
 };
 
 export type Partner = {

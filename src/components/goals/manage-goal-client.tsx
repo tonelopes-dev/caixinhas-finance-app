@@ -36,6 +36,7 @@ import { RemoveParticipantDialog } from '@/components/goals/remove-participant-d
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
 import type { Goal, Vault, User } from '@/lib/definitions';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { motion } from 'framer-motion';
 
 // O tipo Goal agora inclui os campos userId e vaultId globalmente no definitions.ts
@@ -175,12 +176,11 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults, 
             animate={{ opacity: 1, x: 0 }}
             className="mb-8 flex items-center justify-between"
           >
-            <Button asChild variant="ghost" className="group rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm hover:bg-white transition-all text-[#2D241E]/50 hover:text-[#2D241E] font-black uppercase tracking-widest text-[10px]">
-              <Link href={`/goals/${goal.id}`}>
-                <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-                Voltar para Caixinha
-              </Link>
-            </Button>
+            <StandardBackButton 
+              href={`/goals/${goal.id}`} 
+              label="Voltar para a Caixinha" 
+              className="mb-0" 
+            />
 
             <div className="text-right">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b7b]">Configurações</p>

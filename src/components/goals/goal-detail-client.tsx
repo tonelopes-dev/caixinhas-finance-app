@@ -24,6 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 // Importações consolidadas de definições globais
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
@@ -35,8 +36,8 @@ function formatCurrency(value: number) {
   });
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
+function formatDate(date: string | Date) {
+  return new Date(date).toLocaleDateString('pt-BR', {
     timeZone: 'UTC',
     day: '2-digit',
     month: 'short',
@@ -118,12 +119,7 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
       <div className="relative z-10 w-full max-w-4xl">
         {/* Navigation & Actions Header */}
         <div className="mb-12 flex items-center justify-between">
-          <Button asChild variant="ghost" className="text-[#2D241E]/70 hover:text-[#ff6b7b] hover:bg-[#ff6b7b]/5 rounded-xl transition-all">
-            <Link href="/goals" className="flex items-center">
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              <span className="font-black uppercase tracking-widest text-[10px]">Voltar</span>
-            </Link>
-          </Button>
+          <StandardBackButton href="/goals" label="Voltar" className="mb-0" />
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-xl border-[#2D241E]/10 text-[#2D241E]/60 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 hover:bg-white transition-all shadow-sm">
                 <Link href={`/goals/${goal.id}/manage`}>
