@@ -20,11 +20,37 @@ const VAULT_IMAGE_URLS = [
   'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800', // Modern building
 ];
 
+const BANK_LOGOS = {
+  inter: '/images/banks/inter.png',
+  btg: '/images/banks/btg.png',
+  nubank: '/images/banks/nubank.png',
+  itau: '/images/banks/itau.png',
+  santander: '/images/banks/santander.png',
+  bradesco: '/images/banks/bradesco.png',
+  bb: '/images/banks/banco-do-brasil.png',
+  caixa: '/images/banks/caixa.png',
+  c6: '/images/banks/c6bank.png',
+};
+
+// Helper para datas relativas
+const now = new Date();
+const getDaysAgo = (days: number) => {
+  const date = new Date(now);
+  date.setDate(date.getDate() - days);
+  return date;
+};
+
+const getMonthsAgo = (months: number) => {
+  const date = new Date(now);
+  date.setMonth(date.getMonth() - months);
+  return date;
+};
+
 async function main() {
-  console.log('Iniciando o seeding do banco de dados...');
+  console.log('🚀 Iniciando o seeding do banco de dados...');
 
   // Limpeza de dados existentes
-  console.log('Deletando dados existentes...');
+  console.log('🧹 Limpando dados existentes...');
   await prisma.notification.deleteMany();
   await prisma.transaction.deleteMany();
   await prisma.goalParticipant.deleteMany();
@@ -34,13 +60,13 @@ async function main() {
   await prisma.invitation.deleteMany();
   await prisma.vaultMember.deleteMany();
   await prisma.vault.deleteMany();
+  await prisma.savedReport.deleteMany();
   await prisma.user.deleteMany();
-  console.log('Dados existentes deletados.');
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // 1. Criar Usuários com Avatars Específicos
-  console.log('Criando usuários...');
+  // 1. Criar Usuários
+  console.log('👤 Criando usuários demo...');
   const user1 = await prisma.user.create({
     data: {
       name: 'Clara Designer',
@@ -72,7 +98,7 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[2],
       subscriptionStatus: 'trial',
-      trialExpiresAt: faker.date.soon({ days: 15 }),
+      trialExpiresAt: getDaysAgo(-15), // vence em 15 dias
       workspaceImageUrl: '/screenshots/all-boxes-view.png',
     },
   });
@@ -84,27 +110,16 @@ async function main() {
       password: hashedPassword,
       avatarUrl: AVATAR_URLS[3],
       subscriptionStatus: 'inactive',
-      trialExpiresAt: faker.date.past({ years: 1 }), // Trial expirado
+      trialExpiresAt: getDaysAgo(30), // venceu ha 30 dias
       workspaceImageUrl: '/screenshots/main-dashboard.png',
     },
   });
 
-  const invitedEmail = 'novo.membro@caixinhas.app'; // Email para convite pendente
-
-  console.log('Usuários criados:', {
-    user1: user1.email,
-    user2: user2.email,
-    user3: user3.email,
-    user4: user4.email,
-  });
-
-  // 2. Criar Cofres (Vaults)
-  console.log('Criando cofres (vaults)...');
-
-  // Cofre Compartilhado (user1, user2, user3)
+  // 2. Cofres
+  console.log('📦 Criando cofres...');
   const sharedVault = await prisma.vault.create({
     data: {
-      name: 'Cofre da Família Tech',
+      name: 'Família Tech',
       imageUrl: VAULT_IMAGE_URLS[0],
       isPrivate: false,
       ownerId: user1.id,
@@ -118,417 +133,310 @@ async function main() {
     },
   });
 
-  // Cofre Individual Privado para user1
-  const claraPersonalVault = await prisma.vault.create({
-    data: {
-      name: 'Sonhos da Clara',
-      imageUrl: VAULT_IMAGE_URLS[3],
-      isPrivate: true,
-      ownerId: user1.id,
-      members: {
-        create: { userId: user1.id, role: 'owner' },
-      },
-    },
-  });
-
-  // Cofre Individual Privado para user2
-  const joaoPersonalVault = await prisma.vault.create({
-    data: {
-      name: 'Projetos do João',
-      imageUrl: VAULT_IMAGE_URLS[4],
-      isPrivate: true,
-      ownerId: user2.id,
-      members: {
-        create: { userId: user2.id, role: 'owner' },
-      },
-    },
-  });
-
-  // Cofre para o usuário com trial expirado (user4)
-  const marcosPersonalVault = await prisma.vault.create({
-    data: {
-      name: 'Investimentos Marcos',
-      imageUrl: VAULT_IMAGE_URLS[5],
-      isPrivate: true,
-      ownerId: user4.id,
-      members: {
-        create: { userId: user4.id, role: 'owner' },
-      },
-    },
-  });
-
-
-  console.log('Cofres criados:', {
-    shared: sharedVault.name,
-    clara: claraPersonalVault.name,
-    joao: joaoPersonalVault.name,
-    marcos: marcosPersonalVault.name,
-  });
-
-  // 3. Criar Categorias
-  console.log('Criando categorias...');
-  const categoriesData = [
-    { name: 'Salário', ownerId: user1.id },
-    { name: 'Freelance', ownerId: user1.id },
-    { name: 'Alimentação', ownerId: user1.id },
-    { name: 'Transporte', ownerId: user1.id },
-    { name: 'Lazer', ownerId: user1.id },
-    { name: 'Moradia', ownerId: user1.id },
-    { name: 'Educação', ownerId: user2.id },
-    { name: 'Saúde', ownerId: user2.id },
-    { name: 'Roupas', ownerId: user3.id },
-    { name: 'Investimentos', ownerId: user4.id },
+  const vaults = [
+    { name: 'Pessoal Clara', owner: user1, img: VAULT_IMAGE_URLS[1] },
+    { name: 'Pessoal João', owner: user2, img: VAULT_IMAGE_URLS[2] },
+    { name: 'Investimentos Marcos', owner: user4, img: VAULT_IMAGE_URLS[5] },
   ];
-  await prisma.category.createMany({ data: categoriesData });
-  const createdCategories = await prisma.category.findMany(); // Busca todas as categorias criadas
 
-  const catAlimentacaoUser1 = createdCategories.find(c => c.name === 'Alimentação' && c.ownerId === user1.id)!;
-  const catSalarioUser1 = createdCategories.find(c => c.name === 'Salário' && c.ownerId === user1.id)!;
-  const catTransporteUser1 = createdCategories.find(c => c.name === 'Transporte' && c.ownerId === user1.id)!;
-  const catLazerUser1 = createdCategories.find(c => c.name === 'Lazer' && c.ownerId === user1.id)!;
-  const catEducacaoUser2 = createdCategories.find(c => c.name === 'Educação' && c.ownerId === user2.id)!;
-  const catSaudeUser2 = createdCategories.find(c => c.name === 'Saúde' && c.ownerId === user2.id)!;
-  const catRoupasUser3 = createdCategories.find(c => c.name === 'Roupas' && c.ownerId === user3.id)!;
-  const catInvestimentosUser4 = createdCategories.find(c => c.name === 'Investimentos' && c.ownerId === user4.id)!;
+  const createdVaults = await Promise.all(
+    vaults.map(v => prisma.vault.create({
+      data: {
+        name: v.name,
+        imageUrl: v.img,
+        isPrivate: true,
+        ownerId: v.owner.id,
+        members: { create: { userId: v.owner.id, role: 'owner' } },
+      }
+    }))
+  );
 
+  const claraVault = createdVaults[0];
+  const joaoVault = createdVaults[1];
 
-  console.log('Categorias criadas.');
+  // 3. Categorias
+  console.log('🏷️ Criando categorias básicas...');
+  const baseCategories = ['Salário', 'Freelance', 'Alimentação', 'Transporte', 'Lazer', 'Assinaturas', 'Educação', 'Saúde', 'Investimentos'];
+  
+  for (const user of [user1, user2, user3, user4]) {
+    await prisma.category.createMany({
+      data: baseCategories.map(name => ({ name, ownerId: user.id })),
+      skipDuplicates: true
+    });
+  }
 
-  // 4. Criar Contas
-  console.log('Criando contas...');
+  const allCategories = await prisma.category.findMany();
+  const getCat = (userId: string, name: string) => allCategories.find(c => c.ownerId === userId && c.name === name)!;
 
-  // Contas para Clara (user1) no Cofre Pessoal
-  const claraAccount1 = await prisma.account.create({
+  // 4. Contas
+  console.log('💰 Criando contas bancárias...');
+  const claraAccount = await prisma.account.create({
     data: {
-      name: 'Conta Corrente Clara',
-      bank: 'Banco Digital S.A.',
+      name: 'Inter Principal',
+      bank: 'Banco Inter',
       type: 'corrente',
-      balance: 2500.00,
-      scope: claraPersonalVault.id,
+      balance: 4500.50,
+      logoUrl: BANK_LOGOS.inter,
+      scope: claraVault.id,
       ownerId: user1.id,
-      vaultId: claraPersonalVault.id,
+      vaultId: claraVault.id,
     },
   });
 
-  const claraAccount2 = await prisma.account.create({
+  const joaoAccount = await prisma.account.create({
     data: {
-      name: 'Poupança Investimento',
-      bank: 'Invest Fácil',
-      type: 'poupanca',
-      balance: 7000.00,
-      scope: claraPersonalVault.id,
-      ownerId: user1.id,
-      vaultId: claraPersonalVault.id,
-    },
-  });
-
-  // Contas para João (user2) no Cofre Pessoal
-  const joaoAccount1 = await prisma.account.create({
-    data: {
-      name: 'Conta Corrente João',
-      bank: 'Bank XPTO',
-      type: 'corrente',
-      balance: 1800.00,
-      scope: joaoPersonalVault.id,
-      ownerId: user2.id,
-      vaultId: joaoPersonalVault.id,
-    },
-  });
-
-  // Conta Compartilhada no Cofre da Família Tech
-  const sharedAccount1 = await prisma.account.create({
-    data: {
-      name: 'Conta Compartilhada Família',
-      bank: 'MultiBank',
+      name: 'Nubank João',
+      bank: 'Nubank',
       type: 'corrente',
       balance: 1200.00,
+      logoUrl: BANK_LOGOS.nubank,
+      scope: joaoVault.id,
+      ownerId: user2.id,
+      vaultId: joaoVault.id,
+    },
+  });
+
+  const joaoCredit = await prisma.account.create({
+    data: {
+      name: 'Mastercard Black',
+      bank: 'Santander',
+      type: 'credito',
+      balance: -2850.40,
+      creditLimit: 15000,
+      logoUrl: BANK_LOGOS.santander,
+      scope: joaoVault.id,
+      ownerId: user2.id,
+      vaultId: joaoVault.id,
+    },
+  });
+
+  const sharedAccount = await prisma.account.create({
+    data: {
+      name: 'Conta Conjunta',
+      bank: 'Itaú',
+      type: 'corrente',
+      balance: 8900.00,
+      logoUrl: BANK_LOGOS.itau,
       scope: sharedVault.id,
-      ownerId: user1.id, // O owner é um dos membros do cofre compartilhado
+      ownerId: user1.id,
       vaultId: sharedVault.id,
     },
   });
 
-  const joaoCreditCard = await prisma.account.create({
+  // 5. Metas (Goals/Caixinhas)
+  console.log('🎯 Criando metas (caixinhas)...');
+  const travelGoal = await prisma.goal.create({
     data: {
-      name: 'Cartão de Crédito João',
-      bank: 'CrediMais',
-      type: 'credito',
-      balance: -450.00, // Fatura atual
-      creditLimit: 3000.00,
-      scope: joaoPersonalVault.id,
-      ownerId: user2.id,
-      vaultId: joaoPersonalVault.id,
-    },
-  });
-
-
-  console.log('Contas criadas.');
-
-  // 5. Criar Metas (Goals/Caixinhas)
-  console.log('Criando metas (caixinhas)...');
-
-  // Caixinha Privada para Clara (user1) no Cofre Pessoal
-  const claraGoal1 = await prisma.goal.create({
-    data: {
-      name: 'Reserva de Emergência Clara',
-      targetAmount: 15000.00,
-      currentAmount: 5000.00,
-      emoji: '🚨',
-      visibility: 'private',
-      isFeatured: true,
-      userId: user1.id,
-      participants: {
-        create: { userId: user1.id, role: 'owner' },
-      },
-    },
-  });
-
-  // Caixinha Compartilhada (user1, user2, user3) no Cofre da Família Tech
-  const sharedGoal1 = await prisma.goal.create({
-    data: {
-      name: 'Viagem em Família 2025',
-      targetAmount: 10000.00,
-      currentAmount: 3000.00,
-      emoji: '✈️',
+      name: 'Viagem Japão 2026',
+      targetAmount: 30000,
+      currentAmount: 4500,
+      emoji: '🇯🇵',
       visibility: 'shared',
-      isFeatured: true,
       vaultId: sharedVault.id,
       participants: {
         create: [
-          { userId: user1.id, role: 'member' },
+          { userId: user1.id, role: 'owner' },
           { userId: user2.id, role: 'member' },
-          { userId: user3.id, role: 'member' },
-        ],
-      },
-    },
+        ]
+      }
+    }
   });
 
-  // Caixinha Privada para João (user2) no Cofre Pessoal
-  const joaoGoal1 = await prisma.goal.create({
+  const reserveGoal = await prisma.goal.create({
     data: {
-      name: 'Novo Computador',
-      targetAmount: 8000.00,
-      currentAmount: 2000.00,
-      emoji: '💻',
+      name: 'Reserva de Emergência',
+      targetAmount: 20000,
+      currentAmount: 12000,
+      emoji: '🛡️',
       visibility: 'private',
-      isFeatured: false,
-      userId: user2.id,
-      participants: {
-        create: { userId: user2.id, role: 'owner' },
-      },
-    },
-  });
-
-  // Caixinha para o usuário com trial expirado (user4)
-  const marcosGoal1 = await prisma.goal.create({
-    data: {
-      name: 'Reforma da Casa',
-      targetAmount: 20000.00,
-      currentAmount: 1000.00,
-      emoji: '🏡',
-      visibility: 'private',
-      isFeatured: false,
-      userId: user4.id,
-      participants: {
-        create: { userId: user4.id, role: 'owner' },
-      },
-    },
-  });
-
-
-  console.log('Metas (caixinhas) criadas.');
-
-  // 6. Criar Transações
-  console.log('Criando transações...');
-
-  // Transações para Clara (user1) no Cofre Pessoal
-  await prisma.transaction.create({
-    data: {
-      amount: 3000.00,
-      date: faker.date.recent({ days: 30 }),
-      description: 'Salário Mensal',
-      type: 'income',
-      paymentMethod: 'transfer',
-      sourceAccountId: claraAccount1.id,
-      categoryId: catSalarioUser1.id,
-      actorId: user1.id,
       userId: user1.id,
-      vaultId: claraPersonalVault.id,
-    },
+      vaultId: claraVault.id,
+      participants: { create: { userId: user1.id, role: 'owner' } }
+    }
   });
 
-  await prisma.transaction.create({
+  // 6. Transações Dinâmicas (Últimos 3 meses)
+  console.log('💸 Gerando transações (Recorrentes, Parceladas, etc)...');
+
+  // a. Salário Recorrente (Clara e João)
+  const salaryIdClara = faker.string.uuid();
+  const salaryIdJoao = faker.string.uuid();
+
+  for (let i = 0; i < 3; i++) {
+    const monthDate = getMonthsAgo(i);
+    monthDate.setDate(5); // Dia 5
+
+    await prisma.transaction.create({
+      data: {
+        amount: 8500,
+        date: monthDate,
+        description: 'Salário Mensal - Design Inc',
+        type: 'income',
+        isRecurring: true,
+        recurringId: salaryIdClara,
+        actorId: user1.id,
+        userId: user1.id,
+        sourceAccountId: claraAccount.id,
+        categoryId: getCat(user1.id, 'Salário').id,
+        vaultId: claraVault.id,
+      }
+    });
+
+    await prisma.transaction.create({
+      data: {
+        amount: 7200,
+        date: monthDate,
+        description: 'Salário Mensal - Dev Solutions',
+        type: 'income',
+        isRecurring: true,
+        recurringId: salaryIdJoao,
+        actorId: user2.id,
+        userId: user2.id,
+        sourceAccountId: joaoAccount.id,
+        categoryId: getCat(user2.id, 'Salário').id,
+        vaultId: joaoVault.id,
+      }
+    });
+  }
+
+  // b. Entradas Parceladas (Freelance da Clara)
+  console.log('   - Adicionando entrada parcelada (Freelance 3x)...');
+  const freelanceId = faker.string.uuid();
+  for (let i = 1; i <= 3; i++) {
+    const date = getMonthsAgo(3 - i);
+    date.setDate(15);
+
+    await prisma.transaction.create({
+      data: {
+        amount: 2000,
+        date: date,
+        description: `Projeto UI/UX BrandX (${i}/3)`,
+        type: 'income',
+        isInstallment: true,
+        installmentNumber: i,
+        totalInstallments: 3,
+        recurringId: freelanceId,
+        actorId: user1.id,
+        userId: user1.id,
+        sourceAccountId: claraAccount.id,
+        categoryId: getCat(user1.id, 'Freelance').id,
+        vaultId: claraVault.id,
+      }
+    });
+  }
+
+  // c. Despesas Parceladas (iPhone João no Crédito)
+  console.log('   - Adicionando despesa parcelada (iPhone 6x)...');
+  const iPhoneId = faker.string.uuid();
+  for (let i = 1; i <= 6; i++) {
+    const date = getMonthsAgo(4 - i); // Começou ha um mês
+    date.setDate(10);
+
+    await prisma.transaction.create({
+      data: {
+        amount: -850.50,
+        date: date,
+        description: `iPhone 15 Pro Max (${i}/6)`,
+        type: 'expense',
+        paymentMethod: 'credit_card',
+        isInstallment: true,
+        installmentNumber: i,
+        totalInstallments: 6,
+        recurringId: iPhoneId,
+        actorId: user2.id,
+        userId: user2.id,
+        sourceAccountId: joaoCredit.id,
+        categoryId: getCat(user2.id, 'Lazer').id,
+        vaultId: joaoVault.id,
+        paidInstallments: i <= 2 ? [i] : [], // Primeiras 2 pagas
+      }
+    });
+  }
+
+  // d. Assinaturas Recorrentes
+  console.log('   - Adicionando assinaturas (Netflix, Spotify)...');
+  const subs = [
+    { desc: 'Netflix 4K', amount: -55.90, cat: 'Assinaturas', day: 12 },
+    { desc: 'Spotify Family', amount: -34.90, cat: 'Assinaturas', day: 20 },
+    { desc: 'Academia BlueFit', amount: -119.90, cat: 'Saúde', day: 1 },
+  ];
+
+  for (const sub of subs) {
+    const recId = faker.string.uuid();
+    for (let i = 0; i < 3; i++) {
+      const date = getMonthsAgo(i);
+      date.setDate(sub.day);
+      
+      await prisma.transaction.create({
+        data: {
+          amount: sub.amount,
+          date: date,
+          description: sub.desc,
+          type: 'expense',
+          isRecurring: true,
+          recurringId: recId,
+          actorId: user1.id,
+          userId: user1.id,
+          sourceAccountId: claraAccount.id,
+          categoryId: getCat(user1.id, sub.cat).id,
+          vaultId: claraVault.id,
+        }
+      });
+    }
+  }
+
+  // e. Transações Aleatórias Recentemente
+  console.log('   - Adicionando transações diversas...');
+  const randomExpenses = [
+    { desc: 'iFood - Burger King', amount: -85.00, cat: 'Alimentação' },
+    { desc: 'Posto Shell', amount: -150.00, cat: 'Transporte' },
+    { desc: 'Farmácia Pague Menos', amount: -42.30, cat: 'Saúde' },
+    { desc: 'Supermercado Pão de Açúcar', amount: -430.20, cat: 'Alimentação' },
+    { desc: 'Cinema Kinoplex', amount: -65.00, cat: 'Lazer' },
+  ];
+
+  for (let i = 0; i < 20; i++) {
+    const expense = faker.helpers.arrayElement(randomExpenses);
+    const date = faker.date.recent({ days: 60 });
+
+    await prisma.transaction.create({
+      data: {
+        amount: expense.amount,
+        date: date,
+        description: expense.desc,
+        type: 'expense',
+        actorId: user1.id,
+        userId: user1.id,
+        sourceAccountId: claraAccount.id,
+        categoryId: getCat(user1.id, expense.cat).id,
+        vaultId: claraVault.id,
+      }
+    });
+  }
+
+  // 7. Convites e Notificações
+  console.log('✉️ Criando notificações e convites...');
+  await prisma.notification.create({
     data: {
-      amount: -120.50,
-      date: faker.date.recent({ days: 10 }),
-      description: 'Jantar com amigos',
-      type: 'expense',
-      paymentMethod: 'debit_card',
-      sourceAccountId: claraAccount1.id,
-      categoryId: catLazerUser1.id,
-      actorId: user1.id,
       userId: user1.id,
-      vaultId: claraPersonalVault.id,
-    },
+      type: 'system',
+      message: 'Sua reserva de emergência atingiu 60% da meta!',
+      isRead: false,
+    }
   });
 
-  await prisma.transaction.create({
-    data: {
-      amount: 500.00,
-      date: faker.date.recent({ days: 5 }),
-      description: 'Transferência para Reserva de Emergência',
-      type: 'income', // Pode ser um "transfer" em um sistema mais complexo, mas como income aqui
-      paymentMethod: 'pix',
-      sourceAccountId: claraAccount1.id,
-      goalId: claraGoal1.id,
-      actorId: user1.id,
-      userId: user1.id,
-      vaultId: claraPersonalVault.id,
-    },
-  });
-
-  // Transações para João (user2) no Cofre Pessoal
-  await prisma.transaction.create({
-    data: {
-      amount: -80.00,
-      date: faker.date.recent({ days: 7 }),
-      description: 'Mensalidade Curso Online',
-      type: 'expense',
-      paymentMethod: 'credit_card',
-      sourceAccountId: joaoCreditCard.id,
-      categoryId: catEducacaoUser2.id,
-      actorId: user2.id,
-      userId: user2.id,
-      vaultId: joaoPersonalVault.id,
-    },
-  });
-
-  await prisma.transaction.create({
-    data: {
-      amount: -30.00,
-      date: faker.date.recent({ days: 2 }),
-      description: 'Combustível',
-      type: 'expense',
-      paymentMethod: 'debit_card',
-      sourceAccountId: joaoAccount1.id,
-      categoryId: catTransporteUser1.id, // Usando categoria de user1 para exemplo
-      actorId: user2.id,
-      userId: user2.id,
-      vaultId: joaoPersonalVault.id,
-    },
-  });
-
-  // Transação Compartilhada (user1, user2) no Cofre da Família Tech
-  await prisma.transaction.create({
-    data: {
-      amount: -250.00,
-      date: faker.date.recent({ days: 15 }),
-      description: 'Compras para casa',
-      type: 'expense',
-      paymentMethod: 'debit_card',
-      sourceAccountId: sharedAccount1.id,
-      categoryId: catAlimentacaoUser1.id, // Usando categoria de user1 para exemplo
-      actorId: user1.id, // Clara fez a compra
-      userId: user1.id, // Clara é o "owner" da transação neste contexto
-      vaultId: sharedVault.id,
-    },
-  });
-
-  await prisma.transaction.create({
-    data: {
-      amount: 100.00,
-      date: faker.date.recent({ days: 12 }),
-      description: 'Contribuição para Viagem em Família',
-      type: 'income',
-      paymentMethod: 'pix',
-      sourceAccountId: sharedAccount1.id,
-      goalId: sharedGoal1.id,
-      actorId: user2.id, // João contribuiu
-      userId: user2.id,
-      vaultId: sharedVault.id,
-    },
-  });
-
-  console.log('Transações criadas.');
-
-  // 7. Criar Convites
-  console.log('Criando convites...');
-
-  // Convite pendente de user1 para um email de usuário não existente
-  const inviteToNewUser = await prisma.invitation.create({
+  await prisma.invitation.create({
     data: {
       type: 'vault',
       targetId: sharedVault.id,
       targetName: sharedVault.name,
       senderId: user1.id,
-      receiverEmail: invitedEmail,
+      receiverEmail: 'convidado@teste.com',
       status: 'pending',
-    },
+    }
   });
 
-  // Convite pendente de user2 para user4 (usuário existente, mas com trial expirado)
-  const inviteToExistingUser = await prisma.invitation.create({
-    data: {
-      type: 'vault',
-      targetId: joaoPersonalVault.id, // Convidando para o cofre pessoal do João
-      targetName: joaoPersonalVault.name,
-      senderId: user2.id,
-      receiverId: user4.id,
-      receiverEmail: user4.email,
-      status: 'pending',
-    },
-  });
-
-  console.log('Convites pendentes criados.');
-
-  // 8. Criar Notificações
-  console.log('Criando notificações...');
-
-  await prisma.notification.create({
-    data: {
-      userId: user1.id,
-      type: 'system',
-      message: 'Bem-vindo ao Caixinhas! Explore seu novo dashboard.',
-      link: '/dashboard',
-      isRead: false,
-    },
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId: user3.id,
-      type: 'vault_invite',
-      message: `${user1.name} te convidou para o cofre '${sharedVault.name}'.`,
-      link: '/invitations',
-      relatedId: inviteToNewUser.id, // Relacionado ao convite pendente
-      isRead: false,
-    },
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId: user2.id,
-      type: 'goal_progress',
-      message: `Sua Caixinha '${sharedGoal1.name}' atingiu 30% do objetivo!`,
-      link: `/goals/${sharedGoal1.id}`,
-      isRead: true,
-      createdAt: faker.date.recent({days: 2})
-    },
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId: user4.id,
-      type: 'system',
-      message: 'Seu período de teste expirou. Faça upgrade para continuar acessando todos os recursos!',
-      link: '/profile/subscription',
-      isRead: false,
-    },
-  });
-
-  console.log('Notificações criadas.');
-
-  console.log('Seeding concluído com sucesso!');
+  console.log('✨ Seeding concluído com sucesso!');
 }
 
 main()

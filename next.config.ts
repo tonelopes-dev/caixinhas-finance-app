@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'placehold.co',
         port: '',
         pathname: '/**',
@@ -50,12 +56,6 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.worldvectorlogo.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'caixinhas-finance-app.s3.us-east-1.amazonaws.com',
         port: '',
         pathname: '/**',
       },

@@ -23,7 +23,7 @@ export function WorkspaceNavigationHandler() {
           console.log('✅ [Dashboard] Página renderizada, fechando loading');
           localStorage.removeItem('workspace-navigation-pending');
           hideLoading();
-        }, 100); // 500ms - delay reduzido para fechar mais rápido
+        }, 1000); // 1000ms - delay aumentado para garantir render completo
         
         return () => clearTimeout(timer);
       }

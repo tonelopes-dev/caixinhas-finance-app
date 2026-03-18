@@ -4,6 +4,7 @@ import { useState, lazy, Suspense } from 'react';
 import type { User, Account, Goal, Transaction } from '@/lib/definitions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { WorkspaceNavigationHandler } from '@/components/dashboard/workspace-navigation-handler';
 import type { PatrimonyData } from '@/app/patrimonio/actions';
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados
@@ -95,6 +96,7 @@ export function DashboardClient({
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <WorkspaceNavigationHandler />
         <div className="mx-auto w-full">
           <Suspense fallback={<div className="h-20 animate-pulse rounded bg-muted" />}>
             <AnimatedDiv>

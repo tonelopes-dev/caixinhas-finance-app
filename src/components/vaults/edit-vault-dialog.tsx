@@ -3,24 +3,29 @@
 import React, { useState, useRef } from 'react';
 import {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogContent,
 } from '@/components/ui/mobile-dialog';
-import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ExternalLink, Trash2, UserMinus, UserPlus, X } from 'lucide-react';
+import { 
+  Trash2, 
+  UserPlus, 
+  X, 
+  Settings, 
+  ImageIcon, 
+  Users, 
+  AlertTriangle,
+  Globe,
+  Lock,
+  Check,
+  Save
+} from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import Link from 'next/link';
 import { 
   updateVaultAction, 
   deleteVaultAction, 
@@ -45,6 +50,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion, AnimatePresence } from 'framer-motion';
+import { compressImage } from '@/lib/image-utils';
 
 const coverImages = [
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -69,7 +77,7 @@ interface EditVaultDialogProps {
   vault: {
     id: string;
     name: string;
-    imageUrl: string | null; // Allow null for image URL
+    imageUrl: string | null;
     isPrivate: boolean;
     ownerId: string;
     members: User[];
@@ -77,6 +85,7 @@ interface EditVaultDialogProps {
 }
 
 export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogProps) {
+  const [activeTab, setActiveTab] = useState("geral");
   const [vaultName, setVaultName] = useState(vault.name);
   const [selectedPresetImage, setSelectedPresetImage] = useState<string | null>(null);
   const [customImageUrlInput, setCustomImageUrlInput] = useState<string | null>(null);
@@ -95,10 +104,8 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     message: null,
   });
 
-  // Determine the final image URL for display
   const displayImageUrl = localImagePreviewUrl || customImageUrlInput || selectedPresetImage || vault.imageUrl || coverImages[0];
 
-  // Fetch pending invitations
   const fetchPendingInvitations = React.useCallback(async () => {
     if (open && vault.id) {
       const invitations = await getVaultPendingInvitationsAction(vault.id);
@@ -106,12 +113,10 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     }
   }, [open, vault.id]);
 
-  // Reset form when vault changes or dialog opens
   React.useEffect(() => {
     if (open) {
         setVaultName(vault.name);
         setIsPrivate(vault.isPrivate);
-        // Reset image states based on current vault image
         if (vault.imageUrl && coverImages.includes(vault.imageUrl)) {
             setSelectedPresetImage(vault.imageUrl);
             setCustomImageUrlInput(null);
@@ -119,14 +124,11 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
             setSelectedPresetImage(null);
             setCustomImageUrlInput(vault.imageUrl);
         } else {
-            setSelectedPresetImage(coverImages[0]); // Default preset if no image
+            setSelectedPresetImage(coverImages[0]);
             setCustomImageUrlInput(null);
         }
         setLocalImageFile(null);
         setLocalImagePreviewUrl(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
         fetchPendingInvitations();
     }
   }, [open, vault, fetchPendingInvitations]);
@@ -137,8 +139,12 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
         title: 'Sucesso',
         description: state.message,
       });
-      onOpenChange(false);
-      router.refresh();
+      React.startTransition(() => {
+        router.refresh();
+      });
+      setTimeout(() => {
+        onOpenChange(false);
+      }, 150);
     } else if (state?.errors) {
       toast({
         title: 'Erro',
@@ -150,45 +156,40 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
   const handlePresetImageSelection = (imageUrl: string) => {
     setSelectedPresetImage(imageUrl);
-    setCustomImageUrlInput(null); // Clear custom URL
-    setLocalImageFile(null); // Clear local file
+    setCustomImageUrlInput(null);
+    setLocalImageFile(null);
     setLocalImagePreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
-  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setCustomImageUrlInput(url || null);
-    setSelectedPresetImage(null); // Clear preset selection
-    setLocalImageFile(null); // Clear local file
-    setLocalImagePreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setLocalImageFile(file);
     if (file) {
-      setLocalImagePreviewUrl(URL.createObjectURL(file));
-      setSelectedPresetImage(null); // Clear preset selection
-      setCustomImageUrlInput(null); // Clear custom URL
+      try {
+        const compressed = await compressImage(file);
+        setLocalImageFile(compressed);
+        setLocalImagePreviewUrl(URL.createObjectURL(compressed));
+        setSelectedPresetImage(null);
+        setCustomImageUrlInput(null);
+      } catch (error) {
+        console.error('Erro ao comprimir imagem:', error);
+        setLocalImageFile(file);
+        setLocalImagePreviewUrl(URL.createObjectURL(file));
+        setSelectedPresetImage(null);
+        setCustomImageUrlInput(null);
+      }
     } else {
       setLocalImagePreviewUrl(null);
+      setLocalImageFile(null);
     }
   }
 
   const handleRemoveImage = () => {
     setLocalImageFile(null);
     setLocalImagePreviewUrl(null);
-    setSelectedPresetImage(null); // Explicitly set to null to indicate removal
+    setSelectedPresetImage(null);
     setCustomImageUrlInput(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   const handleInvite = async () => {
@@ -218,14 +219,17 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
   const handleCancelInvitation = async (invitationId: string) => {
     try {
-      const result = await cancelInvitationAction(invitationId, vault.id); // Pass vault.id
+      const result = await cancelInvitationAction(invitationId, vault.id);
       toast({
         title: result.success ? 'Convite cancelado' : 'Erro',
         description: result.message,
         variant: result.success ? 'default' : 'destructive',
       });
       if (result.success) {
-        fetchPendingInvitations();
+        React.startTransition(() => {
+          fetchPendingInvitations();
+          router.refresh(); // Refresh to reflect changes in member list if needed
+        });
       }
     } catch (error) {
       toast({
@@ -264,8 +268,11 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
         variant: result.success ? 'default' : 'destructive',
       });
       if (result.success) {
-        onOpenChange(false);
+        // Sequência mais robusta para garantir o refresh antes de desmontar o componente
         router.refresh();
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 100);
       }
     } catch (error) {
       toast({
@@ -280,363 +287,359 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0"
-        mobileOptimized={true}
-      >
-            <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="bg-white/90 hover:bg-white text-gray-900 shadow-lg font-medium"
-                onClick={() => onOpenChange(false)}
-            >Fechar</Button>
+      <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl bg-background">
         <DialogHeader className="sr-only">
-          <DialogTitle>Editar Vault</DialogTitle>
+          <DialogTitle>Editar Cofre: {vault.name}</DialogTitle>
         </DialogHeader>
-        <form action={formAction}>
-            <input type="hidden" name="vaultId" value={vault.id} />
-            {/* Hidden input for imageUrl, only if no file is selected. 
-                If a file is selected, the action will handle the upload. 
-                If customImageUrlInput is null, it means the user cleared it or it wasn't there.
-                If selectedPresetImage is null, it means no preset is selected.
-                If both are null, it means the image is explicitly removed.
-            */}
-            {!localImageFile && (
-                <input 
-                    type="hidden" 
-                    name="imageUrl" 
-                    value={customImageUrlInput ?? selectedPresetImage ?? ''} 
-                />
-            )}
-            
-            {/* Header com imagem de fundo */}
-            <div className="relative h-48 w-full overflow-hidden pt-12">
-                {displayImageUrl ? (
-                    <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
-                ) : (
-                    <div className="bg-gradient-to-br from-blue-500 to-purple-600 h-full w-full" />
-                )}
-                <div className="absolute inset-0 bg-black/40" />
-                
-                {/* Botão remover imagem */}
-                {(localImageFile || selectedPresetImage) && ( 
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900"
-                        onClick={handleRemoveImage}
-                    >
-                        <X className="h-4 w-4" />
-                    </Button>
-                )}
-                
-                {/* Título sobre a imagem */}
-                <div className="absolute bottom-4 left-6">
-                    <h2 className="text-2xl font-bold text-white mb-1">Editar Cofre</h2>
-                    <p className="text-white/80 text-sm">Personalize seu cofre financeiro</p>
-                </div>
+
+        <form action={formAction} className="flex flex-col h-full max-h-[90vh]">
+          <input type="hidden" name="vaultId" value={vault.id} />
+          <input type="hidden" name="isPrivate" value={isPrivate.toString()} />
+          {!localImageFile && (
+            <input 
+              type="hidden" 
+              name="imageUrl" 
+              value={customImageUrlInput ?? selectedPresetImage ?? ''} 
+            />
+          )}
+
+          {/* Header com Preview e Tabs */}
+          <div className="relative">
+            <div className="h-32 w-full overflow-hidden relative">
+              {displayImageUrl ? (
+                <Image src={displayImageUrl} alt="Capa" fill className="object-cover" sizes="(max-width: 768px) 100vw, 550px" />
+              ) : (
+                <div className="bg-gradient-to-br from-primary/80 to-accent/80 h-full w-full" />
+              )}
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+              <div className="absolute bottom-12 left-6 right-6">
+                <h2 className="text-xl font-bold text-white truncate">{vaultName}</h2>
+              </div>
             </div>
 
-            <div className="p-6 space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="bg-background px-6 -mt-6 relative z-10 rounded-t-3xl pt-4">
+                <TabsList className="w-full bg-muted/50 p-1 h-12 rounded-xl">
+                  <TabsTrigger value="geral" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                    <Settings className="w-4 h-4" />
+                    <span className="hidden sm:inline">Geral</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="capa" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Capa</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="membros" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                    <Users className="w-4 h-4" />
+                    <span className="hidden sm:inline">Membros</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="perigo" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-destructive">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Perigo</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-                {/* Nome do cofre */}
-                <div className="space-y-3">
-                    <Label htmlFor="edit-vault-name" className="text-base font-medium">Nome do Cofre</Label>
-                    <Input
+              <div className="flex-1 overflow-y-auto px-6 py-4 min-h-[300px]">
+                <TabsContent value="geral" className="space-y-6 mt-0 animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-vault-name" className="text-sm font-semibold">Nome do Cofre</Label>
+                      <Input
                         id="edit-vault-name"
                         name="name"
                         value={vaultName}
                         onChange={(e) => setVaultName(e.target.value)}
-                        placeholder="Ex: Reforma da Casa, Viagem dos Sonhos..."
+                        placeholder="Ex: Reforma da Casa..."
+                        className="h-12 rounded-xl focus-visible:ring-primary"
                         required
-                        className="text-lg py-3"
-                    />
-                    {state?.errors?.name && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <span className="text-destructive">⚠</span>
-                        {state.errors.name[0]}
-                      </p>
-                    )}
-                </div>
-
-                {/* Switch Privacidade */}
-                <div className="flex flex-row items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-colors">
-                    <div className="space-y-1">
-                        <Label htmlFor="edit-is-private" className="text-base font-medium">
-                            Cofre Privado
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                            Apenas você pode ver este cofre
-                        </p>
+                      />
                     </div>
-                    <Switch 
-                        id="edit-is-private" 
-                        name="isPrivate" 
-                        checked={isPrivate}
-                        onCheckedChange={setIsPrivate}
-                        className="scale-110"
-                    />
-                </div>
 
-                {/* Upload de imagem melhorado */}
-                <div className="space-y-4">
-                    <Label className="text-base font-medium">Imagem de Capa</Label>
+                    <div className="pt-2">
+                      <Label className="text-sm font-semibold mb-3 block">Configuração de Privacidade</Label>
+                      <div className="grid grid-cols-1 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsPrivate(false)}
+                          className={cn(
+                            "flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all",
+                            !isPrivate ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/20"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                            !isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          )}>
+                            <Globe className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 space-y-0.5">
+                            <p className="font-bold text-sm">Cofre em Conjunto</p>
+                            <p className="text-xs text-muted-foreground">Convide família ou amigos para pouparem juntos.</p>
+                          </div>
+                          {!isPrivate && <Check className="w-4 h-4 text-primary" />}
+                        </button>
 
-                    {/* Upload personalizado */}
-                    <div 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="relative border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-accent/30 group"
+                        <button
+                          type="button"
+                          onClick={() => setIsPrivate(true)}
+                          className={cn(
+                            "flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all",
+                            isPrivate ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/20"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                            isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          )}>
+                            <Lock className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 space-y-0.5">
+                            <p className="font-bold text-sm">Cofre Privado</p>
+                            <p className="text-xs text-muted-foreground">Apenas você terá acesso. Seus sonhos, sua privacidade.</p>
+                          </div>
+                          {isPrivate && <Check className="w-4 h-4 text-primary" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="capa" className="space-y-6 mt-0 animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      {coverImages.map(imgSrc => (
+                        <button 
+                          type="button" 
+                          key={imgSrc} 
+                          onClick={() => handlePresetImageSelection(imgSrc)} 
+                          className={cn(
+                            'relative h-20 w-full overflow-hidden rounded-xl border-2 transition-all hover:scale-105', 
+                            selectedPresetImage === imgSrc && !localImageFile 
+                              ? 'border-primary ring-2 ring-primary/20 scale-105' 
+                              : 'border-transparent opacity-70 hover:opacity-100'
+                          )}
+                        >
+                          <Image src={imgSrc} alt="Capa" fill className="object-cover" sizes="150px" />
+                          {selectedPresetImage === imgSrc && !localImageFile && (
+                            <div className="absolute inset-1 flex items-start justify-end">
+                              <Check className="w-5 h-5 text-white bg-primary rounded-full p-1" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-muted" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Ou envie a sua</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full py-8 border-dashed border-2 rounded-xl group hover:border-primary transition-all bg-muted/20"
+                      onClick={() => fileInputRef.current?.click()}
                     >
-                        <input
-                            type="file"
-                            name="imageFile" 
-                            accept="image/*"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            className="hidden"
-                        />
-                        <div className="space-y-2">
-                            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
-                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 10MB</p>
-                            </div>
-                        </div>
-                        {localImageFile && (
-                            <div className="mt-3 text-xs text-primary bg-primary/10 inline-block px-2 py-1 rounded-md">
-                                📁 {localImageFile.name}
-                            </div>
-                        )}
-                    </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <ImageIcon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="text-sm font-medium">{localImageFile ? localImageFile.name : 'Clique para buscar no seu celular'}</span>
+                      </div>
+                      <input
+                        type="file"
+                        name="imageFile" 
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </Button>
+                  </div>
+                </TabsContent>
 
-                    {/* Imagens predefinidas */}
-                    <div className="space-y-3">
-                        <Label className="text-sm text-muted-foreground">Ou escolha uma imagem predefinida</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                        {coverImages.map(imgSrc => (
-                            <button 
-                                type="button" 
-                                key={imgSrc} 
-                                onClick={() => handlePresetImageSelection(imgSrc)} 
-                                className={cn(
-                                    'relative h-24 w-full overflow-hidden rounded-lg border-2 transition-all hover:scale-105 hover:shadow-md', 
-                                    selectedPresetImage === imgSrc && !localImageFile 
-                                        ? 'border-primary ring-2 ring-primary/20 ring-offset-2' 
-                                        : 'border-border hover:border-primary/30'
-                                )}
-                            >
-                                <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
-                                {selectedPresetImage === imgSrc && !localImageFile && (
-                                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                                        <div className="bg-primary text-primary-foreground rounded-full p-1.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </div>
-                                    </div>
-                                )}
-                            </button>
-                        ))}
-                        </div>
-                    </div>
-
-
-                </div>
-
-                <div className="space-y-3">
-                    <Label>Membros</Label>
+                <TabsContent value="membros" className="space-y-6 mt-0 animate-in fade-in duration-300">
+                  <div className="space-y-4">
                     <div className="flex gap-2">
-                        <Input 
-                            placeholder="E-mail do novo membro" 
-                            value={inviteEmail}
-                            onChange={(e) => setInviteEmail(e.target.value)}
-                        />
-                        <Button type="button" onClick={handleInvite} disabled={isInviting || !inviteEmail}>
-                            {isInviting ? 'Enviando...' : <><UserPlus className="mr-2 h-4 w-4" /> Convidar</>}
-                        </Button>
+                      <Input 
+                        placeholder="E-mail do novo membro" 
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        className="h-11 rounded-xl"
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={handleInvite} 
+                        disabled={isInviting || !inviteEmail}
+                        className="rounded-xl h-11"
+                      >
+                        <UserPlus className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{isInviting ? 'Enviando...' : 'Convidar'}</span>
+                      </Button>
                     </div>
                     
-                    <div className="space-y-2 mt-4">
+                    <div className="space-y-3">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Membros Atuais</Label>
+                      <div className="space-y-2">
                         {vault.members.map((member) => (
-                            <div key={member.id} className="flex items-center justify-between p-2 rounded-lg border bg-card">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={member.avatarUrl || ''} />
-                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="text-sm font-medium">{member.name}</p>
-                                        <p className="text-xs text-muted-foreground">{member.email}</p>
-                                    </div>
-                                </div>
-                                {member.id !== vault.ownerId && (
-                                    <Button 
-                                        type="button" 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        onClick={() => handleRemoveMember(member.id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                )}
-                                {member.id === vault.ownerId && (
-                                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Dono</span>
-                                )}
-                            </div>
-                        ))}
-
-                        {/* Lista de Convites Pendentes */}
-                        {pendingInvitations.length > 0 && (
-                          <>
-                            <Label className="text-xs text-muted-foreground mt-4 block">Convites Pendentes</Label>
-                            {pendingInvitations.map((invitation) => (
-                              <div key={invitation.id} className="flex items-center justify-between p-2 rounded-lg border border-dashed bg-muted/30">
-                                <div className="flex items-center gap-3">
-                                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                                    <UserPlus className="h-4 w-4 text-muted-foreground" />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium">{invitation.email}</p>
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-[10px] h-5 px-1 bg-yellow-500/10 text-yellow-600 border-yellow-200">
-                                        Pendente
-                                      </Badge>
-                                      <span className="text-[10px] text-muted-foreground">
-                                        Enviado por {invitation.invitedBy}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <Button 
-                                  type="button" 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="text-muted-foreground hover:text-destructive"
-                                  onClick={() => handleCancelInvitation(invitation.id)}
-                                  title="Cancelar convite"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                          <div key={member.id} className="flex items-center justify-between p-3 rounded-xl border bg-card/50 transition-colors hover:bg-card">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 border-2 border-background">
+                                <AvatarImage src={member.avatarUrl || ''} />
+                                <AvatarFallback className="bg-primary/10 text-primary font-bold">{member.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-bold leading-none">{member.name}</p>
+                                <p className="text-[10px] text-muted-foreground mt-1">{member.email}</p>
                               </div>
-                            ))}
-                          </>
-                        )}
-                    </div>
-                </div>
+                            </div>
+                            {member.id !== vault.ownerId ? (
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                                onClick={() => handleRemoveMember(member.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[10px] px-2">DONO</Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-
-               
-            </div>
-            
-            {/* Rodapé com botões */}
-            <div className="flex flex-col sm:flex-row gap-3 p-6 bg-muted/30 border-t">
-                <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => onOpenChange(false)}
-                    className="flex-1 font-medium"
-                >
-                    Cancelar
-                </Button>
-                <Button 
-                    type="submit" 
-                    disabled={isPending || !vaultName.trim()}
-                    className="flex-1 font-medium bg-primary hover:bg-primary/90"
-                >
-                    {isPending ? (
-                        <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Salvando...
-                        </>
-                    ) : (
-                        <>
-                            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Salvar Alterações
-                        </>
-                    )}
-                </Button>
-
-                
-            </div>
-             {/* Zona de Perigo */}
-                <div className="pt-6 mt-6 border-t border-destructive/20">
-                    <div className="bg-destructive/5 rounded-xl p-4 space-y-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                            <Label className="text-destructive font-medium">Zona de Perigo</Label>
+                      {pendingInvitations.length > 0 && (
+                        <div className="pt-4 space-y-3">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Convites Enviados</Label>
+                          {pendingInvitations.map((invitation) => (
+                            <div key={invitation.id} className="flex items-center justify-between p-3 rounded-xl border border-dashed bg-muted/20">
+                              <div className="flex items-center gap-3">
+                                <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                  <UserPlus className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium truncate max-w-[150px] sm:max-w-none">{invitation.email}</p>
+                                  <p className="text-[10px] text-muted-foreground">Pendente</p>
+                                </div>
+                              </div>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
+                                onClick={() => handleCancelInvitation(invitation.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                            Esta ação é irreversível. O cofre e todos os dados serão permanentemente removidos.
-                        </p>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button 
-                                    type="button" 
-                                    variant="destructive" 
-                                    className="w-full bg-destructive/90 hover:bg-destructive text-white font-medium"
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" /> 
-                                    Excluir Cofre Permanentemente
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle className="flex items-center gap-2">
-                                        <Trash2 className="h-5 w-5 text-destructive" />
-                                        Confirmar Exclusão
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription className="space-y-2">
-                                        <p>Esta ação não pode ser desfeita. Isso excluirá permanentemente:</p>
-                                        <div className="bg-destructive/5 p-3 rounded-md">
-                                            <p className="font-semibold text-destructive">"{vault.name}"</p>
-                                            <p className="text-sm text-muted-foreground mt-1">
-                                                • Todas as transações<br/>
-                                                • Histórico completo<br/>
-                                                • Dados de membros
-                                            </p>
-                                        </div>
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="font-medium">
-                                        Cancelar
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction 
-                                        onClick={handleDeleteVault} 
-                                        disabled={isDeleting} 
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-medium"
-                                    >
-                                        {isDeleting ? (
-                                            <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Excluindo...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Sim, excluir cofre
-                                            </>
-                                        )}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                      )}
                     </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="perigo" className="space-y-6 mt-0 animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="bg-destructive/5 rounded-2xl p-6 border border-destructive/20 text-center space-y-4">
+                      <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <AlertTriangle className="w-8 h-8 text-destructive" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-destructive">Cuidado! Ação Irreversível</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Ao excluir este cofre, todos os dados, transações e histórico serão apagados para sempre.
+                        </p>
+                      </div>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            type="button" 
+                            variant="destructive" 
+                            className="w-full h-12 rounded-xl font-bold bg-destructive shadow-lg shadow-destructive/20"
+                          >
+                            <Trash2 className="mr-2 h-5 w-5" /> 
+                            Excluir Cofre Agora
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="rounded-2xl border-none">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-3 text-destructive">
+                              <div className="p-2 rounded-full bg-destructive/10">
+                                <AlertTriangle className="h-5 w-5" />
+                              </div>
+                              Tem certeza absoluta?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="pt-2">
+                              Você está prestes a apagar o cofre <span className="font-bold text-foreground">"{vault.name}"</span>. 
+                              Essa ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="pt-4">
+                            <AlertDialogCancel className="rounded-xl border-none bg-muted font-bold h-11">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={handleDeleteVault} 
+                              disabled={isDeleting} 
+                              className="rounded-xl bg-destructive text-white font-bold h-11 hover:bg-destructive/90"
+                            >
+                              {isDeleting ? 'Excluindo...' : 'Sim, excluir para sempre'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+
+          {/* Footer Fixo */}
+          <div className="p-6 bg-muted/10 border-t flex gap-3">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => onOpenChange(false)}
+              className="flex-1 h-12 rounded-xl font-bold"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isPending || !vaultName.trim()}
+              className="flex-1 h-12 text-md font-bold rounded-xl gradient-button text-white border-none shadow-lg shadow-primary/20"
+            >
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Salvando...</span>
                 </div>
+              ) : (
+                <>
+                  <Save className="mr-2 h-5 w-5" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </div>
         </form>
+
+        {/* Botão fechar flutuante */}
+        <button 
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors z-[60]"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </DialogContent>
     </Dialog>
   );

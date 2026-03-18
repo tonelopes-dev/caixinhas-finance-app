@@ -11,7 +11,6 @@ import { GoalService } from '@/services/goal.service';
 import { TransactionService } from '@/services/transaction.service';
 import { withPageAccess } from '@/lib/page-access';
 import Header from '@/components/dashboard/header';
-import { WorkspaceNavigationHandler } from '@/components/dashboard/workspace-navigation-handler';
 import type { User, Vault } from '@/lib/definitions';
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados
@@ -102,7 +101,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col">
-      <WorkspaceNavigationHandler />
       <Header user={currentUser as User} partner={null} />
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardClient

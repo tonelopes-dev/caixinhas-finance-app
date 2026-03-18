@@ -1,11 +1,11 @@
 /**
  * Service Worker - Caixinhas Finance App
- * Versão: v20260317-133304
- * Build: 2026-03-17T13:33:04.098Z
+ * Versão: v20260317-231113
+ * Build: 2026-03-17T23:11:13.596Z
  * Ambiente: PRODUCTION
  */
 
-const VERSION = 'v20260317-133304';
+const VERSION = 'v20260317-231113';
 const CACHE_NAME = `caixinhas-${VERSION}`;
 const STATIC_CACHE = `caixinhas-static-${VERSION}`;
 const DYNAMIC_CACHE = `caixinhas-dynamic-${VERSION}`;

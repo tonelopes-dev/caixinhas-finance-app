@@ -1,11 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Mail, Plus, X, MoreVertical, Pencil, Users, Crown, Calendar, UserPlus } from 'lucide-react';
+import { 
+  Check, 
+  Mail, 
+  Plus, 
+  X, 
+  MoreVertical, 
+  Pencil, 
+  Users, 
+  Lock, 
+  UserPlus,
+  ChevronRight 
+} from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -14,7 +25,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Logo } from '@/components/logo';
 import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
 import { EditVaultDialog } from '@/components/vaults/edit-vault-dialog';
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
@@ -24,6 +34,7 @@ import { performLogout } from '@/lib/auth-utils';
 import { useAuthLoading } from '@/hooks/use-auth-loading';
 import { useLoading } from '@/components/providers/loading-provider';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AccessBanner } from '@/components/ui/access-banner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LoadingScreen } from '../ui/loading-screen';
-
+import { cn } from '@/lib/utils';
 
 type User = {
   id: string;
@@ -81,6 +92,12 @@ type VaultsPageClientProps = {
   canCreateVaults?: boolean;
   canAccessPersonal?: boolean;
   currentWorkspaceId?: string;
+  accessInfo?: {
+    status: 'active' | 'trial' | 'inactive';
+    daysRemaining: number;
+    message?: string;
+    isRestricted: boolean;
+  };
 };
 
 function WorkspaceCard({
@@ -91,8 +108,6 @@ function WorkspaceCard({
   isPersonal = false,
   isPrivate = false,
   onEdit,
-  onEditProfile,
-  onConvert,
   isOwner = false,
   ownerId,
   isActive = false,
@@ -104,8 +119,6 @@ function WorkspaceCard({
   isPersonal?: boolean;
   isPrivate?: boolean;
   onEdit?: (vault: Vault) => void;
-  onEditProfile?: () => void;
-  onConvert?: () => void;
   isOwner?: boolean;
   ownerId?: string;
   isActive?: boolean;
@@ -115,33 +128,16 @@ function WorkspaceCard({
   
   const handleWorkspaceClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Sempre permite navegar, mesmo se já estiver ativo
-    // Isso garante que o usuário possa sair da tela de vaults
-    
     try {
-      console.log('🔵 [WorkspaceCard] Iniciando navegação para:', name);
-      
-      // Mostra loading global sem barra de progresso (como no mobile nav)
       showLoading(`Abrindo ${name}...`);
-      
-      // Salva no localStorage para o dashboard saber quando fechar
       if (typeof window !== 'undefined') {
         localStorage.setItem('workspace-navigation-pending', 'true');
       }
-      
-      // Executa a action
       const formData = new FormData(e.currentTarget);
-      console.log('🔵 [WorkspaceCard] Executando setWorkspaceAction...');
       await setWorkspaceAction(formData);
-      console.log('🔵 [WorkspaceCard] setWorkspaceAction concluída');
-      
-      // Pequeno delay antes de navegar
       setTimeout(() => {
-        console.log('🔵 [WorkspaceCard] Navegando para /dashboard');
         router.push('/dashboard');
       }, 300);
-      
     } catch (error) {
       console.error('❌ [WorkspaceCard] Erro ao trocar workspace:', error);
       if (typeof window !== 'undefined') {
@@ -156,31 +152,34 @@ function WorkspaceCard({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
       className="h-full relative group"
     >
       {onEdit && (
-        <div className="absolute top-2 right-2 z-20">
+        <div className="absolute top-3 right-3 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm">
-                <MoreVertical className="h-4 w-4" />
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="h-9 w-9 bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40 shadow-lg rounded-full"
+              >
+                <MoreVertical className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {isOwner && (
+            <DropdownMenuContent align="end" className="rounded-xl border-border/50">
+              {isOwner ? (
                 <DropdownMenuItem onClick={() => onEdit({ id, name, imageUrl, isPrivate, ownerId: ownerId || '', members })}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Editar Espaço
                 </DropdownMenuItem>
-              )}
-              {!isOwner && (
+              ) : (
                 <DropdownMenuItem disabled>
                   <Pencil className="mr-2 h-4 w-4 opacity-50" />
                   Apenas Proprietário
                 </DropdownMenuItem>
               )}
-
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -189,50 +188,75 @@ function WorkspaceCard({
       <form onSubmit={handleWorkspaceClick} className="h-full">
         <input type="hidden" name="workspaceId" value={id} />
         <input type="hidden" name="isPersonal" value={isPersonal.toString()} />
-        <button type="submit" className="h-full w-full text-left">
-          <Card className={`transition-all group h-full flex flex-col w-full ${
-            isActive 
-              ? 'bg-primary/10 border-primary/50 border-2 shadow-lg cursor-pointer hover:scale-[1.02] hover:shadow-xl' 
-              : 'cursor-pointer hover:scale-[1.02] hover:shadow-xl'
-          }`}>
-            <CardHeader className="p-0">
-              <div className="relative h-40 w-full">
-                {isActive && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <Badge className="bg-primary text-primary-foreground shadow-md">
-                      <Check className="h-3 w-3 mr-1" />
-                      Ativo
-                    </Badge>
-                  </div>
-                )}
+        <button type="submit" className="h-full w-full text-left outline-none group">
+          <Card className={cn(
+            "overflow-hidden transition-all duration-500 h-full flex flex-col w-full border-none shadow-xl",
+            isActive ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/5"
+          )}>
+            <CardHeader className="p-0 relative h-48 sm:h-52">
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <Image 
                   src={imageUrl} 
                   alt={name} 
                   fill 
-                  className="object-cover rounded-t-lg"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                   priority={false}
                   loading="lazy"
-                  quality={60}
+                  quality={80}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              </div>
+                
+                {isActive && (
+                  <div className="absolute top-4 left-4 z-20">
+                    <Badge className="bg-primary text-white font-bold shadow-lg shadow-primary/40 border-none px-3 py-1 animate-pulse">
+                      <div className="w-2 h-2 rounded-full bg-white mr-2" />
+                      Ativo
+                    </Badge>
+                  </div>
+                )}
+
+                <div className="absolute bottom-4 left-4 z-20">
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-widest bg-black/30 backdrop-blur-sm border-white/20 text-white font-semibold">
+                    {members.length} {members.length === 1 ? 'Membro' : 'Membros'}
+                  </Badge>
+                </div>
             </CardHeader>
-            <CardContent className="p-4 flex-grow flex flex-col justify-between">
-              <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
-                {name}
-              </CardTitle>
+            <CardContent className="p-6 flex-grow flex flex-col justify-between bg-card/10 backdrop-blur-sm">
+              <div className="space-y-2">
+                <CardTitle className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">
+                  {name}
+                </CardTitle>
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  {isPrivate ? (
+                    <><Lock className="w-3.5 h-3.5" /> Privado</>
+                  ) : (
+                    <><Users className="w-3.5 h-3.5" /> Em Conjunto</>
+                  )}
+                </div>
+              </div>
+
               {members && (
-                <div className="flex -space-x-2 overflow-hidden mt-2">
-                  {members.map((member) => (
-                    <Avatar
-                      key={member.id}
-                      className="inline-block h-6 w-6 rounded-full border-2 border-card"
-                    >
-                      <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  ))}
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="flex -space-x-3 overflow-hidden">
+                    {members.slice(0, 5).map((member) => (
+                      <Avatar
+                        key={member.id}
+                        className="h-9 w-9 border-4 border-card bg-muted ring-2 ring-transparent group-hover:ring-primary/20 transition-all"
+                      >
+                        <AvatarImage src={member.avatarUrl || ''} alt={member.name} />
+                        <AvatarFallback className="font-bold bg-primary/10 text-primary text-xs">{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {members.length > 5 && (
+                      <div className="h-9 w-9 rounded-full border-4 border-card bg-muted flex items-center justify-center text-[10px] font-bold">
+                        +{members.length - 5}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <ChevronRight className="w-6 h-6" />
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -306,10 +330,8 @@ function InvitationCard({
         onHoverEnd={() => setIsHovered(false)}
         className="group relative rounded-xl border-2 border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-lg hover:border-primary/40 hover:shadow-xl transition-all duration-300"
       >
-        {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-accent/10 opacity-60" />
         
-        {/* Vault Cover Image */}
         <div className="relative z-10 mb-4">
           <div className="flex items-start gap-4">
             <div className="relative overflow-hidden rounded-lg">
@@ -350,7 +372,6 @@ function InvitationCard({
           </div>
         </div>
 
-        {/* Members Preview */}
         {memberAvatars.length > 0 && (
           <div className="relative z-10 mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -379,7 +400,6 @@ function InvitationCard({
                       side="top" 
                       className="z-[100] bg-popover border border-border shadow-xl px-3 py-2 rounded-lg"
                       sideOffset={8}
-                      avoidCollisions={true}
                     >
                       <p className="font-medium text-sm whitespace-nowrap text-popover-foreground">
                         {member.user.name}
@@ -399,7 +419,6 @@ function InvitationCard({
                       side="top" 
                       className="z-[100] bg-popover border border-border shadow-xl px-3 py-2 rounded-lg"
                       sideOffset={8}
-                      avoidCollisions={true}
                     >
                       <p className="text-sm whitespace-nowrap text-popover-foreground">
                         Mais {remainingMembers} {remainingMembers === 1 ? 'membro' : 'membros'}
@@ -412,7 +431,6 @@ function InvitationCard({
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="relative z-10 flex gap-3">
           <Button
             className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200"
@@ -451,9 +469,8 @@ function InvitationCard({
           </Tooltip>
         </div>
 
-        {/* Hover Effect Overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
           animate={{ opacity: isHovered ? 1 : 0 }}
         />
       </motion.div>
@@ -461,34 +478,28 @@ function InvitationCard({
   );
 }
 
+
 export function VaultsPageClient({
   currentUser,
   userVaults,
   userInvitations,
   canCreateVaults = true,
-  canAccessPersonal = true,
   currentWorkspaceId,
+  accessInfo,
 }: VaultsPageClientProps) {
   const router = useRouter();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
   const [editingVault, setEditingVault] = useState<Vault | null>(null);
   const { isVisible, message, setAuthLoading } = useAuthLoading();
-
   const { toast } = useToast();
 
-  // Detectar se chegamos aqui vindo do login e fechar o loading após 500ms
   useEffect(() => {
     const loginInProgress = sessionStorage.getItem('login_in_progress');
     if (loginInProgress) {
-      console.log('✅ Vaults - Detectado login bem-sucedido, aguardando 500ms antes de fechar loading...');
-      
-      // Aguardar 500ms para garantir que a página está totalmente carregada
       const timer = setTimeout(() => {
-        console.log('✅ Vaults - Fechando loading do login');
         sessionStorage.removeItem('login_in_progress');
         setAuthLoading(false);
       }, 500);
-      
       return () => clearTimeout(timer);
     }
   }, [setAuthLoading]);
@@ -517,133 +528,189 @@ export function VaultsPageClient({
     router.refresh();
   };
 
-
-
   return (
-    <>
+    <div className="min-h-screen premium-bg pb-20">
       {isVisible && <LoadingScreen message={message} />}
-        <header className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-2">
-            <Logo className="h-8 w-8" />
-            <h1 className="font-headline text-xl font-bold text-foreground">Caixinhas</h1>
+      
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 transition-all duration-300 shadow-sm overflow-hidden">
+        <div className="container mx-auto h-20 px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/')}>
+            <Image
+              src="/logo-caixinhas.png"
+              alt="Caixinhas Logo"
+              width={40}
+              height={40}
+              quality={100}
+              className="w-10 h-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+            />
+            <span className="text-xl font-bold text-foreground tracking-tight hidden sm:block">
+              Caixinhas
+            </span>
           </div>
+
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="font-semibold">{currentUser.name}</p>
-              <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+            <div className="text-right hidden md:block">
+              <p className="font-semibold text-sm leading-tight">{currentUser.name}</p>
+              <p className="text-[10px] text-muted-foreground">{currentUser.email}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => router.push('/profile')}>
-              Meu Perfil
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-foreground hover:bg-primary/10"
+                onClick={() => router.push('/profile')}
+              >
+                Perfil
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                onClick={handleLogout}
+              >
+                Sair
+              </Button>
+            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold font-headline tracking-tight">
-              Bem-vindo(a), {currentUser.name.split(' ')[0]}!
+      <main className="container mx-auto px-6 pt-32 max-w-6xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
+          <div className="text-center md:text-left animate-fade-in-up">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+              Olá, {currentUser.name.split(' ')[0]}! ✨
             </h2>
-            <div className="text-muted-foreground mt-2">
-              Escolha um espaço de trabalho para começar a planejar.
-            </div>
+            <p className="text-muted-foreground mt-4 text-lg">
+              Sua jornada para realizar sonhos começa aqui. 
+              <br className="hidden md:block" /> Escolha um espaço abaixo:
+            </p>
           </div>
 
-          <AnimatePresence>
-            {userInvitations.length > 0 && (
-              <motion.div layout className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                      <Mail className="h-6 w-6 text-primary" /> 
-                      Convites Pendentes
-                    </h3>
-                    <p className="text-muted-foreground mt-1">
-                      {userInvitations.length} {userInvitations.length === 1 ? 'convite aguardando' : 'convites aguardando'} sua decisão
-                    </p>
-                  </div>
-                  <Badge variant="secondary" className="px-3 py-1">
-                    {userInvitations.length}
-                  </Badge>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <AnimatePresence>
-                    {userInvitations.map((inv) => (
-                      <InvitationCard
-                        key={inv.id}
-                        invitation={inv}
-                        userId={currentUser.id}
-                        onAction={handleInvitationAction}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {accessInfo && (
+            <div className="animate-fade-in shrink-0">
+              <AccessBanner
+                status={accessInfo.status}
+                daysRemaining={accessInfo.daysRemaining}
+                message={accessInfo.message}
+                showUpgradeButton={accessInfo.isRestricted}
+              />
+            </div>
+          )}
+        </div>
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Seus Cofres</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-              {/* Vault Cards */}
-              <AnimatePresence>
-                {userVaults.map((vault) => (
-                  <WorkspaceCard
-                    key={vault.id}
-                    id={vault.id}
-                    name={vault.name}
-                    imageUrl={vault.imageUrl}
-                    isPrivate={vault.isPrivate}
-                    members={vault.members}
-                    isPersonal={false}
-                    isOwner={vault.ownerId === currentUser.id}
-                    ownerId={vault.ownerId}
-                    onEdit={handleEditClick}
-                    isActive={currentWorkspaceId === vault.id}
+        <AnimatePresence>
+          {userInvitations.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-12"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                    <Mail className="h-6 w-6 text-primary" /> 
+                    Convites Pendentes
+                  </h3>
+                  <p className="text-muted-foreground mt-1">
+                    {userInvitations.length} {userInvitations.length === 1 ? 'convite aguardando' : 'convites aguardando'} sua decisão
+                  </p>
+                </div>
+                <Badge variant="secondary" className="px-3 py-1">
+                  {userInvitations.length}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {userInvitations.map((inv) => (
+                  <InvitationCard
+                    key={inv.id}
+                    invitation={inv}
+                    userId={currentUser.id}
+                    onAction={handleInvitationAction}
                   />
                 ))}
-              </AnimatePresence>
-              
-              {/* Create New Vault Card */}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-2xl font-bold tracking-tight text-foreground">
+                Seus Cofres
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Gerencie seus espaços de economia
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence mode="popLayout">
+              {userVaults.map((vault) => (
+                <WorkspaceCard
+                  key={vault.id}
+                  id={vault.id}
+                  name={vault.name}
+                  imageUrl={vault.imageUrl}
+                  isPrivate={vault.isPrivate}
+                  members={vault.members}
+                  isOwner={vault.ownerId === currentUser.id}
+                  ownerId={vault.ownerId}
+                  onEdit={handleEditClick}
+                  isActive={currentWorkspaceId === vault.id}
+                />
+              ))}
+            </AnimatePresence>
+            
+            <motion.div
+              layout
+              whileHover={{ y: -5 }}
+              className="h-full"
+            >
               <Card
                 onClick={handleCreateVaultClick}
-                className={`flex flex-col items-center justify-center border-dashed border-2 transition-colors min-h-[220px] ${
+                className={cn(
+                  "flex flex-col items-center justify-center border-dashed border-2 group transition-all duration-300 min-h-[280px] rounded-2xl bg-muted/20 backdrop-blur-sm",
                   canCreateVaults 
-                    ? 'cursor-pointer hover:border-primary hover:bg-muted/50' 
-                    : 'opacity-50 cursor-not-allowed'
-                }`}
+                    ? "cursor-pointer hover:border-primary hover:bg-primary/5 hover:shadow-xl hover:shadow-primary/10" 
+                    : "opacity-50 cursor-not-allowed"
+                )}
               >
                 <CardContent className="p-6 text-center">
-                  <Plus className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                  <div className="font-semibold">Criar Novo Cofre</div>
+                  <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <Plus className="h-8 w-8" />
+                  </div>
+                  <div className="text-lg font-bold">Criar Novo Cofre</div>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-[180px] mx-auto">
+                    Comece um novo projeto de economia hoje mesmo
+                  </p>
                   {!canCreateVaults && (
-                    <div className="text-xs text-muted-foreground mt-1">🔒 Requer assinatura</div>
+                    <Badge variant="outline" className="mt-4 border-destructive/30 text-destructive font-bold">
+                      🔒 Requer assinatura
+                    </Badge>
                   )}
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           </div>
-        </main>
-        <CreateVaultDialog
-          open={isCreateVaultOpen}
-          onOpenChange={setCreateVaultOpen}
-          currentUser={currentUser}
+        </div>
+      </main>
+      
+      <CreateVaultDialog
+        open={isCreateVaultOpen}
+        onOpenChange={setCreateVaultOpen}
+        currentUser={currentUser}
+      />
+      {editingVault && (
+        <EditVaultDialog
+          open={!!editingVault}
+          onOpenChange={(open) => !open && setEditingVault(null)}
+          vault={editingVault}
         />
-        {editingVault && (
-          <EditVaultDialog
-            open={!!editingVault}
-            onOpenChange={(open) => !open && setEditingVault(null)}
-            vault={editingVault}
-          />
-        )}
-        
-
-
-
-    </>
+      )}
+    </div>
   );
 }

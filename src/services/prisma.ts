@@ -51,7 +51,7 @@ export function setCache(key: string, data: any, ttlMs = 60000): void {
 }
 
 // Conectar explicitamente e manter conexão aquecida
-if (!globalThis.prismaConnected) {
+if (!globalThis.prismaConnected && process.env.NODE_ENV !== 'test') {
   prisma.$connect()
     .then(async () => {
       console.log('✅ Prisma conectado ao banco de dados (pooled)');
@@ -76,8 +76,20 @@ if (!globalThis.prismaConnected) {
       }, 2 * 60 * 1000); // 2 minutos (mais agressivo)
     })
     .catch((error) => {
-      console.error('❌ Erro ao conectar Prisma:', error);
+      console.error('❌ Erro ao conectar Prisma:', error.message);
     });
+}
+
+/**
+ * Verifica se a conexão com o banco de dados está ativa
+ */
+export async function isDatabaseAlive(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 export default prisma;

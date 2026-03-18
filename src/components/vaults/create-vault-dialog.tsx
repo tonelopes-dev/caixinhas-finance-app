@@ -3,29 +3,24 @@
 import React, { useState, useRef } from 'react';
 import {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogContent,
 } from '@/components/ui/mobile-dialog';
-import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ExternalLink, X } from 'lucide-react'; // Removed Plus
+import { X, ChevronRight, ChevronLeft, Globe, Lock, Image as ImageIcon, Wallet, Check } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import Link from 'next/link';
 import { VaultCreationSuccessDialog } from './vault-creation-success-dialog';
 import { createVaultAction } from '@/app/vaults/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { compressImage } from '@/lib/image-utils';
 
 type User = {
   id: string;
@@ -50,8 +45,10 @@ interface CreateVaultDialogProps {
 }
 
 export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVaultDialogProps) {
+  const [step, setStep] = useState(1);
   const [vaultName, setVaultName] = useState('');
   const [selectedPresetImage, setSelectedPresetImage] = useState<string | null>(coverImages[0]);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const [localImageFile, setLocalImageFile] = useState<File | null>(null);
   const [localImagePreviewUrl, setLocalImagePreviewUrl] = useState<string | null>(null);
@@ -60,24 +57,66 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   const { toast } = useToast();
   const router = useRouter();
   
+  const [direction, setDirection] = useState(0);
+  const [canSubmit, setCanSubmit] = useState(false);
+  
   const [state, formAction, isPending] = useActionState(createVaultAction, {
     message: null,
   });
 
-  // Determine the final image URL for display
+  // Proteção contra clique duplo na transição para o Passo 3
+  React.useEffect(() => {
+    if (step === 3) {
+      const timer = setTimeout(() => setCanSubmit(true), 500);
+      return () => clearTimeout(timer);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [step]);
+
   const displayImageUrl = localImagePreviewUrl || selectedPresetImage;
 
-  // Função customizada para processar o envio do formulário
-  const handleSubmit = async (formData: FormData) => {
-    // Se há um arquivo local, adiciona ao FormData
+  const resetForm = () => {
+    setStep(1);
+    setVaultName('');
+    setSelectedPresetImage(coverImages[0]);
+    setLocalImageFile(null);
+    setLocalImagePreviewUrl(null);
+    setIsPrivate(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      onOpenChange(false);
+      setTimeout(resetForm, 300);
+    } else {
+      onOpenChange(true);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (step < 3) {
+      nextStep();
+      return;
+    }
+
+    if (!canSubmit || isPending) return;
+
+    const formData = new FormData(e.currentTarget);
+    
     if (localImageFile) {
       formData.set('imageFile', localImageFile);
-      // Remove a URL da imagem predefinida se há um arquivo local
       formData.delete('imageUrl');
     }
     
-    // Chama a action original
-    return formAction(formData);
+    React.startTransition(() => {
+      formAction(formData);
+    });
   };
 
   React.useEffect(() => {
@@ -87,18 +126,15 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
         description: state.message,
       });
       
-      // Reset form
-      setVaultName('');
-      setSelectedPresetImage(coverImages[0]);
-      setLocalImageFile(null);
-      setLocalImagePreviewUrl(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      // Primeiro atualizamos os dados, depois abrimos o feedback de sucesso
+      React.startTransition(() => {
+        router.refresh();
+      });
       
-      onOpenChange(false);
-      setSuccessModalOpen(true);
-      router.refresh();
+      setTimeout(() => {
+        handleClose(false);
+        setSuccessModalOpen(true);
+      }, 150);
     } else if (state?.errors) {
       toast({
         title: 'Erro',
@@ -106,235 +142,346 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
         variant: 'destructive',
       });
     }
-  }, [state, toast, onOpenChange, router]);
-  
+  }, [state, toast, router]);
   
   const handlePresetImageSelection = (imageUrl: string) => {
     setSelectedPresetImage(imageUrl);
-    setLocalImageFile(null); // Clear local file
+    setLocalImageFile(null);
     setLocalImagePreviewUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setLocalImageFile(file);
     if (file) {
-      setLocalImagePreviewUrl(URL.createObjectURL(file));
-      setSelectedPresetImage(null); // Clear preset selection
+      try {
+        const compressed = await compressImage(file);
+        setLocalImageFile(compressed);
+        setLocalImagePreviewUrl(URL.createObjectURL(compressed));
+        setSelectedPresetImage(null);
+      } catch (error) {
+        console.error('Erro ao comprimir imagem:', error);
+        // Fallback para o arquivo original se falhar
+        setLocalImageFile(file);
+        setLocalImagePreviewUrl(URL.createObjectURL(file));
+        setSelectedPresetImage(null);
+      }
     } else {
+      setLocalImageFile(null);
       setLocalImagePreviewUrl(null);
     }
   }
 
-  const handleRemoveImage = () => {
-    setLocalImageFile(null);
-    setLocalImagePreviewUrl(null);
-    setSelectedPresetImage(coverImages[0]); // Revert to a default preset
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const nextStep = () => {
+    if (step >= 3) return; 
+    if (step === 1 && !vaultName.trim()) {
+      toast({
+        title: "Nome necessário",
+        description: "Por favor, dê um nome ao seu cofre para continuar.",
+        variant: "destructive"
+      });
+      return;
     }
-  }
+    setDirection(1);
+    setStep(s => s + 1);
+  };
+
+  const prevStep = () => {
+    if (step <= 1) return;
+    setDirection(-1);
+    setStep(s => s - 1);
+  };
+
+  const stepVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 100 : -100,
+      opacity: 0,
+      scale: 0.95
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -100 : 100,
+      opacity: 0,
+      scale: 0.95
+    })
+  };
 
   return (
     <>
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent
-                className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0"
-                mobileOptimized={true}
-            >
-            <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="bg-white/90 hover:bg-white text-gray-900 shadow-lg font-medium"
-                        onClick={() => onOpenChange(false)}
-                    >Fechar</Button>
-            <DialogHeader className="sr-only">
-              <DialogTitle>Criar Novo Vault</DialogTitle>
-            </DialogHeader>
-            <form action={handleSubmit}>
-                <input type="hidden" name="userId" value={currentUser.id} />
-                {!localImageFile && (
-                    <input 
-                        type="hidden" 
-                        name="imageUrl" 
-                        value={selectedPresetImage ?? ''} 
-                    />
-                )}
-                
-                {/* Botão fechar modal - acima da imagem */}
-                <div className="absolute top-4 right-4 z-10">
-                    
-                </div>
-                
-                {/* Header com imagem de fundo */}
-                <div className="relative h-48 w-full overflow-hidden pt-12">
-                    {displayImageUrl ? (
-                        <Image src={displayImageUrl} alt="Preview da Imagem" fill className="object-cover" />
-                    ) : (
-                        <div className="bg-gradient-to-br from-green-500 to-blue-600 h-full w-full" />
-                    )}
-                    <div className="absolute inset-0 bg-black/40" />
-                    
-                    {/* Botão remover imagem */}
-                    {(localImageFile || selectedPresetImage !== coverImages[0]) && ( 
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            className="absolute top-4 right-4 rounded-full bg-white/90 hover:bg-white text-gray-900 shadow-lg"
-                            onClick={handleRemoveImage}
-                            title="Remover imagem"
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
-                    )}
-                    
-                    {/* Título sobre a imagem */}
-                    <div className="absolute bottom-4 left-6">
-                        <h2 className="text-2xl font-bold text-white mb-1">Criar Novo Cofre</h2>
-                        <p className="text-white/80 text-sm">Planeje e economize em conjunto</p>
-                    </div>
-                </div>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Criar Novo Cofre - Passo {step}</DialogTitle>
+          </DialogHeader>
 
-                <div className="p-6 space-y-6">
-                    {/* Nome do cofre */}
-                    <div className="space-y-3">
-                        <Label htmlFor="vault-name" className="text-base font-medium">Nome do Cofre</Label>
+          <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
+            <input type="hidden" name="userId" value={currentUser.id} />
+            <input type="hidden" name="isPrivate" value={isPrivate.toString()} />
+            {/* Garantir que o nome esteja sempre no FormData, mesmo que o step 1 saia do DOM */}
+            {step !== 1 && <input type="hidden" name="name" value={vaultName} />}
+            {!localImageFile && (
+              <input type="hidden" name="imageUrl" value={selectedPresetImage ?? ''} />
+            )}
+
+            {/* Header com Progresso */}
+            <div className="relative h-2 w-full bg-muted">
+              <motion.div 
+                className="absolute h-full bg-primary"
+                initial={{ width: "33%" }}
+                animate={{ width: `${(step / 3) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            {/* Conteúdo do Step */}
+            <div className="flex-1 overflow-y-auto min-h-[400px]">
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={step}
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  className="p-8 space-y-6"
+                >
+                  {step === 1 && (
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                          <Wallet className="w-6 h-6 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold tracking-tight">O que vamos guardar?</h2>
+                        <p className="text-muted-foreground">Dê um nome bem legal para o seu cofre. Assim fica fácil de lembrar!</p>
+                      </div>
+
+                      <div className="space-y-4 pt-4">
+                        <Label htmlFor="vault-name" className="text-base font-semibold">Nome do Cofre</Label>
                         <Input
-                            id="vault-name"
-                            name="name"
-                            value={vaultName}
-                            onChange={(e) => setVaultName(e.target.value)}
-                            placeholder="Ex: Reforma da Casa, Viagem dos Sonhos..."
-                            required
-                            className="text-lg py-3"
+                          id="vault-name"
+                          name="name"
+                          autoFocus
+                          value={vaultName}
+                          onChange={(e) => setVaultName(e.target.value)}
+                          placeholder="Ex: Reforma da Casa, Viagem, Casamento..."
+                          className="text-xl py-6 rounded-xl border-2 focus:border-primary transition-all shadow-sm"
+                          required
                         />
-                        {state?.errors?.name && (
-                          <p className="text-sm text-destructive flex items-center gap-1">
-                            <span className="text-destructive">⚠</span>
-                            {state.errors.name[0]}
+                        <div className="bg-primary/10 p-4 rounded-xl flex gap-3 items-start border border-primary/20">
+                          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="text-[10px] font-bold text-primary">TIP</span>
+                          </div>
+                          <p className="text-xs text-foreground/80 leading-relaxed font-medium">
+                            Use nomes que te motivem! Em vez de "Poupança", tente "Meu Primeiro Apê" 🏠
                           </p>
-                        )}
-                    </div>
-
-                    {/* Switch Privacidade */}
-                    <div className="flex flex-row items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-colors">
-                        <div className="space-y-1">
-                            <Label htmlFor="is-private" className="text-base font-medium">
-                                Cofre Privado
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Apenas você pode ver este cofre
-                            </p>
                         </div>
-                        <Switch id="is-private" name="isPrivate" className="scale-110" />
+                      </div>
                     </div>
+                  )}
 
-                    <div className="space-y-4"> {/* Increased spacing */}
-                        <Label className="text-base font-medium">Imagem de Capa</Label>
+                  {step === 2 && (
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                          <ImageIcon className="w-6 h-6 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold tracking-tight">Deixe com a sua cara</h2>
+                        <p className="text-muted-foreground">Escolha uma imagem que combine com seu sonho.</p>
+                      </div>
 
-                        {/* Upload personalizado */}
-                        <div 
-                            onClick={() => fileInputRef.current?.click()}
-                            className="relative border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-accent/30 group"
-                        >
-                            <input
-                                type="file"
-                                name="imageFile" 
-                                accept="image/*"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
-                            <div className="space-y-2">
-                                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
-                                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 10MB</p>
-                                </div>
-                            </div>
-                            {localImageFile && (
-                                <div className="mt-3 text-xs text-primary bg-primary/10 inline-block px-2 py-1 rounded-md">
-                                    📁 {localImageFile.name}
-                                </div>
-                            )}
+                      <div className="space-y-6">
+                        {/* Preview atual */}
+                        <div className="relative h-40 w-full overflow-hidden rounded-2xl border-4 border-background shadow-xl">
+                          {displayImageUrl ? (
+                            <Image src={displayImageUrl} alt="Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 500px" />
+                          ) : (
+                            <div className="bg-gradient-to-br from-primary to-accent h-full w-full" />
+                          )}
+                          <div className="absolute inset-0 bg-black/20" />
+                          <div className="absolute bottom-4 left-4 right-4">
+                            <p className="text-white font-bold text-lg truncate">{vaultName}</p>
+                          </div>
                         </div>
 
-                        {/* Imagens predefinidas */}
+                        {/* Opções */}
                         <div className="space-y-3">
-                            <Label className="text-sm text-muted-foreground">Ou escolha uma imagem predefinida</Label>
-                            <div className="grid grid-cols-3 gap-3">{coverImages.map(imgSrc => (
-                                <button 
-                                    type="button" 
-                                    key={imgSrc} 
-                                    onClick={() => handlePresetImageSelection(imgSrc)} 
-                                    className={cn(
-                                        'relative h-24 w-full overflow-hidden rounded-lg border-2 transition-all hover:scale-105 hover:shadow-md', 
-                                        selectedPresetImage === imgSrc && !localImageFile 
-                                            ? 'border-primary ring-2 ring-primary/20 ring-offset-2' 
-                                            : 'border-border hover:border-primary/30'
-                                    )}
-                                >
-                                    <Image src={imgSrc} alt="Opção de capa" fill className="object-cover" />
-                                    {selectedPresetImage === imgSrc && !localImageFile && (
-                                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                                            <div className="bg-primary text-primary-foreground rounded-full p-1.5">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                            </div>
-                                        </div>
-                                    )}
-                                </button>
+                          <Label className="text-sm font-semibold">Escolha uma das nossas fotos:</Label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {coverImages.map(imgSrc => (
+                              <button 
+                                type="button" 
+                                key={imgSrc} 
+                                onClick={() => handlePresetImageSelection(imgSrc)} 
+                                className={cn(
+                                  'relative h-20 w-full overflow-hidden rounded-xl border-2 transition-all hover:scale-105', 
+                                  selectedPresetImage === imgSrc && !localImageFile 
+                                    ? 'border-primary ring-4 ring-primary/20 scale-105' 
+                                    : 'border-transparent opacity-70 hover:opacity-100'
+                                )}
+                              >
+                                <Image src={imgSrc} alt="Capa" fill className="object-cover" sizes="150px" />
+                                {selectedPresetImage === imgSrc && !localImageFile && (
+                                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                    <Check className="w-6 h-6 text-white bg-primary rounded-full p-1" />
+                                  </div>
+                                )}
+                              </button>
                             ))}
-                            </div>
+                          </div>
                         </div>
+
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-muted" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                          </div>
+                        </div>
+
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="w-full py-6 border-dashed border-2 rounded-xl group hover:border-primary transition-colors"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <ImageIcon className="mr-2 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                          {localImageFile ? localImageFile.name : 'Usar minha própria foto'}
+                          <input
+                            type="file"
+                            name="imageFile" 
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                        </Button>
+                      </div>
                     </div>
-                </div>
-                
-                {/* Rodapé com botões */}
-                <div className="flex flex-col-reverse sm:flex-row gap-3 p-4 sm:p-6 bg-muted/30 border-t">
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => onOpenChange(false)}
-                        className="flex-1 font-medium h-12 sm:h-10"
-                    >
-                        Cancelar
-                    </Button>
-                    <Button 
-                        type="submit" 
-                        disabled={isPending || !vaultName.trim()}
-                        className="flex-1 font-medium bg-primary hover:bg-primary/90 h-12 sm:h-10"
-                    >
-                        {isPending ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Criando...
-                            </>
-                        ) : (
-                            <>
-                                <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Criar Cofre
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </form>
-            </DialogContent>
-        </Dialog>
-        <VaultCreationSuccessDialog open={isSuccessModalOpen} onOpenChange={setSuccessModalOpen} />
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-6 text-center">
+                      <div className="space-y-2 text-left">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                          <Lock className="w-6 h-6 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold tracking-tight">Quem pode ver?</h2>
+                        <p className="text-muted-foreground">Escolha como prefere manter este cofre.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setIsPrivate(false)}
+                          className={cn(
+                            "flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all",
+                            !isPrivate ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/30"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                            !isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          )}>
+                            <Globe className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-bold text-lg">Cofre em Conjunto</p>
+                            <p className="text-sm text-muted-foreground">Você poderá convidar outras pessoas para economizarem juntas. Ideal para casais e famílias!</p>
+                          </div>
+                          {!isPrivate && <Check className="w-5 h-5 text-primary shrink-0 self-center" />}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsPrivate(true)}
+                          className={cn(
+                            "flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all",
+                            isPrivate ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/30"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                            isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          )}>
+                            <Lock className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-bold text-lg">Cofre Privado</p>
+                            <p className="text-sm text-muted-foreground">Apenas você terá acesso a este cofre. Seus sonhos, sua privacidade total.</p>
+                          </div>
+                          {isPrivate && <Check className="w-5 h-5 text-primary shrink-0 self-center" />}
+                        </button>
+                      </div>
+
+                      <div className="pt-6">
+                        <div className="bg-primary/10 p-4 rounded-2xl border border-primary/20 flex flex-col items-center gap-2">
+                          <p className="text-sm font-medium">Tudo pronto!</p>
+                          <p className="text-xs text-foreground/80 font-medium">Clique no botão abaixo para criar seu cofre e começar a poupar.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Footer com Navegação */}
+            <div className="p-6 bg-muted/30 border-t flex gap-3">
+              {step > 1 && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={prevStep}
+                  className="h-14 px-6 rounded-xl font-bold"
+                >
+                  <ChevronLeft className="mr-2 h-5 w-5" />
+                  Voltar
+                </Button>
+              )}
+              
+              <Button 
+                type={step === 3 ? "submit" : "button"} 
+                onClick={step === 3 ? undefined : nextStep}
+                disabled={isPending || (step === 3 && !canSubmit)}
+                className="flex-1 h-14 text-lg font-bold rounded-xl gradient-button text-white border-none"
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Criando...</span>
+                  </div>
+                ) : (
+                  <>
+                    {step === 3 ? 'Finalizar e Criar Cofre' : 'Continuar'}
+                    <ChevronRight className="ml-2 h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+
+          {/* Botão fechar flutuante se no step 1 (opcional, já temos o DialogClose padrão mas vamos deixar um bonito) */}
+          <button 
+            type="button"
+            onClick={() => handleClose(false)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground transition-colors md:hidden"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </DialogContent>
+      </Dialog>
+      <VaultCreationSuccessDialog open={isSuccessModalOpen} onOpenChange={setSuccessModalOpen} />
     </>
   );
 }

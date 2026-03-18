@@ -71,8 +71,14 @@ export class AuthService {
       console.log('✅ Login - Login bem-sucedido para:', user.email);
       return userWithoutPassword;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Erro no login:', error);
+      
+      // ⚡ TRATAMENTO DE ERRO: Caso o banco esteja inacessível
+      if (error.message?.includes('Can\'t reach database server')) {
+        throw new Error('Banco de dados inacessível. Verifique se o Docker está rodando e a porta no .env está correta.');
+      }
+      
       throw new Error('Erro ao realizar login');
     }
   }
