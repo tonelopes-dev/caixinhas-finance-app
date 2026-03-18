@@ -30,7 +30,7 @@ Este documento serve como o roteiro estratégico para a modernização da interf
 
 #### 1. Gestão de Caixinhas (Goals)
 - [x] **Lista de Metas (`/goals`)**: Redesenhar a listagem principal para usar o novo `GoalCard` premium.
-- [ ] **Detalhes da Caixinha (`/goals/[id]`)**: Implementar visualização focada no progresso, com gráficos e histórico de transações premium.
+- [x] **Detalhes da Caixinha (`/goals/[id]`)**: Implementar visualização focada no progresso, com gráficos e histórico de transações premium.
 - [ ] **Criação/Edição de Metas**: Refinar os formulários e seletores de ícones/cores.
 
 #### 2. Transações & Contas

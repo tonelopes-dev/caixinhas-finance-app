@@ -26,12 +26,6 @@ import { cn } from '@/lib/utils';
 import type { Goal, Vault } from '@/lib/definitions';
 import { MemberAvatars } from '../ui/member-avatars';
 
-// Estendendo o tipo Goal para incluir os campos do Prisma que podem estar faltando na definição global
-type ExtendedGoal = Goal & {
-  userId?: string | null;
-  vaultId?: string | null;
-};
-
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -40,7 +34,7 @@ function formatCurrency(value: number) {
 }
 
 interface GoalCardProps {
-  goal: ExtendedGoal;
+  goal: Goal;
   userVaults: Vault[];
   userId: string;
   onToggleFeatured: (goalId: string) => void;
@@ -132,10 +126,10 @@ export function GoalCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MemberAvatars 
-              members={(goal.participants?.map((p: any) => ({
-                name: p.user?.name || p.name || 'Usuário',
-                avatarUrl: p.user?.avatarUrl || p.avatarUrl
-              })) || []) as any} 
+              members={goal.participants?.map(p => ({
+                name: p.user.name,
+                avatarUrl: p.user.avatarUrl
+              })) || []} 
               size="md" 
               limit={3} 
             />

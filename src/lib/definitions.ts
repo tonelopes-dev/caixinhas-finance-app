@@ -38,11 +38,18 @@ export type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense' | 'transfer';
-  category: string;
+  category: {
+    name: string;
+  } | null;
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'transfer' | 'boleto' | 'cash';
-  sourceAccountId?: string;
-  destinationAccountId?: string; 
+  sourceAccountId?: string | null;
+  destinationAccountId?: string | null; 
   actorId?: string;
+  actor?: {
+    id: string;
+    name: string;
+    avatarUrl: string;
+  } | null;
   isRecurring?: boolean;
   isInstallment?: boolean;
   totalInstallments?: number;
@@ -52,9 +59,13 @@ export type Transaction = {
 
 export type GoalParticipant = {
   id: string;
-  name: string;
-  avatarUrl: string;
   role: 'owner' | 'member';
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string;
+  };
   // Opcional: Especifica de qual cofre/conta o dinheiro deste participante virá.
   // Isso prepara o app para colaboração entre diferentes cofres no futuro.
   contributionContextId?: string; 
@@ -64,6 +75,8 @@ export type Goal = {
   id:string;
   ownerId: string;
   ownerType: 'user' | 'vault';
+  userId?: string | null;
+  vaultId?: string | null;
   name: string;
   targetAmount: number;
   currentAmount: number;
@@ -71,6 +84,8 @@ export type Goal = {
   visibility: 'private' | 'shared'; 
   participants?: GoalParticipant[];
   isFeatured?: boolean;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
 };
 
 export type User = {

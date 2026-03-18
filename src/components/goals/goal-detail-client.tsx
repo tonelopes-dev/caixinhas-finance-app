@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { GoalTransactionDialog } from '@/components/goals/goal-transaction-dialog';
 import { cn } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
-import type { Account, Vault } from '@/lib/definitions';
+// Importações consolidadas de definições globais
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 
@@ -43,45 +43,9 @@ function formatDate(dateString: string) {
   });
 }
 
-type Goal = {
-  id: string;
-  name: string;
-  emoji: string;
-  targetAmount: number;
-  currentAmount: number;
-  visibility: 'private' | 'shared';
-  isFeatured: boolean;
-  ownerId: string;
-  ownerType: 'user' | 'vault';
-  userId?: string | null;
-  vaultId?: string | null;
-  participants: {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    role: string;
-  }[];
-  createdAt: string;
-};
+import type { Account, Vault, Goal, Transaction } from '@/lib/definitions';
 
-type Transaction = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: 'income' | 'expense' | 'transfer';
-  category: {
-    name: string;
-  } | null;
-  actor: {
-    id: string;
-    name: string;
-    avatarUrl: string;
-  } | null;
-  sourceAccountId: string | null;
-  destinationAccountId: string | null;
-  ownerId: string;
-};
+// Removendo tipos locais redundantes para usar os globais do definitions.ts
 
 type GoalDetailClientProps = {
   goal: Goal;
@@ -288,11 +252,11 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                         {goal.participants?.map((p) => (
                             <div key={p.id} className="flex items-center gap-4 bg-white/60 p-4 rounded-[22px] border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
                                 <Avatar className="h-12 w-12 border-2 border-white shadow-md">
-                                    <AvatarImage src={p.avatarUrl} alt={p.name} />
-                                    <AvatarFallback className="bg-[#ff6b7b]/10 text-[#ff6b7b] font-black">{p.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={p.user.avatarUrl} alt={p.user.name} />
+                                    <AvatarFallback className="bg-[#ff6b7b]/10 text-[#ff6b7b] font-black">{p.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-black text-[#2D241E] truncate text-sm">{p.name}</p>
+                                    <p className="font-black text-[#2D241E] truncate text-sm">{p.user.name}</p>
                                     <p className="text-[10px] font-black uppercase tracking-[0.1em] text-[#2D241E]/50 italic">{p.role === 'owner' ? 'Dono' : 'Colaborador'}</p>
                                 </div>
                             </div>

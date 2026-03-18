@@ -19,38 +19,11 @@ import {
 import { AnimatedDiv } from '@/components/ui/animated-div';
 import { useToast } from '@/hooks/use-toast';
 
-type Goal = {
-  id: string;
-  name: string;
-  emoji: string;
-  targetAmount: number;
-  currentAmount: number;
-  visibility: 'private' | 'shared';
-  isFeatured: boolean;
-  userId?: string | null;
-  vaultId?: string | null;
-  ownerId?: string; // Mantido para compatibilidade
-  ownerType?: 'user' | 'vault'; // Mantido para compatibilidade
-  participants: {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    role: string;
-  }[];
-};
+import type { Goal, Vault } from '@/lib/definitions';
 
-type Vault = {
-  id: string;
-  name: string;
-  imageUrl: string;
-  ownerId: string;
-  members: {
-    id: string;
-    name: string;
-    email: string;
-    avatarUrl: string;
-  }[];
-};
+// Removendo tipos locais redundantes para usar os globais do definitions.ts
+
+// Vault já está importado de @/lib/definitions
 
 type GoalsPageClientProps = {
   goals: Goal[];
@@ -145,8 +118,8 @@ export function GoalsPageClient({ goals: initialGoals, vaults, userId }: GoalsPa
           <div className="space-y-12">
             <AnimatedDiv transition={{ delay: 0.1 }}>
               <GoalList
-                goals={goals as any}
-                userVaults={vaults as any}
+                goals={goals}
+                userVaults={vaults}
                 userId={userId}
                 onToggleFeatured={toggleFeatured}
                 onGoToWorkspace={handleGoToWorkspace}

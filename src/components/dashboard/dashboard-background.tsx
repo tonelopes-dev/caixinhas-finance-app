@@ -1,9 +1,11 @@
-'use client';
-
 import React from 'react';
 
-export function DashboardBackground() {
-  return (
+interface DashboardBackgroundProps {
+  children?: React.ReactNode;
+}
+
+export function DashboardBackground({ children }: DashboardBackgroundProps) {
+  const backgroundElements = (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#fdfcf7]">
       {/* Orbes de Brilho - Cores da Marca (Suaves) */}
       <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#D4A15E]/5 rounded-full blur-[120px] animate-pulse" />
@@ -21,6 +23,18 @@ export function DashboardBackground() {
           backgroundSize: "80px 80px",
         }}
       />
+    </div>
+  );
+
+  if (!children) return backgroundElements;
+
+  return (
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      {backgroundElements}
+      {/* Content */}
+      <div className="relative z-10 flex flex-1 flex-col">
+        {children}
+      </div>
     </div>
   );
 }
