@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import Link from 'next/link';
+import { 
+  ArrowLeft, TrendingDown, TrendingUp, Wallet, Landmark, 
+  ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, 
+  Search, Repeat, ArrowRightLeft, Filter, Calendar, 
+  ChevronDown, Plus, Download 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -33,7 +39,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Search, Repeat, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
 import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
@@ -208,326 +213,352 @@ export function TransactionsPageClient({
 
   return (
     <>
+      {/* Navigation & Header */}
+      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+            <Button asChild variant="ghost" className="text-[#2D241E]/60 hover:text-[#ff6b7b] hover:bg-[#ff6b7b]/5 rounded-xl transition-all -ml-3">
+                <Link href="/dashboard" className="flex items-center">
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    <span className="font-black uppercase tracking-widest text-[10px]">Voltar ao Dashboard</span>
+                </Link>
+            </Button>
+            <h1 className="font-headline text-4xl md:text-5xl font-black tracking-tight text-[#2D241E]">
+                Transações
+            </h1>
+            <p className="text-[#2D241E]/50 font-medium text-sm">
+                Acompanhe e gerencie seu fluxo financeiro completo.
+            </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+            <AddTransactionDialog 
+                accounts={allAccounts} 
+                goals={allGoals} 
+                ownerId={workspaceId} 
+                categories={allCategories} 
+                className="shadow-lg shadow-[#ff6b7b]/20"
+            />
+        </div>
+      </div>
+
       <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="mb-8"
+        className="mb-14"
       >
-        <Card>
-            <CardHeader>
-                <CardTitle className='font-headline'>Resumo do Período</CardTitle>
-                <CardDescription>Balanço de entradas e saídas para os filtros selecionados.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <motion.div className="grid gap-4 md:grid-cols-4" initial="hidden" animate="visible" variants={containerVariants}>
-                    <motion.div variants={summaryItemVariants(0.1)} className={cn(cardBaseClasses, typeFilter === 'all' && activeClasses)} onClick={() => setTypeFilter('all')}>
-                        <div className="rounded-full bg-primary/10 p-3">
-                            <Wallet className="h-6 w-6 text-primary" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Net Balance Card */}
+            <motion.div 
+                variants={summaryItemVariants(0.1)} 
+                className={cn(
+                    "relative group overflow-hidden bg-white/70 backdrop-blur-md rounded-[32px] p-6 border border-white/80 shadow-[0_15px_40px_rgba(45,36,30,0.06)] hover:shadow-[0_25px_60px_rgba(45,36,30,0.12)] transition-all duration-500 cursor-pointer",
+                    typeFilter === 'all' && "ring-2 ring-[#ff6b7b] bg-white/90 scale-[1.02]"
+                )}
+                onClick={() => setTypeFilter('all')}
+            >
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Wallet className="h-16 w-16 text-[#2D241E]" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2D241E]/50 mb-4">Saldo Líquido</p>
+                <h3 className="text-3xl font-black text-[#2D241E] tracking-tighter mb-2">
+                    {formatCurrency(summary.balance)}
+                </h3>
+                <div className="w-10 h-1 bg-[#2D241E]/10 rounded-full group-hover:w-20 transition-all duration-500" />
+            </motion.div>
+
+            {/* Income Card */}
+            <motion.div 
+                variants={summaryItemVariants(0.2)} 
+                className={cn(
+                    "relative group overflow-hidden bg-white/70 backdrop-blur-md rounded-[32px] p-6 border border-white/80 shadow-[0_15px_40px_rgba(45,36,30,0.06)] hover:shadow-[0_25px_60px_rgba(45,36,30,0.12)] transition-all duration-500 cursor-pointer",
+                    typeFilter === 'income' && "ring-2 ring-green-500 bg-white/90 scale-[1.02]"
+                )}
+                onClick={() => setTypeFilter('income')}
+            >
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <TrendingUp className="h-16 w-16 text-green-600" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-green-600/60 mb-4">Total Entradas</p>
+                <h3 className="text-3xl font-black text-green-600 tracking-tighter mb-2">
+                    {formatCurrency(summary.income)}
+                </h3>
+                <div className="w-10 h-1 bg-green-500/10 rounded-full group-hover:w-20 transition-all duration-500" />
+            </motion.div>
+
+            {/* Expense Card */}
+            <motion.div 
+                variants={summaryItemVariants(0.3)} 
+                className={cn(
+                    "relative group overflow-hidden bg-white/70 backdrop-blur-md rounded-[32px] p-6 border border-white/80 shadow-[0_15px_40px_rgba(45,36,30,0.06)] hover:shadow-[0_25px_60px_rgba(45,36,30,0.12)] transition-all duration-500 cursor-pointer",
+                    typeFilter === 'expense' && "ring-2 ring-[#ff6b7b] bg-white/90 scale-[1.02]"
+                )}
+                onClick={() => setTypeFilter('expense')}
+            >
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <TrendingDown className="h-16 w-16 text-[#ff6b7b]" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#ff6b7b]/60 mb-4">Total Saídas</p>
+                <h3 className="text-3xl font-black text-[#ff6b7b] tracking-tighter mb-2">
+                    {formatCurrency(summary.expenses)}
+                </h3>
+                <div className="w-10 h-1 bg-[#ff6b7b]/10 rounded-full group-hover:w-20 transition-all duration-500" />
+            </motion.div>
+
+            {/* Recurring Card */}
+            <motion.div 
+                variants={summaryItemVariants(0.4)} 
+                className="relative group overflow-hidden bg-white/70 backdrop-blur-md rounded-[32px] p-6 border-2 border-transparent hover:border-purple-200/50 shadow-[0_15px_40px_rgba(45,36,30,0.06)] hover:shadow-[0_25px_60px_rgba(45,36,30,0.12)] hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col justify-between"
+                onClick={() => router.push('/recurring')}
+            >
+                <div className="absolute -top-4 -right-4 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-125 transition-all duration-700">
+                    <Repeat className="h-24 w-24 text-purple-600" />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 rounded-xl bg-purple-100/50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                            <Repeat className="h-4 w-4" />
                         </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Saldo Líquido</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.balance)}</p>
-                        </div>
-                    </motion.div>
-                    <motion.div variants={summaryItemVariants(0.2)} className={cn(cardBaseClasses, typeFilter === 'income' && activeClasses)} onClick={() => setTypeFilter('income')}>
-                        <div className="rounded-full bg-green-500/10 p-3">
-                            <TrendingUp className="h-6 w-6 text-green-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Entradas</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.income)}</p>
-                        </div>
-                    </motion.div>
-                    <motion.div variants={summaryItemVariants(0.3)} className={cn(cardBaseClasses, typeFilter === 'expense' && activeClasses)} onClick={() => setTypeFilter('expense')}>
-                        <div className="rounded-full bg-red-500/10 p-3">
-                            <TrendingDown className="h-6 w-6 text-red-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Saídas</p>
-                            <p className="text-xl font-bold">{formatCurrency(summary.expenses)}</p>
-                        </div>
-                    </motion.div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <motion.div
-                            variants={summaryItemVariants(0.4)}
-                            className={cn(cardBaseClasses, "group justify-between hover:bg-muted/50")}
-                            onClick={() => router.push('/recurring')}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="rounded-full bg-purple-500/10 p-3">
-                                <Repeat className="h-6 w-6 text-purple-500" />
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">Recorrentes e Parcelas</p>
-                                <p className="text-xl font-bold">{recurringSummary.recurringCount + recurringSummary.installmentsCount}</p>
-                              </div>
-                            </div>
-                            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                          </motion.div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ver detalhes de recorrências e parcelas</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                </motion.div>
-            </CardContent>
-        </Card>
+                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-purple-600/60">Contas Fixas</p>
+                    </div>
+                    <h3 className="text-3xl font-black text-purple-600 tracking-tighter mb-2">
+                        {recurringSummary.recurringCount + recurringSummary.installmentsCount}
+                    </h3>
+                    <p className="text-[10px] font-bold text-purple-600/30 group-hover:text-purple-600/50 transition-colors">
+                        Recorrências e parcelamentos
+                    </p>
+                </div>
+                <div className="mt-6 flex items-center justify-between">
+                    <div className="px-4 py-2 rounded-xl bg-purple-600/5 text-purple-600 text-[10px] font-black uppercase tracking-widest group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 flex items-center gap-2">
+                        <span>Ver todos</span>
+                        <ArrowRight className="h-3 w-3 transform group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </div>
+            </motion.div>
+        </div>
       </motion.div>
 
       <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
+          className="relative"
       >
-          <Card>
-          <CardHeader>
-              <div>
-              <CardTitle className="font-headline text-2xl">
-                  Histórico de Transações
-              </CardTitle>
-              <CardDescription>
-                  Seu histórico financeiro completo e detalhado.
-              </CardDescription>
-              </div>
-              <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-center">
-                <div className='relative flex-1'>
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Buscar por nome ou valor..."
-                    className="pl-10 w-full"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+        <div className="bg-white/50 backdrop-blur-md rounded-[40px] border border-white/80 shadow-[0_20px_50px_rgba(45,36,30,0.08)] overflow-hidden">
+            {/* Filter Bar */}
+            <div className="p-6 md:p-8 border-b border-[#2D241E]/5 bg-white/30">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2D241E]/30" />
+                        <Input 
+                            placeholder="Buscar transação..."
+                            className="pl-12 h-14 bg-white/50 border-white/80 rounded-2xl shadow-sm focus:ring-[#ff6b7b]/20 focus:border-[#ff6b7b]/30 transition-all font-medium text-[#2D241E]"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-[#2D241E]/5 rounded-2xl border border-white/50">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40">Filtros</span>
+                            <div className="h-4 w-[1px] bg-[#2D241E]/10 mx-1" />
+                            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
+                                <SelectTrigger className="h-9 border-0 bg-transparent shadow-none focus:ring-0 font-bold text-[#2D241E] gap-2 px-2">
+                                    <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-2xl">
+                                    <SelectItem value="all">Todos os Tipos</SelectItem>
+                                    <SelectItem value="income">Entradas</SelectItem>
+                                    <SelectItem value="expense">Saídas</SelectItem>
+                                    <SelectItem value="transfer">Transferências</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            
+                            <Select value={monthFilter} onValueChange={setMonthFilter}>
+                                <SelectTrigger className="h-9 border-0 bg-transparent shadow-none focus:ring-0 font-bold text-[#2D241E] gap-2 px-2">
+                                    <SelectValue placeholder="Mês" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-2xl">
+                                    {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            
+                            <Select value={yearFilter} onValueChange={setYearFilter}>
+                                <SelectTrigger className="h-9 border-0 bg-transparent shadow-none focus:ring-0 font-bold text-[#2D241E] gap-2 px-2">
+                                    <SelectValue placeholder="Ano" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-2xl">
+                                    <SelectItem value="all">Anos</SelectItem>
+                                    {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className='text-sm font-medium sr-only md:not-sr-only'>Filtros:</span>
+            </div>
 
-                  <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="income">Entradas</SelectItem>
-                        <SelectItem value="expense">Saídas</SelectItem>
-                        <SelectItem value="transfer">Transferências</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Mês" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger className="w-full md:w-auto">
-                        <SelectValue placeholder="Ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <div className="hidden md:block">
-                      <AddTransactionDialog accounts={allAccounts} goals={allGoals} ownerId={workspaceId} categories={allCategories} />
-                  </div>
-                </div>
-                
-                {/* Botão mobile logo após os filtros */}
-                <div className="mt-4 md:hidden">
-                    <AddTransactionDialog 
-                      accounts={allAccounts} 
-                      goals={allGoals} 
-                      ownerId={workspaceId} 
-                      categories={allCategories}
-                      fullWidth={true}
-                    />
-                </div>
-              </div>
-          </CardHeader>
-          <CardContent className='overflow-hidden p-0 md:p-6'>
-              {/* Mobile View */}
-              <motion.div className="space-y-4 md:hidden p-4" variants={containerVariants} initial="hidden" animate="visible">
-                  {filteredTransactions.map(t => {
-                      const typeInfo = getTypeDisplay(t.type);
-                      const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod]?.icon : null;
-                      return (
-                          <motion.div variants={itemVariants} key={t.id} className="flex items-center gap-3 border-b pb-3 last:border-b-0">
-                              <div className={cn("p-2 rounded-full", typeInfo.bgColor)}>
-                                  <typeInfo.icon className={cn("h-5 w-5", typeInfo.color)}/>
-                              </div>
-                              <div className="flex-1 space-y-0.5">
-                                  <div className="flex justify-between items-start">
-                                      <p className="font-medium flex-1 pr-2">{t.description}</p>
-                                      <p className={cn("font-medium whitespace-nowrap", {
-                                        'text-green-600': t.type === 'income',
-                                        'text-red-500': t.type === 'expense',
-                                        'text-muted-foreground': t.type === 'transfer'
-                                      })}>
-                                          {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
-                                          {formatCurrency(t.amount)}
-                                      </p>
-                                  </div>
-                                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                                      <span>{formatDate(t.date)}</span>
-                                      <div className='flex items-center gap-2'>
-                                          {t.isRecurring && (
-                                              <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                                                  Recorrente
-                                              </Badge>
-                                          )}
-                                          {t.isInstallment && t.totalInstallments && (
-                                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                                                  ({t.installmentNumber || 1}/{t.totalInstallments})
-                                              </Badge>
-                                          )}
-                                          {MethodIcon && (
-                                              <div className='flex items-center gap-1'>
-                                                  <MethodIcon className="h-3 w-3" />
-                                                  <span>{paymentMethods[t.paymentMethod!].label}</span>
-                                              </div>
-                                          )}
-                                      </div>
-                                  </div>
-                              </div>
-                              <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                          <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                      <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                      <DeleteTransactionDialog transactionId={t.id} />
-                                  </DropdownMenuContent>
-                              </DropdownMenu>
-                          </motion.div>
-                      );
-                  })}
-              </motion.div>
-
-              {/* Desktop View */}
-              <Table className="hidden md:table">
-              <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">Tipo</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="hidden lg:table-cell">Categoria</TableHead>
-                    <TableHead className="hidden lg:table-cell">Contas</TableHead>
-                    <TableHead className="hidden xl:table-cell">Frequência</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-              </TableHeader>
-              <motion.tbody
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-              >
-                  {filteredTransactions.map((t) => {
-                      const typeInfo = getTypeDisplay(t.type);
-                      const MethodIcon = t.paymentMethod ? paymentMethods[t.paymentMethod!]?.icon : null;
-
-                      return (
-                          <motion.tr variants={itemVariants} key={t.id}>
-                              <TableCell>
-                                  <div className={cn("p-2 rounded-full w-fit", typeInfo.bgColor)}>
-                                      <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
-                                  </div>
-                              </TableCell>
-                              <TableCell>
-                                  <div>
-                                      <p className="font-medium">{t.description}</p>
-                                      {MethodIcon && (
-                                        <div className='flex items-center gap-1 text-muted-foreground text-xs'>
-                                            <MethodIcon className="h-3 w-3" />
-                                            <span>{paymentMethods[t.paymentMethod!].label}</span>
+            <CardContent className="p-0">
+                {/* Mobile View */}
+                <motion.div className="md:hidden divide-y divide-[#2D241E]/5" variants={containerVariants} initial="hidden" animate="visible">
+                    {filteredTransactions.map(t => {
+                        const typeInfo = getTypeDisplay(t.type);
+                        const isIncome = t.type === 'income';
+                        const isExpense = t.type === 'expense';
+                        
+                        return (
+                            <motion.div variants={itemVariants} key={t.id} className="p-5 flex items-center gap-4 bg-white/20 hover:bg-white/40 transition-colors">
+                                <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-90", typeInfo.bgColor)}>
+                                    <typeInfo.icon className={cn("h-6 w-6", typeInfo.color)}/>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start mb-0.5">
+                                        <p className="font-bold text-[#2D241E] truncate pr-2">{t.description}</p>
+                                        <p className={cn("font-black whitespace-nowrap text-right", 
+                                            isIncome ? "text-green-600" : isExpense ? "text-[#ff6b7b]" : "text-[#2D241E]/60"
+                                        )}>
+                                            {isIncome ? '+' : isExpense ? '-' : ''}
+                                            {formatCurrency(t.amount)}
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.1em] text-[#2D241E]/40">
+                                        <div className="flex items-center gap-2">
+                                            <span>{formatDate(t.date)}</span>
+                                            {t.category?.name && (
+                                                <>
+                                                    <div className="w-1 h-1 rounded-full bg-[#2D241E]/20" />
+                                                    <span className="text-[#2D241E]/60">{t.category.name}</span>
+                                                </>
+                                            )}
                                         </div>
-                                      )}
-                                  </div>
-                              </TableCell>
-                              <TableCell className="hidden lg:table-cell">
-                                  <Badge variant="outline">{t.category?.name || 'Sem categoria'}</Badge>
-                              </TableCell>
-                              <TableCell className="hidden lg:table-cell text-xs">
-                                  {t.sourceAccountId ? (
-                                      <div className='flex items-center gap-1 text-muted-foreground'>
-                                          <Landmark className="h-3 w-3 text-red-500" />
-                                          <span>{getAccountName(t.sourceAccountId)}</span>
-                                      </div>
-                                  ) : (t.goalId && t.type === 'transfer' && t.destinationAccountId) ? (
-                                      <div className='flex items-center gap-1 text-muted-foreground'>
-                                          <PiggyBank className="h-3 w-3 text-red-500"/>
-                                          <span>{t.goal?.name ? `Caixinha: ${t.goal.name}` : 'Caixinha'}</span>
-                                      </div>
-                                  ) : null}
-                                  
-                                  {t.destinationAccountId ? (
-                                      <div className='flex items-center gap-1 text-muted-foreground mt-1'>
-                                          <Landmark className="h-3 w-3 text-green-500" />
-                                          <span>{getAccountName(t.destinationAccountId)}</span>
-                                      </div>
-                                  ) : (t.goalId && t.type === 'transfer' && t.sourceAccountId) ? (
-                                      <div className='flex items-center gap-1 text-muted-foreground mt-1'>
-                                          <PiggyBank className="h-3 w-3 text-green-500"/>
-                                          <span>{t.goal?.name ? `Caixinha: ${t.goal.name}` : 'Caixinha'}</span>
-                                      </div>
-                                  ) : null}
-                              </TableCell>
-                              <TableCell className="hidden xl:table-cell">
-                                {t.isRecurring && (
-                                  <Badge variant="outline" className="border-purple-300 text-purple-800">
-                                      Recorrente
-                                  </Badge>
-                                )}
-                                {t.isInstallment && t.totalInstallments && (
-                                  <Badge variant="outline" className="border-blue-300 text-blue-800">
-                                      Parcelado ({t.installmentNumber || 1}/{t.totalInstallments})
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell>{formatDate(t.date)}</TableCell>
-                              <TableCell className={cn("text-right font-medium", {
-                                  'text-green-600': t.type === 'income',
-                                  'text-red-500': t.type === 'expense',
-                                  'text-muted-foreground': t.type === 'transfer'
-                              })}>
-                                  {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
-                                  {formatCurrency(t.amount)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                  <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                          <Button variant="ghost" size="icon">
-                                              <MoreHorizontal className="h-4 w-4" />
-                                          </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                          <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                          <DeleteTransactionDialog transactionId={t.id} />
-                                      </DropdownMenuContent>
-                                  </DropdownMenu>
-                              </TableCell>
-                          </motion.tr>
-                      )
-                  })}
-              </motion.tbody>
-              </Table>
+                                        {t.isRecurring && (
+                                            <Badge variant="outline" className="h-5 px-1.5 border-purple-200 bg-purple-50 text-purple-700 text-[8px] font-black">FIXA</Badge>
+                                        )}
+                                    </div>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-[#2D241E]/5">
+                                            <MoreHorizontal className="h-5 w-5 text-[#2D241E]/40" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="rounded-2xl border-[#2D241E]/5 shadow-2xl p-1">
+                                        <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                        <DeleteTransactionDialog transactionId={t.id} />
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </motion.div>
+                        );
+                    })}
+                </motion.div>
 
-               {filteredTransactions.length === 0 && (
-                  <div className="py-12 text-center text-muted-foreground">
-                      Nenhuma transação encontrada para os filtros selecionados.
-                  </div>
-              )}
-          </CardContent>
-          </Card>
+                {/* Desktop View */}
+                <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-[#2D241E]/5 hover:bg-transparent">
+                                <TableHead className="w-[80px] text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 pl-8">Status</TableHead>
+                                <TableHead className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40">Descrição</TableHead>
+                                <TableHead className="hidden lg:table-cell text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40">Categoria</TableHead>
+                                <TableHead className="hidden lg:table-cell text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40">Origem/Destino</TableHead>
+                                <TableHead className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 text-center">Data</TableHead>
+                                <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 pr-8">Valor</TableHead>
+                                <TableHead className="w-[100px]"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredTransactions.map((t) => {
+                                const typeInfo = getTypeDisplay(t.type);
+                                const isIncome = t.type === 'income';
+                                const isExpense = t.type === 'expense';
+
+                                return (
+                                    <motion.tr 
+                                        variants={itemVariants} 
+                                        key={t.id}
+                                        className="group hover:bg-white/50 border-[#2D241E]/5 transition-colors"
+                                    >
+                                        <TableCell className="pl-8">
+                                            <div className={cn("p-2.5 rounded-2xl w-fit shadow-sm", typeInfo.bgColor)}>
+                                                <typeInfo.icon className={cn("h-4 w-4", typeInfo.color)}/>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="py-2">
+                                                <p className="font-bold text-[#2D241E] text-base group-hover:text-[#ff6b7b] transition-colors">{t.description}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    {t.isRecurring && (
+                                                        <Badge variant="outline" className="h-5 px-2 border-purple-200 bg-purple-50 text-purple-700 text-[9px] font-black tracking-widest uppercase">Fixa</Badge>
+                                                    )}
+                                                    {t.isInstallment && (
+                                                        <Badge variant="outline" className="h-5 px-2 border-blue-200 bg-blue-50 text-blue-700 text-[9px] font-black tracking-widest uppercase">
+                                                            {t.installmentNumber}/{t.totalInstallments}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-xl bg-[#2D241E]/5 text-[11px] font-bold text-[#2D241E]/70 border border-white/50">
+                                                {t.category?.name || 'Geral'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell">
+                                            <div className="space-y-1">
+                                                {t.sourceAccountId && (
+                                                    <div className='flex items-center gap-2 text-[11px] font-medium text-[#2D241E]/60'>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                                        <span>{getAccountName(t.sourceAccountId)}</span>
+                                                    </div>
+                                                )}
+                                                {t.destinationAccountId && (
+                                                    <div className='flex items-center gap-2 text-[11px] font-medium text-[#2D241E]/60'>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                                                        <span>{getAccountName(t.destinationAccountId)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-center font-medium text-[#2D241E]/50 text-sm italic">
+                                            {formatDate(t.date)}
+                                        </TableCell>
+                                        <TableCell className={cn("text-right font-black text-lg tracking-tight pr-8", 
+                                            isIncome ? "text-green-600" : isExpense ? "text-[#ff6b7b]" : "text-[#2D241E]/80"
+                                        )}>
+                                            {isIncome ? '+' : isExpense ? '-' : ''}
+                                            {formatCurrency(t.amount)}
+                                        </TableCell>
+                                        <TableCell className="pr-8 text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ff6b7b]/10 hover:text-[#ff6b7b]">
+                                                        <MoreHorizontal className="h-5 w-5" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="rounded-2xl border-[#2D241E]/5 shadow-2xl p-1 min-w-[150px]">
+                                                    <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                                    <DeleteTransactionDialog transactionId={t.id} />
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </motion.tr>
+                                )
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {filteredTransactions.length === 0 && (
+                    <div className="py-32 text-center bg-white/20">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-[30px] bg-[#2D241E]/5 mb-6">
+                            <Search className="h-10 w-10 text-[#2D241E]/20" />
+                        </div>
+                        <p className="text-[#2D241E]/40 font-black italic tracking-widest uppercase text-xs">
+                            Nenhuma transação encontrada
+                        </p>
+                    </div>
+                )}
+            </CardContent>
+        </div>
       </motion.div>
     </>
   );

@@ -56,9 +56,10 @@ interface AddTransactionDialogProps {
   categories: any[];
   chargeType?: 'single' | 'recurring' | 'installment';
   fullWidth?: boolean;
+  className?: string;
 }
 
-export function AddTransactionDialog({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single', fullWidth = false }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ accounts: workspaceAccounts, goals: workspaceGoals, ownerId, categories, chargeType: initialChargeType = 'single', fullWidth = false, className }: AddTransactionDialogProps) {
   const initialState: TransactionState = { success: false };
   const [state, dispatch] = useActionState(addTransaction, initialState);
   const { toast } = useToast();
@@ -236,7 +237,8 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
           className={cn(
             "h-12 rounded-2xl font-black text-xs uppercase tracking-[0.15em] transition-all active:scale-90 shadow-xl",
             "bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white border-none shadow-[#ff6b7b]/30 hover:shadow-[#ff6b7b]/50 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#ff6b7b] focus-visible:ring-offset-2",
-            fullWidth && "w-full justify-center"
+            fullWidth && "w-full justify-center",
+            className
           )}
         >
           {initialChargeType === 'recurring' ? (

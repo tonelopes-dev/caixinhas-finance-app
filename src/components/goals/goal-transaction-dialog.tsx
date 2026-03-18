@@ -16,6 +16,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
 import { AddAccountPromptDialog } from '@/components/transactions/add-account-prompt-dialog';
+import { cn } from '@/lib/utils';
 import type { Account } from '@/lib/definitions';
 import { useLoading } from '@/components/providers/loading-provider';
 
@@ -30,7 +31,8 @@ type GoalTransactionDialogProps = {
   goalId: string;
   accounts: Account[];
   onComplete?: () => void;
-  disabled?: boolean; // Para casos específicos como saque sem saldo
+  disabled?: boolean; 
+  className?: string;
 };
 
 function SubmitButton() {
@@ -42,7 +44,7 @@ function SubmitButton() {
   );
 }
 
-export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disabled }: GoalTransactionDialogProps) {
+export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disabled, className }: GoalTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   const { toast } = useToast();
@@ -54,10 +56,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
     e.preventDefault();
     e.stopPropagation();
     
-    if (disabled) {
-      // Se está desabilitado (ex: saque sem saldo), não faz nada
-      return;
-    }
+    if (disabled) return;
     if (hasNoAccounts) {
       setPromptOpen(true);
     } else {
@@ -85,25 +84,25 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
     }
   }, [state, toast, onComplete, hideLoading]);
 
-  // Limpa o estado ao fechar o diálogo
-  useEffect(() => {
-    if (!isOpen) {
-        // Reset state logic if needed
-    }
-  }, [isOpen]);
-
   return (
     <>
       <AddAccountPromptDialog open={promptOpen} onOpenChange={setPromptOpen} />
       <Dialog open={isOpen && !hasNoAccounts} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button 
-            variant={type === 'deposit' ? 'default' : 'secondary'} 
-            size="sm" 
+            variant={type === 'deposit' ? 'default' : 'outline'} 
+            size="lg" 
             onClick={handleTriggerClick}
             disabled={disabled}
+            className={cn(
+                "w-full h-14 rounded-[20px] font-black uppercase tracking-widest text-sm transition-all active:scale-95",
+                type === 'deposit' 
+                    ? "bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30" 
+                    : "border-2 border-[#ff6b7b]/20 text-[#ff6b7b] hover:bg-[#ff6b7b]/5",
+                className
+            )}
           >
-            <Icon className="mr-2 h-4 w-4" />
+            <Icon className="mr-2 h-5 w-5" />
             {buttonLabel}
           </Button>
         </DialogTrigger>
@@ -118,7 +117,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
           action={formAction}
           onSubmit={(e) => {
             const action = type === 'deposit' ? 'Depositando' : 'Retirando';
-            showLoading(`${action}...`, false);
+            showLoading(`${action}...`);
           }}
         >
           <input type="hidden" name="goalId" value={goalId} />

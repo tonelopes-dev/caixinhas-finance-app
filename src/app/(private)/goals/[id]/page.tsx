@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { getGoalDetails } from '../actions'; 
 import { GoalDetailClient } from '@/components/goals/goal-detail-client';
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 
 export default async function GoalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; // No Next.js 15, params precisa ser aguardado
@@ -21,23 +22,28 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <GoalDetailClient
-      goal={data.goal}
-      transactions={data.transactions}
-      accounts={data.accounts}
-      vaults={data.vaults.map(vault => ({
-        ...vault,
-        imageUrl: vault.imageUrl || '',
-        members: vault.members.map(member => ({
-          id: member.user.id,
-          name: member.user.name,
-          email: member.user.email,
-          avatarUrl: member.user.avatarUrl,
-          workspaceImageUrl: null,
-          subscriptionStatus: 'active' as const
-        }))
-      }))}
-      userId={session.user.id}
-    />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <DashboardBackground />
+      <div className="relative z-10 w-full">
+        <GoalDetailClient
+          goal={data.goal}
+          transactions={data.transactions}
+          accounts={data.accounts}
+          vaults={data.vaults.map(vault => ({
+            ...vault,
+            imageUrl: vault.imageUrl || '',
+            members: vault.members.map(member => ({
+              id: member.user.id,
+              name: member.user.name,
+              email: member.user.email,
+              avatarUrl: member.user.avatarUrl,
+              workspaceImageUrl: null,
+              subscriptionStatus: 'active' as const
+            }))
+          }))}
+          userId={session.user.id}
+        />
+      </div>
+    </div>
   );
 }
