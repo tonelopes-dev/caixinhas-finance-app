@@ -12,6 +12,7 @@ import { Wallet, PiggyBank, Eye, EyeOff } from 'lucide-react';
 import { AnimatedCounter } from '../ui/animated-counter';
 import { Button } from '../ui/button';
 import { usePrivacyMode } from '@/hooks/use-privacy-mode';
+import { motion } from 'framer-motion';
 
 type NetWorthSummaryProps = {
   liquidAssets: number;
@@ -32,19 +33,21 @@ export default function NetWorthSummary({
     });
   };
 
-  const PrivacyBlur = () => <span className="text-xl font-bold">R$ ••••••</span>;
-  const PrivacyBlurPrimary = () => <span className="text-2xl font-bold text-primary">R$ ••••••</span>;
+  const PrivacyBlur = () => <span className="text-3xl font-black tracking-tighter text-[#2D241E]/30">R$ ••••••</span>;
+  const PrivacyBlurPrimary = () => <span className="text-4xl font-black text-[#ff6b7b]/30 tracking-tighter">R$ ••••••</span>;
 
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="font-headline">
-              Resumo do Patrimônio
+          <div className="space-y-1">
+            <CardTitle className="font-headline text-3xl font-bold tracking-tight text-[#2D241E]">
+              Meu Patrimônio
             </CardTitle>
-            <CardDescription>O pulso da sua vida financeira.</CardDescription>
+            <CardDescription className="text-base font-medium text-[#2D241E]/50">
+                Todo o seu dinheiro somado em um só lugar.
+            </CardDescription>
           </div>
           <Button
             variant="ghost"
@@ -60,37 +63,37 @@ export default function NetWorthSummary({
       <CardContent>
         <Link
           href="/patrimonio"
-          className="block rounded-lg bg-primary/5 p-4 transition-colors hover:bg-primary/10 mb-4"
+          className="relative group block rounded-3xl bg-[#f6f3f1] p-8 transition-all duration-300 hover:shadow-inner border border-[#2D241E]/5 mb-8 overflow-hidden"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Patrimônio Total</p>
-            <div className="text-2xl font-bold text-primary">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div className="space-y-1">
+              <p className="text-sm font-bold tracking-widest text-[#ff6b7b] uppercase">Patrimônio Total</p>
+              <p className="text-xs text-[#2D241E]/40 font-bold uppercase">Clique para ver detalhes</p>
+            </div>
+            <div className="text-5xl font-black tracking-tighter text-[#2D241E]">
               {!isLoaded || isPrivate ? <PrivacyBlurPrimary /> : <AnimatedCounter value={totalNetWorth} formatter={formatCurrency} />}
             </div>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Clique para ver o detalhamento completo.
-          </p>
         </Link>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex items-center gap-4 rounded-lg border p-4">
-            <div className="rounded-full bg-blue-500/10 p-3">
-              <Wallet className="h-6 w-6 text-blue-500" />
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="relative group flex items-center gap-6 rounded-[28px] bg-white border-2 border-[#f6f3f1] p-6 transition-all duration-300 hover:border-[#ff6b7b]/20 hover:shadow-lg">
+            <div className="rounded-2xl bg-blue-50 p-5">
+              <Wallet className="h-10 w-10 text-blue-600" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Disponível Agora</p>
-              {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={liquidAssets} formatter={formatCurrency} /></p>}
+            <div className="space-y-0.5">
+              <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic">dinheiro na mão</p>
+              {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-3xl font-extrabold tracking-tighter text-[#2D241E]"><AnimatedCounter value={liquidAssets} formatter={formatCurrency} /></p>}
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-lg border p-4">
-            <div className="rounded-full bg-green-500/10 p-3">
-              <PiggyBank className="h-6 w-6 text-green-500" />
+
+          <div className="relative group flex items-center gap-6 rounded-[28px] bg-white border-2 border-[#f6f3f1] p-6 transition-all duration-300 hover:border-[#456534]/20 hover:shadow-lg">
+            <div className="rounded-2xl bg-emerald-50 p-5">
+              <PiggyBank className="h-10 w-10 text-emerald-600" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Investido p/ Sonhos
-              </p>
-               {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-xl font-bold"><AnimatedCounter value={investedAssets} formatter={formatCurrency} /></p>}
+            <div className="space-y-0.5">
+              <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic">nas caixinhas</p>
+               {!isLoaded || isPrivate ? <PrivacyBlur /> : <p className="text-3xl font-extrabold tracking-tighter text-[#2D241E]"><AnimatedCounter value={investedAssets} formatter={formatCurrency} /></p>}
             </div>
           </div>
         </div>

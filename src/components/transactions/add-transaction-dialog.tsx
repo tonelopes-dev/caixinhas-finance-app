@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, PlusCircle, Repeat, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Repeat, ArrowLeft, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
@@ -233,7 +233,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
         <Button 
           size="sm" 
           onClick={handleTriggerClick}
-          className={cn(fullWidth && "w-full justify-center")}
+          className={cn(
+            "h-12 rounded-2xl font-black text-xs uppercase tracking-[0.15em] transition-all active:scale-90 shadow-xl",
+            "bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white border-none shadow-[#ff6b7b]/30 hover:shadow-[#ff6b7b]/50 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#ff6b7b] focus-visible:ring-offset-2",
+            fullWidth && "w-full justify-center"
+          )}
         >
           {initialChargeType === 'recurring' ? (
             <>
@@ -247,37 +251,41 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             </>
           )}
         </Button>
-        <DialogContent className="flex flex-col max-h-[90vh] md:max-h-none" mobileOptimized={true}>
-          <DialogHeader>
-            <DialogTitle>Adicionar Transação</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="flex flex-col max-h-[90vh] md:max-h-none bg-[#fdfcf7] border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
+          <DialogHeader className="p-8 pb-4 bg-white/50 backdrop-blur-sm border-b border-[#2D241E]/5">
+            <DialogTitle className="font-headline text-3xl font-bold text-[#2D241E]">Adicionar Transação</DialogTitle>
+            <DialogDescription className="text-lg font-medium text-[#2D241E]/50">
               Registre uma nova entrada, saída ou transferência.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-2 py-2">
+          <div className="flex items-center gap-2 px-8 py-6 bg-white/30">
             {steps.map((s, index) => (
                 <React.Fragment key={s.id}>
-                    <div className="flex items-center gap-2">
-                        <div className={cn("flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold", step >= s.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                            {s.id}
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-[10px] text-xs font-black transition-all", 
+                          step === s.id ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20 scale-110" : 
+                          step > s.id ? "bg-emerald-500 text-white" : "bg-white text-[#2D241E]/20 border border-[#2D241E]/5"
+                        )}>
+                            {step > s.id ? <Check className="h-4 w-4" /> : s.id}
                         </div>
-                        <span className={cn("text-sm font-medium", step >= s.id ? "text-foreground" : "text-muted-foreground")}>{s.title}</span>
+                        <span className={cn("text-xs font-black uppercase tracking-widest", step >= s.id ? "text-[#2D241E]" : "text-[#2D241E]/20")}>{s.title}</span>
                     </div>
-                    {index < steps.length - 1 && <div className="flex-1 h-px bg-border" />}
+                    {index < steps.length - 1 && <div className={cn("flex-1 h-0.5 mx-2 rounded-full", step > s.id ? "bg-emerald-500/20" : "bg-[#2D241E]/5")} />}
                 </React.Fragment>
             ))}
           </div>
 
-          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden min-h-0">
-            <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4 min-h-0 overscroll-contain">
+          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden min-h-0 bg-[#fdfcf7]">
+            <div className="flex-1 space-y-6 overflow-y-auto px-8 py-8 min-h-0 overscroll-contain">
               <AnimatePresence mode="wait">
                   {step === 1 && (
                       <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                          <div className="space-y-2">
-                              <Label htmlFor="description_field">Descrição</Label>
-                              <Input id="description_field" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} />
-                              {state?.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
+                          <div className="space-y-3">
+                              <Label htmlFor="description_field" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Descrição</Label>
+                              <Input id="description_field" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm" />
+                              {state?.errors?.description && <p className="text-xs font-bold text-[#ff6b7b] ml-1">{state.errors.description[0]}</p>}
                           </div>
                            <div className="space-y-2">
                                 <Label htmlFor="category_field">Categoria</Label>
@@ -420,21 +428,23 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                   )}
               </AnimatePresence>
             </div>
-            <DialogFooter className='mt-auto pt-4 border-t'>
-              <div className="w-full flex justify-between items-center">
+            <DialogFooter className='mt-auto p-8 border-t border-[#2D241E]/5 bg-white/50 backdrop-blur-sm'>
+              <div className="w-full flex justify-between items-center gap-4">
                 {step > 1 ? (
-                    <Button type="button" variant="ghost" onClick={prevStep}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                    <Button type="button" variant="ghost" onClick={prevStep} className="h-14 px-6 rounded-2xl font-bold text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-transparent">
+                        <ArrowLeft className="mr-2 h-5 w-5" />
                         Voltar
                     </Button>
                 ) : <div />}
 
                 {step < 3 ? (
-                    <Button type="button" onClick={nextStep} disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)}>
+                    <Button type="button" onClick={nextStep} disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest bg-[#2D241E] text-white hover:bg-[#3D342E] transition-all shadow-xl">
                         Avançar
                     </Button>
                 ) : (
-                    <SubmitButton />
+                    <Button type="submit" className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white hover:shadow-[#ff6b7b]/40 transition-all shadow-xl border-none">
+                        Salvar Transação
+                    </Button>
                 )}
               </div>
             </DialogFooter>

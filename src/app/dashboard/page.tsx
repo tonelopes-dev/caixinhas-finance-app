@@ -12,6 +12,7 @@ import { TransactionService } from '@/services/transaction.service';
 import { withPageAccess } from '@/lib/page-access';
 import Header from '@/components/dashboard/header';
 import type { User, Vault } from '@/lib/definitions';
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados
 const DashboardClient = dynamic(
@@ -100,24 +101,28 @@ export default async function DashboardPage() {
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col">
-      <Header user={currentUser as User} partner={null} />
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardClient
-          currentUser={currentUser as User}
-          partner={null}
-          workspaceId={workspaceId}
-          workspaceName={workspaceName}
-          isPersonalWorkspace={workspaceId === userId}
-          members={members}
-          accounts={accounts}
-          goals={allGoals || []}
-          transactions={recentTransactions || []}
-          categories={categories || []}
-          patrimonyData={patrimonyData}
-        />
-      </Suspense>
-      <PwaPrompt />
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      <DashboardBackground />
+      
+      <div className="relative z-10 flex flex-1 flex-col px-4 md:px-8 pt-24 pb-8">
+        <Header user={currentUser as User} partner={null} />
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DashboardClient
+            currentUser={currentUser as User}
+            partner={null}
+            workspaceId={workspaceId}
+            workspaceName={workspaceName}
+            isPersonalWorkspace={workspaceId === userId}
+            members={members}
+            accounts={accounts}
+            goals={allGoals || []}
+            transactions={recentTransactions || []}
+            categories={categories || []}
+            patrimonyData={patrimonyData}
+          />
+        </Suspense>
+        <PwaPrompt />
+      </div>
     </div>
   );
 }

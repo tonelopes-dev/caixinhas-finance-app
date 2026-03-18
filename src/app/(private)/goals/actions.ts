@@ -242,7 +242,15 @@ export async function getUserAllGoals(userId: string) {
   const userVaults = await VaultService.getUserVaults(userId);
   const vaultGoalsPromises = userVaults.map(v => GoalService.getVaultGoals(v.id));
   const vaultGoals = (await Promise.all(vaultGoalsPromises)).flat();
-  return { goals: [...personalGoals, ...vaultGoals] };
+  
+  const allGoals = [...personalGoals, ...vaultGoals];
+  
+  // Garantir que não existam duplicatas por ID
+  const uniqueGoals = Array.from(
+    new Map(allGoals.map(goal => [goal.id, goal])).values()
+  );
+  
+  return { goals: uniqueGoals };
 }
 
 export async function getGoalsPageData(userId: string) {

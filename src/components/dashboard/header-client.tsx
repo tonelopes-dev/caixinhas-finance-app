@@ -42,12 +42,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
     <>
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 relative h-9 rounded-full pl-2 pr-2 md:pr-4">
-          <Avatar className="h-9 w-9 border-2" style={{borderColor: 'hsl(var(--chart-1))'}}>
+        <Button variant="ghost" className="flex items-center gap-3 relative h-11 rounded-full pl-1.5 pr-5 bg-white hover:bg-[#fdfcf7] hover:text-[#2D241E] text-[#2D241E] border-none shadow-sm hover:shadow-md transition-all active:scale-95 group focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
+           <Avatar className="h-8 w-8 ring-2 ring-[#ff6b7b] ring-offset-2 ring-offset-white">
             <AvatarImage src={user.avatarUrl || undefined} alt={user.name} data-ai-hint="woman portrait"/>
-            <AvatarFallback>{user.name.split(' ')[0]}</AvatarFallback>
+            <AvatarFallback className="bg-[#2D241E] text-white font-bold">{user.name.split(' ')[0][0]}</AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline font-medium text-sm">Olá, {user.name.split(' ')[0]}</span>
+          <span className="hidden md:inline font-headline font-bold text-base tracking-tight italic opacity-90 group-hover:opacity-100">Olá, {user.name.split(' ')[0]}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

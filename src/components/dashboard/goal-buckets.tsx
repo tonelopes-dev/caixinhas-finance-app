@@ -13,6 +13,8 @@ import { user, partner } from '@/lib/data';
 import { AnimatedCounter } from '../ui/animated-counter';
 import { cn } from '@/lib/utils';
 import { usePrivacyMode } from '@/hooks/use-privacy-mode';
+import { motion } from 'framer-motion';
+import { MemberAvatars } from '../ui/member-avatars';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -33,12 +35,16 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
 
 
   return (
-    <Card>
+    <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
       <CardHeader>
         <div className="flex items-start justify-between">
-            <div>
-                <CardTitle className="font-headline">Caixinhas em Destaque</CardTitle>
-                <CardDescription>Suas metas favoritas de <span className="font-bold text-primary">{workspaceName}</span>.</CardDescription>
+            <div className="space-y-1">
+                <CardTitle className="font-headline text-3xl font-bold tracking-tight text-[#2D241E]">
+                    Minhas Caixinhas
+                </CardTitle>
+                <CardDescription className="text-base font-medium text-[#2D241E]/50">
+                    Seus objetivos favoritos de <span className="font-bold text-[#ff6b7b]">{workspaceName}</span>.
+                </CardDescription>
             </div>
             <Button
                 variant="ghost"
@@ -51,67 +57,93 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
             </Button>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        {goalsToShow.map((goal) => {
+           <CardContent className="grid gap-6">
+        {goalsToShow.map((goal, index) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           const participants = goal.participants || [];
           return (
-            <Link href={`/goals/${goal.id}`} key={goal.id} className="group flex items-center gap-4 rounded-lg p-3 -m-3 transition-colors hover:bg-muted/50">
-              <div className="text-4xl transition-transform group-hover:scale-110">{goal.emoji}</div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                     {goal.isFeatured && <Heart className="h-4 w-4 text-[#ff6b7b] fill-[#ff6b7b]" />}
-                    <p className="font-semibold">{goal.name}</p>
+            <motion.div
+              key={goal.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+            >
+              <Link 
+                href={`/goals/${goal.id}`} 
+                className="group relative flex flex-col gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="text-5xl bg-white p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
+                    {goal.emoji}
                   </div>
-                   <p className="text-sm font-bold text-primary flex items-center gap-1">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        {goal.isFeatured && <Heart className="h-4 w-4 text-[#ff6b7b] fill-[#ff6b7b] shrink-0" />}
+                        <p className="font-black text-xl truncate tracking-tight text-[#2D241E]">{goal.name}</p>
+                      </div>
+                      <p className="text-base font-black text-[#ff6b7b]">
                         {!isLoaded || isPrivate ? <PrivacyBlurPercent /> : <><AnimatedCounter value={progress} formatter={(v) => Math.round(v).toString()} />%</>}
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic">
+                        {!isLoaded || isPrivate ? <PrivacyBlur className="text-muted-foreground/40" /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> de {formatCurrency(goal.targetAmount)}</>}
                     </p>
+                  </div>
                 </div>
-                 <p className={cn("text-sm text-muted-foreground", goal.isFeatured && "pl-6")}>
-                    {!isLoaded || isPrivate ? <PrivacyBlur /> : <><AnimatedCounter value={goal.currentAmount} formatter={formatCurrency} /> / {formatCurrency(goal.targetAmount)}</>}
-                </p>
-                <Progress value={!isLoaded || isPrivate ? undefined : progress} className="h-3 mt-2" />
-                <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-1">
-                        <div className="flex -space-x-2 overflow-hidden">
-                            {participants.slice(0, 4).map((p, index) => (
-                                 <Avatar key={p.id ?? index} className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                                    <AvatarImage src={p.avatarUrl} alt={p.name || 'Usuário'} />
-                                    <AvatarFallback>{(p.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                            {participants.length > 4 && (
-                                <Avatar className="inline-block h-6 w-6 rounded-full border-2 border-card">
-                                    <AvatarFallback>+{participants.length - 4}</AvatarFallback>
-                                </Avatar>
-                            )}
-                        </div>
+
+                <div className="space-y-4">
+                  <div className="relative h-4 w-full bg-[#2D241E]/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#ff6b7b] to-[#fa8292] rounded-full"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <MemberAvatars 
+                          members={participants.map((p: any) => ({
+                            name: p.user?.name || p.name || 'Usuário',
+                            avatarUrl: p.user?.avatarUrl || p.avatarUrl
+                          }))} 
+                          size="md" 
+                          limit={3} 
+                        />
+                        {participants.length > 0 && (
+                          <span className="text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[2px]">Partic.</span>
+                        )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {goal.visibility === 'shared' ? <Users className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                        <span>{goal.visibility === 'shared' ? 'Compartilhada' : 'Privada'}</span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest">
+                        {goal.visibility === 'shared' ? <Users className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                        <span>{goal.visibility === 'shared' ? 'Pública' : 'Privada'}</span>
                     </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </motion.div>
           );
         })}
-         {goalsToShow.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">Nenhuma caixinha foi favoritada. Clique no coração na página de caixinhas para destacá-las aqui!</p>
+        {goalsToShow.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center space-y-4 bg-[#f6f3f1]/50 rounded-[28px] border-2 border-dashed border-[#2D241E]/10">
+            <Heart className="h-10 w-10 text-[#2D241E]/20" />
+            <p className="text-lg font-bold text-[#2D241E]/50 max-w-[240px]">Nenhuma caixinha favorita ainda. Vamos começar?</p>
+          </div>
         )}
       </CardContent>
-      <CardFooter className="flex-col items-stretch gap-2 border-t pt-6 md:flex-row">
-        <Button variant="ghost" asChild className="flex-1 justify-center">
+      <CardFooter className="flex-col items-stretch gap-4 border-t border-[#2D241E]/5 pt-8 md:flex-row">
+        <Button variant="outline" asChild className="flex-1 justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-base uppercase tracking-widest group">
             <Link href="/goals">
-                Ver todas as caixinhas
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Ver todas
+                <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
         </Button>
-        <Button variant="outline" className="w-full flex-1 md:w-auto" asChild>
+        <Button className="w-full flex-1 md:w-auto rounded-[20px] h-14 font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-base uppercase tracking-widest" asChild>
           <Link href="/goals/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Criar Nova Caixinha
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Criar Caixinha
           </Link>
         </Button>
       </CardFooter>

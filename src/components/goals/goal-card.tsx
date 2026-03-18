@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { Goal, Vault } from '@/lib/definitions';
+import { MemberAvatars } from '../ui/member-avatars';
 
 // Estendendo o tipo Goal para incluir os campos do Prisma que podem estar faltando na definição global
 type ExtendedGoal = Goal & {
@@ -176,22 +177,15 @@ export function GoalCard({
       </CardContent>
       <CardFooter className="flex items-center justify-between gap-2 p-4 pt-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="flex -space-x-1 overflow-hidden">
-            {goal.participants?.slice(0, 3).map((p, index) => (
-              <Avatar
-                key={p.id ?? index}
-                className="inline-block h-5 w-5 rounded-full border-2 border-card transition-transform duration-300 hover:scale-110 hover:z-10"
-              >
-                <AvatarImage src={p.avatarUrl} alt={p.name || 'Usuário'} />
-                <AvatarFallback className="text-xs">{(p.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            ))}
-            {goal.participants && goal.participants.length > 3 && (
-              <Avatar className="inline-block h-5 w-5 sm:h-6 sm:w-6 rounded-full border-2 border-card">
-                <AvatarFallback className="text-xs">+{goal.participants.length - 3}</AvatarFallback>
-              </Avatar>
-            )}
-          </div>
+          <MemberAvatars 
+            members={goal.participants?.map((p: any) => ({
+              name: p.user?.name || p.name || 'Usuário',
+              avatarUrl: p.user?.avatarUrl || p.avatarUrl
+            })) as any} 
+            size="sm" 
+            limit={3} 
+            borderColor="border-card"
+          />
           <span className="text-xs text-muted-foreground truncate">
             {goal.participants && goal.participants.length > 1
               ? (

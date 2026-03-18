@@ -215,7 +215,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden border-none bg-[#fdfcf7] shadow-2xl rounded-[40px]">
           <DialogHeader className="sr-only">
             <DialogTitle>Criar Novo Cofre - Passo {step}</DialogTitle>
           </DialogHeader>
@@ -255,31 +255,31 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 1 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                          <Wallet className="w-6 h-6 text-primary" />
+                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
+                          <Wallet className="w-7 h-7 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-2xl font-bold tracking-tight">O que vamos guardar?</h2>
-                        <p className="text-muted-foreground">Dê um nome bem legal para o seu cofre. Assim fica fácil de lembrar!</p>
+                        <h2 className="text-4xl font-headline font-bold tracking-tight text-[#2D241E]">O que vamos guardar?</h2>
+                        <p className="text-lg font-medium text-[#2D241E]/60">Dê um nome bem legal para o seu cofre. Assim fica fácil de lembrar!</p>
                       </div>
 
                       <div className="space-y-4 pt-4">
-                        <Label htmlFor="vault-name" className="text-base font-semibold">Nome do Cofre</Label>
+                        <Label htmlFor="vault-name" className="text-xs font-black uppercase tracking-widest text-[#201C1C]/40">Nome do Cofre</Label>
                         <Input
                           id="vault-name"
                           name="name"
                           autoFocus
                           value={vaultName}
                           onChange={(e) => setVaultName(e.target.value)}
-                          placeholder="Ex: Reforma da Casa, Viagem, Casamento..."
-                          className="text-xl py-6 rounded-xl border-2 focus:border-primary transition-all shadow-sm"
+                          placeholder="Ex: Reforma da Casa, Viagem..."
+                          className="text-2xl py-8 rounded-[24px] border-2 bg-white border-[#2D241E]/5 focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm placeholder:text-[#2D241E]/20 text-[#2D241E] font-bold"
                           required
                         />
-                        <div className="bg-primary/10 p-4 rounded-xl flex gap-3 items-start border border-primary/20">
-                          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-[10px] font-bold text-primary">TIP</span>
+                        <div className="bg-white/60 backdrop-blur-sm p-5 rounded-[24px] flex gap-4 items-start border border-[#2D241E]/5 shadow-sm">
+                          <div className="w-6 h-6 rounded-full bg-[#ff6b7b]/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="text-[10px] font-black text-[#ff6b7b] uppercase">!</span>
                           </div>
-                          <p className="text-xs text-foreground/80 leading-relaxed font-medium">
-                            Use nomes que te motivem! Em vez de "Poupança", tente "Meu Primeiro Apê" 🏠
+                          <p className="text-sm text-[#2D241E]/70 leading-relaxed font-semibold">
+                            Use nomes que te motivem! Em vez de "Poupança", tente <span className="text-[#2D241E]">"Meu Primeiro Apê"</span> 🏠
                           </p>
                         </div>
                       </div>
@@ -289,11 +289,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 2 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                          <ImageIcon className="w-6 h-6 text-primary" />
+                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
+                          <ImageIcon className="w-7 h-7 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-2xl font-bold tracking-tight">Deixe com a sua cara</h2>
-                        <p className="text-muted-foreground">Escolha uma imagem que combine com seu sonho.</p>
+                        <h2 className="text-3xl font-headline font-bold tracking-tight text-[#2D241E]">Deixe com a sua cara</h2>
+                        <p className="text-lg font-medium text-[#2D241E]/60">Escolha uma imagem que combine com seu sonho.</p>
                       </div>
 
                       <div className="space-y-6">
@@ -370,11 +370,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 3 && (
                     <div className="space-y-6 text-center">
                       <div className="space-y-2 text-left">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                          <Lock className="w-6 h-6 text-primary" />
+                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
+                          <Lock className="w-7 h-7 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-2xl font-bold tracking-tight">Quem pode ver?</h2>
-                        <p className="text-muted-foreground">Escolha como prefere manter este cofre.</p>
+                        <h2 className="text-3xl font-headline font-bold tracking-tight text-[#2D241E]">Quem pode ver?</h2>
+                        <p className="text-lg font-medium text-[#2D241E]/60">Escolha como prefere manter este cofre.</p>
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 pt-4">
@@ -440,7 +440,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   type="button" 
                   variant="outline" 
                   onClick={prevStep}
-                  className="h-14 px-6 rounded-xl font-bold"
+                  className="h-16 px-8 rounded-2xl font-bold border-2 border-[#2D241E]/5 text-[#2D241E]/50 hover:bg-white hover:text-[#2D241E] transition-all"
                 >
                   <ChevronLeft className="mr-2 h-5 w-5" />
                   Voltar
@@ -451,7 +451,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                 type={step === 3 ? "submit" : "button"} 
                 onClick={step === 3 ? undefined : nextStep}
                 disabled={isPending || (step === 3 && !canSubmit)}
-                className="flex-1 h-14 text-lg font-bold rounded-xl gradient-button text-white border-none"
+                className="flex-1 h-16 text-lg font-black uppercase tracking-widest rounded-2xl shadow-xl bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] border-none text-white hover:shadow-[#ff6b7b]/40 hover:-translate-y-0.5 active:scale-95 transition-all"
               >
                 {isPending ? (
                   <div className="flex items-center gap-2">
@@ -463,7 +463,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   </div>
                 ) : (
                   <>
-                    {step === 3 ? 'Finalizar e Criar Cofre' : 'Continuar'}
+                    {step === 3 ? 'Finalizar e Abrir Cofre' : 'Continuar'}
                     <ChevronRight className="ml-2 h-5 w-5" />
                   </>
                 )}

@@ -7,7 +7,7 @@ export const backgroundThemes = [
 ];
 
 export const primaryThemes = [
-  { name: "Padrão", color: "45 65% 52%" }, // Gold
+  { name: "Padrão", color: "43 74% 49%" }, // Premium Gold
   { name: "Oceano", color: "220 80% 55%" }, // Blue
   { name: "Amanhecer", color: "25 95% 55%" }, // Orange
   { name: "Floresta", color: "130 50% 45%" }, // Green

@@ -40,11 +40,13 @@ export default async function Header({ user, partner }: HeaderProps) {
   ]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-center border-b bg-background/80 px-6 backdrop-blur-sm md:px-6">
-      <div className="container flex items-center justify-between">
-        <Link href="/vaults" className="flex items-center gap-2">
-          <Logo w={32} h={32} />
-          <h1 className="font-headline sm:block text-xl font-bold text-foreground">Caixinhas</h1>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 transition-all duration-300 shadow-sm overflow-hidden">
+      <div className="container mx-auto h-20 px-6 flex items-center justify-between">
+        <Link href="/vaults" className="flex items-center gap-3 group cursor-pointer">
+          <Logo w={40} h={40} />
+          <span className="text-xl font-bold text-foreground tracking-tight hidden sm:block">
+            Caixinhas
+          </span>
         </Link>
         <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           {partner && (
