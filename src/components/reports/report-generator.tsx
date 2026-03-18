@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 function GenerateReportButton({ 
     label = 'Gerar Relatório', 
@@ -24,13 +26,29 @@ function GenerateReportButton({
     const isDisabled = !enabled || pending || isGenerating;
     
     return (
-        <Button type="submit" disabled={isDisabled} className="w-full md:w-auto">
+        <Button 
+            type="submit" 
+            disabled={isDisabled} 
+            className={cn(
+                "w-full h-16 rounded-[24px] font-black text-lg tracking-tight transition-all duration-500",
+                isDisabled 
+                    ? "bg-[#2D241E]/10 text-[#2D241E]/20" 
+                    : "bg-gradient-to-r from-[#2D241E] to-[#4A3B32] text-white shadow-[0_10px_30px_rgba(45,36,30,0.2)] hover:shadow-[0_15px_40px_rgba(45,36,30,0.3)] hover:scale-[1.02] active:scale-[0.98]"
+            )}
+        >
             {(pending || isGenerating) ? (
-                <>
-                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Gerando Relatório...
-                </>
-            ) : label}
+                <div className="flex items-center justify-center gap-3">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="uppercase tracking-[0.2em] text-sm">Processando...</span>
+                </div>
+            ) : (
+                <div className="flex items-center justify-center gap-3">
+                    <span className="uppercase tracking-[0.2em] text-sm">{label}</span>
+                    <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    </div>
+                </div>
+            )}
         </Button>
     )
 }
@@ -87,59 +105,66 @@ export function ReportGenerator({
     }, [year, month, monthsForSelectedYear, setMonth]);
 
     return (
-        <form action={handleGenerateReport} className="space-y-3 rounded-lg border border-border/50 bg-card p-3 shadow-sm">
+        <form action={handleGenerateReport} className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)]">
             <input type="hidden" name="ownerId" value={workspaceId} />
             <input type="hidden" name="month" value={month} />
             <input type="hidden" name="year" value={year} />
-            {/* Debug: mostra valores atuais */}
-            {process.env.NODE_ENV === 'development' && (
-                <input type="hidden" data-debug="true" value={`month:${month},year:${year},workspaceId:${workspaceId}`} />
-            )}
             
-            <div className="flex items-center gap-2">
-                <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-                <h3 className="font-headline text-base font-semibold">Selecione o Período</h3>
-            </div>
-            
-            <div className='w-full grid grid-cols-1 md:grid-cols-2 gap-3'>
-                <div className="space-y-1.5">
-                    <label className='text-sm font-medium flex items-center gap-1.5'>
-                        <span>📅</span> Ano
-                    </label>
-                    <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
-                        <SelectTrigger className="w-full h-9 bg-background hover:bg-accent/50 transition-colors">
-                            <SelectValue placeholder="Selecione o ano" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+            <div className="p-8 md:p-10 border-b border-white/20 bg-white/20 flex items-center gap-5">
+                <div className="h-14 w-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-purple-400/20 blur-lg rounded-full animate-pulse" />
+                        <span className="relative text-2xl">📊</span>
+                    </div>
                 </div>
-                <div className="space-y-1.5">
-                    <label className='text-sm font-medium flex items-center gap-1.5'>
-                        <span>📆</span> Mês
-                    </label>
-                    <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending || !year}>
-                        <SelectTrigger className="w-full h-9 bg-background hover:bg-accent/50 transition-colors">
-                            <SelectValue placeholder={!year ? "Selecione o ano primeiro" : "Selecione o mês"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {monthsForSelectedYear.map(m => (
-                                <SelectItem key={`${m.year}-${m.value}`} value={m.value}>
-                                    {new Date(m.year, parseInt(m.value) - 1).toLocaleString('pt-BR', { month: 'long' })}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div>
+                    <h3 className="text-2xl font-black text-[#2D241E] tracking-tight">Gerar Relatório</h3>
+                    <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest mt-1">Selecione o período para análise</p>
                 </div>
             </div>
             
-            <div className="pt-1">
-                <GenerateReportButton 
-                    label={buttonLabel}
-                    enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
-                    isGenerating={isGenerating}
-                />
+            <div className='p-8 md:p-10 space-y-8'>
+                <div className='w-full grid grid-cols-1 md:grid-cols-2 gap-8'>
+                    <div className="space-y-4">
+                        <label className='text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1'>
+                            Ano de Referência
+                        </label>
+                        <Select name="year-select" value={year} onValueChange={setYear} disabled={pending}>
+                            <SelectTrigger className="w-full h-16 bg-white/40 border-white/60 rounded-[20px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-bold text-[#2D241E] text-lg px-6">
+                                <SelectValue placeholder="Selecione o ano" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                {availableYears.map(y => <SelectItem key={y} value={y} className="font-bold py-3">{y}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <label className='text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1'>
+                            Mês de Referência
+                        </label>
+                        <Select name="month-select" value={month} onValueChange={setMonth} disabled={pending || !year}>
+                            <SelectTrigger className="w-full h-16 bg-white/40 border-white/60 rounded-[20px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-bold text-[#2D241E] text-lg px-6">
+                                <SelectValue placeholder={!year ? "Selecione o ano primeiro" : "Selecione o mês"} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90 max-h-[300px]">
+                                {monthsForSelectedYear.map(m => (
+                                    <SelectItem key={`${m.year}-${m.value}`} value={m.value} className="font-bold py-3">
+                                        {new Date(m.year, parseInt(m.value) - 1).toLocaleString('pt-BR', { month: 'long' })}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                
+                <div className="pt-4">
+                    <GenerateReportButton 
+                        label={buttonLabel}
+                        enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
+                        isGenerating={isGenerating}
+                    />
+                </div>
             </div>
         </form>
     );

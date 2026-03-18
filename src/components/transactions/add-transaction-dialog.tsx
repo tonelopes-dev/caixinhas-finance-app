@@ -253,199 +253,268 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             </>
           )}
         </Button>
-        <DialogContent className="flex flex-col max-h-[90vh] md:max-h-none bg-[#fdfcf7] border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
-          <DialogHeader className="p-8 pb-4 bg-white/50 backdrop-blur-sm border-b border-[#2D241E]/5">
-            <DialogTitle className="font-headline text-3xl font-bold text-[#2D241E]">Adicionar Transação</DialogTitle>
-            <DialogDescription className="text-lg font-medium text-[#2D241E]/50">
-              Registre uma nova entrada, saída ou transferência.
+        <DialogContent className="flex flex-col max-h-[95vh] md:max-h-[85vh] md:max-w-xl bg-white/95 backdrop-blur-2xl border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
+          <DialogHeader className="p-8 pb-6 bg-white/50 border-b border-[#2D241E]/5 space-y-2">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="h-2 w-2 rounded-full bg-[#ff6b7b] animate-ping" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b7b]">Nova Transação</span>
+            </div>
+            <DialogTitle className="text-4xl font-black text-[#2D241E] tracking-tighter">Registrar <span className="text-[#ff6b7b]">Movimentação</span></DialogTitle>
+            <DialogDescription className="text-base font-bold text-[#2D241E]/40 leading-relaxed">
+              Organize suas finanças registrando entradas, saídas ou transferências entre contas.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-2 px-8 py-6 bg-white/30">
+          {/* Premium Stepper */}
+          <div className="flex items-center gap-2 px-10 py-8 bg-white/30 border-b border-[#2D241E]/5">
             {steps.map((s, index) => (
                 <React.Fragment key={s.id}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center gap-2 group">
                         <div className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-[10px] text-xs font-black transition-all", 
-                          step === s.id ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20 scale-110" : 
-                          step > s.id ? "bg-emerald-500 text-white" : "bg-white text-[#2D241E]/20 border border-[#2D241E]/5"
+                          "flex h-10 w-10 items-center justify-center rounded-2xl text-[11px] font-black transition-all duration-500", 
+                          step === s.id ? "bg-[#2D241E] text-white shadow-xl shadow-[#2D241E]/20 scale-110" : 
+                          step > s.id ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white text-[#2D241E]/20 border border-[#2D241E]/10"
                         )}>
-                            {step > s.id ? <Check className="h-4 w-4" /> : s.id}
+                            {step > s.id ? <Check className="h-5 w-5" /> : s.id}
                         </div>
-                        <span className={cn("text-xs font-black uppercase tracking-widest", step >= s.id ? "text-[#2D241E]" : "text-[#2D241E]/20")}>{s.title}</span>
+                        <span className={cn(
+                          "text-[9px] font-black uppercase tracking-widest text-center min-w-[60px]", 
+                          step >= s.id ? "text-[#2D241E]" : "text-[#2D241E]/20"
+                        )}>
+                          {s.title.split(' ')[0]}
+                        </span>
                     </div>
-                    {index < steps.length - 1 && <div className={cn("flex-1 h-0.5 mx-2 rounded-full", step > s.id ? "bg-emerald-500/20" : "bg-[#2D241E]/5")} />}
+                    {index < steps.length - 1 && (
+                      <div className="flex-1 px-4 mb-6">
+                        <div className={cn("h-0.5 rounded-full transition-all duration-700", step > s.id ? "bg-emerald-500" : "bg-[#2D241E]/5")} />
+                      </div>
+                    )}
                 </React.Fragment>
             ))}
           </div>
 
-          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden min-h-0 bg-[#fdfcf7]">
-            <div className="flex-1 space-y-6 overflow-y-auto px-8 py-8 min-h-0 overscroll-contain">
+          <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden bg-white/30">
+            <div className="flex-1 space-y-8 overflow-y-auto px-10 py-10 min-h-0 overscroll-contain custom-scrollbar">
               <AnimatePresence mode="wait">
                   {step === 1 && (
-                      <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                          <div className="space-y-3">
-                              <Label htmlFor="description_field" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Descrição</Label>
-                              <Input id="description_field" placeholder="Ex: Jantar de aniversário" value={description} onChange={(e) => setDescription(e.target.value)} className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm" />
-                              {state?.errors?.description && <p className="text-xs font-bold text-[#ff6b7b] ml-1">{state.errors.description[0]}</p>}
+                      <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                          <div className="space-y-4">
+                              <label htmlFor="description_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Descrição do Lançamento</label>
+                              <Input 
+                                id="description_field" 
+                                placeholder="O que você está pagando ou recebendo?" 
+                                value={description} 
+                                onChange={(e) => setDescription(e.target.value)} 
+                                className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] focus:bg-white focus:border-[#ff6b7b] focus:ring-4 focus:ring-[#ff6b7b]/5 transition-all shadow-sm placeholder:text-[#2D241E]/20" 
+                              />
+                              {state?.errors?.description && <p className="text-xs font-black text-[#ff6b7b] ml-1 uppercase tracking-widest">{state.errors.description[0]}</p>}
                           </div>
-                           <div className="space-y-2">
-                                <Label htmlFor="category_field">Categoria</Label>
-                                <Select value={category} onValueChange={setCategory}>
-                                    <SelectTrigger id="category_field"><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                                    <SelectContent>{categories.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
-                                </Select>
-                                {state?.errors?.category && <p className="text-sm font-medium text-destructive">{state.errors.category[0]}</p>}
-                            </div>
+                          
+                          <div className="space-y-4">
+                              <label htmlFor="category_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Categoria</label>
+                              <Select value={category} onValueChange={setCategory}>
+                                  <SelectTrigger id="category_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                    <SelectValue placeholder="Selecione a categoria" />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name} className="font-bold py-3">{cat.name}</SelectItem>)}
+                                  </SelectContent>
+                              </Select>
+                              {state?.errors?.category && <p className="text-xs font-black text-[#ff6b7b] ml-1 uppercase tracking-widest">{state.errors.category[0]}</p>}
+                          </div>
                       </motion.div>
                   )}
 
                   {step === 2 && (
-                       <motion.div key="step2" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="type_field">Tipo</Label>
-                                <Select value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
-                                    <SelectTrigger id="type_field"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="expense">Saída</SelectItem>
-                                        <SelectItem value="income">Entrada</SelectItem>
-                                        <SelectItem value="transfer">Transferência</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                {state?.errors?.type && <p className="text-sm font-medium text-destructive">{state.errors.type[0]}</p>}
+                       <motion.div key="step2" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label htmlFor="type_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Tipo de Operação</label>
+                                    <Select value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
+                                        <SelectTrigger id="type_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                            <SelectValue placeholder="Tipo" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                            <SelectItem value="expense" className="font-bold py-3 text-[#ff6b7b]">Saída / Despesa</SelectItem>
+                                            <SelectItem value="income" className="font-bold py-3 text-emerald-600">Entrada / Receita</SelectItem>
+                                            <SelectItem value="transfer" className="font-bold py-3 text-blue-600">Transferência</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-4">
+                                    <label htmlFor="date_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Data</label>
+                                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button 
+                                                id="date_field" 
+                                                variant={"outline"} 
+                                                type="button"
+                                                className={cn("h-16 w-full rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] justify-start", !date && "text-[#2D241E]/20")}
+                                            >
+                                                <CalendarIcon className="mr-3 h-5 w-5 text-[#ff6b7b]" />
+                                                {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden border-white/40 shadow-2xl backdrop-blur-xl" align="center">
+                                            <Calendar 
+                                                mode="single" 
+                                                selected={date} 
+                                                onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }} 
+                                                locale={ptBR} 
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="date_field">Data</Label>
-                                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button 
-                                            id="date_field" 
-                                            variant={"outline"} 
-                                            type="button"
-                                            className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
-                                            style={{ touchAction: 'manipulation' }}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent 
-                                        className="w-auto p-0" 
-                                        align="center"
-                                        side="bottom"
-                                        sideOffset={8}
-                                    >
-                                        <Calendar 
-                                            mode="single" 
-                                            selected={date} 
-                                            onSelect={(newDate) => { 
-                                                setDate(newDate || undefined); 
-                                                setPopoverOpen(false); 
-                                            }} 
-                                            initialFocus 
-                                            locale={ptBR} 
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                {state?.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+
+                            <div className="space-y-8 pt-4">
+                                {(transactionType === 'expense' || transactionType === 'transfer') && (
+                                  <div className="space-y-4">
+                                      <label htmlFor="sourceAccountId_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">De onde sai o dinheiro?</label>
+                                      <Select value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
+                                          <SelectTrigger id="sourceAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                            <SelectValue placeholder="Selecione a conta de origem" />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                            {availableSources.map(item => <SelectItem key={item.value} value={item.value} className="font-bold py-3">{item.name}</SelectItem>)}
+                                          </SelectContent>
+                                      </Select>
+                                  </div>
+                                )}
+                                
+                                {(transactionType === 'income' || transactionType === 'transfer') && (
+                                  <div className="space-y-4">
+                                      <label htmlFor="destinationAccountId_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Para onde vai o dinheiro?</label>
+                                      <Select value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
+                                          <SelectTrigger id="destinationAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                            <SelectValue placeholder="Selecione a conta de destino" />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                            {availableDestinations.map(item => <SelectItem key={item.value} value={item.value} className="font-bold py-3">{item.name}</SelectItem>)}
+                                          </SelectContent>
+                                      </Select>
+                                  </div>
+                                )}
                             </div>
-                           {(transactionType === 'expense' || transactionType === 'transfer') && (
-                              <div className="space-y-2">
-                                  <Label htmlFor="sourceAccountId_field">Origem</Label>
-                                  <Select value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
-                                      <SelectTrigger id="sourceAccountId_field"><SelectValue placeholder="De onde saiu o dinheiro?" /></SelectTrigger>
-                                      <SelectContent>{availableSources.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
-                                  </Select>
-                                  {state?.errors?.sourceAccountId && <p className="text-sm font-medium text-destructive">{state.errors.sourceAccountId[0]}</p>}
-                              </div>
-                           )}
-                           {(transactionType === 'income' || transactionType === 'transfer') && (
-                              <div className="space-y-2">
-                                  <Label htmlFor="destinationAccountId_field">Destino</Label>
-                                  <Select value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
-                                      <SelectTrigger id="destinationAccountId_field"><SelectValue placeholder="Para onde foi o dinheiro?" /></SelectTrigger>
-                                      <SelectContent>{availableDestinations.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}</SelectContent>
-                                  </Select>
-                                  {state?.errors?.destinationAccountId && <p className="text-sm font-medium text-destructive">{state.errors.destinationAccountId[0]}</p>}
-                              </div>
-                           )}
                        </motion.div>
                   )}
 
                   {step === 3 && (
-                      <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
+                      <motion.div key="step3" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10">
                             {(transactionType === 'income' || transactionType === 'expense') && (
-                                <div className="space-y-3 rounded-lg border p-3">
-                                    <Label>{frequencyLabels[transactionType]?.label || 'Frequência'}</Label>
-                                    <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)}>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="single" id="single" /><Label htmlFor="single" className="font-normal">{frequencyLabels[transactionType]?.single || 'Único'}</Label></div>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="recurring" id="recurring" /><Label htmlFor="recurring" className="font-normal">{frequencyLabels[transactionType]?.recurring || 'Recorrente'}</Label></div>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="installment" id="installment" /><Label htmlFor="installment" className="font-normal">{frequencyLabels[transactionType]?.installment || 'Parcelado'}</Label></div>
+                                <div className="space-y-6">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Frequência e Lançamento</label>
+                                    <RadioGroup value={chargeType} onValueChange={(value) => setChargeType(value as any)} className="grid grid-cols-3 gap-4">
+                                        {[
+                                            { id: 'single', label: 'Único', icon: Check },
+                                            { id: 'recurring', label: 'Fixo', icon: Repeat },
+                                            { id: 'installment', label: 'Parcelado', icon: CalendarIcon }
+                                        ].map((option) => (
+                                            <label 
+                                                key={option.id}
+                                                htmlFor={option.id}
+                                                className={cn(
+                                                    "flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all cursor-pointer gap-2",
+                                                    chargeType === option.id 
+                                                        ? "bg-[#2D241E] border-[#2D241E] text-white shadow-xl scale-105" 
+                                                        : "bg-white border-white hover:border-[#2D241E]/10 text-[#2D241E]/40"
+                                                )}
+                                            >
+                                                <RadioGroupItem value={option.id} id={option.id} className="sr-only" />
+                                                <option.icon className="h-5 w-5" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">{option.label}</span>
+                                            </label>
+                                        ))}
                                     </RadioGroup>
+
                                     {chargeType === 'installment' && (
-                                        <div className="grid grid-cols-2 gap-4 pt-2">
-                                            <div className="space-y-1">
-                                                <Label htmlFor="totalInstallments_field">Total de Parcelas</Label>
-                                                <Input id="totalInstallments_field" type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Qtd. de Parcelas</label>
+                                                <Input type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label htmlFor="installmentValue">Valor da Parcela</Label>
-                                                <Input id="installmentValue" name="installmentValue" type="number" step="0.01" placeholder="Ex: 99,90" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} />
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Valor da Parcela</label>
+                                                <Input type="number" step="0.01" placeholder="R$ 0,00" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
                                             </div>
                                         </div>
                                     )}
+
                                     {chargeType === 'recurring' && !isDecember && (
-                                        <div className="items-top flex space-x-2 pt-3">
-                                            <Checkbox id="projectRecurring" checked={projectRecurring} onCheckedChange={(checked) => setProjectRecurring(checked as boolean)} />
-                                            <div className="grid gap-1.5 leading-none">
-                                                <label htmlFor="projectRecurring" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                    Lançar para os próximos meses deste ano?
-                                                </label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Cria uma cópia desta transação para cada mês até o final do ano.
-                                                </p>
+                                        <div className="bg-[#2D241E]/5 p-6 rounded-3xl border border-[#2D241E]/5 flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <Checkbox id="projectRecurring" checked={projectRecurring} onCheckedChange={(checked) => setProjectRecurring(checked as boolean)} className="mt-1 h-6 w-6 rounded-lg border-2 border-[#2D241E]/20 data-[state=checked]:bg-[#ff6b7b] data-[state=checked]:border-[#ff6b7b]" />
+                                            <div className="space-y-1">
+                                                <label htmlFor="projectRecurring" className="text-sm font-black text-[#2D241E] leading-tight cursor-pointer">Replicar até o fim do ano?</label>
+                                                <p className="text-xs font-bold text-[#2D241E]/40 leading-relaxed uppercase tracking-widest">Cria uma cópia automática para cada mês restante de 2026.</p>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                             <div className="space-y-2">
-                              <Label htmlFor="amount">Valor Total</Label>
-                              <Input id="amount" type="number" step="0.01" placeholder="R$ 0,00" value={amount} onChange={(e) => setAmount(e.target.value)} readOnly={chargeType === 'installment'}/>
-                              {state?.errors?.amount && <p className="text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+                            <div className="space-y-4">
+                                <label htmlFor="amount" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Valor Total</label>
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-[#2D241E]/20">R$</span>
+                                    <Input 
+                                        id="amount" 
+                                        type="number" 
+                                        step="0.01" 
+                                        placeholder="0,00" 
+                                        value={amount} 
+                                        onChange={(e) => setAmount(e.target.value)} 
+                                        readOnly={chargeType === 'installment'}
+                                        className={cn(
+                                            "h-24 pl-20 text-4xl font-black rounded-3xl border-white border-4 bg-white shadow-lg tracking-tighter text-[#2D241E] transition-all",
+                                            chargeType === 'installment' ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "focus:border-[#ff6b7b] focus:ring-4 focus:ring-[#ff6b7b]/5"
+                                        )}
+                                    />
+                                </div>
+                                {state?.errors?.amount && <p className="text-xs font-black text-[#ff6b7b] ml-1 uppercase tracking-widest">{state.errors.amount[0]}</p>}
                             </div>
 
                             {transactionType === 'expense' && !isCreditCardTransaction && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="paymentMethod_field">Método de Pagamento</Label>
+                                <div className="space-y-4">
+                                    <label htmlFor="paymentMethod_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Forma de Pagamento</label>
                                     <Select value={paymentMethod || ''} onValueChange={setPaymentMethod}>
-                                        <SelectTrigger id="paymentMethod_field"><SelectValue placeholder="Selecione o método" /></SelectTrigger>
-                                        <SelectContent>{paymentMethods.map(method => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}</SelectContent>
+                                        <SelectTrigger id="paymentMethod_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                            <SelectValue placeholder="Como você pagou?" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
+                                            {paymentMethods.map(method => <SelectItem key={method.value} value={method.value} className="font-bold py-3">{method.label}</SelectItem>)}
+                                        </SelectContent>
                                     </Select>
-                                    {state?.errors?.paymentMethod && <p className="text-sm font-medium text-destructive">{state.errors.paymentMethod[0]}</p>}
                                 </div>
                             )}
                       </motion.div>
                   )}
               </AnimatePresence>
             </div>
-            <DialogFooter className='mt-auto p-8 border-t border-[#2D241E]/5 bg-white/50 backdrop-blur-sm'>
-              <div className="w-full flex justify-between items-center gap-4">
+
+            <DialogFooter className='mt-auto p-10 bg-white/50 border-t border-[#2D241E]/5'>
+              <div className="w-full flex justify-between items-center gap-6">
                 {step > 1 ? (
-                    <Button type="button" variant="ghost" onClick={prevStep} className="h-14 px-6 rounded-2xl font-bold text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-transparent">
-                        <ArrowLeft className="mr-2 h-5 w-5" />
+                    <Button type="button" variant="ghost" onClick={prevStep} className="h-16 px-8 rounded-2xl font-black text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-[#2D241E]/5 transition-all uppercase tracking-widest text-xs">
+                        <ArrowLeft className="mr-3 h-5 w-5" />
                         Voltar
                     </Button>
                 ) : <div />}
 
                 {step < 3 ? (
-                    <Button type="button" onClick={nextStep} disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest bg-[#2D241E] text-white hover:bg-[#3D342E] transition-all shadow-xl">
-                        Avançar
+                    <Button 
+                      type="button" 
+                      onClick={nextStep} 
+                      disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} 
+                      className="h-16 px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-[#2D241E] text-white hover:bg-[#4A3B32] transition-all shadow-[0_10px_30px_rgba(45,36,30,0.2)] disabled:opacity-30 text-xs"
+                    >
+                        Próximo Passo
                     </Button>
                 ) : (
-                    <Button type="submit" className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white hover:shadow-[#ff6b7b]/40 transition-all shadow-xl border-none">
-                        Salvar Transação
+                    <Button 
+                      type="submit" 
+                      className="h-16 px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10px_30px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-xs"
+                    >
+                        Finalizar e Salvar
                     </Button>
                 )}
               </div>

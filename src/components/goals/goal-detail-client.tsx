@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Settings, MoreHorizontal, Users, Lock, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Settings, MoreHorizontal, Users, Lock, ArrowDown, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -78,7 +78,8 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
     sourceAccountId: 'system-initial',
     destinationAccountId: null,
     ownerId: goal.ownerId,
-    category: { name: 'Saldo Inicial' },
+    ownerType: 'vault' as const,
+    category: { name: 'Saldo Inicial' } as any,
   };
 
   const allActivities = [
@@ -333,8 +334,27 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="rounded-2xl border-[#2D241E]/5 shadow-2xl p-1 min-w-[140px]">
                                                         {/* @ts-ignore */}
-                                                        <EditTransactionDialog transaction={activity} accounts={accounts} goals={[goal]} categories={[]} />
-                                                        <DeleteTransactionDialog transactionId={activity.id} />
+                                                        <EditTransactionDialog 
+                                                            transaction={activity} 
+                                                            accounts={accounts} 
+                                                            goals={[goal]} 
+                                                            categories={[]} 
+                                                            trigger={
+                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                                                    <Edit className="mr-2 h-4 w-4" />
+                                                                    Editar
+                                                                </DropdownMenuItem>
+                                                            }
+                                                        />
+                                                        <DeleteTransactionDialog 
+                                                            transactionId={activity.id} 
+                                                            trigger={
+                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                                    Excluir
+                                                                </DropdownMenuItem>
+                                                            }
+                                                        />
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </div>

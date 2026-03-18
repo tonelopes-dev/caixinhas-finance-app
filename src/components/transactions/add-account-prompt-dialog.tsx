@@ -28,35 +28,39 @@ export function AddAccountPromptDialog({ open, onOpenChange }: AddAccountPromptD
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-[#fdfcf7] border-none rounded-[32px] p-8 shadow-2xl max-w-md">
-        <AlertDialogHeader className="space-y-4">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] bg-white shadow-sm border border-[#2D241E]/5 mb-2 group transition-all hover:scale-110">
-            <Landmark className="h-10 w-10 text-[#ff6b7b] transition-transform group-hover:rotate-12" />
+      <AlertDialogContent className="bg-white/95 backdrop-blur-2xl border-none rounded-[40px] shadow-2xl p-0 overflow-hidden max-w-md">
+        <div className="p-10 space-y-8">
+          <AlertDialogHeader className="space-y-6">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-xl shadow-[#ff6b7b]/10 border border-[#ff6b7b]/5 group transition-all duration-500 hover:scale-110 active:scale-95">
+              <Landmark className="h-10 w-10 text-[#ff6b7b] transition-transform duration-500 group-hover:rotate-12" />
+            </div>
+            <div className="space-y-3 text-center">
+              <AlertDialogTitle className="text-3xl font-black tracking-tighter text-[#2D241E] leading-tight px-4">
+                Ops! Precisamos de uma <span className="text-[#ff6b7b]">Conta</span>.
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base font-bold text-[#2D241E]/40 leading-relaxed">
+                Para registrar sua primeira movimentação, você precisa ter pelo menos uma conta ou cartão cadastrado para sabermos de onde vem o dinheiro.
+              </AlertDialogDescription>
+            </div>
+          </AlertDialogHeader>
+          
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={handleNavigate}
+              className="h-16 px-8 rounded-2xl font-black uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(255,107,123,0.3)] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] border-none hover:shadow-xl active:scale-95 transition-all text-xs"
+            >
+              Criar Minha Primeira Conta
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => onOpenChange(false)}
+              className="h-16 px-8 rounded-2xl font-black uppercase tracking-[0.2em] text-[#2D241E]/30 hover:text-[#2D241E] hover:bg-[#2D241E]/5 transition-all text-xs"
+            >
+              Agora não
+            </Button>
           </div>
-          <div className="space-y-2">
-            <AlertDialogTitle className="text-center font-headline text-3xl font-bold tracking-tight text-[#2D241E]">
-              Ops! Precisamos de uma conta.
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-lg font-medium text-[#2D241E]/60 leading-relaxed">
-              Para registrar sua primeira movimentação, você precisa ter pelo menos uma conta ou cartão cadastrado.
-            </AlertDialogDescription>
-          </div>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 pt-6 sm:justify-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => onOpenChange(false)}
-            className="h-14 px-8 rounded-2xl font-bold text-[#201C1C]/40 hover:text-[#2D241E] hover:bg-transparent transition-all"
-          >
-            Agora não
-          </Button>
-          <Button 
-            onClick={handleNavigate}
-            className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-white shadow-lg bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] border-none hover:shadow-[#ff6b7b]/40 active:scale-95 transition-all"
-          >
-            Adicionar Conta
-          </Button>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );

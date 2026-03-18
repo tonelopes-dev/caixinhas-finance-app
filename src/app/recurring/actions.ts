@@ -17,14 +17,32 @@ export async function getRecurringData(
   try {
     const allTransactions = await TransactionService.getTransactions(workspaceId, ownerType);
 
-    const recurringExpenses = allTransactions.filter((t: any) => t.isRecurring && t.type === 'expense');
-    const recurringIncomes = allTransactions.filter((t: any) => t.isRecurring && t.type === 'income');
+    const recurringExpensesRaw = allTransactions.filter((t: any) => t.isRecurring && t.type === 'expense');
+    const recurringIncomesRaw = allTransactions.filter((t: any) => t.isRecurring && t.type === 'income');
     
-    // Filtra transações parceladas - pega todas que têm isInstallment = true
-    // (cada transação parcelada é única, não criamos múltiplas no banco)
-    const installmentExpenses = allTransactions.filter((t: any) => t.isInstallment && t.type === 'expense');
-    const installmentIncomes = allTransactions.filter((t: any) => t.isInstallment && t.type === 'income');
+    // Função para agrupar por recurringId e manter apenas a transação mais recente
+    const groupByRecurring = (transactions: any[]) => {
+      const groups = new Map<string, any>();
+      transactions.forEach(t => {
+        const id = t.recurringId || t.id;
+        const current = groups.get(id);
+        if (!current || new Date(t.date) > new Date(current.date)) {
+          groups.set(id, t);
+        }
+      });
+      return Array.from(groups.values());
+    };
 
+    const recurringExpenses = groupByRecurring(recurringExpensesRaw);
+    const recurringIncomes = groupByRecurring(recurringIncomesRaw);
+    
+    // Filtra transações parceladas - pega apenas a "Master" (parcela 1 ou null)
+    const installmentExpenses = allTransactions.filter((t: any) => 
+      t.isInstallment && t.type === 'expense' && (t.installmentNumber === 1 || !t.installmentNumber)
+    );
+    const installmentIncomes = allTransactions.filter((t: any) => 
+      t.isInstallment && t.type === 'income' && (t.installmentNumber === 1 || !t.installmentNumber)
+    );
 
     return {
       recurringExpenses: recurringExpenses as Transaction[],

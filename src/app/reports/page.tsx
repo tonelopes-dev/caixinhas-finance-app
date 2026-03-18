@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useActionState } from 'react';
 import { FileText } from 'lucide-react';
-import { BackToDashboard } from '@/components/ui/back-to-dashboard';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/definitions';
@@ -82,8 +82,8 @@ function ReportsPage() {
         setAvailableMonths(monthsWithTransactions);
         
         // Extrai anos únicos dos meses disponíveis
-        const uniqueYears = [...new Set(monthsWithTransactions.map(m => m.year.toString()))];
-        setAvailableYears(uniqueYears.sort((a, b) => b.localeCompare(a)));
+        const uniqueYears = Array.from(new Set(monthsWithTransactions.map((m: { year: number }) => m.year.toString())));
+        setAvailableYears(uniqueYears.sort((a: string, b: string) => b.localeCompare(a)));
         
         // Define mês e ano inicial (mais recente)
         if (monthsWithTransactions.length > 0) {
@@ -195,65 +195,71 @@ function ReportsPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-4 max-w-6xl">
-      <BackToDashboard className="mb-4" />
-      
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <FileText className="h-5 w-5 text-primary" />
-          <h1 className="font-headline text-xl md:text-2xl font-semibold">
-            Relatórios Financeiros
-          </h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Análise profissional gerada por IA
-        </p>
-      </div>
-
-      {hasAnyTransactions === false ? (
-              // Regra 1: Sem transações - esconder componente e mostrar mensagem
-              <div className="text-center py-12">
-                <div className="mb-3 text-5xl">📈</div>
-                <h3 className="font-headline text-lg font-semibold mb-1.5">Comece registrando transações</h3>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Assim que houver transações registradas, você poderá gerar relatórios financeiros detalhados.
-                </p>
+    <div className="min-h-screen bg-[#FDFCFB] text-[#2D241E] pb-20">
+      <div className="max-w-7xl mx-auto px-6 pt-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
+          <div className="space-y-4">
+            <StandardBackButton href="/dashboard" label="Voltar para o Painel" />
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#2D241E] to-[#4A3B32] flex items-center justify-center shadow-lg">
+                    <FileText className="h-5 w-5 text-white" />
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-[#2D241E]">
+                  Relatórios <span className="text-[#ff6b7b]">Financeiros</span>
+                </h1>
               </div>
-            ) : hasAnyTransactions === true ? (
-              <div className="space-y-4">
-                {isGenerating ? (
-                  <div className="py-6">
-                    <ReportLoadingProgress isVisible={true} />
-                  </div>
-                ) : (
-                  <>
-                    <ReportGenerator
-                      workspaceId={workspaceId}
-                      month={month}
-                      setMonth={setMonth}
-                      year={year}
-                      setYear={setYear}
-                      availableMonths={availableMonths}
-                      availableYears={availableYears}
-                      handleGenerateReport={handleGenerateReport}
-                      buttonLabel={reportStatus.buttonLabel}
-                      buttonEnabled={reportStatus.buttonEnabled}
-                      isGenerating={false}
-                    />
+              <p className="text-lg font-bold text-[#2D241E]/40 ml-1">Análise profissional de sua saúde financeira gerada por IA.</p>
+            </div>
+          </div>
+        </div>
 
-                    <ReportDisplay
-                      reportHtml={reportHtml}
-                      isLoading={false}
-                    />
-                  </>
-                )}
+        {hasAnyTransactions === false ? (
+          <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
+            <div className="mb-8 p-10 bg-white/30 w-fit mx-auto rounded-[40px] border border-white/50">
+              <div className="text-7xl">📈</div>
+            </div>
+            <h3 className="text-3xl font-black text-[#2D241E] tracking-tight mb-4">Comece registrando transações</h3>
+            <p className="text-lg font-bold text-[#2D241E]/40 max-w-xl mx-auto uppercase tracking-widest leading-relaxed">
+              Assim que houver transações registradas, nossa IA poderá gerar relatórios financeiros detalhados para você.
+            </p>
+          </div>
+        ) : hasAnyTransactions === true ? (
+          <div className="space-y-12">
+            {isGenerating ? (
+              <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
+                <ReportLoadingProgress isVisible={true} />
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-sm text-muted-foreground mt-3">Verificando transações...</p>
-              </div>
+              <>
+                <ReportGenerator
+                  workspaceId={workspaceId}
+                  month={month}
+                  setMonth={setMonth}
+                  year={year}
+                  setYear={setYear}
+                  availableMonths={availableMonths}
+                  availableYears={availableYears}
+                  handleGenerateReport={handleGenerateReport}
+                  buttonLabel={reportStatus.buttonLabel}
+                  buttonEnabled={reportStatus.buttonEnabled}
+                  isGenerating={false}
+                />
+
+                <ReportDisplay
+                  reportHtml={reportHtml}
+                  isLoading={false}
+                />
+              </>
             )}
+          </div>
+        ) : (
+          <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
+            <div className="h-16 w-16 mx-auto animate-spin rounded-full border-4 border-[#ff6b7b] border-t-transparent" />
+            <p className="text-lg font-bold text-[#2D241E]/40 mt-8 uppercase tracking-[0.2em]">Sincronizando seus dados...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

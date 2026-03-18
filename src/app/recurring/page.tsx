@@ -2,15 +2,15 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { RecurringPageClient } from '@/components/recurring/recurring-page-client';
 import { getRecurringData } from './actions';
 import { cookies } from 'next/headers';
 import { AccountService } from '@/services/account.service';
 import { CategoryService } from '@/services/category.service';
 import { getUserAllGoals } from '@/app/(private)/goals/actions';
+
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 
 export default async function RecurringPage() {
   const session = await getServerSession(authOptions);
@@ -41,24 +41,23 @@ export default async function RecurringPage() {
 
 
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
-      <div className="mx-auto w-full max-w-4xl">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/transactions">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Transações
-          </Link>
-        </Button>
-        <RecurringPageClient
-          recurringExpenses={recurringData.recurringExpenses}
-          recurringIncomes={recurringData.recurringIncomes}
-          installmentExpenses={recurringData.installmentExpenses}
-          installmentIncomes={recurringData.installmentIncomes}
-          allAccounts={allAccounts}
-          allGoals={allGoals}
-          allCategories={allCategories}
-          workspaceId={workspaceId}
-        />
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <DashboardBackground />
+      
+      <div className="relative z-10 flex flex-1 flex-col p-4 md:p-10 pt-24">
+        <div className="mx-auto w-full max-w-4xl">
+          <StandardBackButton href="/transactions" label="Voltar para Transações" />
+          <RecurringPageClient
+            recurringExpenses={recurringData.recurringExpenses}
+            recurringIncomes={recurringData.recurringIncomes}
+            installmentExpenses={recurringData.installmentExpenses}
+            installmentIncomes={recurringData.installmentIncomes}
+            allAccounts={allAccounts}
+            allGoals={allGoals}
+            allCategories={allCategories}
+            workspaceId={workspaceId}
+          />
+        </div>
       </div>
     </div>
   );

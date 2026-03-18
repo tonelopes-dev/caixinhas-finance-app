@@ -162,11 +162,20 @@ export function TransactionsPageClient({
   }, [filteredTransactions]);
 
   const recurringSummary = useMemo(() => {
-    const recurring = initialTransactions.filter(t => t.isRecurring);
-    const installments = initialTransactions.filter(t => t.isInstallment);
+    // Conta assinaturas únicas (pelo recurringId)
+    const uniqueRecurringIds = new Set(
+      initialTransactions
+        .filter(t => t.isRecurring && t.recurringId)
+        .map(t => t.recurringId)
+    );
+    // Adiciona recorrentes que podem não ter ID ainda (muito raros)
+    const standaloneRecurring = initialTransactions.filter(t => t.isRecurring && !t.recurringId).length;
+    
+    // Conta apenas a parcela "Master" das compras parceladas
+    const installments = initialTransactions.filter(t => t.isInstallment && (t.installmentNumber === 1 || !t.installmentNumber));
     
     return {
-      recurringCount: recurring.length,
+      recurringCount: uniqueRecurringIds.size + standaloneRecurring,
       installmentsCount: installments.length
     };
   }, [initialTransactions]);
@@ -346,8 +355,27 @@ export function TransactionsPageClient({
                                       </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                      <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                      <DeleteTransactionDialog transactionId={t.id} />
+                                      <EditTransactionDialog 
+                                        transaction={t as Transaction} 
+                                        accounts={allAccounts} 
+                                        goals={allGoals} 
+                                        categories={allCategories} 
+                                        trigger={
+                                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                            <Edit className="mr-2 h-4 w-4" />
+                                            Editar
+                                          </DropdownMenuItem>
+                                        }
+                                      />
+                                      <DeleteTransactionDialog 
+                                        transactionId={t.id} 
+                                        trigger={
+                                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Excluir
+                                          </DropdownMenuItem>
+                                        }
+                                      />
                                   </DropdownMenuContent>
                               </DropdownMenu>
                           </motion.div>
@@ -431,8 +459,27 @@ export function TransactionsPageClient({
                                           </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end">
-                                          <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                          <DeleteTransactionDialog transactionId={t.id} />
+                                          <EditTransactionDialog 
+                                            transaction={t as Transaction} 
+                                            accounts={allAccounts} 
+                                            goals={allGoals} 
+                                            categories={allCategories} 
+                                            trigger={
+                                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Editar
+                                              </DropdownMenuItem>
+                                            }
+                                          />
+                                          <DeleteTransactionDialog 
+                                            transactionId={t.id} 
+                                            trigger={
+                                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Excluir
+                                              </DropdownMenuItem>
+                                            }
+                                          />
                                       </DropdownMenuContent>
                                   </DropdownMenu>
                               </TableCell>
