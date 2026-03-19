@@ -38,6 +38,10 @@ export function HeaderClient({ user }: HeaderClientProps) {
     await performLogout(setAuthLoading);
   };
 
+  const handleLinkClick = (message?: string) => {
+    showLoading(message || 'Carregando...');
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -68,19 +72,19 @@ export function HeaderClient({ user }: HeaderClientProps) {
         <DropdownMenuSeparator />
         
         {/* 🔥 Ações Frequentes - Mais usadas */}
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Abrindo Extrato...')}>
           <Link href="/transactions">
             <ArrowRightLeft className="mr-2 h-4 w-4" />
             <span>Transações</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Abrindo Caixinhas...')}>
           <Link href="/goals">
             <Gift className="mr-2 h-4 w-4" />
             <span>Caixinhas</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Voltando aos Cofres...')}>
           <Link href="/vaults">
             <Vault className="mr-2 h-4 w-4" />
             <span>Mudar de Cofre</span>
@@ -90,19 +94,19 @@ export function HeaderClient({ user }: HeaderClientProps) {
         <DropdownMenuSeparator />
         
         {/* 💰 Gestão Financeira */}
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick()}>
           <Link href="/accounts">
             <Landmark className="mr-2 h-4 w-4" />
             <span>Contas</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick()}>
           <Link href="/patrimonio">
             <Wallet className="mr-2 h-4 w-4" />
             <span>Patrimônio</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick()}>
           <Link href="/reports">
             <FileText className="mr-2 h-4 w-4" />
             <span>Relatórios</span>
@@ -112,19 +116,19 @@ export function HeaderClient({ user }: HeaderClientProps) {
         <DropdownMenuSeparator />
         
         {/* ⚙️ Configurações & Ajuda */}
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Abrindo Perfil...')}>
           <Link href="/profile">
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Abrindo Tutorial...')}>
           <Link href="/tutorial">
             <BookOpen className="mr-2 h-4 w-4" />
             <span>Tutorial</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild onClick={() => handleLinkClick('Abrindo Suporte...')}>
           <Link href="/support">
             <LifeBuoy className="mr-2 h-4 w-4" />
             <span>Suporte</span>

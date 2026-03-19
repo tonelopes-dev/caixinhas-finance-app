@@ -13,6 +13,7 @@ import { AnimatedCounter } from '../ui/animated-counter';
 import { Button } from '../ui/button';
 import { usePrivacyMode } from '@/hooks/use-privacy-mode';
 import { motion } from 'framer-motion';
+import { useLoading } from '@/components/providers/loading-provider';
 
 type NetWorthSummaryProps = {
   liquidAssets: number;
@@ -36,6 +37,8 @@ export default function NetWorthSummary({
   const PrivacyBlur = () => <span className="text-3xl font-black tracking-tighter text-[#2D241E]/30">R$ ••••••</span>;
   const PrivacyBlurPrimary = () => <span className="text-4xl font-black text-[#ff6b7b]/30 tracking-tighter">R$ ••••••</span>;
 
+
+  const { showLoading } = useLoading();
 
   return (
     <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
@@ -63,6 +66,7 @@ export default function NetWorthSummary({
       <CardContent>
         <Link
           href="/patrimonio"
+          onClick={() => showLoading('Abrindo Patrimônio...')}
           className="relative group block rounded-3xl bg-[#f6f3f1] p-8 transition-all duration-300 hover:shadow-inner border border-[#2D241E]/5 mb-8 overflow-hidden"
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">

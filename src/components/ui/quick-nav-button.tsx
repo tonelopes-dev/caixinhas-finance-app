@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LoadingScreen } from '@/components/ui/loading-screen';
+import { useLoading } from '@/components/providers/loading-provider';
 
 interface QuickNavButtonProps {
   href: string;
@@ -24,23 +24,20 @@ export function QuickNavButton({
   size = 'default',
   disabled
 }: QuickNavButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, showLoading } = useLoading();
   const router = useRouter();
 
   const handleClick = () => {
-    setIsLoading(true);
+    showLoading("Carregando...");
     
     // Pequeno delay para mostrar a tela linda
     setTimeout(() => {
       router.push(href);
-    }, 300);
+    }, 100);
   };
 
   return (
     <>
-      {/* Tela linda de loading */}
-      {isLoading && <LoadingScreen message="Navegando..." showProgress={false} />}
-      
       <Button
         variant={variant}
         size={size}

@@ -6,6 +6,7 @@ import { getProfileData } from './actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { ThemeCustomization } from '@/components/profile/theme-customization';
+import { useLoading } from '@/components/providers/loading-provider';
 import { GuestsManagement } from '@/components/profile/guests-management';
 import { NotificationsManagement } from '@/components/profile/notifications-management';
 import { VaultSettings } from '@/components/profile/vault-settings';
@@ -28,8 +29,8 @@ type ProfileData = {
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { showLoading, hideLoading } = useLoading();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'loading') {
@@ -41,18 +42,18 @@ export default function ProfilePage() {
     }
 
     const fetchData = async () => {
-      setIsLoading(true);
+      showLoading('Carregando Perfil...');
       const data = await getProfileData(session.user.id);
       if (!data?.currentUser) {
         router.push('/login');
       } else {
         setProfileData(data as ProfileData);
       }
-      setIsLoading(false);
+      hideLoading();
     };
 
     fetchData();
-  }, [session, status, router]);
+  }, [session, status, router, showLoading, hideLoading]);
 
   const refreshProfileData = useCallback(async () => {
     if (session?.user) {
@@ -63,12 +64,8 @@ export default function ProfilePage() {
     }
   }, [session]);
 
-  if (isLoading || !profileData) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-background">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  if (!profileData) {
+    return null; // O LoadingProvider global já está mostrando a tela de loading
   }
   
   const { currentUser, currentVault } = profileData;
@@ -221,7 +218,7 @@ export default function ProfilePage() {
                 Você está em um cofre pessoal. Para convidar outras pessoas e gerenciar uma equipe, acesse seus convites ou crie um novo cofre compartilhado.
               </p>
               <Button asChild variant="outline" className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[10px] border-[#2D241E]/10 hover:bg-white hover:text-[#ff6b7b] transition-all">
-                <Link href="/invite">
+                <Link href="/invite" onClick={() => showLoading('Abrindo Convites...')}>
                   Ver meus Convites
                 </Link>
               </Button>

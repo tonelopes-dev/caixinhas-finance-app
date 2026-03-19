@@ -44,9 +44,7 @@ export default async function Header({ user, partner }: HeaderProps) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 overflow-hidden">
 
       <div className="container mx-auto h-20 px-4 md:px-8 flex items-center justify-between">
-        <Link href="/vaults">
-          <PremiumLogo />
-        </Link>
+        <PremiumLogo href="/vaults" />
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           {partner && (

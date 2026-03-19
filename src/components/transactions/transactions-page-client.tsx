@@ -47,6 +47,7 @@ import { DeleteTransactionDialog } from '@/components/transactions/delete-transa
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useLoading } from '@/components/providers/loading-provider';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -108,6 +109,7 @@ export function TransactionsPageClient({
   workspaceId,
 }: TransactionsPageClientProps) {
   const router = useRouter();
+  const { showLoading } = useLoading();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
@@ -340,7 +342,10 @@ export function TransactionsPageClient({
             <motion.div 
                 variants={summaryItemVariants(0.4)} 
                 className="relative group overflow-hidden bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_35px_80px_rgba(147,51,234,0.15)] hover:-translate-y-3 transition-all duration-1000 cursor-pointer flex flex-col justify-between"
-                onClick={() => router.push('/recurring')}
+                onClick={() => {
+                    showLoading('Abrindo Contas Fixas...');
+                    router.push('/recurring');
+                }}
             >
                 <div className="absolute -top-8 -right-8 p-10 opacity-5 group-hover:opacity-15 group-hover:scale-150 transition-all duration-1000 group-hover:rotate-12">
                     <Repeat className="h-32 w-32 text-purple-600" />

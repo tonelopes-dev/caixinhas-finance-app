@@ -122,7 +122,7 @@ const MobileFloatingNav = () => {
     
     console.log('🚀 [MobileNav] Iniciando navegação para:', item.path);
     setActive(index);
-    showLoading('Navegando...', false);
+    showLoading('Navegando...');
     
     // Pequeno delay para mostrar a tela de loading antes de navegar
     setTimeout(() => {
@@ -142,15 +142,15 @@ const MobileFloatingNav = () => {
 
   return (
     <>
-      <div 
-        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4"
+    <div 
+        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-[340px] px-4"
         style={{ 
           bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
         }}
-      >
+    >
       <div
         ref={containerRef}
-        className="relative flex items-center justify-between bg-card/95 backdrop-blur-md shadow-2xl rounded-2xl px-2 py-3 border border-border/50"
+        className="relative flex items-center justify-between bg-white/40 backdrop-blur-3xl shadow-[0_20px_50px_rgba(45,36,30,0.15)] rounded-[32px] px-2 py-2.5 border border-white/60"
       >
         {items.map((item, index) => (
           <button
@@ -161,26 +161,26 @@ const MobileFloatingNav = () => {
             onClick={() => handleNavigation(item, index)}
             disabled={isLoading}
             className={cn(
-              "relative flex flex-col items-center justify-center flex-1 px-3 py-2 text-sm font-medium transition-all duration-200",
-              "hover:scale-105 active:scale-95",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+              "relative flex flex-col items-center justify-center flex-1 px-2 py-2 transition-all duration-300",
+              "active:scale-90",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
               active === index 
-                ? "text-primary" 
-                : "text-muted-foreground"
+                ? "text-[#ff6b7b]" 
+                : "text-[#2D241E]/40"
             )}
             aria-label={`Ir para ${item.label}`}
           >
             <div className={cn(
-              "z-10 transition-all duration-200",
-              active === index && "transform -translate-y-0.5"
+              "z-10 transition-all duration-500",
+              active === index && "transform -translate-y-1 scale-110"
             )}>
               {item.icon}
             </div>
             <span className={cn(
-              "text-xs mt-1 transition-all duration-200 truncate max-w-[60px]",
+              "font-headline text-[10px] mt-1.5 transition-all duration-500 truncate max-w-[60px] uppercase tracking-widest",
               active === index 
-                ? "opacity-100 font-semibold" 
-                : "opacity-70"
+                ? "opacity-100 font-black italic" 
+                : "opacity-60 font-bold"
             )}>
               {item.label}
             </span>
@@ -190,15 +190,18 @@ const MobileFloatingNav = () => {
         {/* Indicador deslizante ativo */}
         <motion.div
           animate={indicatorStyle}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="absolute top-2 bottom-2 rounded-xl bg-primary/10 border border-primary/20"
+          transition={{ type: "spring", stiffness: 350, damping: 25 }}
+          className="absolute top-1.5 bottom-1.5 rounded-[24px] bg-white/60 shadow-sm border border-white/40"
         />
         
         {/* Ponto indicador no topo */}
         <motion.div
-          animate={{ left: indicatorStyle.left + indicatorStyle.width / 2 - 2 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="absolute -top-1 w-1 h-1 rounded-full bg-primary shadow-lg"
+          animate={{ 
+            left: indicatorStyle.left + indicatorStyle.width / 2 - 2,
+            opacity: active === -1 ? 0 : 1
+          }}
+          transition={{ type: "spring", stiffness: 350, damping: 25 }}
+          className="absolute -top-1 w-1.5 h-1.5 rounded-full bg-[#ff6b7b] shadow-[0_0_10px_rgba(255,107,123,0.5)]"
         />
       </div>
     </div>

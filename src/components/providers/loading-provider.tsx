@@ -27,9 +27,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
   const [message, setMessage] = useState('Carregando...');
   
   const showLoading = (customMessage?: string) => {
-    if (customMessage) {
-      setMessage(customMessage);
-    }
+    setMessage(customMessage || 'Carregando...');
     setIsLoading(true);
   };
 
@@ -41,12 +39,24 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
     setMessage(newMessage);
   };
 
-  // Auto hide loading after 10 seconds (safety)
+  // Esconder loading automaticamente quando trocar de página
+  useEffect(() => {
+    if (isLoading) {
+      // Pequeno delay para garantir que a nova página já começou a montar
+      const timeout = setTimeout(() => {
+        hideLoading();
+      }, 500); // 500ms é um tempo seguro para a maioria das montagens
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [pathname]);
+
+  // Auto hide loading after 15 seconds (safety backup)
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
         hideLoading();
-      }, 10000);
+      }, 15000);
       
       return () => clearTimeout(timeout);
     }

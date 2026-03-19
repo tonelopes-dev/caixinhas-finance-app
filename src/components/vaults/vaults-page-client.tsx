@@ -432,9 +432,9 @@ export function VaultsPageClient({
   accessInfo,
 }: VaultsPageClientProps) {
   const router = useRouter();
+  const { isLoading, message, showLoading, hideLoading } = useLoading();
   const [isCreateVaultOpen, setCreateVaultOpen] = useState(false);
   const [editingVault, setEditingVault] = useState<Vault | null>(null);
-  const { isVisible, message, setAuthLoading } = useAuthLoading();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -442,11 +442,11 @@ export function VaultsPageClient({
     if (loginInProgress) {
       const timer = setTimeout(() => {
         sessionStorage.removeItem('login_in_progress');
-        setAuthLoading(false);
+        hideLoading();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [setAuthLoading]);
+  }, [hideLoading]);
 
   const handleCreateVaultClick = () => {
     if (!canCreateVaults) {
@@ -465,6 +465,13 @@ export function VaultsPageClient({
   };
 
   const handleLogout = async () => {
+    const setAuthLoading = (show: boolean, message?: string) => {
+      if (show) {
+        showLoading(message || 'Saindo...');
+      } else {
+        hideLoading();
+      }
+    };
     await performLogout(setAuthLoading);
   };
 
@@ -472,14 +479,19 @@ export function VaultsPageClient({
     router.refresh();
   };
 
+  const handleNav = (href: string, message?: string) => {
+    showLoading(message || 'Carregando...');
+    router.push(href);
+  };
+
   return (
     <div className="relative min-h-screen overflow-x-hidden flex flex-col">
       <DashboardBackground />
-      {isVisible && <LoadingScreen message={message} />}
+      {/* O LoadingScreen real agora é renderizado pelo LoadingProvider global no app/layout.tsx */}
       
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300">
         <div className="container mx-auto h-20 px-6 flex items-center justify-between">
-          <PremiumLogo onClick={() => router.push('/')} />
+          <PremiumLogo onClick={() => handleNav('/', 'Voltando...')} />
 
 
           <div className="flex items-center gap-4">
@@ -499,7 +511,7 @@ export function VaultsPageClient({
                 variant="ghost" 
                 size="sm" 
                 className="rounded-full font-bold text-[11px] uppercase tracking-widest text-[#2D241E]/40 hover:bg-[#ff6b7b]/10 hover:text-[#ff6b7b]"
-                onClick={() => router.push('/profile')}
+                onClick={() => handleNav('/profile', 'Abrindo Perfil...')}
               >
                 Perfil
               </Button>

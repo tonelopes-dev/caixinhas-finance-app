@@ -3,18 +3,34 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useLoading } from '@/components/providers/loading-provider';
 
 interface PremiumLogoProps {
   className?: string;
   onClick?: () => void;
+  href?: string;
 }
 
-export function PremiumLogo({ className, onClick }: PremiumLogoProps) {
+export function PremiumLogo({ className, onClick, href }: PremiumLogoProps) {
+  const router = useRouter();
+  const { showLoading } = useLoading();
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick();
+    }
+    if (href) {
+      showLoading('Carregando...');
+      router.push(href);
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         "flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm group cursor-pointer transition-all duration-300 hover:bg-white/60",
         className

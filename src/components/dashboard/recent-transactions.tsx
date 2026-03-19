@@ -11,9 +11,10 @@ import { ListFilter, ArrowRight, Wallet, PlusCircle, Filter } from 'lucide-react
 import { Button } from '../ui/button';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { usePrivacyMode } from '@/hooks/use-privacy-mode';
 import { motion } from 'framer-motion';
 import { AnimatedCounter } from '../ui/animated-counter';
-import { usePrivacyMode } from '@/hooks/use-privacy-mode';
+import { useLoading } from '@/components/providers/loading-provider';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
@@ -58,6 +59,7 @@ export default function RecentTransactions({
     }
 
     const { isPrivate, isLoaded } = usePrivacyMode();
+    const { showLoading } = useLoading();
     const PrivacyBlur = () => <span className="text-xl font-black tracking-tighter text-[#2D241E]/30">R$ •••</span>;
 
   return (
@@ -178,7 +180,7 @@ export default function RecentTransactions({
 
       <CardFooter className="flex-col items-stretch gap-4 border-t border-[#2D241E]/5 pt-8">
         <Button variant="outline" asChild className="w-full justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-base uppercase tracking-widest group">
-          <Link href="/transactions">
+          <Link href="/transactions" onClick={() => showLoading('Abrindo Extrato...')}>
             Ver histórico completo
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>

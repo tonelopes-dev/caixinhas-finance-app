@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { usePrivacyMode } from '@/hooks/use-privacy-mode';
 import { motion } from 'framer-motion';
 import { MemberAvatars } from '../ui/member-avatars';
+import { useLoading } from '@/components/providers/loading-provider';
 
 type GoalBucketsProps = {
   goals: Goal[];
@@ -23,6 +24,7 @@ type GoalBucketsProps = {
 
 export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) {
   const { isPrivate, togglePrivacy, isLoaded } = usePrivacyMode();
+  const { showLoading } = useLoading();
   
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -70,6 +72,7 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
             >
               <Link 
                 href={`/goals/${goal.id}`} 
+                onClick={() => showLoading(`Abrindo ${goal.name}...`)}
                 className="group relative flex flex-col gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
               >
                 <div className="flex items-center gap-5">
@@ -135,13 +138,13 @@ export default function GoalBuckets({ goals, workspaceName }: GoalBucketsProps) 
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-4 border-t border-[#2D241E]/5 pt-8 md:flex-row">
         <Button variant="outline" asChild className="flex-1 justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-base uppercase tracking-widest group">
-            <Link href="/goals">
+            <Link href="/goals" onClick={() => showLoading('Abrindo Caixinhas...')}>
                 Ver todas
                 <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
         </Button>
         <Button className="w-full flex-1 md:w-auto rounded-[20px] h-14 font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-base uppercase tracking-widest" asChild>
-          <Link href="/goals/new">
+          <Link href="/goals/new" onClick={() => showLoading('Nova Caixinha...')}>
             <PlusCircle className="mr-2 h-5 w-5" />
             Criar Caixinha
           </Link>
