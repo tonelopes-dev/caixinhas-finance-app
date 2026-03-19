@@ -119,6 +119,7 @@ model Account {
 model Goal {
   id            String   @id @default(cuid())
   name          String
+  description   String?
   targetAmount  Float
   currentAmount Float    @default(0)
   emoji         String

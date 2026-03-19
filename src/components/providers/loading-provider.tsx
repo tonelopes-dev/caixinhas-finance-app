@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 
@@ -26,18 +26,18 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
   const [isLoading, setIsLoading] = useState(shouldStartWithLoading);
   const [message, setMessage] = useState('Carregando...');
   
-  const showLoading = (customMessage?: string) => {
+  const showLoading = useCallback((customMessage?: string) => {
     setMessage(customMessage || 'Carregando...');
     setIsLoading(true);
-  };
+  }, []);
 
-  const hideLoading = () => {
+  const hideLoading = useCallback(() => {
     setIsLoading(false);
-  };
+  }, []);
 
-  const setLoadingMessage = (newMessage: string) => {
+  const setLoadingMessage = useCallback((newMessage: string) => {
     setMessage(newMessage);
-  };
+  }, []);
 
   // Esconder loading automaticamente quando trocar de página
   useEffect(() => {
@@ -49,7 +49,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       
       return () => clearTimeout(timeout);
     }
-  }, [pathname]);
+  }, [pathname, isLoading, hideLoading]);
 
   // Auto hide loading after 15 seconds (safety backup)
   useEffect(() => {
@@ -60,15 +60,15 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       
       return () => clearTimeout(timeout);
     }
-  }, [isLoading]);
+  }, [isLoading, hideLoading]);
 
-  const value: LoadingContextType = {
+  const value = useMemo(() => ({
     isLoading,
     message,
     showLoading,
     hideLoading,
     setLoadingMessage,
-  };
+  }), [isLoading, message, showLoading, hideLoading, setLoadingMessage]);
 
   return (
     <LoadingContext.Provider value={value}>

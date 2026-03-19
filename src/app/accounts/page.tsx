@@ -17,7 +17,7 @@ export default async function AccountsPage() {
       <DashboardBackground />
       
       <div className="relative z-10 flex flex-1 flex-col p-4 md:p-10 pt-24 pb-32">
-        <div className="mx-auto w-full max-w-4xl space-y-12">
+        <div className="mx-auto w-full max-w-6xl space-y-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4">
               <StandardBackButton href="/dashboard" label="Voltar para o Painel" className="mb-0" />

@@ -78,6 +78,7 @@ export type Goal = {
   userId?: string | null;
   vaultId?: string | null;
   name: string;
+  description?: string;
   targetAmount: number;
   currentAmount: number;
   emoji: string;

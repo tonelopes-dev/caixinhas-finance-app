@@ -112,11 +112,11 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
                         </div>
                         <div>
                             <h4 className="font-headline text-2xl font-bold text-[#2D241E] leading-tight italic">{account.bank}</h4>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 mt-0.5">{accountTypeLabels[account.type]}</p>
+                            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2D241E]/30 mt-0.5">{accountTypeLabels[account.type]}</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1.5 translate-y-1">
                         <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
                         <DeleteAccountDialog 
                             account={account} 
@@ -143,24 +143,24 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
                 {/* Footer: Balance & Name */}
                 <div className="flex items-end justify-between pt-4">
                     <div className="space-y-1.5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Titular do Cartão</p>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Titular do Cartão</p>
                         <p className="font-bold text-[#2D241E] tracking-tight text-lg group-hover:text-[#ff6b7b] transition-colors">{account.name}</p>
                     </div>
 
                     <div className="text-right">
                         {isCreditCard ? (
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b7b]/60">Fatura Atual</p>
+                                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b7b]/60">Fatura Atual</p>
                                 <p className="text-3xl font-headline font-black text-[#ff6b7b] tracking-tighter italic scale-105 origin-right">
                                     <AnimatedCounter value={account.balance} formatter={formatCurrency} />
                                 </p>
-                                <p className="text-[9px] font-bold text-[#2D241E]/30 italic mt-1">
+                                <p className="text-[11px] font-bold text-[#2D241E]/50 italic mt-1">
                                     de {formatCurrency(account.creditLimit || 0)} limite
                                 </p>
                             </div>
                         ) : (
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/60">Saldo Disponível</p>
+                                <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-500/60">Saldo Disponível</p>
                                 <p className={cn("text-3xl font-headline font-black tracking-tighter italic scale-105 origin-right", account.balance >= 0 ? 'text-emerald-500' : 'text-[#ff6b7b]')}>
                                     <AnimatedCounter value={account.balance} formatter={formatCurrency} />
                                 </p>
@@ -173,11 +173,11 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
             {/* Visibility Pills */}
             {isOwner && visibleInArray.length > 0 && (
                 <div className="mt-8 pt-6 border-t border-[#2D241E]/5 flex items-center gap-3 flex-wrap">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Visível em:</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Visível em:</span>
                     {visibleInArray.map((vaultId: string) => {
                         const vault = userVaults.find(v => v.id === vaultId);
                         return vault ? (
-                            <Badge key={vaultId} className="bg-[#ff6b7b]/10 text-[#ff6b7b] hover:bg-[#ff6b7b]/20 border border-[#ff6b7b]/20 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm">
+                            <Badge key={vaultId} className="bg-[#ff6b7b]/10 text-[#ff6b7b] hover:bg-[#ff6b7b]/20 border border-[#ff6b7b]/20 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-widest shadow-sm">
                                 {vault.name}
                             </Badge>
                         ) : null;
@@ -232,9 +232,9 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     <TooltipTrigger asChild>
                          <DialogTrigger asChild>
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="icon"
-                                className="text-muted-foreground hover:text-primary"
+                                className="h-9 w-9 rounded-xl border-[#2D241E]/5 bg-white/50 text-[#2D241E]/40 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 hover:bg-white transition-all shadow-sm"
                                 disabled={disabled}
                             >
                                 <Edit className="h-4 w-4" />
@@ -271,8 +271,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
             <fieldset disabled={!isOwner}>
                 <input type="hidden" name="logoUrl" value={selectedLogo || ''} />
                 <input type="hidden" name="scope" value="personal" />
-                <div className="grid gap-4 py-4">
-
+                <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                     {isOwner && (
                         <div className="space-y-2 rounded-md border p-4">
                             <Label>Visibilidade nos Cofres</Label>
@@ -390,9 +389,9 @@ function DeleteAccountDialog({ account, disabled, currentUserId }: { account: Ac
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="text-muted-foreground hover:text-destructive"
+                className="h-9 w-9 rounded-xl border-[#2D241E]/5 bg-white/50 text-[#2D241E]/40 hover:text-destructive hover:border-destructive/20 hover:bg-white transition-all shadow-sm"
                 disabled={disabled}
               >
                 <Trash2 className="h-4 w-4" />

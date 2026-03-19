@@ -103,76 +103,79 @@ export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUp
         <div className="p-8 md:p-10">
           <div className="grid gap-4">
             <div className="space-y-6">
-              <div className="flex flex-col items-center sm:flex-row gap-8 mb-8 pb-8 border-b border-[#2D241E]/5">
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl ring-8 ring-[#ff6b7b]/5">
-                  <Image
-                    src={imagePreview || selectedImage}
-                    alt="Profile preview"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 hover:opacity-100 flex items-center justify-center">
-                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Preview</span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-8 pb-10 border-b border-[#2D241E]/5 items-center">
+                {/* Preview Container */}
+                <div className="flex flex-col items-center sm:flex-row gap-8">
+                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-8 ring-[#ff6b7b]/5 group-hover:ring-[#ff6b7b]/10 transition-all duration-500 shrink-0">
+                    <Image
+                      src={imagePreview || selectedImage}
+                      alt="Profile preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 hover:opacity-100 flex items-center justify-center">
+                      <span className="text-white text-[10px] font-black uppercase tracking-widest">Preview</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-2 text-center sm:text-left">
+                    <h3 className="text-xl font-headline font-bold text-[#2D241E] italic">Foto de Perfil</h3>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 leading-relaxed italic">Personalize sua presença no app</p>
                   </div>
                 </div>
-                <div className="flex-1 space-y-2 text-center sm:text-left">
-                  <h3 className="text-xl font-headline font-bold text-[#2D241E] italic">Foto de Perfil</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">Personalize sua presença no app</p>
-                </div>
-              </div>
-              
-              {/* Upload de arquivo */}
-              <div className="space-y-3">
-                <Label htmlFor="avatarFile" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Upload de Imagem</Label>
-                <div className="relative">
-                  <Input
-                    id="avatarFile"
-                    name="avatarFile"
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setImagePreview(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="avatarFile"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#2D241E]/10 rounded-3xl cursor-pointer bg-white/50 hover:bg-white hover:border-[#ff6b7b]/30 transition-all duration-300 group shadow-sm"
-                  >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <div className="w-12 h-12 rounded-full bg-[#ff6b7b]/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg
-                          className="w-6 h-6 text-[#ff6b7b]/60"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 20 16"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                          />
-                        </svg>
+                
+                {/* Upload Area */}
+                <div className="space-y-3">
+                  <Label htmlFor="avatarFile" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Upload de Imagem</Label>
+                  <div className="relative">
+                    <Input
+                      id="avatarFile"
+                      name="avatarFile"
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setImageFile(file);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setImagePreview(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="avatarFile"
+                      className="flex flex-col items-center justify-center w-full h-32 md:h-40 border-2 border-dashed border-[#2D241E]/10 rounded-3xl cursor-pointer bg-white/50 hover:bg-white hover:border-[#ff6b7b]/30 transition-all duration-300 group shadow-sm"
+                    >
+                      <div className="flex flex-col items-center justify-center py-4">
+                        <div className="w-10 h-10 rounded-full bg-[#ff6b7b]/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                          <svg
+                            className="w-5 h-5 text-[#ff6b7b]/60"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 16"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                            />
+                          </svg>
+                        </div>
+                        <p className="mb-1 text-[11px] font-bold text-[#2D241E]/60 text-center">
+                          <span className="text-[#ff6b7b]">Clique para carregar</span> nova foto
+                        </p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-[#2D241E]/20 text-center">
+                          PNG, JPG (MAX. 5MB)
+                        </p>
                       </div>
-                      <p className="mb-2 text-xs font-bold text-[#2D241E]/60">
-                        <span className="text-[#ff6b7b]">Clique para carregar</span> nova foto
-                      </p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/20">
-                        PNG, JPG (MAX. 5MB)
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                  </div>
                 </div>
               </div>
               

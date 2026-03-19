@@ -132,7 +132,7 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
         </div>
 
         {/* HERO SECTION */}
-        <div className="relative mb-16">
+        <div className="relative mb-16 bg-white/50 backdrop-blur-md rounded-[35px] p-8 md:p-12 border border-white/80 shadow-[0_15px_40px_rgba(45,36,30,0.08)]">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-14">
                 {/* Large Emoji Box */}
                 <div className="relative group">
@@ -159,6 +159,11 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                         <p className="text-[#ff6b7b] font-black text-lg md:text-xl uppercase tracking-[0.2em]">
                             {ownerName}
                         </p>
+                        {goal.description && (
+                            <p className="text-[#2D241E]/60 text-sm md:text-base font-medium max-w-xl italic">
+                                "{goal.description}"
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-8 max-w-2xl">
