@@ -113,9 +113,9 @@ export function DashboardClient({
   );
 
   return (
-    <main className="flex-1 p-4 md:p-6 lg:p-8">
+    <main className="flex-1">
       <WorkspaceNavigationHandler />
-      <div className="mx-auto w-full">
+      <div className="mx-auto w-full max-w-7xl">
         <Suspense
           fallback={<div className="h-20 animate-pulse rounded bg-muted" />}
         >

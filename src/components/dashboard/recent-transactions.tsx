@@ -91,7 +91,7 @@ export default function RecentTransactions({
       </CardHeader>
       
       <CardContent>
-        <div className="overflow-x-auto -mx-6 px-6">
+        <div className="overflow-x-auto sm:-mx-6 sm:px-6 px-4">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-[#2D241E]/5 hover:bg-transparent">

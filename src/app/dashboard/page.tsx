@@ -101,10 +101,8 @@ export default async function DashboardPage() {
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-      <DashboardBackground />
-      
-      <div className="relative z-10 flex flex-1 flex-col px-4 md:px-8 pt-24 pb-8">
+    <DashboardBackground>
+      <div className="mx-auto w-full max-w-7xl px-4 md:px-8 pt-24 pb-12 flex flex-col gap-8">
         <Header user={currentUser as User} partner={null} />
         <Suspense fallback={<DashboardSkeleton />}>
           <DashboardClient
@@ -123,6 +121,6 @@ export default async function DashboardPage() {
         </Suspense>
         <PwaPrompt />
       </div>
-    </div>
+    </DashboardBackground>
   );
 }

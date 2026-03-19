@@ -440,55 +440,65 @@ export function TransactionsPageClient({
 
             <div className="p-0">
                 {/* Mobile View */}
-                <div className="md:hidden space-y-5 p-6">
+                <div className="md:hidden space-y-6 p-4">
                     {filteredTransactions.length > 0 ? (
                         filteredTransactions.map((t) => (
-                            <div key={t.id} className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_4px_30px_rgba(45,36,30,0.04)] active:scale-[0.97] transition-all duration-500">
-                                <div className="flex justify-between items-start mb-8">
-                                    <div className="flex items-center gap-5">
-                                        <div className={cn(
-                                            "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-700",
-                                            t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
-                                            t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
-                                            "bg-blue-50 text-blue-600"
-                                        )}>
-                                            {t.type === 'income' ? <TrendingUp size={24} /> : 
-                                             t.type === 'expense' ? <TrendingDown size={24} /> : 
-                                             <ArrowRightLeft size={24} />}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h4 className="font-headline italic text-[#2D241E] text-xl leading-tight truncate">{t.description}</h4>
-                                            <p className="text-[11px] font-black text-[#2D241E]/30 uppercase tracking-[0.25em] mt-2">
-                                                {formatDate(t.date)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                        <DeleteTransactionDialog transactionId={t.id} />
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-end justify-between mt-10">
-                                    <div className="space-y-4">
-                                        <Badge variant="secondary" className="bg-white/80 text-[#2D241E]/60 border-none font-black text-[11px] uppercase tracking-widest px-5 py-2 rounded-2xl shadow-sm">
-                                            {t.category?.name || 'Geral'}
-                                        </Badge>
-                                        <div className="flex items-center gap-3 text-[11px] font-black text-[#2D241E]/40 ml-2 uppercase tracking-[0.2em]">
-                                            <div className="h-2 w-2 rounded-full bg-[#2D241E]/15" />
-                                            <span className="truncate max-w-[140px]">
-                                                {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
-                                                 t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
-                                            </span>
-                                        </div>
+                            <div key={t.id} className="bg-white/40 backdrop-blur-3xl rounded-[32px] p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500">
+                                {/* Top Row: Icon and Amount */}
+                                <div className="flex justify-between items-center mb-6">
+                                    <div className={cn(
+                                        "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-700",
+                                        t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
+                                        t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
+                                        "bg-blue-50 text-blue-600"
+                                    )}>
+                                        {t.type === 'income' ? <TrendingUp size={24} /> : 
+                                         t.type === 'expense' ? <TrendingDown size={24} /> : 
+                                         <ArrowRightLeft size={24} />}
                                     </div>
                                     <div className={cn(
-                                        "text-3xl font-black tracking-tighter font-headline italic",
+                                        "text-3xl font-black tracking-tighter font-headline italic leading-none text-right",
                                         t.type === 'income' ? "text-emerald-600" : 
                                         t.type === 'expense' ? "text-[#ff6b7b]" : 
                                         "text-blue-600"
                                     )}>
                                         {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <div className="mb-6 min-w-0">
+                                    <h4 className="font-headline italic text-[#2D241E] text-2xl font-black leading-tight break-words pr-2">
+                                        {t.description}
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        <Badge variant="secondary" className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[9px] uppercase tracking-[0.2em] px-3 py-1 rounded-lg">
+                                            {t.category?.name || 'Geral'}
+                                        </Badge>
+                                        {t.isRecurring && (
+                                            <Badge variant="outline" className="border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-lg px-3 py-1">Fixo</Badge>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {/* Bottom Row: Info and Actions */}
+                                <div className="pt-6 border-t border-[#2D241E]/5 flex items-end justify-between">
+                                    <div className="space-y-1.5 flex-1 min-w-0 pr-4">
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em]">
+                                            <Calendar className="h-3 w-3" />
+                                            <span>{formatDate(t.date)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.1em] truncate italic">
+                                            <Wallet className="h-3 w-3 shrink-0" />
+                                            <span>
+                                                {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
+                                                 t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 shrink-0">
+                                        <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
+                                        <DeleteTransactionDialog transactionId={t.id} />
                                     </div>
                                 </div>
                             </div>
