@@ -6,7 +6,7 @@ export const config = {
   // Outras configurações podem ser adicionadas aqui
   app: {
     name: 'Caixinhas',
-    description: 'Sonhar juntos é o primeiro passo para conquistar.',
+    description: 'Sonhar é o primeiro passo para conquistar.',
   }
 } as const
 

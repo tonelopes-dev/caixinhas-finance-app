@@ -1,59 +1,103 @@
 /**
- * Gera o template HTML para o e-mail de boas-vindas.
- * @param userName O nome do novo usuário.
- * @returns A string HTML do e-mail.
+ * welcomeEmailTemplate — Caixinhas Premium Design
+ * Used by the welcome email for new self-registered users.
  */
-export const welcomeEmailTemplate = (userName: string): string => {
-  return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Bem-vindo(a) ao Caixinhas!</title>
-      <style>
-        body { font-family: 'Alegreya', serif; background-color: #fcfaf4; color: #443831; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #e5e0d4; border-radius: 12px; overflow: hidden; }
-        .header { background: linear-gradient(135deg, #E7A42F 0%, #D4941F 100%); padding: 25px; text-align: center; }
-        .logo-container { display: inline-block; vertical-align: middle; }
-        .logo { width: 50px; height: 50px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); margin-right: 15px; vertical-align: middle; }
-        .brand-name { color: #ffffff; font-size: 32px; font-weight: bold; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: -0.5px; vertical-align: middle; }
-        .brand-tagline { color: #FFF8E6; font-size: 13px; margin: 5px 0 0 0; font-weight: 500; opacity: 0.9; }
-        .greeting-section { padding: 35px 30px 20px 30px; background-color: #ffffff; border-bottom: 2px solid #F0F0F0; margin-bottom: 25px; text-align: center; }
-        .greeting-title { color: #453C35; font-size: 26px; margin: 0; font-weight: 600; }
-        .greeting-highlight { color: #E7A42F; }
-        .content { padding: 0 30px 30px 30px; }
-        .content h2 { font-size: 24px; color: #E7A42F; }
-        .content p { font-size: 16px; line-height: 1.6; }
-        .button { display: inline-block; background-color: #d4ac0d; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
-        .footer { background-color: #f3f0e9; padding: 20px; text-align: center; font-size: 12px; color: #8e8073; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="logo-container">
-            <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png" alt="Caixinhas Logo" class="logo">
-            <h1 class="brand-name">Caixinhas</h1>
-          </div>
-          <p class="brand-tagline">Sua vida financeira organizada</p>
-        </div>
-        <div class="greeting-section">
-          <h2 class="greeting-title">Olá, <span class="greeting-highlight">${userName}</span>! 👋</h2>
-        </div>
-        <div class="content">
-          <h2>Bem-vindo(a) à nossa família!</h2>
-          <p>Sua jornada para realizar sonhos em conjunto começa agora. Estamos muito felizes por ter você a bordo.</p>
-          <p>O Caixinhas foi criado para transformar a maneira como você e seu parceiro(a) lidam com as finanças, tornando tudo mais transparente, colaborativo e, acima de tudo, motivador.</p>
-          <p>Pronto(a) para começar a planejar seu futuro?</p>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://www.caixinhas.app'}/login" class="button">Acessar minha conta</a>
-          <p style="margin-top: 30px;">Com carinho,<br>Equipe Caixinhas</p>
-        </div>
-        <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} Caixinhas. Todos os direitos reservados.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-};
+export const welcomeEmailTemplate = (userName: string): string => `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Bem-vindo(a) ao Caixinhas!</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f1ea;font-family:'Inter',Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f1ea;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#fdfcf7;border-radius:20px;overflow:hidden;border:1px solid #ede8df;box-shadow:0 8px 40px rgba(45,36,30,0.10);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);padding:32px 30px;text-align:center;">
+              <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
+                <tr>
+                  <td style="padding-right:14px;vertical-align:middle;">
+                    <table cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:12px;width:52px;height:52px;">
+                      <tr>
+                        <td align="center" valign="middle">
+                          <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png"
+                               alt="Caixinhas" width="38" style="display:block;border:0;">
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td style="vertical-align:middle;text-align:left;">
+                    <p style="font-family:Georgia,'Times New Roman',serif;color:#ffffff;font-size:30px;font-weight:bold;margin:0;letter-spacing:-0.5px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,0.20);">Caixinhas</p>
+                    <p style="font-family:'Inter',Arial,sans-serif;color:rgba(255,255,220,0.85);font-size:12px;margin:4px 0 0 0;font-weight:500;letter-spacing:0.04em;">Sonhar é o primeiro passo</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:36px 36px 8px 36px;background-color:#fdfcf7;border-bottom:1px solid #ede8df;text-align:center;">
+              <p style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#2D241E;font-weight:600;margin:0 0 8px 0;">
+                Bem-vindo(a), <span style="color:#d4af37;">${userName}</span>! 🎉
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:28px 36px;background-color:#fdfcf7;">
+              <p style="font-family:'Inter',Arial,sans-serif;font-size:16px;color:#2D241E;line-height:1.7;margin:0 0 16px 0;">
+                Sua jornada para realizar sonhos em conjunto começa agora. Estamos muito felizes por ter você a bordo!
+              </p>
+              <p style="font-family:'Inter',Arial,sans-serif;font-size:16px;color:#2D241E;line-height:1.7;margin:0 0 16px 0;">
+                O Caixinhas foi criado para transformar a maneira como você e seu parceiro(a) lidam com as finanças — tornando tudo mais transparente, colaborativo e, acima de tudo, motivador.
+              </p>
+              <p style="font-family:'Inter',Arial,sans-serif;font-size:16px;color:#2D241E;line-height:1.7;margin:0 0 24px 0;">
+                Pronto(a) para começar a planejar seu futuro?
+              </p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 32px auto;">
+                <tr>
+                  <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.caixinhas.app'}/login"
+                       style="display:inline-block;padding:14px 36px;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;color:#3d2c00;text-decoration:none;border-radius:12px;letter-spacing:0.02em;">
+                      Acessar Minha Conta →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-family:'Inter',Arial,sans-serif;font-size:15px;color:#2D241E;line-height:1.7;margin:0;">
+                Com carinho,<br>
+                <strong>Equipe Caixinhas</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f0ece4;padding:24px 36px;border-top:1px solid #ede8df;border-bottom-left-radius:20px;border-bottom-right-radius:20px;">
+              <p style="font-family:'Inter',Arial,sans-serif;text-align:center;font-size:11px;color:#9a8e84;margin:0 0 6px 0;line-height:1.5;">
+                Este e-mail foi enviado automaticamente pelo Caixinhas. Por favor, não responda.
+              </p>
+              <p style="font-family:'Inter',Arial,sans-serif;text-align:center;font-size:11px;color:#9a8e84;margin:0;">
+                &copy; ${new Date().getFullYear()} Caixinhas &mdash; Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;

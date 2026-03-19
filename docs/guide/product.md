@@ -11,7 +11,7 @@
 
 ### 1.2. Slogan
 
-> "Sonhar juntos é o primeiro passo para conquistar."
+> "Sonhar é o primeiro passo para conquistar."
 
 ### 1.3. Público-Alvo
 

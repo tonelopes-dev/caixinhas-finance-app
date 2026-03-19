@@ -15,7 +15,7 @@ import { MobileNavWrapper } from '@/components/ui/mobile-nav-wrapper';
 
 export const metadata: Metadata = {
   title: 'Caixinhas',
-  description: 'Sonhar juntos é o primeiro passo para conquistar.',
+  description: 'Sonhar é o primeiro passo para conquistar.',
   applicationName: 'Caixinhas',
   manifest: '/manifest.json',
   appleWebApp: {

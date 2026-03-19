@@ -1,63 +1,57 @@
+import { emailHeader, emailFooter } from './email-header';
 
-import { emailHeader } from './email-header';
-import { emailFooter } from './email-footer';
+/* ─── Helpers ──────────────────────────────────────────────────── */
 
-export const welcomeEmail = (userName: string, userEmail: string, temporaryPassword: string) => {
-  return `
-    <div style="font-family: 'Inter', 'Alegreya', sans-serif; line-height: 1.6; color: #453C35; background-color: #F2F1E4; padding: 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F2F1E4;">
-        <tr>
-          <td align="center" style="padding: 20px 0;">
-            <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <tr>
-                <td style="padding: 0px;">
-                  <img src="https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/banners/caixinhas-banner-email-seja-bem-vindo.png" alt="Seja Bem-Vindo ao Caixinhas!" style="width: 100%; max-width: 600px; height: auto; display: block; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                </td>
-              </tr>
-              <tr>
-                <td style="padding: 30px;">
-                  <h1 style="font-family: 'Alegreya', serif; color: #E7A42F; font-size: 28px; margin-bottom: 20px; text-align: center;">Olá, ${userName}!</h1>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-                    Seja muito bem-vindo(a) à família Caixinhas App! Estamos super felizes em ter você conosco.
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-                    Seu acesso foi criado com sucesso. Aqui estão seus dados para fazer login:
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 5px;">
-                    <strong>E-mail:</strong> ${userEmail}
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px;">
-                    <strong>Senha Temporária:</strong> ${temporaryPassword}
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 20px; text-align: center;">
-                    <a href="https://www.caixinhas.app/login" style="display: inline-block; padding: 12px 25px; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Acessar Minha Conta</a>
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: #777; margin-bottom: 10px;">
-                    Recomendamos que você altere sua senha assim que fizer o primeiro login para garantir a segurança da sua conta.
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px; margin-bottom: 15px;">
-                    Qualquer dúvida, é só nos chamar!
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; font-size: 16px;">
-                    Atenciosamente,<br>
-                    Equipe Caixinhas App
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td style="background-color: #F0F0F0; padding: 20px 30px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-                  <p style="font-family: 'Inter', sans-serif; text-align: center; font-size: 12px; color: #777;">
-                    Este e-mail foi enviado pela Caixinhas App. Por favor, não responda a este e-mail.
-                  </p>
-                  <p style="font-family: 'Inter', sans-serif; text-align: center; font-size: 12px; color: #777;">
-                    &copy; ${new Date().getFullYear()} Caixinhas App. Todos os direitos reservados.
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
-  `;
-};
+const primaryButton = (href: string, label: string) => `
+  <table cellpadding="0" cellspacing="0" border="0" style="margin:28px auto 0 auto;">
+    <tr>
+      <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
+        <a href="${href}" style="display:inline-block;padding:14px 36px;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;color:#3d2c00;text-decoration:none;border-radius:12px;letter-spacing:0.02em;">${label}</a>
+      </td>
+    </tr>
+  </table>
+`;
+
+const infoBox = (content: string, borderColor = '#d4af37') => `
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:20px 0;">
+    <tr>
+      <td style="background-color:#f9f6f0;border-radius:12px;border-left:4px solid ${borderColor};padding:18px 20px;font-family:'Inter',Arial,sans-serif;font-size:15px;color:#2D241E;line-height:1.6;">
+        ${content}
+      </td>
+    </tr>
+  </table>
+`;
+
+/* ─── Welcome Email (from admin with temp password) ─────────────── */
+
+export const welcomeEmail = (userName: string, userEmail: string, temporaryPassword: string) => `
+  ${emailHeader(userName)}
+
+  <p style="font-family:'Inter',Arial,sans-serif;font-size:16px;color:#2D241E;line-height:1.7;margin:0 0 16px 0;">
+    Seja muito bem-vindo(a) à família <strong>Caixinhas</strong>! Estamos muito felizes em ter você conosco.
+  </p>
+
+  <p style="font-family:'Inter',Arial,sans-serif;font-size:16px;color:#2D241E;line-height:1.7;margin:0 0 20px 0;">
+    Seu acesso foi criado com sucesso. Aqui estão seus dados de login:
+  </p>
+
+  ${infoBox(`
+    <p style="margin:0 0 8px 0;"><strong style="color:#7a6a5f;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">E-mail</strong></p>
+    <p style="margin:0 0 16px 0;font-size:16px;">${userEmail}</p>
+    <p style="margin:0 0 8px 0;"><strong style="color:#7a6a5f;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Senha Temporária</strong></p>
+    <p style="margin:0;font-size:18px;font-weight:700;color:#d4af37;font-family:monospace;">${temporaryPassword}</p>
+  `)}
+
+  <p style="font-family:'Inter',Arial,sans-serif;font-size:14px;color:#9a8e84;line-height:1.6;margin:16px 0 24px 0;">
+    ⚠️ Recomendamos que você altere sua senha assim que fizer o primeiro login para garantir a segurança da sua conta.
+  </p>
+
+  ${primaryButton('https://www.caixinhas.app/login', 'Acessar Minha Conta →')}
+
+  <p style="font-family:'Inter',Arial,sans-serif;font-size:15px;color:#2D241E;line-height:1.7;margin:32px 0 0 0;">
+    Qualquer dúvida, é só nos chamar!<br>
+    <strong>Equipe Caixinhas</strong>
+  </p>
+
+  ${emailFooter()}
+`;
