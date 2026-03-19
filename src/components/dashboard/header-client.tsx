@@ -56,11 +56,11 @@ export function HeaderClient({ user }: HeaderClientProps) {
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent className="w-64 bg-white/60 backdrop-blur-2xl border-white/40 rounded-[30px] shadow-2xl p-4 mt-2" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal pb-4 mb-2 border-b border-[#2D241E]/5">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-lg font-headline font-bold text-[#2D241E] italic leading-tight">{user.name}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/30">
               {user.email}
             </p>
           </div>

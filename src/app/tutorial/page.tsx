@@ -1,20 +1,15 @@
+'use client';
 
 import { PiggyBank, PlusCircle, UserPlus, FileText, Paintbrush, Edit, Wallet, Building2, User, HelpCircle } from 'lucide-react';
-import { BackToDashboard } from '@/components/ui/back-to-dashboard';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import { motion } from 'framer-motion';
 
 const tutorialSteps = [
     {
@@ -77,41 +72,59 @@ const tutorialSteps = [
       content: "'Entrada' é dinheiro que CHEGA para você (seu mesadinha, um presente, seu salário). 'Saída' é dinheiro que SAI do seu bolso (quando você compra algo, paga uma conta). Registrar tudo isso ajuda você a entender para onde seu dinheiro está indo!",
       icon: Wallet
     },
-  ];
+];
 
 export default function TutorialPage() {
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
-      <div className="mx-auto w-full max-w-2xl">
-        <BackToDashboard className="mb-4" />
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl">
-              Como usar o Caixinhas? 🎯
-            </CardTitle>
-            <CardDescription>
+    <DashboardBackground>
+      <div className="container max-w-4xl mx-auto py-12 px-6">
+        <div className="mb-12">
+          <StandardBackButton href="/vaults" label="Voltar para Início" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-12"
+        >
+          {/* Header Section */}
+          <div className="text-center space-y-4">
+            <h1 className="text-5xl md:text-7xl font-headline font-bold text-[#2D241E] italic tracking-tight leading-tight">
+              Como usar o <span className="text-[#ff6b7b]">Caixinhas?</span> 🎯
+            </h1>
+            <p className="text-xl md:text-2xl text-[#2D241E]/60 font-medium italic max-w-2xl mx-auto">
               Tudo explicado de um jeito super fácil! Se você tem dúvidas, é só clicar nas perguntas abaixo.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
+            </p>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/40 shadow-2xl p-8 md:p-12">
+            <Accordion type="single" collapsible className="w-full space-y-4">
                 {tutorialSteps.map((step, index) => (
-                    <AccordionItem value={`item-${index + 1}`} key={index}>
-                        <AccordionTrigger>
-                            <div className='flex items-center gap-3'>
-                                <step.icon className="h-5 w-5 text-primary" />
-                                <span className='text-left'>{step.trigger}</span>
+                    <AccordionItem 
+                      value={`item-${index + 1}`} 
+                      key={index}
+                      className="border-b border-[#2D241E]/5 last:border-0"
+                    >
+                        <AccordionTrigger className="hover:no-underline group">
+                            <div className='flex items-center gap-5 text-left transition-transform group-data-[state=open]:scale-[1.02]'>
+                                <div className="p-3 rounded-2xl bg-white/60 shadow-sm border border-white group-data-[state=open]:bg-[#ff6b7b] group-data-[state=open]:text-white transition-colors duration-300">
+                                  <step.icon className="h-6 w-6" />
+                                </div>
+                                <span className='text-xl md:text-2xl font-headline font-bold text-[#2D241E] italic group-hover:text-[#ff6b7b] transition-colors'>
+                                  {step.trigger}
+                                </span>
                             </div>
                         </AccordionTrigger>
-                        <AccordionContent className='pl-11 text-base'>
-                        {step.content}
+                        <AccordionContent className='pl-20 text-lg md:text-xl text-[#2D241E]/70 font-medium italic leading-relaxed pb-8'>
+                          {step.content}
                         </AccordionContent>
                     </AccordionItem>
                 ))}
             </Accordion>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </DashboardBackground>
   );
 }

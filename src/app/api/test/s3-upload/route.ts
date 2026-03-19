@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { uploadFileToS3 } from '@/lib/s3';
+import { uploadFile } from '@/lib/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       fileType: file.type
     });
 
-    const imageUrl = await uploadFileToS3(file);
+    const imageUrl = await uploadFile(file, 'test-uploads');
     
     return NextResponse.json({
       success: true,

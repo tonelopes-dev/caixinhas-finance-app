@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { AuthService } from '@/services/auth.service';
 import { VaultService } from '@/services/vault.service';
+import { prisma } from '@/services/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
@@ -95,12 +96,12 @@ export async function updateProfileAction(prevState: ProfileActionState, formDat
   // Se há um arquivo, fazer upload para S3
   if (file && file.size > 0) {
     try {
-      const { uploadFileToS3, deleteFileFromS3 } = await import('@/lib/s3');
-      avatarUrl = await uploadFileToS3(file);
+      const { uploadFile, deleteFile } = await import('@/lib/blob');
+      avatarUrl = await uploadFile(file, 'avatars');
       
       // Deletar avatar antigo se existir e não for um avatar padrão
       if (currentUser.avatarUrl && !currentUser.avatarUrl.startsWith('data:image/svg+xml')) {
-        await deleteFileFromS3(currentUser.avatarUrl);
+        await deleteFile(currentUser.avatarUrl);
       }
     } catch (uploadError) {
       console.error('Erro ao fazer upload do avatar:', uploadError);
@@ -339,10 +340,14 @@ export async function changePasswordAction(
   newPassword: string
 ) {
   try {
-    const user = await AuthService.getUserById(userId);
+    const user = await AuthService.getUserWithPassword(userId);
     
     if (!user) {
       return { success: false, message: 'Usuário não encontrado.' };
+    }
+
+    if (!user.password) {
+      return { success: false, message: 'Este usuário não possui uma senha definida (login social).' };
     }
 
     // Verificar senha atual

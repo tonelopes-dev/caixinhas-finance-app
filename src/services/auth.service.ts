@@ -182,6 +182,22 @@ export class AuthService {
   }
 
   /**
+   * Busca um usuário por ID (incluindo a senha para verificação)
+   * @param id - ID do usuário
+   * @returns Usuário completo ou null
+   */
+  static async getUserWithPassword(id: string) {
+    try {
+      return await prisma.user.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar usuário com senha:', error);
+      return null;
+    }
+  }
+
+  /**
    * Busca um usuário por ID
    * @param id - ID do usuário
    * @returns Usuário encontrado (sem senha) ou null
