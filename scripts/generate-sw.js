@@ -47,12 +47,9 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        // Em DEV: pula waiting para forçar atualização imediata
-        // Em PROD: aguarda para não interromper sessões ativas
-        if (IS_DEV) {
-          console.log(\`[SW \${VERSION}] DEV mode: skipping waiting\`);
-          return self.skipWaiting();
-        }
+        // Auto-skip waiting in all environments for seamless updates
+        console.log(\`[SW \${VERSION}] Skipping waiting for instant activation\`);
+        return self.skipWaiting();
       })
   );
 });
@@ -77,12 +74,9 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        // Em DEV: assume controle imediatamente
-        // Em PROD: assume controle de novos clients apenas
-        if (IS_DEV) {
-          console.log(\`[SW \${VERSION}] DEV mode: claiming clients\`);
-          return self.clients.claim();
-        }
+        // Always claim clients for instant takeover on all open tabs
+        console.log(\`[SW \${VERSION}] Claiming all clients\`);
+        return self.clients.claim();
       })
   );
 });

@@ -1,11 +1,11 @@
 /**
  * Service Worker - Caixinhas Finance App
- * Versão: v20260319-105039
- * Build: 2026-03-19T10:50:39.232Z
+ * Versão: v20260319-151409
+ * Build: 2026-03-19T15:14:09.296Z
  * Ambiente: PRODUCTION
  */
 
-const VERSION = 'v20260319-105039';
+const VERSION = 'v20260319-151409';
 const CACHE_NAME = `caixinhas-${VERSION}`;
 const STATIC_CACHE = `caixinhas-static-${VERSION}`;
 const DYNAMIC_CACHE = `caixinhas-dynamic-${VERSION}`;
@@ -32,12 +32,9 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        // Em DEV: pula waiting para forçar atualização imediata
-        // Em PROD: aguarda para não interromper sessões ativas
-        if (IS_DEV) {
-          console.log(`[SW ${VERSION}] DEV mode: skipping waiting`);
-          return self.skipWaiting();
-        }
+        // Auto-skip waiting in all environments for seamless updates
+        console.log(`[SW ${VERSION}] Skipping waiting for instant activation`);
+        return self.skipWaiting();
       })
   );
 });
@@ -62,12 +59,9 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        // Em DEV: assume controle imediatamente
-        // Em PROD: assume controle de novos clients apenas
-        if (IS_DEV) {
-          console.log(`[SW ${VERSION}] DEV mode: claiming clients`);
-          return self.clients.claim();
-        }
+        // Always claim clients for instant takeover on all open tabs
+        console.log(`[SW ${VERSION}] Claiming all clients`);
+        return self.clients.claim();
       })
   );
 });

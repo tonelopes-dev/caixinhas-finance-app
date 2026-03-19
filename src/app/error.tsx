@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { RefreshCw, Home, AlertCircle, Smartphone, Wifi, Bug } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { RefreshCw, Home, AlertTriangle, Wifi, Bug, ChevronDown } from 'lucide-react';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -11,8 +9,9 @@ interface ErrorPageProps {
 }
 
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
+  const [showDetails, setShowDetails] = useState(false);
+
   useEffect(() => {
-    // Log do erro para monitoramento
     console.error('Global Error Page:', {
       error: error.toString(),
       stack: error.stack,
@@ -38,100 +37,151 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-            <AlertCircle className="h-8 w-8 text-destructive" />
-          </div>
-          <CardTitle className="text-xl">Algo deu errado!</CardTitle>
-          <CardDescription>
-            Ocorreu um erro inesperado. Não se preocupe, vamos te ajudar a resolver isso rapidamente!
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Instruções específicas para PWA/Mobile */}
-          <div className="bg-muted/50 rounded-lg p-4 text-sm">
-            <div className="flex items-start gap-3">
-              <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-muted-foreground mb-2">
-                  Para usuários do app na tela inicial:
-                </p>
-                <ol className="text-muted-foreground space-y-1 text-xs list-decimal list-inside">
-                  <li>Primeiro, tente "Tentar Novamente"</li>
-                  <li>Se persistir, use "Limpar Cache e Recarregar"</li>
-                  <li>Em último caso, remova e adicione o app novamente</li>
-                </ol>
-              </div>
-            </div>
-          </div>
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        background: 'radial-gradient(ellipse at top left, hsl(24,22%,90%) 0%, hsl(24,22%,95%) 60%)',
+      }}
+    >
+      <div className="w-full max-w-sm">
 
-          <div className="space-y-3">
-            <Button
-              onClick={reset}
-              className="w-full"
-              size="lg"
+        {/* Icon */}
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            <div
+              className="absolute inset-0 rounded-full blur-2xl opacity-30"
+              style={{ background: 'hsl(0,84%,60%)', transform: 'scale(1.4)' }}
+            />
+            <div
+              className="relative h-20 w-20 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, hsl(0,84%,65%) 0%, hsl(0,84%,50%) 100%)',
+                boxShadow: '0 8px 32px hsla(0,84%,60%,0.35)',
+              }}
             >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Tentar Novamente
-            </Button>
-
-            <Button
-              onClick={handleHardRefresh}
-              variant="outline"
-              className="w-full"
-              size="lg"
-            >
-              <Wifi className="mr-2 h-4 w-4" />
-              Limpar Cache e Recarregar
-            </Button>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                onClick={handleGoHome}
-                variant="secondary"
-                size="lg"
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Início
-              </Button>
-
-              <Button
-                onClick={handleReportBug}
-                variant="secondary"
-                size="lg"
-              >
-                <Bug className="mr-2 h-4 w-4" />
-                Reportar
-              </Button>
+              <AlertTriangle className="h-9 w-9 text-white" strokeWidth={2} />
             </div>
           </div>
+        </div>
 
-          {/* ID do erro se disponível */}
-          {error.digest && (
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                ID do Erro: <code className="bg-muted px-1 rounded">{error.digest}</code>
-              </p>
-            </div>
-          )}
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1
+            className="text-2xl font-bold mb-2"
+            style={{ fontFamily: 'var(--font-alegreya, serif)', color: 'hsl(26,29%,18%)' }}
+          >
+            Algo deu errado
+          </h1>
+          <p className="text-sm leading-relaxed" style={{ color: 'hsl(26,29%,42%)' }}>
+            Não se preocupe — isso acontece às vezes.
+            <br />
+            Tente uma das opções abaixo.
+          </p>
+        </div>
 
-          {/* Detalhes do erro apenas em desenvolvimento */}
-          {process.env.NODE_ENV === 'development' && (
-            <details className="mt-6 text-xs">
-              <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                Detalhes técnicos (desenvolvimento)
-              </summary>
-              <pre className="mt-2 whitespace-pre-wrap break-words bg-muted p-3 rounded text-xs overflow-auto max-h-40 border">
+        {/* Actions */}
+        <div className="space-y-3">
+          {/* Primary */}
+          <button
+            onClick={reset}
+            className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, hsl(43,74%,52%) 0%, hsl(43,74%,42%) 100%)',
+              color: 'hsl(43,74%,5%)',
+              boxShadow: '0 4px 20px hsla(43,74%,49%,0.35)',
+            }}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Tentar Novamente
+          </button>
+
+          {/* Secondary */}
+          <button
+            onClick={handleHardRefresh}
+            className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold border transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background: 'hsl(60,50%,97%)',
+              border: '1.5px solid hsl(60,30%,82%)',
+              color: 'hsl(26,29%,25%)',
+            }}
+          >
+            <Wifi className="h-4 w-4" style={{ color: 'hsl(26,29%,42%)' }} />
+            Limpar Cache e Recarregar
+          </button>
+
+          {/* Tertiary row */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              onClick={handleGoHome}
+              className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-medium border transition-all duration-200 active:scale-[0.98]"
+              style={{
+                background: 'hsl(60,50%,97%)',
+                border: '1.5px solid hsl(60,30%,82%)',
+                color: 'hsl(26,29%,30%)',
+              }}
+            >
+              <Home className="h-4 w-4" style={{ color: 'hsl(26,29%,45%)' }} />
+              Início
+            </button>
+            <button
+              onClick={handleReportBug}
+              className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-medium border transition-all duration-200 active:scale-[0.98]"
+              style={{
+                background: 'hsl(60,50%,97%)',
+                border: '1.5px solid hsl(60,30%,82%)',
+                color: 'hsl(26,29%,30%)',
+              }}
+            >
+              <Bug className="h-4 w-4" style={{ color: 'hsl(26,29%,45%)' }} />
+              Reportar
+            </button>
+          </div>
+        </div>
+
+        {/* Error ID */}
+        {error.digest && (
+          <p className="text-center text-xs mt-5" style={{ color: 'hsl(26,29%,55%)' }}>
+            Código:{' '}
+            <code
+              className="rounded-md px-1.5 py-0.5"
+              style={{ background: 'hsl(60,30%,90%)', color: 'hsl(26,29%,35%)' }}
+            >
+              {error.digest}
+            </code>
+          </p>
+        )}
+
+        {/* Dev details */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-5">
+            <button
+              onClick={() => setShowDetails(v => !v)}
+              className="w-full flex items-center justify-center gap-1.5 text-xs transition-colors"
+              style={{ color: 'hsl(26,29%,55%)' }}
+            >
+              <ChevronDown
+                className="h-3.5 w-3.5 transition-transform duration-200"
+                style={{ transform: showDetails ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              />
+              Detalhes técnicos
+            </button>
+            {showDetails && (
+              <pre
+                className="mt-3 whitespace-pre-wrap break-words rounded-xl p-3 text-xs overflow-auto max-h-36 border"
+                style={{
+                  background: 'hsl(60,30%,92%)',
+                  border: '1px solid hsl(60,30%,82%)',
+                  color: 'hsl(26,29%,30%)',
+                }}
+              >
                 {error.toString()}
                 {'\n\n'}
                 {error.stack}
               </pre>
-            </details>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

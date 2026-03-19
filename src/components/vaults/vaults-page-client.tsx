@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,8 +27,15 @@ import {
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { CreateVaultDialog } from '@/components/vaults/create-vault-dialog';
-import { EditVaultDialog } from '@/components/vaults/edit-vault-dialog';
+// ⚡ PERFORMANCE: Lazy-load heavy dialog components
+const CreateVaultDialog = dynamic(
+  () => import('@/components/vaults/create-vault-dialog').then(m => ({ default: m.CreateVaultDialog })),
+  { ssr: false }
+);
+const EditVaultDialog = dynamic(
+  () => import('@/components/vaults/edit-vault-dialog').then(m => ({ default: m.EditVaultDialog })),
+  { ssr: false }
+);
 import { acceptInvitationAction, declineInvitationAction } from '@/app/vaults/actions';
 import { setWorkspaceAction } from '@/app/vaults/workspace-actions';
 import { useToast } from '@/hooks/use-toast';
