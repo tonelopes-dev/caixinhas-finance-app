@@ -42,12 +42,18 @@ export function HeaderClient({ user }: HeaderClientProps) {
     <>
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-3 relative h-11 rounded-full pl-1.5 pr-5 bg-white hover:bg-[#fdfcf7] hover:text-[#2D241E] text-[#2D241E] border-none shadow-sm hover:shadow-md transition-all active:scale-95 group focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
-           <Avatar className="h-8 w-8 ring-2 ring-[#ff6b7b] ring-offset-2 ring-offset-white">
-            <AvatarImage src={user.avatarUrl || undefined} alt={user.name} data-ai-hint="woman portrait"/>
-            <AvatarFallback className="bg-[#2D241E] text-white font-bold">{user.name.split(' ')[0][0]}</AvatarFallback>
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full border border-white/50 shadow-sm group hover:bg-white/60 transition-all h-auto active:scale-95 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
+        >
+          <Avatar className="h-8 w-8 ring-2 ring-white shadow-sm">
+            <AvatarImage src={user.avatarUrl || undefined} alt={user.name} />
+            <AvatarFallback className="font-black bg-[#ff6b7b]/10 text-[#ff6b7b] text-[10px]">{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline font-headline font-bold text-base tracking-tight italic opacity-90 group-hover:opacity-100">Olá, {user.name.split(' ')[0]}</span>
+          <div className="hidden md:flex text-left flex-col">
+            <span className="text-xs font-black text-[#2D241E] leading-tight line-clamp-1">Olá, {user.name.split(' ')[0]}</span>
+            <span className="text-[9px] font-bold text-[#2D241E]/40 uppercase tracking-widest leading-none">Minha Conta</span>
+          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

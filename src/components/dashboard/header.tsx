@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
-import { Logo } from '@/components/logo';
+import { PremiumLogo } from '@/components/ui/premium-logo';
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift } from 'lucide-react';
@@ -40,14 +41,13 @@ export default async function Header({ user, partner }: HeaderProps) {
   ]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 transition-all duration-300 shadow-sm overflow-hidden">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 overflow-hidden">
+
       <div className="container mx-auto h-20 px-6 flex items-center justify-between">
-        <Link href="/vaults" className="flex items-center gap-3 group cursor-pointer">
-          <Logo w={40} h={40} />
-          <span className="text-xl font-bold text-foreground tracking-tight hidden sm:block">
-            Caixinhas
-          </span>
+        <Link href="/vaults">
+          <PremiumLogo />
         </Link>
+
         <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           {partner && (
               <TooltipProvider>

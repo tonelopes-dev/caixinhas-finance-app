@@ -44,6 +44,8 @@ import {
 import { LoadingScreen } from '../ui/loading-screen';
 import { cn } from '@/lib/utils';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import { PremiumLogo } from '@/components/ui/premium-logo';
+
 
 type User = {
   id: string;
@@ -477,29 +479,18 @@ export function VaultsPageClient({
       
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300">
         <div className="container mx-auto h-20 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/')}>
-            <div className="h-10 w-10 relative overflow-hidden rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-[#2D241E]/5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-                <Image
-                    src="/logo-caixinhas.png"
-                    alt="Caixinhas Logo"
-                    fill
-                    className="object-contain"
-                />
-            </div>
-            <span className="text-xl font-headline font-bold text-[#2D241E] tracking-tight hidden sm:block italic">
-              Caixinhas
-            </span>
-          </div>
+          <PremiumLogo onClick={() => router.push('/')} />
+
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full border border-white/50 shadow-sm group hover:bg-white/60 transition-all">
+            <div className="flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full border border-white/50 shadow-sm group hover:bg-white/60 transition-all">
                 <Avatar className="h-8 w-8 ring-2 ring-white shadow-sm">
                     <AvatarImage src={currentUser.avatarUrl || ''} alt={currentUser.name} />
                     <AvatarFallback className="font-black bg-[#ff6b7b]/10 text-[#ff6b7b] text-[10px]">{currentUser.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="text-left flex flex-col">
+                <div className="hidden md:flex text-left flex-col">
                   <span className="text-xs font-black text-[#2D241E] leading-tight line-clamp-1">{currentUser.name}</span>
-                  <span className="text-[9px] font-bold text-[#2D241E]/40 uppercase tracking-widest">{currentUser.email}</span>
+                  <span className="text-[9px] font-bold text-[#2D241E]/40 uppercase tracking-widest leading-none">{currentUser.email}</span>
                 </div>
             </div>
 
