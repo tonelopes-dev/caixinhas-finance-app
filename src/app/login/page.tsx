@@ -285,8 +285,8 @@ function LoginPageContent() {
               <Logo className="h-16 w-16 animate-float-logo" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-headline bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Bem-vindo(a) de volta!
+          <CardTitle className="text-3xl font-headline font-black italic tracking-tight text-[#2D241E] leading-tight">
+            Bem-vindo(a) <br /> de volta!
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-2">
             Entre com seu e-mail e senha para acessar sua conta.

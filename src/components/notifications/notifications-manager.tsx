@@ -2,15 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { Bell, CircleDot, ClipboardCheck, Trash2, Users } from 'lucide-react';
+import { Bell, CircleDot, ClipboardCheck, Trash2, Users, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +15,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/notifications/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { NotificationData } from '@/services/notification.service';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type NotificationsManagerProps = {
   initialNotifications: NotificationData[];
@@ -35,15 +28,35 @@ type NotificationsManagerProps = {
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'vault_invite':
-      return <Bell className="h-5 w-5 text-blue-500" />;
+      return (
+        <div className="rounded-xl bg-blue-500/10 p-2 border border-blue-500/20">
+          <Users className="h-5 w-5 text-blue-500" />
+        </div>
+      );
     case 'transaction_added':
-      return <span className="font-bold text-primary text-sm">R$</span>;
+      return (
+        <div className="rounded-xl bg-[#ff6b7b]/10 p-2 border border-[#ff6b7b]/20">
+          <span className="font-bold text-[#ff6b7b] text-sm leading-none">R$</span>
+        </div>
+      );
     case 'goal_progress':
-      return <span className="font-bold text-green-500 text-sm">%</span>;
+      return (
+        <div className="rounded-xl bg-emerald-500/10 p-2 border border-emerald-500/20">
+          <span className="font-bold text-emerald-500 text-sm leading-none">%</span>
+        </div>
+      );
     case 'vault_member_added':
-      return <Bell className="h-5 w-5 text-green-500" />;
+      return (
+        <div className="rounded-xl bg-violet-500/10 p-2 border border-violet-500/20">
+          <CheckCircle2 className="h-5 w-5 text-violet-500" />
+        </div>
+      );
     default:
-      return <Bell className="h-5 w-5 text-muted-foreground" />;
+      return (
+        <div className="rounded-xl bg-[#2D241E]/5 p-2 border border-[#2D241E]/10">
+          <Bell className="h-5 w-5 text-[#2D241E]/40" />
+        </div>
+      );
   }
 };
 
@@ -132,179 +145,204 @@ export function NotificationsManager({ initialNotifications }: NotificationsMana
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className="space-y-6">
-      {/* Cabeçalho com ações */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Bell className="h-5 w-5 text-primary" />
-            Suas Notificações
-            {unreadCount > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full">
-                {unreadCount}
-              </span>
-            )}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Acompanhe atualizações sobre seus cofres e metas
-          </p>
+    <div className="space-y-10">
+      {/* Filtros e Ações de Cabeçalho */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 rounded-3xl bg-white/30 border border-white/50 backdrop-blur-sm shadow-sm">
+        <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 mr-2">Filtrar por:</h2>
+          <div className="flex items-center bg-white/40 p-1 rounded-2xl border border-white/60 shadow-inner w-full sm:w-auto">
+            <button 
+              onClick={() => setFilter('all')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                filter === 'all' 
+                  ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20" 
+                  : "text-[#2D241E]/40 hover:text-[#2D241E]/60"
+              )}
+            >
+              Todas
+            </button>
+            <button 
+              onClick={() => setFilter('unread')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                filter === 'unread' 
+                  ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20" 
+                  : "text-[#2D241E]/40 hover:text-[#2D241E]/60"
+              )}
+            >
+              Não lidas
+            </button>
+            <button 
+              onClick={() => setFilter('read')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                filter === 'read' 
+                  ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20" 
+                  : "text-[#2D241E]/40 hover:text-[#2D241E]/60"
+              )}
+            >
+              Lidas
+            </button>
+          </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleMarkAllAsRead}
+            disabled={isPending || notifications.every(n => n.isRead)}
+            className="flex items-center gap-2 h-10 px-4 rounded-xl font-black uppercase tracking-widest text-[8px] text-[#2D241E]/60 hover:text-[#ff6b7b] hover:bg-[#ff6b7b]/5 transition-all"
+          >
+            <ClipboardCheck className="h-4 w-4" />
+            Lidas
+          </Button>
           <Link href="/invite">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-2 h-10 px-4 rounded-xl font-black uppercase tracking-widest text-[8px] border-[#2D241E]/10 text-[#2D241E]/60 hover:border-[#ff6b7b]/20 hover:text-[#ff6b7b] transition-all"
+            >
               <Users className="h-4 w-4" />
-              Gerenciar Convites
+              Convites
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Filtros e ações */}
-      <div className='flex items-center justify-between gap-2'>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-full sm:w-[140px]">
-            <SelectValue placeholder="Filtrar" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas ({notifications.length})</SelectItem>
-            <SelectItem value="unread">Não Lidas ({unreadCount})</SelectItem>
-            <SelectItem value="read">Lidas ({notifications.length - unreadCount})</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleMarkAllAsRead}
-          disabled={isPending || notifications.every(n => n.isRead)}
-        >
-          <ClipboardCheck className="h-4 w-4 mr-2" />
-          Marcar todas como lidas
-        </Button>
-      </div>
-
       {/* Lista de notificações */}
-      <div className="space-y-3">
-        {filteredNotifications.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Bell className="h-12 w-12 text-muted-foreground/30 mb-4" />
-              <CardTitle className="text-lg text-muted-foreground mb-2">
-                {filter === 'all' ? 'Nenhuma notificação' : `Nenhuma notificação ${filter === 'read' ? 'lida' : 'não lida'}`}
-              </CardTitle>
-              <CardDescription>
-                {filter === 'all' 
-                  ? 'Você está em dia! Suas notificações aparecerão aqui.'
-                  : 'Ajuste o filtro para ver outras notificações.'
-                }
-              </CardDescription>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredNotifications.map(notification => {
-            const isInvite = notification.type === 'vault_invite';
-
-            return (
-              <div 
+      <div className="space-y-4">
+        <AnimatePresence mode="popLayout">
+          {filteredNotifications.length === 0 ? (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center py-20 bg-white/20 rounded-[32px] border border-dashed border-[#2D241E]/10"
+            >
+              <div className="rounded-full bg-white/40 p-6 mb-4 shadow-inner">
+                <Bell className="h-10 w-10 text-[#2D241E]/20" />
+              </div>
+              <h3 className="font-headline text-xl font-bold text-[#2D241E]/40 italic">
+                {filter === 'all' ? 'Tudo limpo por aqui!' : 'Nenhum item encontrado.'}
+              </h3>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/20 mt-2">
+                Você está em dia com seus avisos.
+              </p>
+            </motion.div>
+          ) : (
+            filteredNotifications.map((notification, index) => (
+              <motion.div 
                 key={notification.id} 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
                 className={cn(
-                  "flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-sm",
-                  notification.isRead ? 'bg-muted/30 text-muted-foreground' : 'bg-card border-primary/20 shadow-sm'
+                  "relative group flex items-start gap-4 p-5 rounded-3xl border transition-all duration-300",
+                  notification.isRead 
+                    ? "bg-white/20 border-white/40 hover:bg-white/30" 
+                    : "bg-white/50 border-[#ff6b7b]/20 shadow-lg shadow-[#ff6b7b]/5 hover:border-[#ff6b7b]/40"
                 )}
               >
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <h3 className={cn(
-                          "font-medium text-sm",
-                          notification.isRead ? "text-muted-foreground" : "text-foreground"
-                        )}>
-                          {notification.message}
-                        </h3>
-                        <p className={cn(
-                          "text-sm mt-1",
-                          notification.isRead ? "text-muted-foreground/70" : "text-muted-foreground"
-                        )}>
-                          {new Date(notification.createdAt).toLocaleDateString('pt-BR')}
-                        </p>
-                        
-                        {isInvite && (
-                          <Link 
-                            href="/invite"
-                            className="inline-flex items-center text-sm text-primary hover:text-primary/80 mt-2"
-                          >
-                            Ver convites →
-                          </Link>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(notification.createdAt).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleRead(notification.id)}
-                          disabled={isPending}
-                          className="h-8 w-8 p-0"
-                        >
-                          {notification.isRead ? (
-                            <CircleDot className="h-4 w-4" />
-                          ) : (
-                            <div className="h-2 w-2 rounded-full bg-primary" />
-                          )}
-                        </Button>
+                {/* Status Dot */}
+                {!notification.isRead && (
+                  <div className="absolute top-6 left-1.5 w-1.5 h-1.5 rounded-full bg-[#ff6b7b] animate-pulse" />
+                )}
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                              disabled={isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Excluir notificação</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta ação não pode ser desfeita. A notificação será removida permanentemente.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteNotification(notification.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                <div className="flex-shrink-0 mt-1">
+                  {getNotificationIcon(notification.type)}
+                </div>
+                
+                <div className="flex-1 min-w-0 pr-8">
+                  <div className="flex flex-col">
+                    <h3 className={cn(
+                      "font-bold text-sm tracking-tight leading-snug",
+                      notification.isRead ? "text-[#2D241E]/60" : "text-[#2D241E]"
+                    )}>
+                      {notification.message}
+                    </h3>
+                    
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/30">
+                        {new Date(notification.createdAt).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </span>
+                      <span className="h-1 w-1 rounded-full bg-[#2D241E]/10" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/30">
+                        {new Date(notification.createdAt).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
                     </div>
+
+                    {notification.type === 'vault_invite' && (
+                      <Link 
+                        href="/invite"
+                        className="inline-flex items-center gap-2 mt-4 text-[10px] font-black uppercase tracking-widest text-[#ff6b7b] hover:gap-3 transition-all"
+                      >
+                        Aceitar Convite →
+                      </Link>
+                    )}
                   </div>
                 </div>
-              </div>
-            );
-          })
-        )}
+
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleRead(notification.id)}
+                    disabled={isPending}
+                    className="h-10 w-10 p-0 rounded-xl hover:bg-white/60 transition-all"
+                  >
+                    {notification.isRead ? (
+                      <CircleDot className="h-5 w-5 text-[#2D241E]/30" />
+                    ) : (
+                      <CheckCircle2 className="h-5 w-5 text-[#ff6b7b]" />
+                    )}
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        disabled={isPending}
+                        className="h-10 w-10 p-0 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-[40px] border-none bg-[#fdfcf7] shadow-2xl p-8">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="font-headline text-2xl font-bold tracking-tight text-[#2D241E] italic">Excluir Aviso</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm font-medium text-[#2D241E]/60 italic mt-2">
+                          Esta notificação será removida permanentemente. Deseja prosseguir?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="mt-8 gap-3 sm:flex-row flex-col">
+                        <AlertDialogCancel className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] border-[#2D241E]/10 text-[#2D241E]/60 hover:bg-[#ff6b7b]/5 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 transition-all">
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteNotification(notification.id)}
+                          className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-red-500 text-white shadow-xl shadow-red-500/20 border-none hover:bg-red-600 transition-all"
+                        >
+                          Confirmar Exclusão
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

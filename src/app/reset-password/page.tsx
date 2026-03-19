@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { GradientButton } from '@/components/ui/gradient-button';
 import {
   Card,
   CardContent,
@@ -14,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
-import { ArrowLeft, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { resetPasswordAction } from '../forgot-password/actions';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -43,7 +45,6 @@ function ResetPasswordContent() {
     setIsLoading(true);
     setError('');
 
-    // Validações
     if (formData.password !== formData.confirmPassword) {
       setError('As senhas não coincidem');
       setIsLoading(false);
@@ -61,7 +62,6 @@ function ResetPasswordContent() {
       
       if (result.success) {
         setSuccess(true);
-        // Redirecionar para login após 3 segundos
         setTimeout(() => {
           router.push('/login?message=password-reset-success');
         }, 3000);
@@ -80,146 +80,162 @@ function ResetPasswordContent() {
       ...prev,
       [e.target.name]: e.target.value
     }));
+    if (error) setError('');
   };
 
   if (!token) {
-    return null; // Será redirecionado
-  }
-
-  if (success) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-        <div className="mx-auto w-full max-w-md space-y-6">
-          <div className="text-center">
-            <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-            <h1 className="mt-4 text-3xl font-bold tracking-tight font-headline text-green-700">
-              Senha Redefinida!
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Sua senha foi alterada com sucesso. Redirecionando para o login...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md space-y-6">
-        <div className="text-center">
-          <Logo className="mx-auto h-12 w-12" />
-          <h1 className="mt-4 text-3xl font-bold tracking-tight font-headline">
-            Nova Senha
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Digite sua nova senha
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Redefinir Senha</CardTitle>
-            <CardDescription className="text-center">
-              Crie uma nova senha segura para sua conta
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 border border-red-200">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Nova Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Mínimo 8 caracteres"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                    disabled={isLoading}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Digite a senha novamente"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    required
-                    disabled={isLoading}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    disabled={isLoading}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Redefinindo...
-                  </>
-                ) : (
-                  'Redefinir Senha'
-                )}
-              </Button>
-            </form>
-
-            <div className="text-center">
-              <Link 
-                href="/login"
-                className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                Voltar para o login
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden flex items-center justify-center p-4">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-10 left-10 w-32 h-32 border-4 border-primary/20 rounded-full animate-ping-slow" />
+        <div className="absolute bottom-10 right-10 w-48 h-48 border-4 border-accent/20 rounded-full animate-ping-slow animation-delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 border-primary/10 rounded-full animate-ping-slow animation-delay-500" />
       </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mx-auto w-full max-w-md relative z-10"
+      >
+        <Card className="rounded-[40px] border-2 border-primary/20 shadow-2xl backdrop-blur-xl bg-card/90 overflow-hidden">
+          {success ? (
+            <CardContent className="pt-20 pb-20 px-10 text-center space-y-6">
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="mx-auto h-24 w-24 bg-emerald-100 rounded-full flex items-center justify-center border-4 border-emerald-50 shadow-xl shadow-emerald-500/20"
+                >
+                    <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+                </motion.div>
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-headline font-black italic tracking-tight text-[#2D241E]">
+                        Senha Alterada!
+                    </h1>
+                    <p className="text-sm font-medium text-[#2D241E]/50">
+                        Sua segurança foi reestabelecida. Redirecionando você para o portal...
+                    </p>
+                </div>
+                <div className="h-1.5 w-full bg-emerald-100 rounded-full overflow-hidden">
+                    <motion.div 
+                        initial={{ x: "-100%" }}
+                        animate={{ x: "0%" }}
+                        transition={{ duration: 3, ease: "linear" }}
+                        className="h-full bg-emerald-500"
+                    />
+                </div>
+            </CardContent>
+          ) : (
+            <>
+              <CardHeader className="text-center pt-10 pb-6 px-8 relative">
+                <div className="mx-auto mb-6 flex items-center justify-center">
+                  <div className="p-4 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 rounded-3xl shadow-inner border border-white/40">
+                    <Logo className="h-16 w-16 animate-float-logo" />
+                  </div>
+                </div>
+                <CardTitle className="text-3xl font-headline font-black italic tracking-tight text-[#2D241E] leading-tight text-balance">
+                  Definir Nova Senha
+                </CardTitle>
+                <CardDescription className="text-sm font-medium text-[#2D241E]/50 mt-2 max-w-[280px] mx-auto">
+                  Crie uma senha forte e segura para proteger seus sonhos.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="px-8 pb-8 space-y-6">
+                <AnimatePresence>
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="rounded-2xl bg-red-50 p-4 border border-red-100 text-center"
+                    >
+                      <p className="text-[10px] font-black uppercase tracking-widest text-red-500">{error}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password" title="password" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Nova Senha</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Mínimo 8 caracteres"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        disabled={isLoading}
+                        className="h-14 rounded-2xl border-primary/20 focus:border-primary focus:ring-primary/10 bg-white/60 text-base pr-12"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-12 w-12 p-0 rounded-xl hover:bg-transparent text-[#2D241E]/40"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" title="confirmPassword" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Confirmar Senha</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Digite novamente"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                        disabled={isLoading}
+                        className="h-14 rounded-2xl border-primary/20 focus:border-primary focus:ring-primary/10 bg-white/60 text-base pr-12"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-12 w-12 p-0 rounded-xl hover:bg-transparent text-[#2D241E]/40"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <GradientButton 
+                    type="submit" 
+                    className="w-full h-14 group relative overflow-hidden mt-2" 
+                    disabled={isLoading}
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {isLoading ? 'Redefinindo...' : 'Atualizar Senha'}
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                  </GradientButton>
+                </form>
+
+                <div className="text-center pt-4 border-t border-[#2D241E]/5">
+                  <Link 
+                    href="/login"
+                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 hover:text-[#ff6b7b] transition-all"
+                  >
+                    <ArrowLeft className="h-3 w-3" />
+                    Voltar para o login
+                  </Link>
+                </div>
+              </CardContent>
+            </>
+          )}
+        </Card>
+      </motion.div>
     </div>
   );
 }
@@ -227,8 +243,8 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="min-h-screen bg-[#fdfcf7] flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#ff6b7b] border-t-transparent shadow-xl shadow-[#ff6b7b]/20" />
       </div>
     }>
       <ResetPasswordContent />

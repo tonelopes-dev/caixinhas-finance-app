@@ -16,14 +16,21 @@ interface PatrimonySectionProps {
 
 export function PatrimonySection({ title, total, children }: PatrimonySectionProps) {
   return (
-    <section>
-      <h3 className="font-headline text-xl font-semibold mb-4 border-b pb-2">{title}</h3>
-      {children}
-      {total !== undefined && (
-        <div className="flex justify-end font-bold text-lg mt-2 pr-3">
-          Total: <span className="ml-2 text-primary"><AnimatedCounter value={total} formatter={formatCurrency} /></span>
-        </div>
-      )}
+    <section className="space-y-6">
+      <div className="flex items-center justify-between border-b border-[#2D241E]/5 pb-4">
+        <h3 className="font-headline text-2xl font-bold text-[#2D241E] italic">{title}</h3>
+        {total !== undefined && (
+          <div className="px-4 py-1.5 rounded-full bg-white/50 border border-[#2D241E]/5 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 mr-2">Subtotal:</span>
+            <span className="text-sm font-bold text-[#ff6b7b]">
+              <AnimatedCounter value={total} formatter={formatCurrency} />
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="space-y-3">
+        {children}
+      </div>
     </section>
   );
 }
