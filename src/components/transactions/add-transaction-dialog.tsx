@@ -254,13 +254,13 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
           )}
         </Button>
         <DialogContent className="flex flex-col max-h-[95vh] md:max-h-[85vh] md:max-w-xl bg-white/95 backdrop-blur-2xl border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
-          <DialogHeader className="p-8 pb-6 bg-white/50 border-b border-[#2D241E]/5 space-y-2">
+          <DialogHeader className="p-10 pb-8 bg-white/50 border-b border-[#2D241E]/5 space-y-3">
             <div className="flex items-center gap-3 mb-2">
-                <div className="h-2 w-2 rounded-full bg-[#ff6b7b] animate-ping" />
+                <div className="h-2 w-2 rounded-full bg-[#ff6b7b] animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b7b]">Nova Transação</span>
             </div>
-            <DialogTitle className="text-4xl font-black text-[#2D241E] tracking-tighter">Registrar <span className="text-[#ff6b7b]">Movimentação</span></DialogTitle>
-            <DialogDescription className="text-base font-bold text-[#2D241E]/40 leading-relaxed">
+            <DialogTitle className="text-4xl font-headline italic text-[#2D241E] tracking-tight">Registrar <span className="text-[#ff6b7b]">Movimentação</span></DialogTitle>
+            <DialogDescription className="text-lg font-bold text-[#2D241E]/40 leading-relaxed italic">
               Organize suas finanças registrando entradas, saídas ou transferências entre contas.
             </DialogDescription>
           </DialogHeader>
@@ -313,11 +313,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                           <div className="space-y-4">
                               <label htmlFor="category_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Categoria</label>
                               <Select value={category} onValueChange={setCategory}>
-                                  <SelectTrigger id="category_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                  <SelectTrigger id="category_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] transition-all hover:bg-white focus:ring-4 focus:ring-[#ff6b7b]/5">
                                     <SelectValue placeholder="Selecione a categoria" />
                                   </SelectTrigger>
-                                  <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name} className="font-bold py-3">{cat.name}</SelectItem>)}
+                                  <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name} className="font-black rounded-xl py-3 px-4">{cat.name}</SelectItem>)}
                                   </SelectContent>
                               </Select>
                               {state?.errors?.category && <p className="text-xs font-black text-[#ff6b7b] ml-1 uppercase tracking-widest">{state.errors.category[0]}</p>}
@@ -331,13 +331,13 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                 <div className="space-y-4">
                                     <label htmlFor="type_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Tipo de Operação</label>
                                     <Select value={transactionType} onValueChange={(value) => setTransactionType(value as any)}>
-                                        <SelectTrigger id="type_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                        <SelectTrigger id="type_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] transition-all hover:bg-white focus:ring-4 focus:ring-[#ff6b7b]/5">
                                             <SelectValue placeholder="Tipo" />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                            <SelectItem value="expense" className="font-bold py-3 text-[#ff6b7b]">Saída / Despesa</SelectItem>
-                                            <SelectItem value="income" className="font-bold py-3 text-emerald-600">Entrada / Receita</SelectItem>
-                                            <SelectItem value="transfer" className="font-bold py-3 text-blue-600">Transferência</SelectItem>
+                                        <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                            <SelectItem value="expense" className="font-black rounded-xl py-3 px-4 text-[#ff6b7b]">Saída / Despesa</SelectItem>
+                                            <SelectItem value="income" className="font-black rounded-xl py-3 px-4 text-emerald-600">Entrada / Receita</SelectItem>
+                                            <SelectItem value="transfer" className="font-black rounded-xl py-3 px-4 text-blue-600">Transferência</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -355,12 +355,13 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                                 {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden border-white/40 shadow-2xl backdrop-blur-xl" align="center">
+                                        <PopoverContent className="w-auto p-2 rounded-[32px] overflow-hidden border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95" align="center">
                                             <Calendar 
                                                 mode="single" 
                                                 selected={date} 
                                                 onSelect={(newDate) => { setDate(newDate || undefined); setPopoverOpen(false); }} 
                                                 locale={ptBR} 
+                                                className="font-inter"
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -372,11 +373,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                   <div className="space-y-4">
                                       <label htmlFor="sourceAccountId_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">De onde sai o dinheiro?</label>
                                       <Select value={sourceAccountId || ''} onValueChange={(value) => setSourceAccountId(value)}>
-                                          <SelectTrigger id="sourceAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                          <SelectTrigger id="sourceAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] transition-all hover:bg-white focus:ring-4 focus:ring-[#ff6b7b]/5">
                                             <SelectValue placeholder="Selecione a conta de origem" />
                                           </SelectTrigger>
-                                          <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                            {availableSources.map(item => <SelectItem key={item.value} value={item.value} className="font-bold py-3">{item.name}</SelectItem>)}
+                                          <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                            {availableSources.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3 px-4">{item.name}</SelectItem>)}
                                           </SelectContent>
                                       </Select>
                                   </div>
@@ -386,11 +387,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                   <div className="space-y-4">
                                       <label htmlFor="destinationAccountId_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Para onde vai o dinheiro?</label>
                                       <Select value={destinationAccountId || ''} onValueChange={(value) => setDestinationAccountId(value)}>
-                                          <SelectTrigger id="destinationAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                          <SelectTrigger id="destinationAccountId_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] transition-all hover:bg-white focus:ring-4 focus:ring-[#ff6b7b]/5">
                                             <SelectValue placeholder="Selecione a conta de destino" />
                                           </SelectTrigger>
-                                          <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                            {availableDestinations.map(item => <SelectItem key={item.value} value={item.value} className="font-bold py-3">{item.name}</SelectItem>)}
+                                          <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                            {availableDestinations.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3 px-4">{item.name}</SelectItem>)}
                                           </SelectContent>
                                       </Select>
                                   </div>
@@ -477,11 +478,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                 <div className="space-y-4">
                                     <label htmlFor="paymentMethod_field" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Forma de Pagamento</label>
                                     <Select value={paymentMethod || ''} onValueChange={setPaymentMethod}>
-                                        <SelectTrigger id="paymentMethod_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]">
+                                        <SelectTrigger id="paymentMethod_field" className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E] transition-all hover:bg-white focus:ring-4 focus:ring-[#ff6b7b]/5">
                                             <SelectValue placeholder="Como você pagou?" />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                            {paymentMethods.map(method => <SelectItem key={method.value} value={method.value} className="font-bold py-3">{method.label}</SelectItem>)}
+                                        <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                            {paymentMethods.map(method => <SelectItem key={method.value} value={method.value} className="font-black rounded-xl py-3 px-4">{method.label}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>

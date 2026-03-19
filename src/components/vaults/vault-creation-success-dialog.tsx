@@ -63,7 +63,7 @@ export function VaultCreationSuccessDialog({ open, onOpenChange }: VaultCreation
                 className="space-y-8"
             >
                 <div className="space-y-3">
-                    <h2 className="text-4xl font-headline font-bold tracking-tight text-[#2D241E]">
+                    <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight text-[#2D241E] italic">
                         Cofre Criado! ✨
                     </h2>
                     <p className="text-lg font-medium text-[#2D241E]/60 leading-relaxed max-w-[300px] mx-auto">

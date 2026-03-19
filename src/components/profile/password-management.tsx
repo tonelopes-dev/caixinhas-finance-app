@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Eye, EyeOff, Key, Shield } from 'lucide-react';
+import { Eye, EyeOff, Key, Shield, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { changePasswordAction } from '@/app/profile/actions';
 import type { User } from '@/lib/definitions';
@@ -129,26 +129,29 @@ export function PasswordManagement({ currentUser }: PasswordManagementProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5" />
-          <CardTitle>Segurança da Conta</CardTitle>
+    <div className="relative overflow-hidden rounded-[40px] bg-white/40 backdrop-blur-3xl border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] transition-all duration-500">
+      <div className="p-8 md:p-10 space-y-2 border-b border-[#2D241E]/5 bg-white/30">
+        <div className="flex items-center gap-4">
+          <div className="rounded-2xl bg-[#ff6b7b]/10 p-3 shadow-inner">
+            <Shield className="h-6 w-6 text-[#ff6b7b]" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-headline font-bold text-[#2D241E] italic">Segurança da <span className="text-[#ff6b7b]">Conta</span></h2>
+            <p className="text-xs font-medium text-[#2D241E]/40 italic">Gerencie sua senha para manter sua conta segura e privada.</p>
+          </div>
         </div>
-        <CardDescription>
-          Gerencie sua senha para manter sua conta segura
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Senha Atual</Label>
+      </div>
+      <div className="p-8 md:p-10 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="currentPassword" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Senha Atual</Label>
             <div className="relative">
               <Input
                 id="currentPassword"
                 name="currentPassword"
                 type={showCurrentPassword ? 'text' : 'password'}
                 placeholder="Digite sua senha atual"
+                className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm"
                 value={formData.currentPassword}
                 onChange={handleInputChange}
                 required
@@ -231,10 +234,10 @@ export function PasswordManagement({ currentUser }: PasswordManagementProps) {
             </div>
           </div>
 
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white shadow-xl shadow-[#ff6b7b]/20 border-none hover:shadow-2xl hover:shadow-[#ff6b7b]/30 transition-all duration-300 active:scale-[0.98]">
             {isLoading ? (
               <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Alterando...
               </>
             ) : (
@@ -246,23 +249,23 @@ export function PasswordManagement({ currentUser }: PasswordManagementProps) {
           </Button>
         </form>
 
-        <div className="pt-4 border-t">
-          <div className="flex flex-col gap-2">
-            <h4 className="font-medium">Esqueceu sua senha?</h4>
-            <p className="text-sm text-muted-foreground">
-              Receba um link de recuperação por email
+        <div className="pt-8 border-t border-[#2D241E]/5">
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xl font-headline font-bold text-[#2D241E] italic">Esqueceu sua senha?</h4>
+            <p className="text-sm font-medium text-[#2D241E]/40 italic">
+              Receba um link de recuperação por e-mail se não lembrar o acesso atual.
             </p>
             <Button
               type="button"
               variant="outline"
               onClick={handleRequestPasswordReset}
-              className="w-fit"
+              className="w-fit h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-[#2D241E]/10 text-[#2D241E]/60 hover:bg-[#ff6b7b]/5 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 transition-all"
             >
               Enviar Email de Recuperação
             </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

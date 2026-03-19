@@ -90,15 +90,15 @@ export function InstallmentCard({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/60 shadow-[0_4px_20px_rgba(45,36,30,0.03)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(45,36,30,0.06)]">
+      <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] transition-all duration-500 hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)] overflow-hidden">
         <div className="flex justify-between items-center mb-6">
           <CollapsibleTrigger asChild>
             <div className="flex-1 cursor-pointer group">
-              <h3 className="font-black text-[#2D241E] text-lg tracking-tight group-hover:text-[#ff6b7b] transition-colors">{purchase.description}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-bold text-[#ff6b7b]">{formatCurrency(paidAmount)}</span>
-                <span className="text-[10px] font-black text-[#2D241E]/20 uppercase tracking-widest">de</span>
-                <span className="text-xs font-bold text-[#2D241E]/40">{formatCurrency(totalAmount)}</span>
+              <h3 className="text-2xl font-headline italic text-[#2D241E] tracking-tight group-hover:text-[#ff6b7b] transition-colors">{purchase.description}</h3>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm font-black text-[#ff6b7b] tracking-tight">{formatCurrency(paidAmount)}</span>
+                <span className="text-[10px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em] italic">de</span>
+                <span className="text-sm font-bold text-[#2D241E]/30">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
           </CollapsibleTrigger>
@@ -116,14 +116,14 @@ export function InstallmentCard({
                     <MoreHorizontal className="h-5 w-5" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90 p-1">
+                <DropdownMenuContent align="end" className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2 min-w-[200px]">
                     <EditTransactionDialog
                       transaction={purchase as Transaction}
                       accounts={allAccounts}
                       goals={allGoals}
                       categories={allCategories}
                       trigger={
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer font-black text-[10px] uppercase tracking-widest p-3 rounded-xl mb-1">
                           <Edit className="mr-2 h-4 w-4" />
                           Editar Transação
                         </DropdownMenuItem>
@@ -132,7 +132,7 @@ export function InstallmentCard({
                     <DeleteTransactionDialog 
                       transactionId={purchase.id} 
                       trigger={
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer font-black text-[10px] uppercase tracking-widest p-3 rounded-xl">
                           <Trash2 className="mr-2 h-4 w-4" />
                           Excluir Registro
                         </DropdownMenuItem>
@@ -157,19 +157,19 @@ export function InstallmentCard({
           </div>
         </div>
 
-        <div className="relative h-2 w-full bg-white/60 rounded-full overflow-hidden border border-white/60 shadow-inner">
+        <div className="relative h-3 w-full bg-white/40 rounded-full overflow-hidden border border-white/60 shadow-inner">
             <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] rounded-full shadow-[0_0_10px_rgba(255,107,123,0.3)]"
+                transition={{ duration: 1.2, ease: "circOut" }}
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] rounded-full shadow-[0_0_20px_rgba(255,107,123,0.4)]"
             />
         </div>
 
-        <CollapsibleContent className="space-y-4 pt-8">
-            <div className="flex items-center gap-2 mb-2">
-                <div className="h-1 w-8 rounded-full bg-[#ff6b7b]/20" />
-                <span className="text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.2em]">Detalhes das Parcelas</span>
+        <CollapsibleContent className="space-y-6 pt-10">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="h-[2px] w-12 rounded-full bg-gradient-to-r from-[#ff6b7b] to-transparent" />
+                <span className="text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.3em] italic">Mapa das Parcelas</span>
             </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {Array.from({ length: totalInstallments }).map((_, index) => {
@@ -188,10 +188,10 @@ export function InstallmentCard({
                   )}
                 >
                   <div className={cn(
-                      "absolute top-2 right-2 h-4 w-4 rounded-full border flex items-center justify-center transition-all",
-                      isChecked ? "bg-emerald-500 border-emerald-500 scale-110 shadow-lg" : "bg-white/50 border-[#2D241E]/10"
+                      "absolute top-3 right-3 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                      isChecked ? "bg-emerald-500 border-emerald-300 scale-110 shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-white/50 border-[#2D241E]/5"
                   )}>
-                      {isChecked && <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />}
+                      {isChecked && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-white shadow-sm" />}
                   </div>
 
                   <Checkbox
@@ -216,9 +216,9 @@ export function InstallmentCard({
                     </span>
                   </div>
 
-                  <div className={cn(
-                      "w-4 h-1 rounded-full",
-                      isChecked ? "bg-emerald-400" : "bg-[#2D241E]/5"
+                   <div className={cn(
+                      "w-6 h-[2px] rounded-full mt-1",
+                      isChecked ? "bg-emerald-400" : "bg-[#2D241E]/10"
                   )} />
                 </label>
               );

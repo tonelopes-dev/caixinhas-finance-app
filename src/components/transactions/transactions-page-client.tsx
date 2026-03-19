@@ -215,26 +215,26 @@ export function TransactionsPageClient({
   return (
     <>
       {/* Navigation & Header */}
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
             <StandardBackButton href="/dashboard" label="Voltar ao Dashboard" />
             <div>
-              <h1 className="font-headline text-4xl md:text-5xl font-black tracking-tight text-[#2D241E]">
+              <h1 className="font-headline text-5xl md:text-6xl font-black tracking-tight text-[#2D241E] italic">
                   Transações
               </h1>
-              <p className="text-[#2D241E]/50 font-medium text-sm mt-1">
+              <p className="text-[#2D241E]/40 font-bold text-lg mt-2 italic">
                   Acompanhe e gerencie seu fluxo financeiro completo.
               </p>
             </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
             <AddTransactionDialog 
                 accounts={allAccounts} 
                 goals={allGoals} 
                 ownerId={workspaceId} 
                 categories={allCategories} 
-                className="shadow-lg shadow-[#ff6b7b]/20"
+                className="h-16 px-10 text-lg font-black uppercase tracking-widest rounded-3xl shadow-2xl shadow-[#ff6b7b]/20 bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] hover:shadow-[#ff6b7b]/40 hover:-translate-y-1 transition-all duration-500"
             />
         </div>
       </div>
@@ -245,28 +245,31 @@ export function TransactionsPageClient({
         variants={containerVariants}
         className="mb-14"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Net Balance Card */}
             <motion.div 
                 variants={summaryItemVariants(0.1)} 
                 className={cn(
-                    "relative group overflow-hidden bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/40 shadow-[0_8px_32px_rgba(45,36,30,0.05)] hover:shadow-[0_16px_48px_rgba(45,36,30,0.1)] transition-all duration-500 cursor-pointer hover:-translate-y-1",
-                    typeFilter === 'all' && "ring-2 ring-[#ff6b7b]/50 bg-white/60 shadow-[0_20px_60px_rgba(255,107,123,0.15)]"
+                    "relative group overflow-hidden bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)] transition-all duration-700 cursor-pointer hover:-translate-y-2",
+                    typeFilter === 'all' && "ring-4 ring-[#ff6b7b]/20 bg-white/80 shadow-[0_40px_80px_rgba(255,107,123,0.15)]"
                 )}
                 onClick={() => setTypeFilter('all')}
             >
-                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
-                    <Wallet className="h-16 w-16 text-[#2D241E]" />
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                    <Wallet className="h-24 w-24 text-[#2D241E]" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2.5 rounded-2xl bg-white/50 text-[#2D241E] shadow-sm">
-                                <Wallet className="h-4 w-4" />
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className={cn(
+                                "p-3 rounded-2xl transition-all duration-500",
+                                typeFilter === 'all' ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20" : "bg-white text-[#2D241E]/20"
+                            )}>
+                                <Wallet className="h-5 w-5" />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Saldo Líquido</p>
+                            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 font-inter">Saldo Líquido</p>
                         </div>
-                        <h3 className="text-3xl font-black text-[#2D241E] tracking-tighter mb-1">
+                        <h3 className="text-4xl font-black text-[#2D241E] tracking-tighter mb-1 font-headline italic">
                             {formatCurrency(summary.balance)}
                         </h3>
                     </div>
@@ -277,23 +280,26 @@ export function TransactionsPageClient({
             <motion.div 
                 variants={summaryItemVariants(0.2)} 
                 className={cn(
-                    "relative group overflow-hidden bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/40 shadow-[0_8px_32px_rgba(45,36,30,0.05)] hover:shadow-[0_16px_48px_rgba(45,36,30,0.1)] transition-all duration-500 cursor-pointer hover:-translate-y-1",
-                    typeFilter === 'income' && "ring-2 ring-emerald-500/50 bg-white/60 shadow-[0_20px_60px_rgba(16,185,129,0.15)]"
+                    "relative group overflow-hidden bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)] transition-all duration-700 cursor-pointer hover:-translate-y-2",
+                    typeFilter === 'income' && "ring-4 ring-emerald-500/20 bg-white/80 shadow-[0_40px_80px_rgba(16,185,129,0.15)]"
                 )}
                 onClick={() => setTypeFilter('income')}
             >
-                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
-                    <TrendingUp className="h-16 w-16 text-emerald-600" />
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                    <TrendingUp className="h-24 w-24 text-emerald-600" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm transition-colors group-hover:bg-emerald-500 group-hover:text-white">
-                                <TrendingUp className="h-4 w-4" />
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className={cn(
+                                "p-3 rounded-2xl transition-all duration-500",
+                                typeFilter === 'income' ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-emerald-50 text-emerald-600/40"
+                            )}>
+                                <TrendingUp className="h-5 w-5" />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/60 font-inter">Entradas</p>
+                            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600/40 font-inter">Entradas</p>
                         </div>
-                        <h3 className="text-3xl font-black text-emerald-600 tracking-tighter mb-1">
+                        <h3 className="text-4xl font-black text-emerald-600 tracking-tighter mb-1 font-headline italic">
                             {formatCurrency(summary.income)}
                         </h3>
                     </div>
@@ -304,62 +310,65 @@ export function TransactionsPageClient({
             <motion.div 
                 variants={summaryItemVariants(0.3)} 
                 className={cn(
-                    "relative group overflow-hidden bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/40 shadow-[0_8px_32px_rgba(45,36,30,0.05)] hover:shadow-[0_16px_48px_rgba(45,36,30,0.1)] transition-all duration-500 cursor-pointer hover:-translate-y-1",
-                    typeFilter === 'expense' && "ring-2 ring-[#ff6b7b]/50 bg-white/60 shadow-[0_20px_60px_rgba(255,107,123,0.15)]"
+                    "relative group overflow-hidden bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)] transition-all duration-700 cursor-pointer hover:-translate-y-2",
+                    typeFilter === 'expense' && "ring-4 ring-[#ff6b7b]/20 bg-white/80 shadow-[0_40px_80px_rgba(255,107,123,0.15)]"
                 )}
                 onClick={() => setTypeFilter('expense')}
             >
-                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
-                    <TrendingDown className="h-16 w-16 text-[#ff6b7b]" />
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                    <TrendingDown className="h-24 w-24 text-[#ff6b7b]" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2.5 rounded-2xl bg-[#ff6b7b]/10 text-[#ff6b7b] shadow-sm transition-colors group-hover:bg-[#ff6b7b] group-hover:text-white">
-                                <TrendingDown className="h-4 w-4" />
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className={cn(
+                                "p-3 rounded-2xl transition-all duration-500",
+                                typeFilter === 'expense' ? "bg-[#ff6b7b] text-white shadow-lg shadow-[#ff6b7b]/20" : "bg-[#ff6b7b]/10 text-[#ff6b7b]/40"
+                            )}>
+                                <TrendingDown className="h-5 w-5" />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b7b]/60 font-inter">Saídas</p>
+                            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b7b]/40 font-inter">Saídas</p>
                         </div>
-                        <h3 className="text-3xl font-black text-[#ff6b7b] tracking-tighter mb-1">
+                        <h3 className="text-4xl font-black text-[#ff6b7b] tracking-tighter mb-1 font-headline italic">
                             {formatCurrency(summary.expenses)}
                         </h3>
                     </div>
                 </div>
             </motion.div>
 
-            {/* Recurring Card (Link to /recurring) */}
+            {/* Recurring Card */}
             <motion.div 
                 variants={summaryItemVariants(0.4)} 
-                className="relative group overflow-hidden bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/40 shadow-[0_8px_32px_rgba(45,36,30,0.05)] hover:shadow-[0_25px_60px_rgba(147,51,234,0.12)] hover:-translate-y-2 transition-all duration-700 cursor-pointer flex flex-col justify-between"
+                className="relative group overflow-hidden bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_35px_80px_rgba(147,51,234,0.15)] hover:-translate-y-3 transition-all duration-1000 cursor-pointer flex flex-col justify-between"
                 onClick={() => router.push('/recurring')}
             >
-                <div className="absolute -top-4 -right-4 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-125 transition-all duration-1000">
-                    <Repeat className="h-24 w-24 text-purple-600" />
+                <div className="absolute -top-8 -right-8 p-10 opacity-5 group-hover:opacity-15 group-hover:scale-150 transition-all duration-1000 group-hover:rotate-12">
+                    <Repeat className="h-32 w-32 text-purple-600" />
                 </div>
                 <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="p-2.5 rounded-2xl bg-purple-50 text-purple-600 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 group-hover:rotate-[360deg]">
-                            <Repeat className="h-4 w-4" />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-all duration-700 group-hover:rotate-[360deg] group-hover:shadow-lg group-hover:shadow-purple-500/20">
+                            <Repeat className="h-5 w-5" />
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-600/60 font-inter">Contas Fixas</p>
+                        <p className="text-[11px] font-black uppercase tracking-[0.25em] text-purple-600/40 font-inter">Contas Fixas</p>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <h3 className="text-3xl font-black text-purple-600 tracking-tighter">
+                        <h3 className="text-4xl font-black text-purple-600 tracking-tighter font-headline italic">
                             {recurringSummary.recurringCount + recurringSummary.installmentsCount}
                         </h3>
-                        <span className="text-[10px] font-black text-purple-600/30 uppercase tracking-widest">Ativas</span>
+                        <span className="text-[10px] font-black text-purple-600/30 uppercase tracking-[0.2em]">Ativas</span>
                     </div>
                 </div>
-                <div className="relative z-10 mt-6 pt-4 border-t border-purple-100/50">
+                <div className="relative z-10 mt-8 pt-6 border-t border-purple-100/50">
                     <div className="flex items-center justify-between text-purple-600">
-                        <span className="text-[9px] font-black uppercase tracking-[2px]">Gerenciar Tudo</span>
-                        <div className="h-6 w-6 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
-                            <ArrowRight className="h-3 w-3 transform group-hover:translate-x-0.5 transition-transform" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em]">Painel de Controle</span>
+                        <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-700 shadow-sm">
+                            <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
                         </div>
                     </div>
                 </div>
                 {/* Status Indicator */}
-                <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-purple-400 animate-pulse pointer-events-none" />
+                <div className="absolute top-6 right-6 h-2.5 w-2.5 rounded-full bg-purple-400 animate-pulse pointer-events-none shadow-[0_0_10px_rgba(167,139,250,0.5)]" />
             </motion.div>
         </div>
       </motion.div>
@@ -372,54 +381,56 @@ export function TransactionsPageClient({
       >
         <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_30px_70px_rgba(45,36,30,0.1)]">
             {/* Filter Bar */}
-            <div className="p-6 md:p-10 border-b border-white/20 bg-white/20">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                    <div className="relative flex-1 max-w-xl group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2D241E]/30 group-focus-within:text-[#ff6b7b] transition-colors" />
+            <div className="p-8 md:p-12 border-b border-white/20 bg-white/20">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="relative flex-1 max-w-2xl group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#2D241E]/20 group-focus-within:text-[#ff6b7b] transition-all duration-500" />
                         <Input 
-                            placeholder="Buscar transação por descrição ou valor..."
-                            className="pl-14 h-16 bg-white/40 border-white/60 rounded-[20px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-medium text-[#2D241E] text-lg placeholder:text-[#2D241E]/20"
+                            placeholder="Pesquisar por descrição ou valor..."
+                            className="pl-16 h-20 bg-white/40 border-white/40 rounded-[28px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-bold text-[#2D241E] text-xl placeholder:text-[#2D241E]/15 placeholder:italic"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500">
+                             <div className="px-2 py-1 rounded-md bg-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/30 uppercase tracking-widest">ESC para limpar</div>
+                        </div>
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/30 rounded-[24px] border border-white/60 shadow-inner">
-                            <div className="px-4 py-2 flex items-center gap-2">
-                                <Filter size={14} className="text-[#2D241E]/40" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Filtros</span>
+                    <div className="flex flex-wrap items-center gap-5">
+                        <div className="flex flex-wrap items-center gap-3 p-2 bg-white/30 rounded-[32px] border border-white/60 shadow-inner">
+                            <div className="px-5 py-2 flex items-center gap-3">
+                                <Filter size={16} className="text-[#2D241E]/30" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Refinar</span>
                             </div>
                             
                             <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
-                                <SelectTrigger className="h-11 border-none bg-white/50 hover:bg-white rounded-xl shadow-sm focus:ring-0 font-bold text-[#2D241E] gap-2 px-4 transition-all">
+                                <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[160px]">
                                     <SelectValue placeholder="Tipo" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                    <SelectItem value="all" className="font-bold">Todos os Tipos</SelectItem>
-                                    <SelectItem value="income" className="font-bold text-emerald-600">Entradas</SelectItem>
-                                    <SelectItem value="expense" className="font-bold text-[#ff6b7b]">Saídas</SelectItem>
-                                    <SelectItem value="transfer" className="font-bold text-blue-600">Transferências</SelectItem>
+                                <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                    <SelectItem value="all" className="font-black rounded-xl py-3 px-4">Todos</SelectItem>
+                                    <SelectItem value="income" className="font-black text-emerald-600 rounded-xl py-3 px-4">Entradas</SelectItem>
+                                    <SelectItem value="expense" className="font-black text-[#ff6b7b] rounded-xl py-3 px-4">Saídas</SelectItem>
+                                    <SelectItem value="transfer" className="font-black text-blue-600 rounded-xl py-3 px-4">Transferências</SelectItem>
                                 </SelectContent>
                             </Select>
                             
                             <Select value={monthFilter} onValueChange={setMonthFilter}>
-                                <SelectTrigger className="h-11 border-none bg-white/50 hover:bg-white rounded-xl shadow-sm focus:ring-0 font-bold text-[#2D241E] gap-2 px-4 transition-all">
-                                    <Calendar className="h-4 w-4 text-[#2D241E]/40" />
+                                <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[180px]">
+                                    <Calendar className="h-4 w-4 text-[#2D241E]/30" />
                                     <SelectValue placeholder="Mês" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90 max-h-[300px]">
-                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-bold">{m.label}</SelectItem>)}
+                                <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2 max-h-[400px]">
+                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-black rounded-xl py-3 px-4">{m.label}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             
                             <Select value={yearFilter} onValueChange={setYearFilter}>
-                                <SelectTrigger className="h-11 border-none bg-white/50 hover:bg-white rounded-xl shadow-sm focus:ring-0 font-bold text-[#2D241E] gap-2 px-4 transition-all">
+                                <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all">
                                     <SelectValue placeholder="Ano" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-white/40 shadow-2xl backdrop-blur-xl bg-white/90">
-                                    <SelectItem value="all" className="font-bold">Anos</SelectItem>
-                                    {years.map(y => <SelectItem key={y} value={y} className="font-bold text-center">{y}</SelectItem>)}
+                                <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
+                                    {years.map(y => <SelectItem key={y} value={y} className="font-black text-center rounded-xl py-3 px-4">{y}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -429,50 +440,50 @@ export function TransactionsPageClient({
 
             <div className="p-0">
                 {/* Mobile View */}
-                <div className="md:hidden space-y-4 p-4">
+                <div className="md:hidden space-y-5 p-6">
                     {filteredTransactions.length > 0 ? (
                         filteredTransactions.map((t) => (
-                            <div key={t.id} className="bg-white/40 backdrop-blur-xl rounded-[32px] p-6 border border-white/60 shadow-[0_4px_20px_rgba(45,36,30,0.03)] active:scale-[0.98] transition-all duration-300">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="flex items-center gap-4">
+                            <div key={t.id} className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 border border-white/60 shadow-[0_4px_30px_rgba(45,36,30,0.04)] active:scale-[0.97] transition-all duration-500">
+                                <div className="flex justify-between items-start mb-8">
+                                    <div className="flex items-center gap-5">
                                         <div className={cn(
-                                            "h-12 w-12 rounded-2xl flex items-center justify-center shadow-sm",
+                                            "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-700",
                                             t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
                                             t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
                                             "bg-blue-50 text-blue-600"
                                         )}>
-                                            {t.type === 'income' ? <TrendingUp size={20} /> : 
-                                             t.type === 'expense' ? <TrendingDown size={20} /> : 
-                                             <ArrowRightLeft size={20} />}
+                                            {t.type === 'income' ? <TrendingUp size={24} /> : 
+                                             t.type === 'expense' ? <TrendingDown size={24} /> : 
+                                             <ArrowRightLeft size={24} />}
                                         </div>
                                         <div className="min-w-0">
-                                            <h4 className="font-bold text-[#2D241E] text-base leading-tight truncate">{t.description}</h4>
-                                            <p className="text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[0.2em] mt-1.5">
+                                            <h4 className="font-headline italic text-[#2D241E] text-xl leading-tight truncate">{t.description}</h4>
+                                            <p className="text-[11px] font-black text-[#2D241E]/30 uppercase tracking-[0.25em] mt-2">
                                                 {formatDate(t.date)}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-3">
                                         <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
                                         <DeleteTransactionDialog transactionId={t.id} />
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-end justify-between mt-8">
-                                    <div className="space-y-3">
-                                        <Badge variant="secondary" className="bg-white/60 text-[#2D241E]/60 border-none font-bold text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl shadow-sm">
+                                <div className="flex items-end justify-between mt-10">
+                                    <div className="space-y-4">
+                                        <Badge variant="secondary" className="bg-white/80 text-[#2D241E]/60 border-none font-black text-[11px] uppercase tracking-widest px-5 py-2 rounded-2xl shadow-sm">
                                             {t.category?.name || 'Geral'}
                                         </Badge>
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/40 ml-1 uppercase tracking-widest">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-[#2D241E]/20" />
-                                            <span>
+                                        <div className="flex items-center gap-3 text-[11px] font-black text-[#2D241E]/40 ml-2 uppercase tracking-[0.2em]">
+                                            <div className="h-2 w-2 rounded-full bg-[#2D241E]/15" />
+                                            <span className="truncate max-w-[140px]">
                                                 {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
                                                  t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className={cn(
-                                        "text-2xl font-black tracking-tighter",
+                                        "text-3xl font-black tracking-tighter font-headline italic",
                                         t.type === 'income' ? "text-emerald-600" : 
                                         t.type === 'expense' ? "text-[#ff6b7b]" : 
                                         "text-blue-600"
@@ -483,13 +494,13 @@ export function TransactionsPageClient({
                             </div>
                         ))
                     ) : (
-                        <div className="py-20 text-center text-[#2D241E]/20 space-y-6">
-                            <div className="p-8 bg-white/30 w-fit mx-auto rounded-[32px] border border-white/50">
-                                <Search size={48} className="animate-pulse" />
+                        <div className="py-24 text-center text-[#2D241E]/20 space-y-8">
+                            <div className="p-10 bg-white/30 w-fit mx-auto rounded-[48px] border border-white/50">
+                                <Search size={56} className="animate-pulse" />
                             </div>
-                            <div className="space-y-2">
-                                <p className="font-black text-xl tracking-tight text-[#2D241E]/40">Nenhuma transação</p>
-                                <p className="text-xs font-bold uppercase tracking-widest">Ajuste seus filtros</p>
+                            <div className="space-y-3">
+                                <p className="font-black text-2xl tracking-tight text-[#2D241E]/40 font-headline italic">Nenhuma transação encontrada</p>
+                                <p className="text-sm font-bold uppercase tracking-widest opacity-60">Ajuste seus filtros e tente novamente</p>
                             </div>
                         </div>
                     )}
@@ -501,12 +512,12 @@ export function TransactionsPageClient({
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-b border-white/10 hover:bg-transparent">
-                                    <TableHead className="py-8 px-10 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Data</TableHead>
-                                    <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Descrição</TableHead>
-                                    <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Categoria</TableHead>
-                                    <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Conta</TableHead>
-                                    <TableHead className="py-8 text-right text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 pr-10">Valor</TableHead>
-                                    <TableHead className="py-8 text-center text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Ações</TableHead>
+                                    <TableHead className="py-10 px-12 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Data</TableHead>
+                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Descrição</TableHead>
+                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Categoria</TableHead>
+                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Conta</TableHead>
+                                    <TableHead className="py-10 text-right text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 pr-12">Valor</TableHead>
+                                    <TableHead className="py-10 text-center text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Ações</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -514,36 +525,36 @@ export function TransactionsPageClient({
                                     filteredTransactions.map((t) => (
                                         <TableRow 
                                             key={t.id} 
-                                            className="group border-b border-white/5 hover:bg-white/40 transition-all duration-300"
+                                            className="group border-b border-white/5 hover:bg-white/60 transition-all duration-500"
                                         >
-                                            <TableCell className="py-6 px-10">
+                                            <TableCell className="py-8 px-12">
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-[#2D241E]">{formatDate(t.date)}</span>
-                                                    <span className="text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[0.1em] mt-0.5">
+                                                    <span className="text-base font-black text-[#2D241E] font-inter italic">{formatDate(t.date)}</span>
+                                                    <span className="text-[11px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em] mt-1.5">
                                                         {new Date(t.date).toLocaleDateString('pt-BR', { weekday: 'long' })}
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <div className="flex items-center gap-4">
+                                            <TableCell className="py-8">
+                                                <div className="flex items-center gap-5">
                                                     <div className={cn(
-                                                        "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:rotate-[360deg] shadow-sm",
+                                                        "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm",
                                                         t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
                                                         t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
                                                         "bg-blue-50 text-blue-600"
                                                     )}>
-                                                        {t.type === 'income' ? <TrendingUp size={16} /> : 
-                                                         t.type === 'expense' ? <TrendingDown size={16} /> : 
-                                                         <ArrowRightLeft size={16} />}
+                                                        {t.type === 'income' ? <TrendingUp size={20} /> : 
+                                                         t.type === 'expense' ? <TrendingDown size={20} /> : 
+                                                         <ArrowRightLeft size={20} />}
                                                     </div>
                                                     <div>
-                                                        <span className="text-base font-bold text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-300">{t.description}</span>
-                                                        <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-lg font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic">{t.description}</span>
+                                                        <div className="flex items-center gap-3 mt-2">
                                                             {t.isRecurring && (
-                                                                <Badge variant="outline" className="h-5 px-2 border-purple-100 bg-purple-50 text-purple-600 text-[8px] font-black tracking-widest uppercase rounded-lg">Fixo</Badge>
+                                                                <Badge variant="outline" className="h-6 px-3 border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-xl">Fixo</Badge>
                                                             )}
                                                             {t.isInstallment && (
-                                                                <Badge variant="outline" className="h-5 px-2 border-blue-100 bg-blue-50 text-blue-600 text-[8px] font-black tracking-widest uppercase rounded-lg">
+                                                                <Badge variant="outline" className="h-6 px-3 border-blue-100 bg-blue-50 text-blue-600 text-[9px] font-black tracking-widest uppercase rounded-xl">
                                                                     {t.installmentNumber}/{t.totalInstallments}
                                                                 </Badge>
                                                             )}
@@ -551,30 +562,30 @@ export function TransactionsPageClient({
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <Badge variant="secondary" className="px-4 py-1.5 rounded-xl bg-white/60 text-[#2D241E]/60 border-none font-bold text-[10px] uppercase tracking-widest shadow-sm">
+                                            <TableCell className="py-8">
+                                                <Badge variant="secondary" className="px-5 py-2 rounded-2xl bg-white/80 text-[#2D241E]/60 border-none font-black text-[11px] uppercase tracking-widest shadow-sm">
                                                     {t.category?.name || 'Geral'}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="h-2 w-2 rounded-full bg-[#2D241E]/10" />
-                                                    <span className="text-[11px] font-bold text-[#2D241E]/40 uppercase tracking-widest">
+                                            <TableCell className="py-8">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-2.5 w-2.5 rounded-full bg-[#2D241E]/10" />
+                                                    <span className="text-[12px] font-black text-[#2D241E]/40 uppercase tracking-[0.15em]">
                                                         {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
                                                          t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
                                                     </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className={cn(
-                                                "py-6 text-right font-black text-xl tracking-tighter pr-10",
+                                                "py-8 text-right font-black text-2xl tracking-tighter pr-12 font-headline italic",
                                                 t.type === 'income' ? "text-emerald-600" : 
                                                 t.type === 'expense' ? "text-[#ff6b7b]" : 
                                                 "text-blue-600"
                                             )}>
                                                 {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                            <TableCell className="py-8">
+                                                <div className="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
                                                     <EditTransactionDialog 
                                                         transaction={t as Transaction} 
                                                         accounts={allAccounts} 
@@ -588,14 +599,14 @@ export function TransactionsPageClient({
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-80 text-center">
-                                            <div className="flex flex-col items-center justify-center gap-6 text-[#2D241E]/20">
-                                                <div className="p-8 bg-white/30 rounded-[40px] border border-white/50">
-                                                    <Search size={64} className="animate-pulse" />
+                                        <TableCell colSpan={6} className="h-96 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-8 text-[#2D241E]/20">
+                                                <div className="p-12 bg-white/30 rounded-[60px] border border-white/50 shadow-inner">
+                                                    <Search size={80} className="animate-pulse" />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <p className="font-black text-2xl tracking-tight text-[#2D241E]/30">Nenhum resultado</p>
-                                                    <p className="text-sm font-bold uppercase tracking-widest">Tente usar outros filtros ou termos de busca</p>
+                                                <div className="space-y-2">
+                                                    <p className="font-black text-3xl tracking-tight text-[#2D241E]/30 font-headline italic">Nenhum resultado</p>
+                                                    <p className="text-sm font-bold uppercase tracking-[0.3em] opacity-50">Refine seus termos de busca ou filtros</p>
                                                 </div>
                                             </div>
                                         </TableCell>

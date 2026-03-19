@@ -41,7 +41,11 @@ const pastelColors = [
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button 
+      type="submit" 
+      disabled={pending}
+      className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white shadow-xl shadow-[#ff6b7b]/20 border-none hover:shadow-2xl hover:shadow-[#ff6b7b]/30 transition-all duration-300 active:scale-[0.98]"
+    >
       {pending ? 'Salvando...' : 'Salvar Alterações'}
     </Button>
   );
@@ -90,32 +94,36 @@ export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUp
   }, [state, toast, onProfileUpdate]);
 
   return (
-    <Card>
+    <div className="relative overflow-hidden rounded-[40px] bg-white/40 backdrop-blur-3xl border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] transition-all duration-500">
       <form action={formAction}>
-        <CardHeader>
-          <CardTitle>Informações Pessoais</CardTitle>
-          <CardDescription>
-            Mantenha seus dados sempre atualizados.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <div className="p-8 md:p-10 space-y-2 border-b border-[#2D241E]/5 bg-white/30">
+          <h2 className="text-3xl font-headline font-bold text-[#2D241E] italic">Informações <span className="text-[#ff6b7b]">Pessoais</span></h2>
+          <p className="text-xs font-medium text-[#2D241E]/40 italic">Mantenha seus dados sempre atualizados para um porto seguro.</p>
+        </div>
+        <div className="p-8 md:p-10">
           <div className="grid gap-4">
-            <div className="space-y-4">
-              <Label>Foto de Perfil</Label>
-              <div className="flex justify-center mb-4">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary">
+            <div className="space-y-6">
+              <div className="flex flex-col items-center sm:flex-row gap-8 mb-8 pb-8 border-b border-[#2D241E]/5">
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl ring-8 ring-[#ff6b7b]/5">
                   <Image
                     src={imagePreview || selectedImage}
                     alt="Profile preview"
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 hover:opacity-100 flex items-center justify-center">
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Preview</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2 text-center sm:text-left">
+                  <h3 className="text-xl font-headline font-bold text-[#2D241E] italic">Foto de Perfil</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">Personalize sua presença no app</p>
                 </div>
               </div>
               
               {/* Upload de arquivo */}
-              <div className="space-y-2">
-                <Label htmlFor="avatarFile">Upload de Imagem Personalizada</Label>
+              <div className="space-y-3">
+                <Label htmlFor="avatarFile" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Upload de Imagem</Label>
                 <div className="relative">
                   <Input
                     id="avatarFile"
@@ -137,29 +145,31 @@ export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUp
                   />
                   <label
                     htmlFor="avatarFile"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 group"
+                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#2D241E]/10 rounded-3xl cursor-pointer bg-white/50 hover:bg-white hover:border-[#ff6b7b]/30 transition-all duration-300 group shadow-sm"
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg
-                        className="w-8 h-8 mb-4 text-gray-500 group-hover:text-gray-600"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 16"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                        />
-                      </svg>
-                      <p className="mb-2 text-sm text-gray-500 group-hover:text-gray-600">
-                        <span className="font-semibold">Clique para fazer upload</span>
+                      <div className="w-12 h-12 rounded-full bg-[#ff6b7b]/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg
+                          className="w-6 h-6 text-[#ff6b7b]/60"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 20 16"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                          />
+                        </svg>
+                      </div>
+                      <p className="mb-2 text-xs font-bold text-[#2D241E]/60">
+                        <span className="text-[#ff6b7b]">Clique para carregar</span> nova foto
                       </p>
-                      <p className="text-xs text-gray-500 group-hover:text-gray-600">
-                        PNG, JPG ou JPEG (MAX. 5MB)
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/20">
+                        PNG, JPG (MAX. 5MB)
                       </p>
                     </div>
                   </label>
@@ -224,21 +234,34 @@ export function ProfileForm({ user, onProfileUpdate }: { user: User; onProfileUp
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input id="name" name="name" defaultValue={user.name} />
-              {state?.errors?.name && <p className="text-sm text-destructive mt-1">{state.errors.name[0]}</p>}
+            <div className="space-y-3">
+              <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Nome Completo</Label>
+              <Input 
+                id="name" 
+                name="name" 
+                defaultValue={user.name} 
+                className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm"
+              />
+              {state?.errors?.name && <p className="text-xs text-[#ff6b7b] font-bold mt-1 ml-1">{state.errors.name[0]}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input id="email" type="email" defaultValue={user.email} readOnly disabled />
+            
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">E-mail (Não alterável)</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                defaultValue={user.email} 
+                className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-[#2D241E]/5 text-lg font-bold text-[#2D241E]/40 grayscale cursor-not-allowed transition-all"
+                readOnly 
+                disabled 
+              />
             </div>
           </div>
-        </CardContent>
-        <CardFooter className="border-t px-6 py-4 flex justify-end">
+        </div>
+        <div className="p-8 md:p-10 border-t border-[#2D241E]/5 flex justify-end bg-white/30 backdrop-blur-sm">
           <SubmitButton />
-        </CardFooter>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }

@@ -72,8 +72,9 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
         if (Array.isArray(account.visibleIn)) {
             return account.visibleIn;
         }
-        if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
-            return account.visibleIn.split(',');
+        const visibleIn = account.visibleIn as any;
+        if (typeof visibleIn === 'string' && visibleIn.length > 0) {
+            return visibleIn.split(',');
         }
         return [];
     }, [account.visibleIn]);
@@ -84,46 +85,38 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
             y: 0,
             opacity: 1,
             transition: {
-            ease: "easeOut",
-            duration: 0.4,
+                ease: "easeOut",
+                duration: 0.4,
             },
         },
     };
 
     return (
-        <motion.div variants={itemVariants} className="rounded-lg border p-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                    <div className="rounded-full bg-muted flex items-center justify-center h-10 w-10 overflow-hidden">
-                        {account.logoUrl ? (
-                            <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="h-full w-full object-cover rounded-full" />
-                        ) : (
-                            isCreditCard ? <CreditCard className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />
-                        )}
+        <motion.div 
+            variants={itemVariants} 
+            className="group relative overflow-hidden rounded-[40px] bg-white/40 backdrop-blur-3xl border border-white/60 p-8 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.12)] transition-all duration-700 hover:-translate-y-2"
+        >
+            {/* Card Pattern Overlay */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ff6b7b]/5 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
+            
+            <div className="relative z-10 space-y-6">
+                {/* Header: Bank & Actions */}
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="h-14 w-14 rounded-2xl bg-white p-2 shadow-sm border border-[#2D241E]/5 overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
+                            {account.logoUrl ? (
+                                <Image src={account.logoUrl} alt={account.bank} width={40} height={40} className="w-full h-full object-contain" />
+                            ) : (
+                                <Landmark className="h-7 w-7 text-[#2D241E]/10" />
+                            )}
+                        </div>
+                        <div>
+                            <h4 className="font-headline text-2xl font-bold text-[#2D241E] leading-tight italic">{account.bank}</h4>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 mt-0.5">{accountTypeLabels[account.type]}</p>
+                        </div>
                     </div>
-                    <div className='flex-1'>
-                        <p className="font-medium">{account.name}</p>
-                        <p className="text-xs text-muted-foreground">{account.bank} • {accountTypeLabels[account.type]}</p>
-                    </div>
-                </div>
-                <div className='flex items-center gap-4'>
-                    <div className='text-right'>
-                        {isCreditCard ? (
-                            <>
-                                <p className="font-medium text-red-500">
-                                    <AnimatedCounter value={account.balance} formatter={formatCurrency} />
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                    de {formatCurrency(account.creditLimit || 0)}
-                                </p>
-                            </>
-                        ) : (
-                            <p className={cn("font-medium text-lg", account.balance >= 0 ? 'text-green-600' : 'text-red-500')}>
-                               <AnimatedCounter value={account.balance} formatter={formatCurrency} />
-                            </p>
-                        )}
-                    </div>
-                    <div className='flex gap-1 items-center'>
+
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
                         <DeleteAccountDialog 
                             account={account} 
@@ -132,17 +125,61 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
                         />
                     </div>
                 </div>
-            </div>
-            {isOwner && visibleInArray.length > 0 && (
-                <div className="border-t pt-3 mt-3 flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Eye className="h-3 w-3" />
-                        <span>Visível em:</span>
+
+                {/* Middle: Virtual Card Chip */}
+                <div className="flex items-center justify-between py-4">
+                    <div className="h-10 w-14 rounded-lg bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600/50 relative overflow-hidden shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_2px_10px_rgba(0,0,0,0.1)] group-hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)] transition-all">
+                        <div className="absolute inset-0 grid grid-cols-2 gap-px opacity-30">
+                            <div className="border-b border-r border-amber-900/20" />
+                            <div className="border-b border-amber-900/20" />
+                            <div className="border-r border-amber-900/20" />
+                            <div className="border-amber-900/20" />
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-4 border border-amber-900/10 rounded-sm" />
                     </div>
-                    {visibleInArray.map(vaultId => {
+                    {isCreditCard ? <CreditCard className="h-8 w-8 text-[#2D241E]/10 group-hover:text-[#ff6b7b]/20 transition-colors" /> : <Wallet className="h-8 w-8 text-[#2D241E]/10 group-hover:text-emerald-500/20 transition-colors" />}
+                </div>
+
+                {/* Footer: Balance & Name */}
+                <div className="flex items-end justify-between pt-4">
+                    <div className="space-y-1.5">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Titular do Cartão</p>
+                        <p className="font-bold text-[#2D241E] tracking-tight text-lg group-hover:text-[#ff6b7b] transition-colors">{account.name}</p>
+                    </div>
+
+                    <div className="text-right">
+                        {isCreditCard ? (
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b7b]/60">Fatura Atual</p>
+                                <p className="text-3xl font-headline font-black text-[#ff6b7b] tracking-tighter italic scale-105 origin-right">
+                                    <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                                </p>
+                                <p className="text-[9px] font-bold text-[#2D241E]/30 italic mt-1">
+                                    de {formatCurrency(account.creditLimit || 0)} limite
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/60">Saldo Disponível</p>
+                                <p className={cn("text-3xl font-headline font-black tracking-tighter italic scale-105 origin-right", account.balance >= 0 ? 'text-emerald-500' : 'text-[#ff6b7b]')}>
+                                    <AnimatedCounter value={account.balance} formatter={formatCurrency} />
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Visibility Pills */}
+            {isOwner && visibleInArray.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-[#2D241E]/5 flex items-center gap-3 flex-wrap">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 italic">Visível em:</span>
+                    {visibleInArray.map((vaultId: string) => {
                         const vault = userVaults.find(v => v.id === vaultId);
                         return vault ? (
-                            <Badge key={vaultId} variant="secondary">{vault.name}</Badge>
+                            <Badge key={vaultId} className="bg-[#ff6b7b]/10 text-[#ff6b7b] hover:bg-[#ff6b7b]/20 border border-[#ff6b7b]/20 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm">
+                                {vault.name}
+                            </Badge>
                         ) : null;
                     })}
                 </div>
@@ -181,8 +218,9 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
         if (Array.isArray(account.visibleIn)) {
             return account.visibleIn;
         }
-        if (typeof account.visibleIn === 'string' && account.visibleIn.length > 0) {
-            return account.visibleIn.split(',');
+        const visibleIn = account.visibleIn as any;
+        if (typeof visibleIn === 'string' && visibleIn.length > 0) {
+            return visibleIn.split(',');
         }
         return [];
     }, [account.visibleIn]);
@@ -212,10 +250,10 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                 </Tooltip>
             </TooltipProvider>
 
-            <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Editar Conta</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="bg-[#fdfcf7] border-none rounded-[40px] shadow-2xl overflow-hidden p-0 max-w-lg">
+            <DialogHeader className="p-8 pb-4 bg-white/50 backdrop-blur-sm border-b border-[#2D241E]/5">
+                <DialogTitle className="text-2xl font-bold font-headline text-[#2D241E] italic">Editar <span className="text-[#ff6b7b]">Conta</span></DialogTitle>
+                <DialogDescription className="text-sm font-medium text-[#2D241E]/40 italic">
                     Atualize os detalhes da sua conta ou cartão.
                 </DialogDescription>
             </DialogHeader>
@@ -272,14 +310,14 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="account-type">Tipo</Label>
+                        <Label htmlFor="account-type" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Tipo de Conta</Label>
                         <Select name="account-type" value={accountType} onValueChange={(v) => setAccountType(v as Account['type'])}>
-                            <SelectTrigger>
+                            <SelectTrigger className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
                                 <SelectValue placeholder="Selecione o tipo" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">
                                 {Object.entries(accountTypeLabels).map(([value, label]) => (
-                                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                                    <SelectItem key={value} value={value} className="rounded-xl font-bold text-[#2D241E] focus:bg-[#ff6b7b]/10 focus:text-[#ff6b7b]">{label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -329,11 +367,11 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     )}
                 </div>
             </fieldset>
-            <DialogFooter>
-              <Button type="submit" disabled={!isOwner || isLoading}>
+            <DialogFooter className="p-8 pt-0">
+              <Button type="submit" disabled={!isOwner || isLoading} className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white shadow-xl shadow-[#ff6b7b]/20 border-none">
                 {isLoading ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
-               {!isOwner && <p className="text-xs text-muted-foreground">Apenas o proprietário pode salvar alterações.</p>}
+               {!isOwner && <p className="text-xs text-muted-foreground mt-4 text-center">Apenas o proprietário pode salvar alterações.</p>}
             </DialogFooter>
             </form>
             </DialogContent>
@@ -406,31 +444,30 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         visible: {
             opacity: 1,
             transition: {
-            staggerChildren: 0.1,
+                staggerChildren: 0.1,
             },
         },
     };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Contas e Cartões</CardTitle>
-          <CardDescription>
-            Gerencie todas as suas contas. A visibilidade em cada cofre pode ser ajustada individualmente.
-          </CardDescription>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between px-2">
+        <div className="space-y-1">
+          <h2 className="font-headline text-3xl font-bold text-[#2D241E] italic">Contas e <span className="text-[#ff6b7b]">Cartões</span></h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2D241E]/30 italic">Gestão de Patrimônio e Limites de Crédito</p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button className="gradient-button h-12 px-6 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg shadow-[#ff6b7b]/20">
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Nova Conta ou Cartão</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="bg-[#fdfcf7] border-none rounded-[40px] shadow-2xl overflow-hidden p-0 max-w-lg">
+            <DialogHeader className="p-8 pb-4 bg-white/50 backdrop-blur-sm border-b border-[#2D241E]/5">
+              <DialogTitle className="text-2xl font-bold font-headline text-[#2D241E] italic">Nova Conta ou Cartão</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-[#2D241E]/40 italic">
                 A nova conta será sua, mas você poderá torná-la visível em seus cofres.
               </DialogDescription>
             </DialogHeader>
@@ -452,141 +489,179 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 console.error('Erro ao criar conta:', error);
               }
             }}>
-            <input type="hidden" name="logoUrl" value={selectedLogo} />
-            <input type="hidden" name="scope" value="personal" />
-            <div className="grid gap-4 py-4">
-                 <div className="space-y-2">
-                    <Label>Logo do Banco</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {bankLogos.map((logo, index) => (
-                            <button
-                                type="button"
-                                key={index}
-                                onClick={() => setSelectedLogo(logo)}
-                                className={cn(
-                                    "flex h-12 w-12 items-center justify-center rounded-full border-2 bg-muted transition-all overflow-hidden",
-                                    selectedLogo === logo ? 'border-primary ring-2 ring-primary' : 'border-transparent'
-                                )}
-                            >
-                                <Image src={logo} alt={`logo ${index}`} width={48} height={48} className="h-full w-full object-cover rounded-full" />
-                            </button>
-                        ))}
-                    </div>
+              <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <input type="hidden" name="logoUrl" value={selectedLogo} />
+                <input type="hidden" name="scope" value="personal" />
+                
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Instituição</Label>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                    {bankLogos.map((logo, index) => (
+                      <button
+                        type="button"
+                        key={index}
+                        onClick={() => setSelectedLogo(logo)}
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center rounded-2xl border-2 bg-white transition-all overflow-hidden shadow-sm hover:scale-110",
+                          selectedLogo === logo ? 'border-[#ff6b7b] ring-4 ring-[#ff6b7b]/10' : 'border-[#2D241E]/5'
+                        )}
+                      >
+                        <Image src={logo} alt={`logo ${index}`} width={48} height={48} className="h-full w-full object-contain p-1" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-               <div className="space-y-2">
-                <Label htmlFor="account-type">Tipo</Label>
-                 <Select name="account-type" onValueChange={(v) => setAccountType(v as Account['type'])}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                         {Object.entries(accountTypeLabels).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>{label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-              </div>
 
-            {accountType && (
-                <>
-                    <div className="space-y-2">
-                        <Label htmlFor="account-name">Nome da Conta/Cartão *</Label>
-                        <Input
+                <div className="space-y-3">
+                  <Label htmlFor="account-type" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Tipo de Conta</Label>
+                  <Select name="account-type" onValueChange={(v) => setAccountType(v as Account['type'])}>
+                    <SelectTrigger className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
+                      <SelectValue placeholder="Selecione o tipo..." />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">
+                      {Object.entries(accountTypeLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value} className="rounded-xl font-bold text-[#2D241E] focus:bg-[#ff6b7b]/10 focus:text-[#ff6b7b]">{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {accountType && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="space-y-3">
+                      <Label htmlFor="account-name" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Nome de Exibição *</Label>
+                      <Input
                         id="account-name"
                         name="account-name"
                         value={accountName}
                         onChange={(e) => setAccountName(e.target.value)}
-                        placeholder="Ex: Conta para o dia a dia"
+                        placeholder="Ex: Minha Conta Principal"
+                        className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm"
                         required
-                        />
+                      />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="bank-name">Instituição *</Label>
-                        <Input
+
+                    <div className="space-y-3">
+                      <Label htmlFor="bank-name" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Nome do Banco *</Label>
+                      <Input
                         id="bank-name"
                         name="bank-name"
                         value={bankName}
                         onChange={(e) => setBankName(e.target.value)}
-                        placeholder="Ex: Banco Digital"
+                        placeholder="Ex: Nubank, Itaú..."
+                        className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm"
                         required
-                        />
+                      />
                     </div>
+
                     {accountType === 'credit_card' ? (
-                        <div className="space-y-2">
-                            <Label htmlFor="credit-limit">Limite do Cartão</Label>
-                            <Input
-                                id="credit-limit"
-                                name="credit-limit"
-                                type="number"
-                                step="0.01"
-                                value={creditLimit}
-                                onChange={(e) => setCreditLimit(e.target.value)}
-                                placeholder='R$ 5.000,00'
-                            />
-                        </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="credit-limit" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Limite do Cartão (R$)</Label>
+                        <Input
+                          id="credit-limit"
+                          name="credit-limit"
+                          type="text"
+                          inputMode="decimal"
+                          value={creditLimit}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/\D/g, '');
+                            if (val) {
+                              setCreditLimit((Number(val)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+                            } else setCreditLimit('');
+                          }}
+                          placeholder='R$ 0,00'
+                          className="h-16 rounded-[24px] border-2 border-[#2D241E]/5 bg-white text-center text-2xl font-black text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-inner"
+                        />
+                      </div>
                     ) : (
-                         <div className="space-y-2">
-                            <Label htmlFor="balance">Saldo Inicial</Label>
-                            <Input
-                                id="balance"
-                                name="balance"
-                                type="number"
-                                step="0.01"
-                                value={balance}
-                                onChange={(e) => setBalance(e.target.value)}
-                                placeholder='R$ 1.234,56'
-                            />
-                        </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="balance" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Saldo Atual (R$)</Label>
+                        <Input
+                          id="balance"
+                          name="balance"
+                          type="text"
+                          inputMode="decimal"
+                          value={balance}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/\D/g, '');
+                            if (val) {
+                              setBalance((Number(val)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+                            } else setBalance('');
+                          }}
+                          placeholder='R$ 0,00'
+                          className="h-16 rounded-[24px] border-2 border-[#2D241E]/5 bg-white text-center text-2xl font-black text-[#2D241E] focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-inner"
+                        />
+                      </div>
                     )}
 
-                    <div className="space-y-2 rounded-md border p-4">
-                        <Label>Visibilidade nos Cofres</Label>
-                        <p className='text-xs text-muted-foreground'>Você possui apenas esse cofre até o momento.</p>
-                         {userVaults.map(vault => (
-                             <div key={vault.id} className="flex items-center justify-between">
-                                <Label htmlFor={`create-visible-${vault.id}`} className="font-normal">{vault.name}</Label>
+                    <div className="space-y-4 rounded-[32px] bg-white/40 border-2 border-white p-6 shadow-sm">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Visibilidade</Label>
+                      {userVaults.length > 0 ? (
+                        <>
+                          <p className='text-[10px] text-muted-foreground italic mb-4'>Marque em quais cofres esta conta pessoal deve ser visível para outros membros.</p>
+                          <div className="space-y-3">
+                            {userVaults.map(vault => (
+                              <div key={vault.id} className="flex items-center justify-between">
+                                <Label htmlFor={`create-visible-${vault.id}`} className="font-bold text-[#2D241E]">{vault.name}</Label>
                                 <Switch 
-                                    id={`create-visible-${vault.id}`} 
-                                    name={`visible-${vault.id}`}
+                                  id={`create-visible-${vault.id}`} 
+                                  name={`visible-${vault.id}`}
                                 />
-                             </div>
-                         ))}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p className='text-[10px] text-muted-foreground italic'>Você ainda não participa de nenhum cofre compartilhado.</p>
+                      )}
                     </div>
-                </>
-            )}
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                disabled={!accountType || !accountName || !bankName}
-              >
-                Salvar
-              </Button>
-            </DialogFooter>
+                  </motion.div>
+                )}
+              </div>
+              <DialogFooter className="p-8 pt-0">
+                <Button 
+                  type="submit" 
+                  disabled={!accountType || !accountName || !bankName}
+                  className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-br from-[#ff6b7b] to-[#fa8292] text-white shadow-xl shadow-[#ff6b7b]/20 border-none"
+                >
+                  Salvar Conta
+                </Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
-      </CardHeader>
-      <CardContent>
-        <motion.div 
-            className="space-y-4"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-          {accounts.map((account) => (
-            <AccountItem 
-                key={account.id} 
-                account={account} 
-                userVaults={userVaults} 
-                currentUserId={currentUserId}
-            />
-          ))}
-           {accounts.length === 0 && (
-            <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma conta ou cartão cadastrado.</p>
-           )}
-        </motion.div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {accounts.map((account) => (
+          <AccountItem 
+            key={account.id} 
+            account={account} 
+            userVaults={userVaults} 
+            currentUserId={currentUserId}
+          />
+        ))}
+        {accounts.length === 0 && (
+          <div className="col-span-full py-12 flex flex-col items-center justify-center text-center space-y-4 bg-white/20 backdrop-blur-sm rounded-[40px] border-2 border-dashed border-[#2D241E]/5">
+            <div className="p-4 rounded-3xl bg-white shadow-sm border border-[#2D241E]/5">
+              <Landmark className="h-10 w-10 text-[#2D241E]/10" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-bold text-[#2D241E]">Oops!</p>
+              <p className="text-sm text-muted-foreground italic">Nenhuma conta ou cartão cadastrado ainda.</p>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
   );
 }

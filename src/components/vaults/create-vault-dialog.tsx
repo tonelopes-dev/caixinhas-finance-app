@@ -255,11 +255,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 1 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
-                          <Wallet className="w-7 h-7 text-[#ff6b7b]" />
+                        <div className="w-16 h-16 rounded-[24px] bg-white shadow-xl shadow-[#2D241E]/5 flex items-center justify-center mb-8 transform hover:scale-110 transition-all duration-500 ring-1 ring-[#2D241E]/5">
+                          <Wallet className="w-8 h-8 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-4xl font-headline font-bold tracking-tight text-[#2D241E]">O que vamos guardar?</h2>
-                        <p className="text-lg font-medium text-[#2D241E]/60">Dê um nome bem legal para o seu cofre. Assim fica fácil de lembrar!</p>
+                        <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight text-[#2D241E] italic">O que vamos guardar?</h2>
+                        <p className="text-xl font-medium text-[#2D241E]/50 italic">Dê um nome bem legal para o seu cofre. Assim fica fácil de lembrar!</p>
                       </div>
 
                       <div className="space-y-4 pt-4">
@@ -274,12 +274,12 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                           className="text-2xl py-8 rounded-[24px] border-2 bg-white border-[#2D241E]/5 focus:border-[#ff6b7b] focus:ring-0 transition-all shadow-sm placeholder:text-[#2D241E]/20 text-[#2D241E] font-bold"
                           required
                         />
-                        <div className="bg-white/60 backdrop-blur-sm p-5 rounded-[24px] flex gap-4 items-start border border-[#2D241E]/5 shadow-sm">
-                          <div className="w-6 h-6 rounded-full bg-[#ff6b7b]/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-[10px] font-black text-[#ff6b7b] uppercase">!</span>
+                        <div className="bg-white/40 backdrop-blur-xl p-6 rounded-[32px] flex gap-5 items-start border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                          <div className="w-8 h-8 rounded-full bg-[#ff6b7b]/10 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                            <span className="text-[12px] font-black text-[#ff6b7b] uppercase">!</span>
                           </div>
-                          <p className="text-sm text-[#2D241E]/70 leading-relaxed font-semibold">
-                            Use nomes que te motivem! Em vez de "Poupança", tente <span className="text-[#2D241E]">"Meu Primeiro Apê"</span> 🏠
+                          <p className="text-sm text-[#2D241E]/60 leading-relaxed font-bold italic">
+                            Use nomes que te motivem! Em vez de "Poupança", tente <span className="text-[#2D241E] not-italic font-black underline decoration-[#ff6b7b]/30">"Meu Primeiro Apê"</span> 🏠
                           </p>
                         </div>
                       </div>
@@ -289,11 +289,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 2 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
-                          <ImageIcon className="w-7 h-7 text-[#ff6b7b]" />
+                        <div className="w-16 h-16 rounded-[24px] bg-white shadow-xl shadow-[#2D241E]/5 flex items-center justify-center mb-8 transform hover:scale-110 transition-all duration-500 ring-1 ring-[#2D241E]/5">
+                          <ImageIcon className="w-8 h-8 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-3xl font-headline font-bold tracking-tight text-[#2D241E]">Deixe com a sua cara</h2>
-                        <p className="text-lg font-medium text-[#2D241E]/60">Escolha uma imagem que combine com seu sonho.</p>
+                        <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight text-[#2D241E] italic">Deixe com a sua cara</h2>
+                        <p className="text-xl font-medium text-[#2D241E]/50 italic">Escolha uma imagem que combine com seu sonho.</p>
                       </div>
 
                       <div className="space-y-6">
@@ -370,11 +370,11 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   {step === 3 && (
                     <div className="space-y-6 text-center">
                       <div className="space-y-2 text-left">
-                        <div className="w-14 h-14 rounded-[20px] bg-white shadow-sm border border-[#2D241E]/5 flex items-center justify-center mb-6">
-                          <Lock className="w-7 h-7 text-[#ff6b7b]" />
+                        <div className="w-16 h-16 rounded-[24px] bg-white shadow-xl shadow-[#2D241E]/5 flex items-center justify-center mb-8 transform hover:scale-110 transition-all duration-500 ring-1 ring-[#2D241E]/5">
+                          <Lock className="w-8 h-8 text-[#ff6b7b]" />
                         </div>
-                        <h2 className="text-3xl font-headline font-bold tracking-tight text-[#2D241E]">Quem pode ver?</h2>
-                        <p className="text-lg font-medium text-[#2D241E]/60">Escolha como prefere manter este cofre.</p>
+                        <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight text-[#2D241E] italic">Quem pode ver?</h2>
+                        <p className="text-xl font-medium text-[#2D241E]/50 italic">Escolha como prefere manter este cofre.</p>
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 pt-4">
@@ -382,42 +382,50 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                           type="button"
                           onClick={() => setIsPrivate(false)}
                           className={cn(
-                            "flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all",
-                            !isPrivate ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/30"
+                            "flex items-start gap-5 p-6 rounded-[32px] border-2 text-left transition-all duration-500",
+                            !isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-                            !isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                            !isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Globe className="w-6 h-6" />
+                            <Globe className="w-7 h-7" />
                           </div>
-                          <div className="space-y-1">
-                            <p className="font-bold text-lg">Cofre em Conjunto</p>
-                            <p className="text-sm text-muted-foreground">Você poderá convidar outras pessoas para economizarem juntas. Ideal para casais e famílias!</p>
+                          <div className="space-y-2">
+                            <p className={cn("font-black text-xl tracking-tight transition-colors", !isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre em Conjunto</p>
+                            <p className="text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Ideal para economizar com a família. Você poderá convidar outros membros!</p>
                           </div>
-                          {!isPrivate && <Check className="w-5 h-5 text-primary shrink-0 self-center" />}
+                          {!isPrivate && (
+                            <div className="ml-auto w-8 h-8 rounded-full bg-[#ff6b7b] flex items-center justify-center shrink-0 self-center shadow-lg shadow-[#ff6b7b]/30">
+                                <Check className="w-5 h-5 text-white" />
+                            </div>
+                          )}
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setIsPrivate(true)}
                           className={cn(
-                            "flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all",
-                            isPrivate ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/30"
+                            "flex items-start gap-5 p-6 rounded-[32px] border-2 text-left transition-all duration-500",
+                            isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-                            isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                            isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Lock className="w-6 h-6" />
+                            <Lock className="w-7 h-7" />
                           </div>
-                          <div className="space-y-1">
-                            <p className="font-bold text-lg">Cofre Privado</p>
-                            <p className="text-sm text-muted-foreground">Apenas você terá acesso a este cofre. Seus sonhos, sua privacidade total.</p>
+                          <div className="space-y-2">
+                            <p className={cn("font-black text-xl tracking-tight transition-colors", isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre Privado</p>
+                            <p className="text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Apenas você terá acesso a este espaço. Seus sonhos, sua privacidade total.</p>
                           </div>
-                          {isPrivate && <Check className="w-5 h-5 text-primary shrink-0 self-center" />}
+                          {isPrivate && (
+                            <div className="ml-auto w-8 h-8 rounded-full bg-[#ff6b7b] flex items-center justify-center shrink-0 self-center shadow-lg shadow-[#ff6b7b]/30">
+                                <Check className="w-5 h-5 text-white" />
+                            </div>
+                          )}
                         </button>
                       </div>
 

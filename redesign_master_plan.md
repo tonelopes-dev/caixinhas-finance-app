@@ -36,23 +36,17 @@ A estética do Caixinhas baseia-se no conceito de **"Trustworthy Premium"** (Con
 
 ---
 
-## 🧩 3. Componentes Assinatura
+### 3.4 Premium Virtual Cards (Bancos e Cartões)
+- **Estrutura**: `rounded-[32px]`, `bg-white/40`, `backdrop-blur-xl`, `border border-white/50`.
+- **Elementos Visuais**:
+  - **Header**: Logo do banco (`h-12 w-12 rounded-2xl bg-white p-1`).
+  - **Chip**: Retângulo `h-8 w-11` com gradiente `amber-200` a `amber-500` e grid de 20% de opacidade.
+  - **Tipografia de Saldo**: `text-2xl font-black tracking-tighter`. Verde (`emerald-500`) para positivo, Vermelho (`red-500`) para negativo/fatura.
+- **Interatividade**: Botões de ação (`Edit/Delete`) ocultos por padrão (`opacity-0`), revelados no `hover` do card.
 
-### 3.1 `DashboardBackground` (O Coração Visual)
-O segredo do design é a camada fixa de fundo que flutua atrás de tudo:
-- **Camada 1**: Gradientes radiais suaves (Salmon no topo, Gold no fundo).
-- **Camada 2**: Overlay sutil (`bg-black/[0.03]`) para dar profundidade ao "vidro".
-- **Camada 3**: Ruído/Grain sutil (opcional) para textura física.
-
-### 3.2 Botões Premium (`StandardButton`)
-- **Físico**: `h-14` (mínimo), `rounded-[20px]`.
-- **Estilo**: Gradientes lineares (`bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b]`).
-- **Animação**: `tracking-widest capitalize`, `transition-all active:scale-95`.
-
-### 3.3 Cards e Containers
-- **Bordas**: `rounded-[32px]` ou `rounded-[40px]`.
-- **Fundo**: `bg-white/60` ou `bg-white/30` com `backdrop-blur`.
-- **Layout**: Uso ostensivo de `padding` interno (`p-8 md:p-12`).
+### 3.5 Glassmorphism Pills (Categorias e Badges)
+- **Estilo**: `rounded-full`, `bg-white/40`, `backdrop-blur-md`, `border-white`.
+- **Tipografia**: `font-bold text-[#2D241E]`. Prefixo `#` com `opacity-80`.
 
 ---
 
@@ -62,11 +56,10 @@ O segredo do design é a camada fixa de fundo que flutua atrás de tudo:
 1. **Wrapper**: `relative min-h-screen overflow-x-hidden`.
 2. **Background**: `<DashboardBackground />` (Posição fixa).
 3. **Content Layer**: `relative z-10 pt-24 pb-32` (O `pt-24` garante espaço para o Header/Sidebar).
-4. **Max Width**: Centralizado com `mx-auto max-w-5xl` ou `max-w-6xl`.
+4. **Max Width**: Centralizado com `mx-auto max-w-4xl` (para páginas de gestão) ou `max-w-6xl` (dashboards).
 
-### 4.2 Navegação Uniforme
-- Sempre usar o `StandardBackButton` no topo à esquerda do conteúdo principal.
-- Títulos de página: `H1` com `font-headline text-4xl`, combinando a cor `primary` em palavras-chave.
+### 4.2 Grid de Gestão
+- Usar `grid-cols-1 md:grid-cols-2 gap-6` para listar itens complexos como cards de contas.
 
 ---
 
@@ -74,26 +67,44 @@ O segredo do design é a camada fixa de fundo que flutua atrás de tudo:
 
 Ao criar uma nova página, verifique:
 - [ ] **Badges**: São todos em `uppercase tracking-widest` com fonte `black`?
-- [ ] **Hovers**: Os elementos rotacionam (`rotate-[360deg]`), brilham ou sobem (`-translate-y-1`) ao passar o mouse?
+- [ ] **Hovers**: Os elementos rotacionam, brilham ou sobem (`-translate-y-1`) ao passar o mouse?
 - [ ] **Skeletons**: Têm o mesmo border-radius dos componentes reais?
 - [ ] **Empty States**: Usam ícones grandes com `bg-white/30 rounded-[40px]` e `animate-pulse`?
-- [ ] **Contexto**: Os diálogos/modais respeitam o `DashboardBackground` (têm seu próprio fundo glass)?
+- [ ] **Diálogos**: Têm `rounded-[40px]`, fundo `fdfcf7` e headers com `bg-white/50 backdrop-blur`?
 
 ---
 
 ## 🚀 6. Páginas Concluídas (Referências)
-- **Dashboard**: O exemplo máximo de grid dinâmico.
-- **Transactions**: Referência para tabelas e modais mobile-first.
-- **Recurring**: Exemplo de consolidação de dados (agrupamento inteligente).
-- **Goals**: Mix perfeito de progresso visual e cards interativos.
+- **Dashboard**: O exemplo máximo de grid dinâmico e widgets premium.
+- **Transactions**: Referência para tabelas, filtros e modais mobile-first.
+- **Accounts & Categories**: O padrão ouro para gestão de ativos com **Premium Virtual Cards** e **Glass Pills**.
+- [x] Login (V2)
+- [x] Landing Page (V2)
+- [x] Dashboard (V2)
+- [x] Contas (V2)
+- [x] Categorias (V2)
+- [x] Seleção de Cofres (Vaults V2)
+
+## Novos Padrões Estabelecidos
+
+### Premium Vault Gallery
+- **Container**: `bg-white/40`, `backdrop-blur-xl`, `border-white/60`.
+- **Tipografia**: Alegreya italic para títulos, Outfit para subtítulos.
+- **Micro-interações**: Hover com escala (`scale-105`) e sombra profunda (`shadow-2xl`).
+
+### Dialog Standards
+- **Radius**: `rounded-[40px]`.
+- **Background**: `#fdfcf7` (Off-white quente).
+- **Inputs**: Borda de 2px, raio de 24px, tipografia de alto impacto.
+- **Progresso**: Barra de progresso visível no topo para diálogos multi-step.
 
 ---
 
 ## 🛠️ 7. Guia Técnico (Backend-to-Frontend)
 - **Fetch**: Usar `Promise.all` para todos os dados que não dependem entre si.
-- **Grouping**: Agrupar transações repetitivas (Recorrência/Parcelas) para evitar poluição da UI.
-- **Actions**: Utilizar Server Actions com `useActionState` para feedback instantâneo e robusto.
-- **Types**: Manter interfaces no `definitions.ts` centralizado, evitando `any` a todo custo.
+- **Grouping**: Agrupar transações repetitivas para evitar poluição da UI.
+- **Actions**: Utilizar Server Actions com `useActionState` para feedback instantâneo.
+- **Typing**: Garantir que propriedades dinâmicas (como `visibleIn`) sejam tratadas com segurança via casting ou schemas rigorosos.
 
 ---
 

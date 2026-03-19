@@ -305,36 +305,36 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
 
           {/* Header com Preview e Tabs */}
           <div className="relative">
-            <div className="h-32 w-full overflow-hidden relative">
+            <div className="h-40 w-full overflow-hidden relative">
               {displayImageUrl ? (
-                <Image src={displayImageUrl} alt="Capa" fill className="object-cover" sizes="(max-width: 768px) 100vw, 550px" />
+                <Image src={displayImageUrl} alt="Capa" fill className="object-cover transition-transform duration-700 hover:scale-110" sizes="(max-width: 768px) 100vw, 550px" />
               ) : (
-                <div className="bg-gradient-to-br from-primary/80 to-accent/80 h-full w-full" />
+                <div className="bg-gradient-to-br from-[#ff6b7b]/80 to-[#fa8292]/80 h-full w-full" />
               )}
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-              <div className="absolute bottom-12 left-6 right-6">
-                <h2 className="text-xl font-bold text-white truncate">{vaultName}</h2>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#fdfcf7] via-[#fdfcf7]/40 to-black/20" />
+              <div className="absolute bottom-12 left-8 right-8">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold text-[#2D241E] truncate italic tracking-tight">{vaultName}</h2>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="bg-background px-6 -mt-6 relative z-10 rounded-t-3xl pt-4">
-                <TabsList className="w-full bg-muted/50 p-1 h-12 rounded-xl">
-                  <TabsTrigger value="geral" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                    <Settings className="w-4 h-4" />
+              <div className="bg-[#fdfcf7] px-8 -mt-6 relative z-10 rounded-t-[40px] pt-6">
+                <TabsList className="w-full bg-white/50 backdrop-blur-md p-1.5 h-14 rounded-2xl border border-[#2D241E]/5 shadow-sm">
+                  <TabsTrigger value="geral" className="flex-1 rounded-xl gap-2 font-bold data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#ff6b7b] transition-all duration-300">
+                    <Settings className="w-4.5 h-4.5" />
                     <span className="hidden sm:inline">Geral</span>
                   </TabsTrigger>
-                  <TabsTrigger value="capa" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                    <ImageIcon className="w-4 h-4" />
+                  <TabsTrigger value="capa" className="flex-1 rounded-xl gap-2 font-bold data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#ff6b7b] transition-all duration-300">
+                    <ImageIcon className="w-4.5 h-4.5" />
                     <span className="hidden sm:inline">Capa</span>
                   </TabsTrigger>
-                  <TabsTrigger value="membros" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                    <Users className="w-4 h-4" />
+                  <TabsTrigger value="membros" className="flex-1 rounded-xl gap-2 font-bold data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#ff6b7b] transition-all duration-300">
+                    <Users className="w-4.5 h-4.5" />
                     <span className="hidden sm:inline">Membros</span>
                   </TabsTrigger>
-                  <TabsTrigger value="perigo" className="flex-1 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-destructive">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Perigo</span>
+                  <TabsTrigger value="perigo" className="flex-1 rounded-xl gap-2 font-bold data-[state=active]:bg-red-50 data-[state=active]:shadow-lg text-[#2D241E]/40 data-[state=active]:text-red-600 transition-all duration-300">
+                    <AlertTriangle className="w-4.5 h-4.5" />
+                    <span className="hidden sm:inline">Ajustes</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -362,42 +362,42 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                           type="button"
                           onClick={() => setIsPrivate(false)}
                           className={cn(
-                            "flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all",
-                            !isPrivate ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/20"
+                            "flex items-center gap-4 p-5 rounded-[24px] border-2 text-left transition-all duration-500",
+                            !isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                            !isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                            !isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Globe className="w-5 h-5" />
+                            <Globe className="w-6 h-6" />
                           </div>
                           <div className="flex-1 space-y-0.5">
-                            <p className="font-bold text-sm">Cofre em Conjunto</p>
-                            <p className="text-xs text-muted-foreground">Convide família ou amigos para pouparem juntos.</p>
+                            <p className={cn("font-black text-base tracking-tight", !isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre em Conjunto</p>
+                            <p className="text-xs font-bold text-[#2D241E]/30 italic">Convide família ou amigos para pouparem juntos.</p>
                           </div>
-                          {!isPrivate && <Check className="w-4 h-4 text-primary" />}
+                          {!isPrivate && <Check className="w-5 h-5 text-[#ff6b7b]" />}
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setIsPrivate(true)}
                           className={cn(
-                            "flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all",
-                            isPrivate ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/20"
+                            "flex items-center gap-4 p-5 rounded-[24px] border-2 text-left transition-all duration-500",
+                            isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                            isPrivate ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                            isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Lock className="w-5 h-5" />
+                            <Lock className="w-6 h-6" />
                           </div>
                           <div className="flex-1 space-y-0.5">
-                            <p className="font-bold text-sm">Cofre Privado</p>
-                            <p className="text-xs text-muted-foreground">Apenas você terá acesso. Seus sonhos, sua privacidade.</p>
+                            <p className={cn("font-black text-base tracking-tight", isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre Privado</p>
+                            <p className="text-xs font-bold text-[#2D241E]/30 italic">Apenas você terá acesso. Seus sonhos, sua privacidade.</p>
                           </div>
-                          {isPrivate && <Check className="w-4 h-4 text-primary" />}
+                          {isPrivate && <Check className="w-5 h-5 text-[#ff6b7b]" />}
                         </button>
                       </div>
                     </div>
@@ -484,15 +484,15 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                       <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Membros Atuais</Label>
                       <div className="space-y-2">
                         {vault.members.map((member) => (
-                          <div key={member.id} className="flex items-center justify-between p-3 rounded-xl border bg-card/50 transition-colors hover:bg-card">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10 border-2 border-background">
+                          <div key={member.id} className="flex items-center justify-between p-4 rounded-2xl border border-[#2D241E]/5 bg-white/40 backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:shadow-[#2D241E]/5">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-[#2D241E]/5">
                                 <AvatarImage src={member.avatarUrl || ''} />
-                                <AvatarFallback className="bg-primary/10 text-primary font-bold">{member.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="bg-[#ff6b7b]/10 text-[#ff6b7b] font-black">{member.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="text-sm font-bold leading-none">{member.name}</p>
-                                <p className="text-[10px] text-muted-foreground mt-1">{member.email}</p>
+                                <p className="text-base font-black text-[#2D241E] leading-none">{member.name}</p>
+                                <p className="text-[11px] font-bold text-[#2D241E]/30 mt-1 italic tracking-tight">{member.email}</p>
                               </div>
                             </div>
                             {member.id !== vault.ownerId ? (
@@ -500,13 +500,13 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                                 type="button" 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                                className="h-9 w-9 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                                 onClick={() => handleRemoveMember(member.id)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4.5 w-4.5" />
                               </Button>
                             ) : (
-                              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[10px] px-2">DONO</Badge>
+                              <Badge variant="secondary" className="bg-[#2D241E]/5 text-[#2D241E]/60 border-none font-black text-[9px] px-2.5 py-0.5 tracking-widest uppercase">Proprietário</Badge>
                             )}
                           </div>
                         ))}
