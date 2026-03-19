@@ -1,14 +1,4 @@
-import { emailHeader, emailFooter } from './email-header';
-
-const primaryButton = (href: string, label: string) => `
-  <table cellpadding="0" cellspacing="0" border="0" style="margin:28px auto 0 auto;">
-    <tr>
-      <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
-        <a href="${href}" style="display:inline-block;padding:14px 36px;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;color:#3d2c00;text-decoration:none;border-radius:12px;letter-spacing:0.02em;">${label}</a>
-      </td>
-    </tr>
-  </table>
-`;
+import { emailHeader, emailFooter, primaryButton, infoBox } from './email-header';
 
 export const milestoneEmail = (
   userName: string,
@@ -41,13 +31,7 @@ export const milestoneEmail = (
     Cada marco é uma prova de que você está no caminho certo. Sua disciplina e consistência estão transformando seus sonhos em realidade!
   </p>
 
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 8px 0;">
-    <tr>
-      <td style="background-color:#f9f6f0;border-radius:12px;border-left:4px solid #d4af37;padding:16px 20px;font-family:'Inter',Arial,sans-serif;font-size:15px;color:#2D241E;line-height:1.6;">
-        🌟 <strong>Continue assim!</strong> Pequenos passos consistentes levam a grandes conquistas.
-      </td>
-    </tr>
-  </table>
+  ${infoBox('🌟 <strong>Continue assim!</strong> Pequenos passos consistentes levam a grandes conquistas.')}
 
   ${primaryButton('https://caixinhas.app/dashboard', 'Ver Meu Progresso →')}
 

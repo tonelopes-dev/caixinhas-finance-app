@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/services/prisma';
 import { sendEmail } from '@/lib/email.service';
 import bcrypt from 'bcryptjs';
+import { welcomeEmail } from '@/app/_templates/emails/welcome-email';
 
 // Tipos para o webhook da Kiwify
 interface Customer {
@@ -138,25 +139,41 @@ async function handleOrderApproved(data: WebhookData) {
       console.log('👤 Criando novo usuário:', customer.email);
       
       // Gerar senha temporária
+      // Gerar senha temporária
       const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 12);
       
+      // Gerar token de Magic Link para login automático
+      const magicToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const magicLinkExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
       user = await prisma.user.create({
         data: {
           email: customer.email,
           name: customerName,
-          password: hashedPassword, // Usar a senha com hash
+          password: hashedPassword,
           subscriptionStatus: 'active',
           trialExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 ano
           avatarUrl: null,
           workspaceImageUrl: null,
+          magicLinkToken: magicToken,
+          magicLinkExpires: magicLinkExpires,
         }
       });
 
-      // Enviar email de boas-vindas com credenciais
-      await sendWelcomeEmail(customer.email, customerName, tempPassword);
+      // Enviar email de boas-vindas com credenciais e Magic Link
+      const appUrl = process.env.NEXTAUTH_URL || 'https://caixinhas.app';
+      const magicLink = `${appUrl}/login?token=${magicToken}`;
       
-      console.log('✅ Usuário criado com sucesso:', user.id);
+      const welcomeEmailHtml = welcomeEmail(customerName, customer.email, tempPassword, magicLink);
+      
+      await sendEmail({ 
+        to: customer.email, 
+        subject: 'Bem-vindo ao Caixinhas App! 🎉', 
+        html: welcomeEmailHtml 
+      });
+      
+      console.log('✅ Usuário criado com sucesso com Magic Link:', user.id);
     } else {
       // Atualizar usuário existente
       console.log('🔄 Atualizando usuário existente:', customer.email);

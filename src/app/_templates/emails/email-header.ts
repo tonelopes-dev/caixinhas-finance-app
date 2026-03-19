@@ -10,6 +10,27 @@
  *   Primary btn : #d4af37
  */
 
+export const primaryButton = (href: string, label: string) => `
+  <table cellpadding="0" cellspacing="0" border="0" style="margin:28px auto 0 auto;">
+    <tr>
+      <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#c49a2a 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
+        <a href="${href}" style="display:inline-block;padding:14px 36px;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;color:#3d2c00;text-decoration:none;border-radius:12px;letter-spacing:0.02em;">${label}</a>
+      </td>
+    </tr>
+  </table>
+`;
+
+export const infoBox = (content: string, borderColor = '#d4af37') => `
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:20px 0;">
+    <tr>
+      <td style="background-color:#f9f6f0;border-radius:12px;border-left:4px solid ${borderColor};padding:18px 20px;font-family:'Inter',Arial,sans-serif;font-size:15px;color:#2D241E;line-height:1.6;">
+        ${content}
+      </td>
+    </tr>
+  </table>
+`;
+
+
 export const emailHeader = (userName: string) => `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -28,7 +49,7 @@ export const emailHeader = (userName: string) => `
           <!-- ║         HEADER BRAND         ║ -->
           <!-- ╚══════════════════════════════╝ -->
           <tr>
-            <td style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);padding:32px 30px;text-align:center;">
+            <td style="background:linear-gradient(135deg,#d4af37 0%,#c49a2a 100%);padding:32px 30px;text-align:center;">
               <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
                 <tr>
                   <td style="padding-right:14px;vertical-align:middle;">

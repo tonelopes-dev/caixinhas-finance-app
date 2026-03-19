@@ -347,4 +347,67 @@ export class AuthService {
       console.error('Erro ao corrigir trial:', error);
     }
   }
+
+  /**
+   * Gera e salva um novo token de Magic Link para o usuário
+   * @param email - Email do usuário
+   * @returns O token gerado ou null
+   */
+  static async generateMagicLinkToken(email: string): Promise<string | null> {
+    try {
+      const token = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+      await prisma.user.update({
+        where: { email },
+        data: {
+          magicLinkToken: token,
+          magicLinkExpires: expires,
+        },
+      });
+
+      return token;
+    } catch (error) {
+      console.error('❌ Erro ao gerar Magic Link:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Valida um token de Magic Link e retorna o usuário
+   * @param token - Token a ser validado
+   * @returns Usuário ou null
+   */
+  static async validateMagicLinkToken(token: string): Promise<UserWithoutPassword | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { magicLinkToken: token },
+      });
+
+      if (!user) {
+        console.log('❌ Magic Link - Token não encontrado');
+        return null;
+      }
+
+      if (!user.magicLinkExpires || new Date(user.magicLinkExpires) < new Date()) {
+        console.log('❌ Magic Link - Token expirado');
+        return null;
+      }
+
+      // Limpa o token após o uso (segurança: token de uso único)
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          magicLinkToken: null,
+          magicLinkExpires: null,
+        },
+      });
+
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      console.error('❌ Erro ao validar Magic Link:', error);
+      return null;
+    }
+  }
 }

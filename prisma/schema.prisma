@@ -23,6 +23,8 @@ model User {
   trialExpiresAt     DateTime?
   resetToken         String?   // Token para recuperação de senha
   resetTokenExpiry   DateTime? // Data de expiração do token
+  magicLinkToken     String?   @unique // Token para login sem senha (Magic Link)
+  magicLinkExpires   DateTime? // Expiração do Magic Link
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 

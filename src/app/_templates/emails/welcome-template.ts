@@ -2,7 +2,7 @@
  * welcomeEmailTemplate — Caixinhas Premium Design
  * Used by the welcome email for new self-registered users.
  */
-export const welcomeEmailTemplate = (userName: string): string => `
+export const welcomeEmailTemplate = (userName: string, magicLink?: string): string => `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,7 +19,7 @@ export const welcomeEmailTemplate = (userName: string): string => `
 
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);padding:32px 30px;text-align:center;">
+            <td style="background:linear-gradient(135deg,#d4af37 0%,#c49a2a 100%);padding:32px 30px;text-align:center;">
               <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
                 <tr>
                   <td style="padding-right:14px;vertical-align:middle;">
@@ -66,10 +66,10 @@ export const welcomeEmailTemplate = (userName: string): string => `
               <!-- CTA Button -->
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 32px auto;">
                 <tr>
-                  <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#b8961e 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.caixinhas.app'}/login"
+                  <td align="center" style="background:linear-gradient(135deg,#d4af37 0%,#c49a2a 100%);border-radius:12px;box-shadow:0 4px 16px rgba(212,175,55,0.35);">
+                    <a href="${magicLink || (process.env.NEXT_PUBLIC_APP_URL || 'https://www.caixinhas.app') + '/login'}"
                        style="display:inline-block;padding:14px 36px;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;color:#3d2c00;text-decoration:none;border-radius:12px;letter-spacing:0.02em;">
-                      Acessar Minha Conta →
+                      ${magicLink ? 'Entrar Agora (Sem Senha) →' : 'Acessar Minha Conta →'}
                     </a>
                   </td>
                 </tr>

@@ -39,11 +39,30 @@ export const authOptions: AuthOptions = {
       name: 'Credentials',
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        magicToken: { label: "Magic Token", type: "text" }
       },
       async authorize(credentials) {
-        console.log('🔐 Authorize - Iniciando com credenciais:', credentials?.email);
+        console.log('🔐 Authorize - Iniciando:', credentials?.email || 'Magic Link');
         
+        // Se houver magicToken, autentica via token
+        if (credentials?.magicToken) {
+          console.log('✨ Authorize - Tentando login via Magic Link');
+          const user = await AuthService.validateMagicLinkToken(credentials.magicToken);
+          
+          if (user) {
+            console.log('✅ Authorize - Magic Link válido:', user.email);
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.avatarUrl || undefined
+            };
+          }
+          console.log('❌ Authorize - Magic Link inválido ou expirado');
+          return null;
+        }
+
         if (!credentials?.email || !credentials?.password) {
             console.log('❌ Authorize - Credenciais inválidas ou faltando');
             return null;
@@ -147,9 +166,6 @@ export const authOptions: AuthOptions = {
     signIn: '/login',
     signOut: '/login',
     error: '/login', 
-  },
-  session: {
-    strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
