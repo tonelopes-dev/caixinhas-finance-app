@@ -121,11 +121,6 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
 
   React.useEffect(() => {
     if (state?.message && !state?.errors) {
-      toast({
-        title: 'Sucesso',
-        description: state.message,
-      });
-      
       // Primeiro atualizamos os dados, depois abrimos o feedback de sucesso
       React.startTransition(() => {
         router.refresh();
