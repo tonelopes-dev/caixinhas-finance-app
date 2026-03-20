@@ -391,10 +391,10 @@ export function TransactionsPageClient({
                                     <SelectValue placeholder="Tipo" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    <SelectItem value="all" className="font-black rounded-xl py-3 px-4">Todos</SelectItem>
-                                    <SelectItem value="income" className="font-black text-emerald-600 rounded-xl py-3 px-4">Entradas</SelectItem>
-                                    <SelectItem value="expense" className="font-black text-[#ff6b7b] rounded-xl py-3 px-4">Saídas</SelectItem>
-                                    <SelectItem value="transfer" className="font-black text-blue-600 rounded-xl py-3 px-4">Transferências</SelectItem>
+                                    <SelectItem value="all" className="font-black rounded-xl py-3">Todos</SelectItem>
+                                    <SelectItem value="income" className="font-black text-emerald-600 rounded-xl py-3">Entradas</SelectItem>
+                                    <SelectItem value="expense" className="font-black text-[#ff6b7b] rounded-xl py-3">Saídas</SelectItem>
+                                    <SelectItem value="transfer" className="font-black text-blue-600 rounded-xl py-3">Transferências</SelectItem>
                                 </SelectContent>
                             </Select>
                             
@@ -404,7 +404,7 @@ export function TransactionsPageClient({
                                     <SelectValue placeholder="Mês" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2 max-h-[400px]">
-                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-black rounded-xl py-3 px-4">{m.label}</SelectItem>)}
+                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-black rounded-xl py-3">{m.label}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             
@@ -413,7 +413,7 @@ export function TransactionsPageClient({
                                     <SelectValue placeholder="Ano" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    {years.map(y => <SelectItem key={y} value={y} className="font-black text-center rounded-xl py-3 px-4">{y}</SelectItem>)}
+                                    {years.map(y => <SelectItem key={y} value={y} className="font-black text-center rounded-xl py-3">{y}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -427,6 +427,7 @@ export function TransactionsPageClient({
                     accounts={allAccounts}
                     goals={allGoals}
                     categories={allCategories}
+                    disablePrivacyMode={true}
                     emptyState={
                         <div className="py-24 text-center text-[#2D241E]/20 space-y-8">
                             <div className="p-10 bg-white/30 w-fit mx-auto rounded-[48px] border border-white/50">

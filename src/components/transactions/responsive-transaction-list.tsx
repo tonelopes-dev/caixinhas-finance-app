@@ -32,6 +32,7 @@ type ResponsiveTransactionListProps = {
   goals: Goal[];
   categories: any[];
   emptyState?: React.ReactNode;
+  disablePrivacyMode?: boolean;
 };
 
 // Helpers
@@ -52,6 +53,7 @@ export function ResponsiveTransactionList({
   goals,
   categories,
   emptyState,
+  disablePrivacyMode = false,
 }: ResponsiveTransactionListProps) {
   const { isPrivate, isLoaded } = usePrivacyMode();
 
@@ -128,7 +130,7 @@ export function ResponsiveTransactionList({
                     t.type === 'expense' ? "text-rose-600" : 
                     "text-blue-600"
                   )}>
-                    {!isLoaded || isPrivate ? (
+                    {(!isLoaded || (isPrivate && !disablePrivacyMode)) ? (
                       <PrivacyBlur />
                     ) : (
                       <>
@@ -238,7 +240,7 @@ export function ResponsiveTransactionList({
                   t.type === 'expense' ? "text-rose-600" : 
                   "text-blue-600"
                 )}>
-                  {!isLoaded || isPrivate ? (
+                  {(!isLoaded || (isPrivate && !disablePrivacyMode)) ? (
                     <PrivacyBlur />
                   ) : (
                     <>

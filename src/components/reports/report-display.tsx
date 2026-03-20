@@ -27,6 +27,7 @@ export function ReportDisplay({ reportHtml, isLoading }: ReportDisplayProps) {
                         prose-strong:text-foreground prose-strong:font-semibold
                         prose-ul:my-1.5 prose-li:text-foreground prose-li:my-0.5 prose-li:text-sm
                         prose-table:text-sm prose-th:p-1.5 prose-td:p-1.5
+                        [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto
                         [&_.space-y-6]:space-y-2 [&_.space-y-4]:space-y-1.5 [&_.space-y-3]:space-y-1
                         [&_.gap-4]:gap-1.5 [&_.gap-6]:gap-2
                         [&_svg]:inline-block [&_svg]:align-middle"
