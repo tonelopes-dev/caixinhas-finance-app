@@ -220,7 +220,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
             <DialogTitle>Criar Novo Cofre - Passo {step}</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[85vh] sm:max-h-[90vh]">
             <input type="hidden" name="userId" value={currentUser.id} />
             <input type="hidden" name="isPrivate" value={isPrivate.toString()} />
             {/* Garantir que o nome esteja sempre no FormData, mesmo que o step 1 saia do DOM */}
@@ -250,7 +250,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   animate="center"
                   exit="exit"
                   transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  className="p-8 space-y-6"
+                  className="p-5 md:p-8 space-y-5 md:space-y-6"
                 >
                   {step === 1 && (
                     <div className="space-y-6">
@@ -382,19 +382,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                           type="button"
                           onClick={() => setIsPrivate(false)}
                           className={cn(
-                            "flex items-start gap-5 p-6 rounded-[32px] border-2 text-left transition-all duration-500",
-                            !isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
+                            "flex items-start gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-[24px] sm:rounded-[32px] border-2 text-left transition-all duration-500",
+                            !isPrivate ? "border-[#ff6b7b] bg-white shadow-lg shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
                             !isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Globe className="w-7 h-7" />
+                            <Globe className="w-6 h-6 sm:w-7 sm:h-7" />
                           </div>
-                          <div className="space-y-2">
-                            <p className={cn("font-black text-xl tracking-tight transition-colors", !isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre em Conjunto</p>
-                            <p className="text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Ideal para economizar com a família. Você poderá convidar outros membros!</p>
+                          <div className="space-y-1">
+                            <p className={cn("font-black text-lg sm:text-xl tracking-tight transition-colors", !isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre em Conjunto</p>
+                            <p className="text-[13px] sm:text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Ideal para economizar com a família. Você poderá convidar outros membros!</p>
                           </div>
                           {!isPrivate && (
                             <div className="ml-auto w-8 h-8 rounded-full bg-[#ff6b7b] flex items-center justify-center shrink-0 self-center shadow-lg shadow-[#ff6b7b]/30">
@@ -407,19 +407,19 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                           type="button"
                           onClick={() => setIsPrivate(true)}
                           className={cn(
-                            "flex items-start gap-5 p-6 rounded-[32px] border-2 text-left transition-all duration-500",
-                            isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
+                            "flex items-start gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-[24px] sm:rounded-[32px] border-2 text-left transition-all duration-500",
+                            isPrivate ? "border-[#ff6b7b] bg-white shadow-lg shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
                             isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Lock className="w-7 h-7" />
+                            <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
                           </div>
-                          <div className="space-y-2">
-                            <p className={cn("font-black text-xl tracking-tight transition-colors", isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre Privado</p>
-                            <p className="text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Apenas você terá acesso a este espaço. Seus sonhos, sua privacidade total.</p>
+                          <div className="space-y-1">
+                            <p className={cn("font-black text-lg sm:text-xl tracking-tight transition-colors", isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre Privado</p>
+                            <p className="text-[13px] sm:text-sm font-bold text-[#2D241E]/40 leading-relaxed italic">Apenas você terá acesso a este espaço. Seus sonhos, sua privacidade total.</p>
                           </div>
                           {isPrivate && (
                             <div className="ml-auto w-8 h-8 rounded-full bg-[#ff6b7b] flex items-center justify-center shrink-0 self-center shadow-lg shadow-[#ff6b7b]/30">
@@ -442,15 +442,15 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
             </div>
 
             {/* Footer com Navegação */}
-            <div className="p-6 bg-muted/30 border-t flex gap-3">
+            <div className="p-4 sm:p-6 bg-muted/30 border-t flex gap-2 sm:gap-3">
               {step > 1 && (
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={prevStep}
-                  className="h-16 px-8 rounded-2xl font-bold border-2 border-[#2D241E]/5 text-[#2D241E]/50 hover:bg-white hover:text-[#2D241E] transition-all"
+                  className="h-14 sm:h-16 px-4 sm:px-8 rounded-2xl font-bold border-2 border-[#2D241E]/5 text-[#2D241E]/50 hover:bg-white hover:text-[#2D241E] transition-all"
                 >
-                  <ChevronLeft className="mr-2 h-5 w-5" />
+                  <ChevronLeft className="mr-1.5 h-4 w-4 shrink-0" />
                   Voltar
                 </Button>
               )}
@@ -459,7 +459,7 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                 type={step === 3 ? "submit" : "button"} 
                 onClick={step === 3 ? undefined : nextStep}
                 disabled={isPending || (step === 3 && !canSubmit)}
-                className="flex-1 h-16 text-lg font-black uppercase tracking-widest rounded-2xl shadow-xl bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] border-none text-white hover:shadow-[#ff6b7b]/40 hover:-translate-y-0.5 active:scale-95 transition-all"
+                className="flex-1 h-14 sm:h-16 text-sm sm:text-lg font-black uppercase tracking-normal sm:tracking-widest rounded-2xl shadow-xl bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] border-none text-white hover:shadow-[#ff6b7b]/40 hover:-translate-y-0.5 active:scale-95 transition-all"
               >
                 {isPending ? (
                   <div className="flex items-center gap-2">
@@ -471,22 +471,13 @@ export function CreateVaultDialog({ open, onOpenChange, currentUser }: CreateVau
                   </div>
                 ) : (
                   <>
-                    {step === 3 ? 'Finalizar e Abrir Cofre' : 'Continuar'}
-                    <ChevronRight className="ml-2 h-5 w-5" />
+                    <span className="truncate">{step === 3 ? 'Finalizar e Abrir' : 'Continuar'}</span>
+                    <ChevronRight className="ml-2 h-5 w-5 shrink-0" />
                   </>
                 )}
               </Button>
             </div>
           </form>
-
-          {/* Botão fechar flutuante se no step 1 (opcional, já temos o DialogClose padrão mas vamos deixar um bonito) */}
-          <button 
-            type="button"
-            onClick={() => handleClose(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground transition-colors md:hidden"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </DialogContent>
       </Dialog>
       <VaultCreationSuccessDialog open={isSuccessModalOpen} onOpenChange={setSuccessModalOpen} />

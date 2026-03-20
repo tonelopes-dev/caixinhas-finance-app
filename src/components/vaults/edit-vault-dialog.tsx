@@ -97,6 +97,8 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
   const [isInviting, setIsInviting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
+  const [showInviteConfirm, setShowInviteConfirm] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const router = useRouter();
   
@@ -293,6 +295,35 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
     }
   };
 
+  const handleSaveAttempt = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (inviteEmail.trim()) {
+      setShowInviteConfirm(true);
+    } else {
+      formRef.current?.requestSubmit();
+    }
+  };
+
+  const handleConfirmInviteAndSave = async () => {
+    setShowInviteConfirm(false);
+    setIsInviting(true);
+    try {
+      const result = await inviteToVaultAction(vault.id, inviteEmail);
+      if (result.success) {
+        toast({ title: 'Sucesso', description: 'Convite enviado e salvando cofre...' });
+        setInviteEmail('');
+        // Wait a bit to ensure invitation is processed before navigation if any
+         formRef.current?.requestSubmit();
+      } else {
+        toast({ title: 'Erro ao convidar', description: result.message, variant: 'destructive' });
+      }
+    } catch (error) {
+       toast({ title: 'Erro', description: 'Erro ao enviar convite', variant: 'destructive' });
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl bg-background">
@@ -300,7 +331,7 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
           <DialogTitle>Editar Cofre: {vault.name}</DialogTitle>
         </DialogHeader>
 
-        <form action={formAction} className="flex flex-col h-full max-h-[90vh]">
+        <form action={formAction} ref={formRef} className="flex flex-col h-full max-h-[90vh]">
           <input type="hidden" name="vaultId" value={vault.id} />
           <input type="hidden" name="isPrivate" value={isPrivate.toString()} />
           {!localImageFile && (
@@ -315,18 +346,18 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
           <div className="relative">
             <div className="h-40 w-full overflow-hidden relative">
               {displayImageUrl ? (
-                <Image src={displayImageUrl} alt="Capa" fill className="object-cover transition-transform duration-700 hover:scale-110" sizes="(max-width: 768px) 100vw, 550px" />
+                <Image src={displayImageUrl} alt="Capa" fill className="object-cover transition-transform duration-700 hover:scale-110" sizes="(max-width: 768px) 100vw, 550px" priority />
               ) : (
                 <div className="bg-gradient-to-br from-[#ff6b7b]/80 to-[#fa8292]/80 h-full w-full" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-[#fdfcf7] via-[#fdfcf7]/40 to-black/20" />
-              <div className="absolute bottom-12 left-8 right-8">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold text-[#2D241E] truncate italic tracking-tight">{vaultName}</h2>
+              <div className="absolute bottom-10 left-6 right-6 sm:bottom-12 sm:left-8 sm:right-8">
+                <h2 className="text-2xl sm:text-4xl font-headline font-bold text-[#2D241E] truncate italic tracking-tight">{vaultName}</h2>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="bg-[#fdfcf7] px-8 -mt-6 relative z-10 rounded-t-[40px] pt-6">
+              <div className="bg-[#fdfcf7] px-4 sm:px-8 -mt-6 relative z-10 rounded-t-[40px] pt-4 sm:pt-6">
                 <TabsList className="w-full bg-white/50 backdrop-blur-md p-1.5 h-14 rounded-2xl border border-[#2D241E]/5 shadow-sm">
                   <TabsTrigger value="geral" className="flex-1 rounded-xl gap-2 font-bold data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#ff6b7b] transition-all duration-300">
                     <Settings className="w-4.5 h-4.5" />
@@ -347,7 +378,7 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                 </TabsList>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-6 py-4 min-h-[300px]">
+              <div className="flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 min-h-[300px]">
                 <TabsContent value="geral" className="space-y-6 mt-0 animate-in fade-in duration-300">
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -370,15 +401,15 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                           type="button"
                           onClick={() => setIsPrivate(false)}
                           className={cn(
-                            "flex items-center gap-4 p-5 rounded-[24px] border-2 text-left transition-all duration-500",
+                            "flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-[24px] border-2 text-left transition-all duration-500",
                             !isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                            "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
                             !isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Globe className="w-6 h-6" />
+                            <Globe className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
                           <div className="flex-1 space-y-0.5">
                             <p className={cn("font-black text-base tracking-tight", !isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre em Conjunto</p>
@@ -391,15 +422,15 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                           type="button"
                           onClick={() => setIsPrivate(true)}
                           className={cn(
-                            "flex items-center gap-4 p-5 rounded-[24px] border-2 text-left transition-all duration-500",
+                            "flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-[24px] border-2 text-left transition-all duration-500",
                             isPrivate ? "border-[#ff6b7b] bg-white shadow-xl shadow-[#ff6b7b]/5" : "border-[#2D241E]/5 bg-white/20 hover:border-[#ff6b7b]/30"
                           )}
                         >
                           <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                            "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
                             isPrivate ? "bg-[#ff6b7b] text-white" : "bg-white text-[#2D241E]/20"
                           )}>
-                            <Lock className="w-6 h-6" />
+                            <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
                           <div className="flex-1 space-y-0.5">
                             <p className={cn("font-black text-base tracking-tight", isPrivate ? "text-[#2D241E]" : "text-[#2D241E]/40")}>Cofre Privado</p>
@@ -530,8 +561,8 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                                   <UserPlus className="h-4 w-4 text-muted-foreground" />
                                 </div>
                                 <div>
-                                  <p className="text-sm font-medium truncate max-w-[150px] sm:max-w-none">{invitation.email}</p>
-                                  <p className="text-[10px] text-muted-foreground">Pendente</p>
+                                  <p className="text-sm font-black text-[#2D241E] truncate max-w-[150px] sm:max-w-none">{invitation.email}</p>
+                                  <p className="text-[10px] font-bold text-[#ff6b7b] italic">Convite enviado</p>
                                 </div>
                               </div>
                               <Button 
@@ -618,7 +649,8 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
               Cancelar
             </Button>
             <Button 
-              type="submit" 
+              type="button" 
+              onClick={handleSaveAttempt}
               disabled={isPending || !vaultName.trim()}
               className="flex-1 h-12 text-md font-bold rounded-xl gradient-button text-white border-none shadow-lg shadow-primary/20"
             >
@@ -639,6 +671,39 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
             </Button>
           </div>
         </form>
+
+        {/* Invitation Confirmation Modal */}
+        <AlertDialog open={showInviteConfirm} onOpenChange={setShowInviteConfirm}>
+          <AlertDialogContent className="rounded-3xl border-none shadow-2xl p-8">
+            <AlertDialogHeader className="space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-[#ff6b7b]/10 flex items-center justify-center">
+                <UserPlus className="w-8 h-8 text-[#ff6b7b]" />
+              </div>
+              <div className="space-y-2 text-center">
+                <AlertDialogTitle className="text-2xl font-headline italic tracking-tight">
+                  Convidar <span className="text-[#ff6b7b]">Membro?</span>
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-base font-bold text-[#2D241E]/40 italic leading-relaxed">
+                  Você digitou o e-mail <span className="text-[#2D241E] font-black not-italic">{inviteEmail}</span>. Deseja enviar o convite agora antes de salvar as alterações do cofre?
+                </AlertDialogDescription>
+              </div>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="grid grid-cols-2 gap-3 sm:flex sm:justify-end mt-6">
+              <AlertDialogCancel 
+                onClick={() => formRef.current?.requestSubmit()}
+                className="h-14 rounded-xl border-none bg-[#2D241E]/5 font-black uppercase tracking-widest text-[10px] sm:mt-0"
+              >
+                Não, apenas salvar
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmInviteAndSave}
+                className="h-14 rounded-xl bg-[#ff6b7b] text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-[#ff6b7b]/20 hover:bg-[#fa8292]"
+              >
+                Sim, convidar e salvar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Botão fechar flutuante */}
         <button 

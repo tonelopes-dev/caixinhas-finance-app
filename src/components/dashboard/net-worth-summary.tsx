@@ -50,9 +50,9 @@ export default function NetWorthSummary({
   return (
     <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="font-headline text-3xl font-bold tracking-tight text-[#2D241E]">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1 min-w-0 flex-1">
+            <CardTitle className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
               Meu Patrimônio
             </CardTitle>
             <CardDescription className="text-base font-medium text-[#2D241E]/50">
@@ -78,7 +78,7 @@ export default function NetWorthSummary({
         <Link
           href="/patrimonio"
           onClick={() => showLoading("Abrindo Patrimônio...")}
-          className="relative group block rounded-3xl bg-[#f6f3f1] p-8 transition-all duration-300 hover:shadow-inner border border-[#2D241E]/5 mb-8 overflow-hidden"
+          className="relative group block rounded-3xl bg-[#f6f3f1] p-5 sm:p-8 transition-all duration-300 hover:shadow-inner border border-[#2D241E]/5 mb-8 overflow-hidden"
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             <div className="space-y-1">
@@ -89,7 +89,7 @@ export default function NetWorthSummary({
                 Clique para ver detalhes
               </p>
             </div>
-            <div className="text-5xl font-bold tracking-tighter text-[#2D241E]">
+            <div className="text-3xl sm:text-5xl font-bold tracking-tighter text-[#2D241E]">
               {!isLoaded || isPrivate ? (
                 <PrivacyBlurPrimary />
               ) : (

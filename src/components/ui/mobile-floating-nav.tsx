@@ -143,7 +143,7 @@ const MobileFloatingNav = () => {
   return (
     <>
     <div 
-        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-[340px] px-4"
+        className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 w-full max-w-[400px] px-4"
         style={{ 
           bottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
         }}
@@ -177,7 +177,7 @@ const MobileFloatingNav = () => {
               {item.icon}
             </div>
             <span className={cn(
-              "font-headline text-[10px] mt-1.5 transition-all duration-500 truncate max-w-[60px] uppercase tracking-widest",
+              "font-headline text-[10px] mt-1.5 transition-all duration-500 uppercase tracking-widest whitespace-nowrap",
               active === index 
                 ? "opacity-100 font-black italic" 
                 : "opacity-60 font-bold"

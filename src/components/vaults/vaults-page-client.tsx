@@ -169,7 +169,7 @@ function WorkspaceCard({
       className="h-full relative group"
     >
       {onEdit && (
-        <div className="absolute top-4 right-4 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute top-4 right-4 z-30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 

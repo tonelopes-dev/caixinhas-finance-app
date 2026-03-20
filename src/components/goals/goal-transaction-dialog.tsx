@@ -106,10 +106,14 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
             {buttonLabel}
           </Button>
         </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] md:max-h-none" mobileOptimized={true}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-none shadow-2xl bg-[#fdfcf7]" mobileOptimized={true}>
+        <DialogHeader className="p-8 pb-6 bg-white/50 border-b border-[#2D241E]/5 space-y-2">
+          <div className="flex items-center gap-3 mb-1">
+              <div className="h-2 w-2 rounded-full bg-[#ff6b7b] animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b7b]">Minhas Caixinhas</span>
+          </div>
+          <DialogTitle className="text-3xl font-headline italic text-[#2D241E] tracking-tight">{title.split(' ')[0]} <span className="text-[#ff6b7b]">{title.split(' ').slice(1).join(' ')}</span></DialogTitle>
+          <DialogDescription className="text-sm font-bold text-[#2D241E]/40 italic leading-relaxed">
             Insira o valor e selecione a conta que deseja {type === 'deposit' ? 'usar para depositar' : 'receber a retirada'}.
           </DialogDescription>
         </DialogHeader>
@@ -120,41 +124,44 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
             showLoading(`${action}...`);
           }}
         >
-          <input type="hidden" name="goalId" value={goalId} />
-          <div className="grid gap-4 py-4">
-            {/* CORRIGIDO: Campo de seleção de conta adicionado */}
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="accountId" className="text-right">{accountLabel}</Label>
+          <div className="grid gap-6 p-8">
+            <div className="space-y-2">
+                <Label htmlFor="accountId" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">{accountLabel}</Label>
                 <Select name="accountId">
-                    <SelectTrigger className="col-span-3">
+                    <SelectTrigger className="h-12 rounded-xl border-2 border-[#2D241E]/5 bg-white font-bold text-[#2D241E] focus:ring-[#ff6b7b]/20 transition-all">
                         <SelectValue placeholder="Selecione uma conta" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">
                         {accounts.map(account => (
-                            <SelectItem key={account.id} value={account.id}>
+                            <SelectItem key={account.id} value={account.id} className="font-bold py-3 focus:bg-[#ff6b7b]/10 focus:text-[#ff6b7b] rounded-xl cursor-pointer">
                                 {account.name} - {account.bank}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
-                {state.errors?.accountId && <p className="col-span-4 text-right text-sm font-medium text-destructive">{state.errors.accountId[0]}</p>}
+                {state.errors?.accountId && <p className="text-xs font-bold text-destructive italic">{state.errors.accountId[0]}</p>}
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">Valor</Label>
-              <Input id="amount" name="amount" placeholder="R$ 0,00" className="col-span-3" />
-              {state.errors?.amount && <p className="col-span-4 text-right text-sm font-medium text-destructive">{state.errors.amount[0]}</p>}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">Valor</Label>
+              <Input id="amount" name="amount" placeholder="R$ 0,00" className="h-12 rounded-xl border-2 border-[#2D241E]/5 bg-white font-black text-lg focus:ring-[#ff6b7b]/20 transition-all placeholder:text-[#2D241E]/10" />
+              {state.errors?.amount && <p className="text-xs font-bold text-destructive italic">{state.errors.amount[0]}</p>}
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">Descrição</Label>
-              <Input id="description" name="description" placeholder="Ex: Férias de verão (opcional)" className="col-span-3" />
-               {state.errors?.description && <p className="col-span-4 text-right text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">Descrição</Label>
+              <Input id="description" name="description" placeholder="Ex: Férias de verão (opcional)" className="h-12 rounded-xl border-2 border-[#2D241E]/5 bg-white font-bold focus:ring-[#ff6b7b]/20 transition-all" />
+               {state.errors?.description && <p className="text-xs font-bold text-destructive italic">{state.errors.description[0]}</p>}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="p-8 bg-white/50 border-t border-[#2D241E]/5 gap-3">
             <DialogClose asChild>
-              <Button type="button" variant="ghost">Cancelar</Button>
+              <Button type="button" variant="ghost" className="h-14 flex-1 rounded-xl font-black uppercase tracking-widest text-xs text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-[#2D241E]/5">Cancelar</Button>
             </DialogClose>
-            <SubmitButton />
+            <Button 
+                type="submit" 
+                className="h-14 flex-1 rounded-xl font-black uppercase tracking-widest text-xs bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white shadow-xl shadow-[#ff6b7b]/20 border-none hover:shadow-[#ff6b7b]/40 transition-all"
+            >
+                {type === 'deposit' ? 'Confirmar Depósito' : 'Confirmar Retirada'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

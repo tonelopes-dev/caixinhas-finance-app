@@ -253,39 +253,39 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
             </>
           )}
         </Button>
-        <DialogContent className="flex flex-col max-h-[95vh] md:max-h-[85vh] md:max-w-xl bg-white/95 backdrop-blur-2xl border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
-          <DialogHeader className="p-10 pb-8 bg-white/50 border-b border-[#2D241E]/5 space-y-3">
-            <div className="flex items-center gap-3 mb-2">
+        <DialogContent className="flex flex-col h-full max-h-[92vh] sm:max-h-[85vh] md:max-w-xl bg-white/95 backdrop-blur-2xl border-none rounded-[40px] shadow-2xl p-0 overflow-hidden" mobileOptimized={true}>
+          <DialogHeader className="p-6 sm:p-10 pb-4 sm:pb-8 bg-white/50 border-b border-[#2D241E]/5 space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-3 mb-1 sm:mb-2">
                 <div className="h-2 w-2 rounded-full bg-[#ff6b7b] animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b7b]">Nova Transação</span>
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b7b]">Nova Transação</span>
             </div>
-            <DialogTitle className="text-4xl font-headline italic text-[#2D241E] tracking-tight">Registrar <span className="text-[#ff6b7b]">Movimentação</span></DialogTitle>
-            <DialogDescription className="text-lg font-bold text-[#2D241E]/40 leading-relaxed italic">
-              Organize suas finanças registrando entradas, saídas ou transferências entre contas.
+            <DialogTitle className="text-2xl sm:text-4xl font-headline italic text-[#2D241E] tracking-tight">Registrar <span className="text-[#ff6b7b]">Movimentação</span></DialogTitle>
+            <DialogDescription className="text-sm sm:text-lg font-bold text-[#2D241E]/40 leading-relaxed italic">
+              Organize suas finanças registrando entradas, saídas ou transferências.
             </DialogDescription>
           </DialogHeader>
 
           {/* Premium Stepper */}
-          <div className="flex items-center gap-2 px-10 py-8 bg-white/30 border-b border-[#2D241E]/5">
+          <div className="flex items-center justify-between gap-1 px-6 py-4 sm:px-10 sm:py-8 bg-white/30 border-b border-[#2D241E]/5">
             {steps.map((s, index) => (
                 <React.Fragment key={s.id}>
-                    <div className="flex flex-col items-center gap-2 group">
+                    <div className="flex flex-col items-center gap-1.5 group">
                         <div className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-2xl text-[11px] font-black transition-all duration-500", 
+                          "flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black transition-all duration-500", 
                           step === s.id ? "bg-[#2D241E] text-white shadow-xl shadow-[#2D241E]/20 scale-110" : 
                           step > s.id ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white text-[#2D241E]/20 border border-[#2D241E]/10"
                         )}>
-                            {step > s.id ? <Check className="h-5 w-5" /> : s.id}
+                            {step > s.id ? <Check className="h-4 w-4 sm:h-5 sm:w-5" /> : s.id}
                         </div>
                         <span className={cn(
-                          "text-[9px] font-black uppercase tracking-widest text-center min-w-[60px]", 
+                          "text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center min-w-[50px] sm:min-w-[60px]", 
                           step >= s.id ? "text-[#2D241E]" : "text-[#2D241E]/20"
                         )}>
                           {s.title.split(' ')[0]}
                         </span>
                     </div>
                     {index < steps.length - 1 && (
-                      <div className="flex-1 px-4 mb-6">
+                      <div className="flex-1 px-1 sm:px-4 mb-5 sm:mb-6">
                         <div className={cn("h-0.5 rounded-full transition-all duration-700", step > s.id ? "bg-emerald-500" : "bg-[#2D241E]/5")} />
                       </div>
                     )}
@@ -294,7 +294,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
           </div>
 
           <form onSubmit={handleFinalSubmit} className="flex flex-1 flex-col justify-between overflow-hidden bg-white/30">
-            <div className="flex-1 space-y-8 overflow-y-auto px-10 py-10 min-h-0 overscroll-contain custom-scrollbar">
+            <div className="flex-1 space-y-6 sm:space-y-8 overflow-y-auto px-6 py-6 sm:px-10 sm:py-10 min-h-0 overscroll-contain custom-scrollbar">
               <AnimatePresence mode="wait">
                   {step === 1 && (
                       <motion.div key="step1" variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
@@ -492,11 +492,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
               </AnimatePresence>
             </div>
 
-            <DialogFooter className='mt-auto p-10 bg-white/50 border-t border-[#2D241E]/5'>
-              <div className="w-full flex justify-between items-center gap-6">
+            <DialogFooter className='mt-auto p-6 sm:p-10 bg-white/50 border-t border-[#2D241E]/5'>
+              <div className="w-full flex justify-between items-center gap-4 sm:gap-6">
                 {step > 1 ? (
-                    <Button type="button" variant="ghost" onClick={prevStep} className="h-16 px-8 rounded-2xl font-black text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-[#2D241E]/5 transition-all uppercase tracking-widest text-xs">
-                        <ArrowLeft className="mr-3 h-5 w-5" />
+                    <Button type="button" variant="ghost" onClick={prevStep} className="h-14 sm:h-16 px-4 sm:px-8 rounded-2xl font-black text-[#2D241E]/40 hover:text-[#2D241E] hover:bg-[#2D241E]/5 transition-all uppercase tracking-widest text-[10px] sm:text-xs">
+                        <ArrowLeft className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" />
                         Voltar
                     </Button>
                 ) : <div />}
@@ -506,14 +506,14 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                       type="button" 
                       onClick={nextStep} 
                       disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} 
-                      className="h-16 px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-[#2D241E] text-white hover:bg-[#4A3B32] transition-all shadow-[0_10px_30px_rgba(45,36,30,0.2)] disabled:opacity-30 text-xs"
+                      className="h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-[#2D241E] text-white hover:bg-[#4A3B32] transition-all shadow-[0_10px_30px_rgba(45,36,30,0.2)] disabled:opacity-30 text-[10px] sm:text-xs"
                     >
                         Próximo Passo
                     </Button>
                 ) : (
                     <Button 
                       type="submit" 
-                      className="h-16 px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10px_30px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-xs"
+                      className="flex-1 sm:flex-none h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10px_30px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-[10px] sm:text-xs"
                     >
                         Finalizar e Salvar
                     </Button>
