@@ -36,11 +36,11 @@ function Calendar({
         month_grid: "w-full border-collapse",
         weekdays: "flex mb-2",
         weekday:
-          "text-[#2D241E]/30 w-10 font-black text-[10px] uppercase tracking-widest",
-        week: "flex w-full mt-2",
+          "text-[#2D241E]/30 w-8 sm:w-10 font-black text-[10px] uppercase tracking-widest",
+        week: "flex w-full mt-2 justify-center",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-10 w-10 p-0 font-bold text-sm text-[#2D241E] rounded-xl hover:bg-[#ff6b7b]/10 hover:text-[#ff6b7b] transition-all aria-selected:opacity-100"
+          "h-8 w-8 sm:h-10 sm:w-10 p-0 font-bold text-xs sm:text-sm text-[#2D241E] rounded-xl hover:bg-[#ff6b7b]/10 hover:text-[#ff6b7b] transition-all aria-selected:opacity-100"
         ),
         range_end: "day-range-end",
         selected:
