@@ -129,7 +129,8 @@ async function handleOrderApproved(data: WebhookData) {
         html: emailHtml 
       });
       
-      console.log('✅ Usuário e boas-vindas processados:', user.id);
+      const activeUserId = user?.id || newUser.id;
+      console.log('✅ Usuário e boas-vindas processados:', activeUserId);
     } else {
       if (!user) {
         console.error('❌ Usuário não encontrado para renovação');

@@ -229,7 +229,6 @@ async function main() {
   const travelGoal = await prisma.goal.create({
     data: {
       name: 'Viagem Japão 2026',
-      description: 'Economizando para a viagem dos sonhos: passagens, hospedagem e experiências no Japão em 2026.',
       targetAmount: 35000,
       currentAmount: 0, // Será atualizado pelas transações
       emoji: '🇯🇵',
@@ -248,7 +247,6 @@ async function main() {
   const houseGoal = await prisma.goal.create({
     data: {
       name: 'Reforma do Apartamento',
-      description: 'Fundo para a reforma da cozinha e sala de estar planejada.',
       targetAmount: 50000,
       currentAmount: 0,
       emoji: '🏠',

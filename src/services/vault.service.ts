@@ -534,6 +534,14 @@ export class VaultService {
           vault: {
             select: {
               name: true,
+              imageUrl: true,
+              members: {
+                select: {
+                  user: {
+                    select: { id: true, name: true, avatarUrl: true }
+                  }
+                }
+              }
             },
           },
         },
@@ -673,6 +681,14 @@ export class VaultService {
           vault: {
             select: {
               name: true,
+              imageUrl: true,
+              members: {
+                select: {
+                  user: {
+                    select: { id: true, name: true, avatarUrl: true }
+                  }
+                }
+              }
             },
           },
         },
@@ -771,6 +787,14 @@ export class VaultService {
           vault: {
             select: {
               name: true,
+              imageUrl: true,
+              members: {
+                select: {
+                  user: {
+                    select: { id: true, name: true, avatarUrl: true }
+                  }
+                }
+              }
             },
           },
         },
