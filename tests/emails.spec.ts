@@ -79,7 +79,7 @@ test.describe('Fluxos de Envio de Email', () => {
     test('[EMAIL-003] deve disparar email ao convidar membro para cofre', async ({ page }) => {
       // Login como usuário teste
       await page.goto('/auth');
-      await page.fill('input[type="email"]', 'clara@caixinhas.app');
+      await page.fill('input[type="email"]', 'clara.beatriz@caixinhas.app');
       await page.fill('input[type="password"]', 'password123');
       await page.click('button[type="submit"]');
       
@@ -135,12 +135,13 @@ test.describe('Fluxos de Envio de Email', () => {
     });
 
     test('[EMAIL-005] não deve enviar convite duplicado para mesmo email', async ({ page }) => {
-      await page.goto('/auth');
-      await page.fill('input[type="email"]', 'clara@caixinhas.app');
-      await page.fill('input[type="password"]', 'password123');
-      await page.click('button[type="submit"]');
+      // Login como usuário teste - REMOVIDO, AGORA NO beforeEach
+      // await page.goto('/auth');
+      // await page.fill('input[type="email"]', 'clara.beatriz@caixinhas.app');
+      // await page.fill('input[type="password"]', 'password123');
+      // await page.click('button[type="submit"]');
       
-      await page.waitForURL('/vaults', { timeout: 5000 });
+      // await page.waitForURL('/vaults', { timeout: 5000 });
       
       const duplicateEmail = 'duplicado@example.com';
       
@@ -172,7 +173,7 @@ test.describe('Fluxos de Envio de Email', () => {
     test('[EMAIL-006] deve disparar email ao solicitar reset de senha', async ({ page }) => {
       await page.goto('/forgot-password');
       
-      const testEmail = 'clara@caixinhas.app';
+      const testEmail = 'clara.beatriz@caixinhas.app';
       
       // Preencher email
       await page.fill('input[type="email"]', testEmail);
@@ -209,14 +210,14 @@ test.describe('Fluxos de Envio de Email', () => {
 
     test('[EMAIL-008] link de reset deve expirar após tempo limite', async ({ page }) => {
       await page.goto('/forgot-password');
-      await page.fill('input[type="email"]', 'clara@caixinhas.app');
+      await page.fill('input[type="email"]', 'clara.beatriz@caixinhas.app');
       await page.click('button[type="submit"]');
       
       await expect(page.locator('text=/email.*enviado/i')).toBeVisible({ timeout: 5000 });
       
       // Verificar que token tem data de expiração
       const user = await prisma.user.findUnique({
-        where: { email: 'clara@caixinhas.app' },
+        where: { email: 'clara.beatriz@caixinhas.app' },
         select: { passwordResetExpires: true }
       });
       
@@ -334,7 +335,7 @@ test.describe('Fluxos de Envio de Email', () => {
 
     test('[EMAIL-015] deve validar formato de email antes de enviar', async ({ page }) => {
       await page.goto('/auth');
-      await page.fill('input[type="email"]', 'clara@caixinhas.app');
+      await page.fill('input[type="email"]', 'clara.beatriz@caixinhas.app');
       await page.fill('input[type="password"]', 'password123');
       await page.click('button[type="submit"]');
       
