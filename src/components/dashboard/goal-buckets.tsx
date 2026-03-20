@@ -67,7 +67,7 @@ export default function GoalBuckets({
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0 flex-1">
-            <CardTitle className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
+            <CardTitle className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
               Minhas Caixinhas
             </CardTitle>
             <CardDescription className="text-base font-medium text-[#2D241E]/50">

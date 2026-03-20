@@ -105,7 +105,7 @@ export default function RecentTransactions({
       <CardHeader className="pb-2">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
           <div className="space-y-1 min-w-0 flex-1">
-            <CardTitle className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
+            <CardTitle className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
               Meu Extrato
             </CardTitle>
             <CardDescription className="text-base font-medium text-[#2D241E]/50">
@@ -214,7 +214,7 @@ export default function RecentTransactions({
                     {formatDate(tx.date)}
                   </TableCell>
                   <TableCell className="py-6 px-4 text-right">
-                    <p
+                    <div
                       className={cn(
                         "text-xl font-bold tracking-tighter",
                         tx.type === "income"
@@ -232,7 +232,7 @@ export default function RecentTransactions({
                           <span>{formatCurrency(Math.abs(tx.amount))}</span>
                         </div>
                       )}
-                    </p>
+                    </div>
                   </TableCell>
                 </motion.tr>
               ))}

@@ -164,9 +164,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     transactionType === 'expense' ? !!sourceAccountId :
     !!sourceAccountId && !!destinationAccountId
   );
+  const isStep3Valid = amount !== '' && parseFloat(amount) > 0;
   
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 3) return;
     const formData = new FormData();
     formData.append('ownerId', ownerId);
     
@@ -505,7 +507,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                     <Button 
                       type="button" 
                       onClick={nextStep} 
-                      disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} 
+                      disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid) || (step === 3 && !isStep3Valid)} 
                       className="h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-[#2D241E] text-white hover:bg-[#4A3B32] transition-all shadow-[0_10px_30px_rgba(45,36,30,0.2)] disabled:opacity-30 text-[10px] sm:text-xs"
                     >
                         Próximo Passo
@@ -513,6 +515,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                 ) : (
                     <Button 
                       type="submit" 
+                      disabled={!isStep3Valid}
                       className="flex-1 sm:flex-none h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10px_30px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-[10px] sm:text-xs"
                     >
                         Finalizar e Salvar

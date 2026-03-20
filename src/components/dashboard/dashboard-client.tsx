@@ -123,7 +123,7 @@ export function DashboardClient({
             <div className="flex flex-col gap-4 mb-12">
               <div className="flex items-center justify-between flex-wrap gap-6">
                 <div className="space-y-2">
-                  <h1 className="font-headline text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2D241E]">
+                  <h1 className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
                     Painel:{" "}
                     <span className="text-[#ff6b7b] uppercase">
                       {workspaceName}

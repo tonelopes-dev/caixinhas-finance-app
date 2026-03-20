@@ -169,21 +169,38 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
     }
     
     const isValid = hasType && hasDate && hasAccounts;
-    
-    // Debug log (pode ser removido em produção)
-    console.log('🔍 Step 2 Validation:', {
-      transactionType,
-      hasDate,
-      sourceAccountId,
-      destinationAccountId,
-      sourceDefaultValue,
-      destinationDefaultValue,
-      hasAccounts,
-      isValid
-    });
-    
     return isValid;
   })();
+
+  const isStep3Valid = amount !== '' && parseFloat(amount) > 0;
+  
+  const handleFinalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (step < 3) return;
+    
+    // We can use the dispatch directly if we want, but since it's a form action, 
+    // it's better to just let the action prop handle it but only when we are on the right step.
+    // However, to be extra safe, we'll manually handle it like in AddTransaction.
+    const formData = new FormData();
+    formData.append('id', transaction.id);
+    formData.append('ownerId', transaction.ownerId);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('type', transactionType);
+    formData.append('date', date?.toISOString() || '');
+    if (sourceAccountId) formData.append('sourceAccountId', sourceAccountId);
+    if (destinationAccountId) formData.append('destinationAccountId', destinationAccountId);
+    formData.append('chargeType', chargeType);
+    if (totalInstallments) formData.append('totalInstallments', totalInstallments);
+    formData.append('amount', amount);
+    if (paymentMethod) formData.append('paymentMethod', paymentMethod);
+    
+    showLoading('Atualizando transação...');
+    
+    React.startTransition(() => {
+        dispatch(formData);
+    });
+  };
 
   const formVariants = {
     hidden: { opacity: 0, x: 30 },
@@ -268,11 +285,8 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
         </div>
 
         <form 
-          onSubmit={(e) => {
-            showLoading('Atualizando transação...');
-          }}
+          onSubmit={handleFinalSubmit}
           className="flex flex-1 flex-col justify-between overflow-hidden bg-white/30"
-          action={dispatch}
         >
           <div className="flex-1 space-y-6 sm:space-y-8 overflow-y-auto px-6 py-6 sm:px-10 sm:py-10 min-h-0 overscroll-contain custom-scrollbar">
             {/* Hidden inputs for form data */}
@@ -492,7 +506,7 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
                   <Button 
                     type="button" 
                     onClick={nextStep} 
-                    disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid)} 
+                    disabled={(step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid) || (step === 3 && !isStep3Valid)} 
                     className="h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-[#2D241E] text-white hover:bg-[#4A3B32] transition-all shadow-[0_10px_30px_rgba(45,36,30,0.2)] disabled:opacity-30 text-[10px] sm:text-xs"
                   >
                       Próximo Passo
@@ -500,7 +514,8 @@ export function EditTransactionDialog({ transaction, accounts, goals, categories
               ) : (
                   <Button 
                     type="submit" 
-                    className="flex-1 sm:flex-none h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10px_30px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-[10px] sm:text-xs"
+                    disabled={!isStep3Valid}
+                    className="flex-1 sm:flex-none h-14 sm:h-16 px-6 sm:px-12 rounded-2xl font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#ff6b7b] to-[#ff8e9a] text-white hover:shadow-[0_10_10px_rgba(255,107,123,0.3)] transition-all shadow-xl border-none text-[10px] sm:text-xs"
                   >
                       Salvar Alterações
                   </Button>
