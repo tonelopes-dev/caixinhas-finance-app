@@ -11,6 +11,8 @@ import { GoalRow } from '@/components/patrimonio/goal-row';
 import { CreditCardRow } from '@/components/patrimonio/credit-card-row';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 import { motion } from 'framer-motion';
+import Header from '@/components/dashboard/header';
+import { User } from '@/lib/definitions';
 
 export default async function PatrimonioPage() {
   const session = await getServerSession(authOptions);
@@ -40,6 +42,7 @@ export default async function PatrimonioPage() {
       
       <div className="relative z-10 pt-24 pb-32 px-4 md:px-8">
         <div className="mx-auto w-full max-w-4xl">
+          <Header user={session.user as User} partner={null} />
           <StandardBackButton href="/dashboard" label="Voltar para o Dashboard" />
 
           <div className="relative overflow-hidden rounded-[40px] bg-white/40 backdrop-blur-3xl border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] transition-all duration-500 mb-8">

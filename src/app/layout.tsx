@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { inter, alegreya } from '@/lib/fonts';
 import { Toaster } from "@/components/ui/toaster";
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { RootLayoutClient } from '@/components/root-layout-client';
 import { NextAuthProvider } from '@/components/providers/next-auth-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -109,7 +108,6 @@ export default function RootLayout({
         <NextAuthProvider>
           <ThemeProvider>
             <LoadingProvider>
-              <FirebaseClientProvider>
                 <ErrorBoundary>
                   <InitialLoadingHandler />
                   <SessionValidator />
@@ -121,7 +119,6 @@ export default function RootLayout({
                   <MobileFloatingNav />
                   <Toaster />
                 </ErrorBoundary>
-              </FirebaseClientProvider>
             </LoadingProvider>
           </ThemeProvider>
         </NextAuthProvider>

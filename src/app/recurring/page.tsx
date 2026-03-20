@@ -11,6 +11,8 @@ import { CategoryService } from '@/services/category.service';
 import { getUserAllGoals } from '@/app/(private)/goals/actions';
 
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import Header from '@/components/dashboard/header';
+import { User } from '@/lib/definitions';
 
 export default async function RecurringPage() {
   const session = await getServerSession(authOptions);
@@ -46,6 +48,7 @@ export default async function RecurringPage() {
       
       <div className="relative z-10 flex flex-1 flex-col p-4 md:p-10 pt-24">
         <div className="mx-auto w-full max-w-4xl">
+          <Header user={session.user as User} partner={null} />
           <StandardBackButton href="/transactions" label="Voltar para Transações" />
           <RecurringPageClient
             recurringExpenses={recurringData.recurringExpenses}

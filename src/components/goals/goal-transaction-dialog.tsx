@@ -78,9 +78,14 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
       toast({ title: 'Sucesso!', description: state.message });
       setIsOpen(false);
       onComplete?.();
-    } else if (state.message) {
+    } else if (state.message || state.errors) {
       hideLoading();
-      toast({ title: 'Erro', description: state.message, variant: 'destructive' });
+      const firstError = state.errors ? Object.values(state.errors)[0]?.[0] : undefined;
+      toast({ 
+        title: 'Ops! Algo deu errado', 
+        description: state.message || firstError || 'Verifique os campos e tente novamente.', 
+        variant: 'destructive' 
+      });
     }
   }, [state, toast, onComplete, hideLoading]);
 
@@ -142,8 +147,15 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
                 {state.errors?.accountId && <p className="text-xs font-bold text-destructive italic">{state.errors.accountId[0]}</p>}
             </div>
             <div className="space-y-2">
+              <input type="hidden" name="goalId" value={goalId} />
               <Label htmlFor="amount" className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">Valor</Label>
-              <Input id="amount" name="amount" placeholder="R$ 0,00" className="h-12 rounded-xl border-2 border-[#2D241E]/5 bg-white font-black text-lg focus:ring-[#ff6b7b]/20 transition-all placeholder:text-[#2D241E]/10" />
+              <Input 
+                id="amount" 
+                name="amount" 
+                placeholder="R$ 0,00" 
+                inputMode="decimal"
+                className="h-12 rounded-xl border-2 border-[#2D241E]/5 bg-white font-black text-lg focus:ring-[#ff6b7b]/20 transition-all placeholder:text-[#2D241E]/10" 
+              />
               {state.errors?.amount && <p className="text-xs font-bold text-destructive italic">{state.errors.amount[0]}</p>}
             </div>
             <div className="space-y-2">

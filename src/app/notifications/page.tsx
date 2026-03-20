@@ -6,6 +6,8 @@ import { NotificationsManager } from '@/components/notifications/notifications-m
 import { NotificationsPageHandler } from '@/components/notifications/notifications-page-handler';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
+import Header from '@/components/dashboard/header';
+import { User } from '@/lib/definitions';
 
 export default async function NotificationsPage() {
   const session = await getServerSession(authOptions);
@@ -19,6 +21,7 @@ export default async function NotificationsPage() {
   return (
     <main className="relative min-h-screen overflow-x-hidden">
       <DashboardBackground />
+      <Header user={session.user as User} partner={null} />
       <NotificationsPageHandler />
       
       <div className="relative z-10 pt-24 pb-32 px-4 md:px-8">

@@ -8,6 +8,8 @@ import { authOptions } from '@/lib/auth';
 import { GoalsPageClient } from '@/components/goals/goals-page-client';
 import { getGoalsPageData } from './actions';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import Header from '@/components/dashboard/header';
+import { User } from '@/lib/definitions';
 
 export default async function GoalsPage() {
   const session = await getServerSession(authOptions);
@@ -32,6 +34,7 @@ export default async function GoalsPage() {
       
       <div className="relative z-10 flex flex-1 flex-col px-4 md:px-8 pt-24 pb-32">
         <div className="mx-auto w-full max-w-5xl">
+          <Header user={session.user as User} partner={null} />
           <StandardBackButton href="/dashboard" label="Voltar para o Painel" className="mb-6 opacity-80 hover:opacity-100 transition-opacity" />
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">

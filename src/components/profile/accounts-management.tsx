@@ -346,6 +346,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                 id="credit-limit"
                                 name="credit-limit"
                                 type="number"
+                                inputMode="decimal"
                                 step="0.01"
                                 defaultValue={account.creditLimit || ''}
                                 placeholder='R$ 5.000,00'
@@ -358,6 +359,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                                 id="balance"
                                 name="balance"
                                 type="number"
+                                inputMode="decimal"
                                 step="0.01"
                                 defaultValue={account.balance}
                                 placeholder='R$ 1.234,56'

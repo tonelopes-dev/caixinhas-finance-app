@@ -24,8 +24,9 @@ export type TransactionFormState = GoalFormState;
 // --- ESQUEMAS ZOD ---
 const moneyPreprocess = (val: unknown) => {
   if (typeof val === 'string' && val) {
-    const sanitizedString = val.replace(/\./g, '').replace(',', '.');
-    return parseFloat(sanitizedString);
+    // Remove "R$", espaços e qualquer caracter que não seja número, vírgula ou ponto
+    const cleanValue = val.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue);
   }
   if (val === '' || val === null || val === undefined) return 0;
   return val;

@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getUserInvitations, getUserSentInvitations } from "./actions";
+import Header from "@/components/dashboard/header";
+import { User } from "@/lib/definitions";
+import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 
 export default async function InvitePage() {
   const session = await getServerSession(authOptions);
@@ -34,8 +37,10 @@ export default async function InvitePage() {
   const formattedVaults = sharedVaults.map((v) => ({ id: v.id, name: v.name }));
 
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
-      <div className="mx-auto w-full max-w-7xl">
+    <div className="relative flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10 pt-24">
+      <DashboardBackground />
+      <Header user={session.user as User} partner={null} />
+      <div className="mx-auto w-full max-w-7xl relative z-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex flex-col items-start gap-4">

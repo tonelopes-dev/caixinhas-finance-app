@@ -14,6 +14,8 @@ import { CategoryService } from '@/services/category.service';
 import { TransactionService } from '@/services/transaction.service';
 import { VaultService } from '@/services/vault.service';
 import { getUserAllGoals } from '@/app/(private)/goals/actions';
+import Header from '@/components/dashboard/header';
+import { User } from '@/lib/definitions';
 
 export default async function TransactionsPage() {
   const session = await getServerSession(authOptions);
@@ -55,6 +57,7 @@ export default async function TransactionsPage() {
     <div className="relative min-h-screen">
       <DashboardBackground />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 md:px-8 pt-24 pb-32">
+        <Header user={session.user as User} partner={null} />
         <TransactionsPageClient
           initialTransactions={transactions}
           allAccounts={accounts}

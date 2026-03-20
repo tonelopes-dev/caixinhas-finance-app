@@ -434,11 +434,11 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Qtd. de Parcelas</label>
-                                                <Input type="number" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
+                                                <Input type="number" inputMode="numeric" placeholder="Ex: 12" value={totalInstallments} onChange={e => setTotalInstallments(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 ml-1">Valor da Parcela</label>
-                                                <Input type="number" step="0.01" placeholder="R$ 0,00" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
+                                                <Input type="number" inputMode="decimal" step="0.01" placeholder="R$ 0,00" value={installmentValue} onChange={e => setInstallmentValue(e.target.value)} className="h-16 rounded-2xl border-white border-2 bg-white/60 text-lg font-bold text-[#2D241E]" />
                                             </div>
                                         </div>
                                     )}
@@ -462,6 +462,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                     <Input 
                                         id="amount" 
                                         type="number" 
+                                        inputMode="decimal"
                                         step="0.01" 
                                         placeholder="0,00" 
                                         value={amount} 
