@@ -139,6 +139,51 @@ function LoginPageContent() {
     }
   }, [searchParams]);
 
+  // Lógica de Magic Link Automático
+  useEffect(() => {
+    const token = searchParams.get('token');
+    
+    // Só disparar se houver token, se não estiver carregando, se não estiver redirecionando e se não estiver logado
+    if (token && !isLoading && !isRedirectingRef.current && status !== 'authenticated') {
+      console.log('✨ Detectado Magic Link Token, iniciando auto-login...');
+      
+      const performMagicLogin = async () => {
+        try {
+          setAuthLoading(true, "✨ Validando seu acesso de convidado...");
+          setIsLoading(true);
+          
+          const result = await signIn('credentials', {
+            magicToken: token,
+            redirect: false,
+          });
+          
+          if (result?.error) {
+            console.error('❌ Erro no Magic Link:', result.error);
+            setError('Este link de acesso expirou ou é inválido.');
+            setAuthLoading(false);
+          } else {
+            console.log('✅ Magic Link válido! Redirecionando...');
+            setAuthLoading(true, "✅ Acesso validado! Bem-vindo(a).");
+            
+            // Redirecionar para o callbackUrl ou dashboard
+            const callbackUrl = searchParams.get('callbackUrl') || '/vaults';
+            setTimeout(() => {
+              window.location.href = callbackUrl;
+            }, 1000);
+          }
+        } catch (err) {
+          console.error('❌ Erro no processo de Magic Link:', err);
+          setError('Ocorreu um erro ao processar seu acesso.');
+          setAuthLoading(false);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      performMagicLogin();
+    }
+  }, [searchParams, status, isLoading, setAuthLoading]);
+
   useEffect(() => {
     // Aguardar o status ser definido e só redirecionar se estiver realmente autenticado
     if (status === 'loading') return; // Aguardar carregamento da sessão
@@ -165,7 +210,8 @@ function LoginPageContent() {
       const timeout = isIOS ? 500 : 100;
       setTimeout(() => {
         if (isRedirectingRef.current) {
-          window.location.href = '/vaults';
+          const callbackUrl = searchParams.get('callbackUrl') || '/vaults';
+          window.location.href = callbackUrl;
         }
       }, timeout);
     }
@@ -215,9 +261,10 @@ function LoginPageContent() {
         // Marcar que o login foi bem-sucedido para manter o loading ativo
         sessionStorage.setItem('login_in_progress', 'true');
         
-        // Redirecionar - o loading continua até chegarmos em /vaults
+        // Redirecionar - o loading continua até chegarmos no destino
         setTimeout(() => {
-          window.location.href = '/vaults';
+          const callbackUrl = searchParams.get('callbackUrl') || '/vaults';
+          window.location.href = callbackUrl;
         }, 800);
       } else {
         console.log('⚠️ Resultado inesperado do login:', result);

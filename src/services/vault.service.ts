@@ -378,10 +378,9 @@ export class VaultService {
             const { sendEmail } = await import('@/lib/email.service');
             const { inviteEmail } = await import('@/app/_templates/emails/invite-template');
             
-            // Criar link de convite - se usuário não existir, direciona para registro
-            const inviteLink = receiver 
-                ? `${process.env.NEXTAUTH_URL}/invitations` 
-                : `${process.env.NEXTAUTH_URL}/register?invite=${invitation.id}`;
+            // Criar link de convite
+            const appUrl = process.env.NEXTAUTH_URL || 'https://caixinhas.app';
+            const inviteLink = `${appUrl}/invitation/${invitation.id}`;
             
             // Adicionar contexto ao subject se fornecido
             const subject = context 
@@ -811,6 +810,57 @@ export class VaultService {
     } catch (error) {
       console.error('Erro ao buscar convites enviados:', error);
       return [];
+    }
+  }
+
+  /**
+   * Busca um convite específico por ID com todos os detalhes necessários
+   * @param id - ID do convite
+   * @returns Dados do convite ou null
+   */
+  static async getInvitationById(id: string): Promise<VaultInvitationData | null> {
+    try {
+      const invitation = await prisma.invitation.findUnique({
+        where: { id },
+        include: {
+          sender: {
+            select: {
+              name: true,
+              avatarUrl: true,
+            },
+          },
+          vault: {
+            select: {
+              name: true,
+              imageUrl: true,
+              members: {
+                select: {
+                  user: {
+                    select: { id: true, name: true, avatarUrl: true }
+                  }
+                }
+              }
+            },
+          },
+          receiver: {
+            select: {
+              name: true,
+              email: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      });
+
+      if (!invitation) return null;
+
+      return {
+        ...invitation,
+        targetName: invitation.vault?.name || 'Cofre sem nome'
+      } as VaultInvitationData;
+    } catch (error) {
+      console.error('Erro ao buscar convite por ID:', error);
+      return null;
     }
   }
 }

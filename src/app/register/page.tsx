@@ -87,7 +87,10 @@ function RegisterContent() {
             });
 
             if (signInResult?.ok) {
-                if (inviteId) {
+                const callbackUrl = searchParams.get('callbackUrl');
+                if (callbackUrl) {
+                    router.push(callbackUrl);
+                } else if (inviteId) {
                     router.push('/invitations');
                 } else {
                     router.push('/vaults');

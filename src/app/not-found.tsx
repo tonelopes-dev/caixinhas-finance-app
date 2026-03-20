@@ -1,161 +1,157 @@
 'use client';
 
-import { Home, ArrowLeft, Search, Compass, Lightbulb } from 'lucide-react';
+import { Home, ArrowLeft, Search, Compass, Sparkles, MoveRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use404Analytics, useCommon404Patterns } from '@/hooks/use-404-analytics';
+import { Logo } from '@/components/logo';
+import { motion } from 'framer-motion';
 
 export default function NotFound() {
   const router = useRouter();
   const { suggestions } = use404Analytics();
-  const { pattern, message } = useCommon404Patterns();
+  const { message } = useCommon404Patterns();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg border-0 shadow-2xl">
-        <CardHeader className="text-center pb-6">
-          <div className="mx-auto mb-6 relative">
-            {/* Ícone principal */}
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 mx-auto">
-              <Compass className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-            </div>
-            {/* Efeito decorativo */}
-            <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-gradient-to-r from-orange-400 to-pink-400 opacity-80 animate-pulse"></div>
-            <div className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 opacity-60 animate-pulse delay-300"></div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Decorativo */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse delay-700" />
+      
+      <div className="w-full max-w-2xl relative z-10">
+        <Card className="border-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/40 overflow-hidden rounded-[40px]">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-primary animate-shimmer" />
           
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Página não encontrada
-          </CardTitle>
-          <CardDescription className="text-base mt-3">
-            Ops! A página que você está procurando não existe ou foi movida para outro lugar.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Código de erro estilizado */}
-          <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl p-6 text-center border border-muted/50">
-            <span className="text-6xl font-black text-muted-foreground/30 tracking-wider">
-              404
-            </span>
-            <p className="text-sm text-muted-foreground mt-2">
-              Erro: Recurso não encontrado
-            </p>
-          </div>
-
-          {/* Detecção de padrão */}
-          {message && (
-            <div className="bg-amber-50 dark:bg-amber-900/10 rounded-lg p-4 border border-amber-200 dark:border-amber-800/50">
-              <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2 text-sm flex items-center">
-                <Lightbulb className="h-4 w-4 mr-2" />
-                Observação:
-              </h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300">{message}</p>
-            </div>
-          )}
-
-          {/* Sugestões inteligentes */}
-          {suggestions.length > 0 && (
-            <div className="bg-blue-50 dark:bg-blue-900/10 rounded-lg p-4 border border-blue-200 dark:border-blue-800/50">
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 text-sm">
-                🎯 Sugestões baseadas na sua busca:
-              </h3>
-              <div className="space-y-2">
-                {suggestions.map((suggestion, index) => (
-                  <Link
-                    key={suggestion.path}
-                    href={suggestion.path}
-                    className="block p-2 rounded-md bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 transition-colors border border-blue-200/50 dark:border-blue-700/50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                          {suggestion.label}
-                        </span>
-                        <p className="text-xs text-blue-600 dark:text-blue-300">
-                          {suggestion.description}
-                        </p>
-                      </div>
-                      <div className="text-xs text-blue-500 font-mono">
-                        {Math.round(suggestion.confidence * 100)}%
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+          <CardHeader className="text-center pt-16 pb-8">
+            <div className="flex justify-center mb-10 relative">
+              <div className="p-5 bg-white rounded-[32px] shadow-2xl border border-primary/10 relative z-10">
+                <Logo className="h-20 w-20 animate-float-logo" />
+              </div>
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-accent rounded-full flex items-center justify-center animate-bounce shadow-lg border-4 border-white">
+                <Compass className="h-6 w-6 text-white" />
               </div>
             </div>
-          )}
 
-          {/* Dicas gerais */}
-          <div className="bg-muted/50 rounded-lg p-4 text-sm">
-            <h3 className="font-semibold mb-2">💡 Dicas gerais:</h3>
-            <ul className="text-muted-foreground space-y-1 text-xs">
-              <li>• Verifique se a URL está correta</li>
-              <li>• Use os botões abaixo para navegar</li>
-              <li>• Acesse o menu principal para encontrar o que precisa</li>
-            </ul>
-          </div>
-
-          {/* Botões de ação */}
-          <div className="space-y-3">
-            <Button
-              onClick={() => router.back()}
-              variant="default"
-              className="w-full h-12 text-base font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar à Página Anterior
-            </Button>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Link href="/dashboard">
-                  <Home className="mr-2 h-4 w-4" />
-                  Painel Principal
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                variant="outline" 
-                className="h-12 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Link href="/goals">
-                  <Search className="mr-2 h-4 w-4" />
-                  Ver Caixinhas
-                </Link>
-              </Button>
+            <CardTitle className="text-5xl font-headline font-black italic tracking-tighter text-[#2D241E] mb-6">
+              Opa! Caminho errado?
+            </CardTitle>
+            
+            <CardDescription className="text-xl font-medium text-[#2D241E]/60 max-w-[85%] mx-auto leading-relaxed">
+              Não conseguimos encontrar a página que você procura. Parece que esse objetivo financeiro ainda não foi criado! 😉
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="px-10 pb-16 space-y-10">
+            {/* 404 Display Premium */}
+            <div className="relative py-12 flex items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#2D241E]/5 to-transparent border border-white/50 shadow-inner">
+               <span className="text-8xl font-black text-[#2D241E]/10 tracking-[1.5rem] select-none">
+                 404
+               </span>
+               <div className="absolute inset-0 flex items-center justify-center">
+                 <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full border border-primary/10 shadow-lg">
+                    <Sparkles className="h-4 w-4 text-accent animate-pulse" />
+                    <span className="text-xs font-black uppercase tracking-widest text-[#2D241E]">
+                      Houve uma falha na matriz financeira
+                    </span>
+                 </div>
+               </div>
             </div>
-          </div>
 
-          {/* Links rápidos */}
-          <div className="pt-4 border-t">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Acesso rápido:
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              <Link href="/goals/new" className="text-xs px-3 py-1 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                Nova Caixinha
+            {/* Pattern/Message (Contextual Info) */}
+            {message && (
+              <div className="bg-amber-50/60 rounded-2xl p-5 border border-amber-200/50 flex gap-4">
+                <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                  <Search className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-amber-900/40 mb-1">Dica do Sistema</h3>
+                  <p className="text-sm font-bold text-amber-900/70">{message}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Sugestões Inteligentes */}
+            {suggestions.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="h-1 w-8 bg-primary rounded-full" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">Caminhos Sugeridos</h3>
+                </div>
+                <div className="grid gap-3">
+                  {suggestions.map((suggestion) => (
+                    <Link
+                      key={suggestion.path}
+                      href={suggestion.path}
+                      className="group flex items-center justify-between p-5 rounded-2xl bg-white/60 hover:bg-white border border-primary/5 hover:border-primary/20 transition-all shadow-sm hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-primary/5 rounded-xl group-hover:bg-primary/10 transition-colors">
+                           <MoveRight className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-[#2D241E]">{suggestion.label}</p>
+                          <p className="text-xs font-medium text-[#2D241E]/40">{suggestion.description}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black bg-primary/10 text-primary px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                         {Math.round(suggestion.confidence * 100)}% Match
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="grid gap-4 pt-6">
+              <Link href="/dashboard">
+                <GradientButton className="w-full h-16 text-lg group rounded-2xl shadow-xl shadow-primary/20">
+                  <span className="flex items-center gap-2">
+                    <Home className="h-5 w-5" />
+                    Voltar ao Painel Principal
+                  </span>
+                </GradientButton>
               </Link>
-              <Link href="/transactions" className="text-xs px-3 py-1 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                Transações
-              </Link>
-              <Link href="/reports" className="text-xs px-3 py-1 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                Relatórios
-              </Link>
-              <Link href="/profile" className="text-xs px-3 py-1 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                Perfil
-              </Link>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={() => router.back()}
+                  variant="outline"
+                  className="h-14 rounded-2xl border-2 border-primary/10 hover:border-primary/30 font-bold transition-all"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                <Link href="/vaults">
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-2xl border-2 border-primary/10 hover:border-primary/30 font-bold transition-all"
+                  >
+                    <Search className="mr-2 h-4 w-4" />
+                    Ver Cofres
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Links Rápidos Compactos */}
+        <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4">
+           {['Cofres', 'Metas', 'Relatórios', 'Perfil'].map((link) => (
+             <Link 
+               key={link} 
+               href={`/${link.toLowerCase().replace('é', 'e').replace('ô', 'o')}`}
+               className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/30 hover:text-primary transition-colors"
+             >
+               {link}
+             </Link>
+           ))}
+        </div>
+      </div>
     </div>
   );
 }

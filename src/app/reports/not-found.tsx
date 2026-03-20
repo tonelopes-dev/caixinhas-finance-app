@@ -1,139 +1,119 @@
 'use client';
 
-import { BarChart3, Home, ArrowLeft, FileText, TrendingUp } from 'lucide-react';
+import { BarChart3, Home, ArrowLeft, FileText, TrendingUp, Sparkles, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Logo } from '@/components/logo';
 
 export default function ReportsNotFound() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg border-0 shadow-2xl">
-        <CardHeader className="text-center pb-6">
-          <div className="mx-auto mb-6 relative">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 mx-auto">
-              <BarChart3 className="h-10 w-10 text-cyan-600 dark:text-cyan-400" />
-            </div>
-            <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-80 animate-pulse"></div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Decorativo */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse delay-700" />
+      
+      <div className="w-full max-w-2xl relative z-10">
+        <Card className="border-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/40 overflow-hidden rounded-[40px]">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-primary animate-shimmer" />
           
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Relatório não encontrado
-          </CardTitle>
-          <CardDescription className="text-base mt-3">
-            O relatório que você está buscando não existe, foi removido ou você não tem permissão para acessá-lo.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Código de erro temático */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/10 dark:to-blue-900/10 rounded-xl p-6 text-center border border-cyan-200 dark:border-cyan-800/50">
-            <div className="text-4xl mb-2">📊</div>
-            <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
-              Dados não disponíveis
-            </span>
-            <p className="text-sm text-muted-foreground mt-2">
-              Relatório inexistente ou inacessível
-            </p>
-          </div>
+          <CardHeader className="text-center pt-16 pb-8">
+            <div className="flex justify-center mb-10 relative">
+              <div className="p-5 bg-white rounded-[32px] shadow-2xl border border-primary/10 relative z-10">
+                <Logo className="h-20 w-20 animate-float-logo" />
+              </div>
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-accent rounded-full flex items-center justify-center animate-bounce shadow-lg border-4 border-white">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+            </div>
 
-          {/* Sugestões específicas */}
-          <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800/50">
-            <h3 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2 text-sm">
-              📈 Possíveis motivos:
-            </h3>
-            <ul className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
-              <li>• O relatório foi excluído ou expirou</li>
-              <li>• Você não tem acesso a estes dados</li>
-              <li>• O período solicitado não possui dados</li>
-              <li>• Houve um erro na URL do relatório</li>
-            </ul>
-          </div>
+            <CardTitle className="text-5xl font-headline font-black italic tracking-tighter text-[#2D241E] mb-6">
+              Relatório Sumiu?
+            </CardTitle>
+            
+            <CardDescription className="text-xl font-medium text-[#2D241E]/60 max-w-[85%] mx-auto leading-relaxed">
+              Não conseguimos encontrar os dados que você solicitou. O relatório pode ter sido removido ou o período está vazio.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="px-10 pb-16 space-y-10">
+            {/* Insights Card Premium */}
+            <div className="bg-cyan-50/60 rounded-3xl p-6 border border-cyan-200/50 flex gap-6 items-center shadow-inner">
+               <div className="h-16 w-16 rounded-2xl bg-cyan-100 flex items-center justify-center shrink-0 shadow-sm">
+                  <TrendingUp className="h-8 w-8 text-cyan-600" />
+               </div>
+               <div>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-cyan-900/40 mb-1">Dica de Performance</h3>
+                  <p className="text-sm font-bold text-cyan-900/70">Relatórios novos levam alguns segundos para serem processados. Tente novamente em breve!</p>
+               </div>
+            </div>
 
-          {/* Botões de ação */}
-          <div className="space-y-3">
-            <Button
-              onClick={() => router.back()}
-              variant="default"
-              className="w-full h-12 text-base font-medium bg-cyan-600 hover:bg-cyan-700"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar à Página Anterior
-            </Button>
+            {/* Tipos de Relatórios Sugeridos */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 px-2">
+                <div className="h-1 w-8 bg-primary rounded-full" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#2D241E]/40">Relatórios sugeridos</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Mensal', icon: '📅', template: 'monthly' },
+                  { label: 'Caixinhas', icon: '🎯', template: 'goals' },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={`/reports?type=${item.template}`}
+                    className="group flex flex-col items-center p-5 rounded-2xl bg-white/60 hover:bg-white border border-primary/5 hover:border-primary/20 transition-all shadow-sm hover:shadow-md"
+                  >
+                    <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">{item.icon}</span>
+                    <span className="text-sm font-black text-[#2D241E]">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                asChild
-                variant="outline"
-                className="h-12"
-              >
-                <Link href="/reports">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Todos Relatórios
-                </Link>
-              </Button>
+            {/* Action Buttons */}
+            <div className="grid gap-4 pt-6">
+              <Link href="/reports">
+                <GradientButton className="w-full h-16 text-lg group rounded-2xl shadow-xl shadow-primary/20">
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Ver Todos os Relatórios
+                  </span>
+                </GradientButton>
+              </Link>
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12"
-              >
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={() => router.back()}
+                  variant="outline"
+                  className="h-14 rounded-2xl border-2 border-primary/10 hover:border-primary/30 font-bold transition-all"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
                 <Link href="/reports/new">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Novo Relatório
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-2xl border-2 border-primary/10 hover:border-primary/30 font-bold transition-all"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Novo
+                  </Button>
                 </Link>
-              </Button>
+              </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <Button
-              asChild
-              variant="secondary"
-              className="w-full h-12"
-            >
-              <Link href="/dashboard">
-                <Home className="mr-2 h-4 w-4" />
-                Voltar ao Painel
-              </Link>
-            </Button>
-          </div>
-
-          {/* Tipos de relatórios disponíveis */}
-          <div className="pt-4 border-t">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Relatórios disponíveis:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <Link href="/reports?type=monthly" className="p-3 rounded-lg bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/10 dark:to-indigo-900/10 border border-violet-200 dark:border-violet-800/50 hover:scale-105 transition-transform">
-                <div className="text-center">
-                  <div className="text-lg mb-1">📅</div>
-                  <div className="font-medium text-violet-700 dark:text-violet-300">Mensal</div>
-                </div>
-              </Link>
-              <Link href="/reports?type=goals" className="p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/10 dark:to-green-900/10 border border-emerald-200 dark:border-emerald-800/50 hover:scale-105 transition-transform">
-                <div className="text-center">
-                  <div className="text-lg mb-1">🎯</div>
-                  <div className="font-medium text-emerald-700 dark:text-emerald-300">Caixinhas</div>
-                </div>
-              </Link>
-              <Link href="/reports?type=performance" className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800/50 hover:scale-105 transition-transform">
-                <div className="text-center">
-                  <TrendingUp className="h-4 w-4 mx-auto mb-1 text-blue-600" />
-                  <div className="font-medium text-blue-700 dark:text-blue-300">Performance</div>
-                </div>
-              </Link>
-              <Link href="/reports?type=insights" className="p-3 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-800/50 hover:scale-105 transition-transform">
-                <div className="text-center">
-                  <div className="text-lg mb-1">💡</div>
-                  <div className="font-medium text-amber-700 dark:text-amber-300">Insights</div>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Brand Footer */}
+        <p className="text-center mt-8 text-xs font-medium text-[#2D241E]/40">
+           Seus dados estão seguros, só estamos procurando o lugar certo! 📊
+        </p>
+      </div>
     </div>
   );
 }
