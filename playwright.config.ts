@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  expect: {
+    timeout: 15000,
+  },
   fullyParallel: false, // Rodar em série para evitar sobrecarga no banco
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,

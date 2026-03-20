@@ -1,0 +1,16 @@
+
+> nextn@0.1.0 typecheck
+> tsc --noEmit
+
+docs/bank-selector-example.ts(9,6): error TS1005: '>' expected.
+docs/bank-selector-example.ts(9,15): error TS1005: ';' expected.
+docs/bank-selector-example.ts(10,10): error TS1005: '>' expected.
+docs/bank-selector-example.ts(10,17): error TS1005: ';' expected.
+docs/bank-selector-example.ts(10,33): error TS1110: Type expected.
+docs/bank-selector-example.ts(15,21): error TS1005: ':' expected.
+docs/bank-selector-example.ts(16,4): error TS1109: Expression expected.
+docs/bank-selector-example.ts(17,2): error TS1110: Type expected.
+docs/bank-selector-example.ts(21,18): error TS1005: ',' expected.
+docs/bank-selector-example.ts(23,17): error TS1005: ':' expected.
+docs/bank-selector-example.ts(25,2): error TS1109: Expression expected.
+docs/bank-selector-example.ts(25,3): error TS1109: Expression expected.
