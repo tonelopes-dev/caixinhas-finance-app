@@ -100,6 +100,8 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
   const { toast } = useToast();
   const router = useRouter();
   
+  const lastStateMessageRef = useRef<string | null>(null);
+  
   const [state, formAction, isPending] = useActionState(updateVaultAction, {
     message: null,
   });
@@ -134,7 +136,13 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
   }, [open, vault, fetchPendingInvitations]);
 
   React.useEffect(() => {
-    if (state?.message && !state?.errors) {
+    // 🛡️ Prevenção de Loop de Notificações
+    // Só mostramos o toast se a mensagem mudou desde a última exibição
+    if (!state?.message || state.message === lastStateMessageRef.current) return;
+    
+    lastStateMessageRef.current = state.message;
+
+    if (!state?.errors) {
       toast({
         title: 'Sucesso',
         description: state.message,
@@ -145,7 +153,7 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
       setTimeout(() => {
         onOpenChange(false);
       }, 150);
-    } else if (state?.errors) {
+    } else {
       toast({
         title: 'Erro',
         description: state.message || 'Erro ao atualizar cofre',

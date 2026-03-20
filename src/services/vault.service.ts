@@ -391,7 +391,8 @@ export class VaultService {
             await sendEmail({
                 to: receiverEmail,
                 subject,
-                html: inviteEmail(sender.name, vault.name, inviteLink, context?.goalName)
+                html: inviteEmail(sender.name, vault.name, inviteLink, context?.goalName),
+                fromName: `${sender.name} via Caixinhas`
             });
             
             console.log(`Email de convite enviado para ${receiverEmail}`);

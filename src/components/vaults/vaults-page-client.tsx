@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
 import { useRouter } from 'next/navigation';
@@ -446,6 +446,10 @@ export function VaultsPageClient({
   const [editingVault, setEditingVault] = useState<Vault | null>(null);
   const { toast } = useToast();
 
+  const handleCloseEdit = useCallback((open: boolean) => {
+    if (!open) setEditingVault(null);
+  }, []);
+
   useEffect(() => {
     const loginInProgress = sessionStorage.getItem('login_in_progress');
     if (loginInProgress) {
@@ -677,7 +681,7 @@ export function VaultsPageClient({
       {editingVault && (
         <EditVaultDialog
           open={!!editingVault}
-          onOpenChange={(open) => !open && setEditingVault(null)}
+          onOpenChange={handleCloseEdit}
           vault={editingVault}
         />
       )}
