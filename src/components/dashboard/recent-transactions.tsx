@@ -225,12 +225,12 @@ export default function RecentTransactions({
                       {!isLoaded || isPrivate ? (
                         <PrivacyBlur />
                       ) : (
-                        <AnimatedCounter
-                          value={tx.amount}
-                          formatter={(v) =>
-                            `${tx.type === "income" ? "+" : "-"} ${formatCurrency(v)}`
-                          }
-                        />
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-sm md:text-base opacity-70">
+                            {tx.type === "income" ? "+" : "-"}
+                          </span>
+                          <span>{formatCurrency(Math.abs(tx.amount))}</span>
+                        </div>
                       )}
                     </p>
                   </TableCell>

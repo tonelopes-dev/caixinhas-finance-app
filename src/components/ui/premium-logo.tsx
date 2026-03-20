@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { useLoading } from '@/components/providers/loading-provider';
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useLoading } from "@/components/providers/loading-provider";
 
 interface PremiumLogoProps {
   className?: string;
@@ -21,7 +21,7 @@ export function PremiumLogo({ className, onClick, href }: PremiumLogoProps) {
       onClick();
     }
     if (href) {
-      showLoading('Carregando...');
+      showLoading("Carregando...");
       router.push(href);
     }
   };
@@ -33,7 +33,7 @@ export function PremiumLogo({ className, onClick, href }: PremiumLogoProps) {
       onClick={handleClick}
       className={cn(
         "flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm group cursor-pointer transition-all duration-300 hover:bg-white/60",
-        className
+        className,
       )}
     >
       <div className="h-9 w-9 relative shrink-0 transform group-hover:rotate-6 transition-transform duration-500">
@@ -45,7 +45,7 @@ export function PremiumLogo({ className, onClick, href }: PremiumLogoProps) {
           priority
         />
       </div>
-      <span className="text-xl font-headline font-black italic text-[#2D241E] tracking-tight hidden sm:block leading-none">
+      <span className="text-xl font-headline font-bold italic text-[#2D241E] tracking-tight hidden sm:block leading-none">
         Caixinhas
       </span>
     </motion.div>
