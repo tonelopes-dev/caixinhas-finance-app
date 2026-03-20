@@ -9,8 +9,8 @@ import type { User } from '@/lib/definitions';
 import { ReportGenerator } from '@/components/reports/report-generator';
 import { ReportDisplay } from '@/components/reports/report-display';
 import { ReportLoadingProgress } from '@/components/reports/report-loading-progress';
-import { generateNewFinancialReport, type FinancialReportState } from '@/app/reports/actions';
-import { checkHasAnyTransactionsAction, getMonthsWithTransactionsAction, getReportStatusAction } from '@/app/reports/actions';
+import { generateNewFinancialReport, type FinancialReportState } from '@/app/(private)/reports/actions';
+import { checkHasAnyTransactionsAction, getMonthsWithTransactionsAction, getReportStatusAction } from '@/app/(private)/reports/actions';
 
 export function ReportsPageClient() {
   const router = useRouter();

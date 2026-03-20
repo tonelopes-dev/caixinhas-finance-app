@@ -17,7 +17,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
-import { updateUserAction } from '@/app/profile/actions';
+import { updateUserAction } from '@/app/(private)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';

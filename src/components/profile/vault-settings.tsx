@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { deleteVaultAction } from '@/app/profile/actions';
+import { deleteVaultAction } from '@/app/(private)/profile/actions';
 
 interface VaultSettingsProps {
   vaultId: string;

@@ -1,9 +1,7 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+import { withPageAccess } from '@/lib/page-access';
 import { getProfileData } from './actions';
 import { ProfilePageClient } from '@/components/profile/profile-page-client';
-import Header from '@/components/dashboard/header';
 import { User, Vault } from '@/lib/definitions';
 
 type ProfileData = {
@@ -13,22 +11,16 @@ type ProfileData = {
 };
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const data = await getProfileData(session.user.id);
+  const { user } = await withPageAccess({ requireFullAccess: true });
+  const data = await getProfileData(user.id);
   
   if (!data?.currentUser) {
     redirect('/login');
   }
 
   return (
-    <>
-      <Header user={session.user as User} partner={null} />
+    <div className="pt-8">
       <ProfilePageClient initialData={data as ProfileData} />
-    </>
+    </div>
   );
 }

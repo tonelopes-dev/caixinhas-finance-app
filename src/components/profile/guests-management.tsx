@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, X, Loader2, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { inviteMemberAction, removeMemberAction, type InviteMemberState } from '@/app/profile/actions';
+import { inviteMemberAction, removeMemberAction, type InviteMemberState } from '@/app/(private)/profile/actions';
 import {
   AlertDialog,
   AlertDialogAction,

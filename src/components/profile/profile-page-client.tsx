@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { getProfileData } from '@/app/profile/actions';
+import { getProfileData } from '@/app/(private)/profile/actions';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { ThemeCustomization } from '@/components/profile/theme-customization';

@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { deleteInvitation, cancelInvitation, respondToInvitation } from '@/app/invite/actions';
+import { deleteInvitation, cancelInvitation, respondToInvitation } from '@/app/(private)/invite/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { VaultInvitationData } from '@/services/vault.service';
 

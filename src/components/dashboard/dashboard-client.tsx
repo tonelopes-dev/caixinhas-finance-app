@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { WorkspaceNavigationHandler } from "@/components/dashboard/workspace-navigation-handler";
-import type { PatrimonyData } from "@/app/patrimonio/actions";
+import type { PatrimonyData } from "@/app/(private)/patrimonio/actions";
 import { MemberAvatars } from "@/components/ui/member-avatars";
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados

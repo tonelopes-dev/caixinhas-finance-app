@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { User } from '@/lib/definitions';
-import { updateProfileAction, type ProfileActionState } from '@/app/profile/actions';
+import { updateProfileAction, type ProfileActionState } from '@/app/(private)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';

@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { createAccount, updateAccount, deleteAccount } from '@/app/accounts/actions';
+import { createAccount, updateAccount, deleteAccount } from '@/app/(private)/accounts/actions';
 import {
   Card,
   CardContent,

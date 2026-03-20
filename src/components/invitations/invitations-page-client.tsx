@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { respondToInvitation } from '@/app/invite/actions';
+import { respondToInvitation } from '@/app/(private)/invite/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { VaultInvitationData } from '@/services/vault.service';
 

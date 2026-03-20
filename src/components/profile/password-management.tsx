@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Eye, EyeOff, Key, Shield, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { changePasswordAction } from '@/app/profile/actions';
+import { changePasswordAction } from '@/app/(private)/profile/actions';
 import type { User } from '@/lib/definitions';
 
 interface PasswordManagementProps {

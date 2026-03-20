@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Bell, CircleDot, CheckCheck, Users, Banknote, Target, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NotificationData } from '@/services/notification.service';
-import { markNotificationAsRead } from '@/app/notifications/actions';
+import { markNotificationAsRead } from '@/app/(private)/notifications/actions';
 import { useLoading } from '@/components/providers/loading-provider';
 
 const getNotificationIcon = (type: string) => {

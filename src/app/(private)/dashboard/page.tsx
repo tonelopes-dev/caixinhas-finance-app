@@ -4,15 +4,13 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 
 import { getDashboardData } from './actions';
-import { getPatrimonyData } from '@/app/patrimonio/actions';
+import { getPatrimonyData } from '@/app/(private)/patrimonio/actions';
 import { VaultService } from '@/services/vault.service';
 import { CategoryService } from '@/services/category.service';
 import { GoalService } from '@/services/goal.service';
 import { TransactionService } from '@/services/transaction.service';
 import { withPageAccess } from '@/lib/page-access';
-import Header from '@/components/dashboard/header';
 import type { User, Vault } from '@/lib/definitions';
-import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados
 const DashboardClient = dynamic(
@@ -101,26 +99,23 @@ export default async function DashboardPage() {
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
   return (
-    <DashboardBackground>
-      <div className="mx-auto w-full max-w-7xl px-4 md:px-8 pt-24 pb-12 flex flex-col gap-8">
-        <Header user={currentUser as User} partner={null} />
-        <Suspense fallback={<DashboardSkeleton />}>
-          <DashboardClient
-            currentUser={currentUser as User}
-            partner={null}
-            workspaceId={workspaceId}
-            workspaceName={workspaceName}
-            isPersonalWorkspace={workspaceId === userId}
-            members={members}
-            accounts={accounts}
-            goals={allGoals || []}
-            transactions={recentTransactions || []}
-            categories={categories || []}
-            patrimonyData={patrimonyData}
-          />
-        </Suspense>
-        <PwaPrompt />
-      </div>
-    </DashboardBackground>
+    <div className="mx-auto w-full max-w-7xl px-4 md:px-8 pb-12 flex flex-col gap-8 pt-8">
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardClient
+          currentUser={currentUser as any}
+          partner={null}
+          workspaceId={workspaceId}
+          workspaceName={workspaceName}
+          isPersonalWorkspace={workspaceId === userId}
+          members={members}
+          accounts={accounts}
+          goals={allGoals || []}
+          transactions={recentTransactions || []}
+          categories={categories || []}
+          patrimonyData={patrimonyData}
+        />
+      </Suspense>
+      <PwaPrompt />
+    </div>
   );
 }

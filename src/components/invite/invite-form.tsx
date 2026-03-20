@@ -22,8 +22,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Mail, Send, Users, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { sendPartnerInvite, getVaultMembers } from '@/app/invite/actions';
-import type { GenericState } from '@/app/auth/actions';
+import { sendPartnerInvite, getVaultMembers } from '@/app/(private)/invite/actions';
+import type { GenericState } from '@/app/(private)/auth/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 

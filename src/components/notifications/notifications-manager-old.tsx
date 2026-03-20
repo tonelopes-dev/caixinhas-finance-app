@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/notifications/actions';
+import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/(private)/notifications/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { NotificationData } from '@/services/notification.service';
 

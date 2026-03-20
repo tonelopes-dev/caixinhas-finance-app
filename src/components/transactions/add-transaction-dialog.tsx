@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useActionState, startTransition } from 'react';
-import { addTransaction, type TransactionState } from '@/app/transactions/actions';
+import { addTransaction, type TransactionState } from '@/app/(private)/transactions/actions';
 import {
   Dialog,
   DialogContent,

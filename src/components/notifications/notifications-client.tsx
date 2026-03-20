@@ -24,7 +24,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import Link from 'next/link';
-import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/notifications/actions';
+import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/(private)/notifications/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { NotificationData } from '@/services/notification.service';
 

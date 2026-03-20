@@ -17,7 +17,7 @@ import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useActionState } from 'react';
-import { deleteTransaction } from '@/app/transactions/actions';
+import { deleteTransaction } from '@/app/(private)/transactions/actions';
 import { cn } from '@/lib/utils';
 import { useLoading } from '@/components/providers/loading-provider';
 

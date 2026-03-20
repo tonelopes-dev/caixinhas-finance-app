@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { withPageAccess } from '@/lib/page-access';
 import { InvitationsPageClient } from '@/components/invitations/invitations-page-client';
 import { VaultService } from '@/services/vault.service';
 
@@ -10,14 +8,10 @@ export const metadata = {
 };
 
 export default async function InvitationsPage() {
-  const session = await getServerSession(authOptions);
+  const { user } = await withPageAccess({ requireFullAccess: true });
   
-  if (!session?.user) {
-    redirect('/login');
-  }
-
   // Buscar convites pendentes do banco de dados
-  const invitations = await VaultService.getPendingInvitations(session.user.id);
+  const invitations = await VaultService.getPendingInvitations(user.id);
 
   return <InvitationsPageClient initialInvitations={invitations} />;
 }

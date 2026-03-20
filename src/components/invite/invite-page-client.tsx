@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { getUserSentInvitations, getUserReceivedInvitations } from '@/app/invite/actions';
+import { getUserSentInvitations, getUserReceivedInvitations } from '@/app/(private)/invite/actions';
 import type { VaultInvitationData } from '@/services/vault.service';
 
 type InvitePageClientProps = {

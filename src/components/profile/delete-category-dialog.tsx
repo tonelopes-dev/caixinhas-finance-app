@@ -16,7 +16,7 @@ import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useActionState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
-import { deleteCategory, type CategoryActionState } from '@/app/accounts/actions';
+import { deleteCategory, type CategoryActionState } from '@/app/(private)/accounts/actions';
 import type { Category } from '@/services/category.service';
 import { cn } from '@/lib/utils';
 

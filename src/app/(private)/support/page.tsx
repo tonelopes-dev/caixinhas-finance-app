@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
 import { toast } from '@/hooks/use-toast';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
-import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Image as ImageIcon, X, CheckCircle2 } from 'lucide-react';
 
@@ -122,10 +121,10 @@ export default function SupportPage() {
   };
 
   return (
-    <DashboardBackground>
+    <div className="pt-8 text-[#2D241E]">
       <div className="container max-w-4xl mx-auto py-12 px-6">
         <div className="mb-12">
-          <StandardBackButton href="/vaults" label="Voltar para Início" />
+          <StandardBackButton href="/dashboard" label="Voltar para o Painel" />
         </div>
 
         <motion.div
@@ -247,7 +246,7 @@ export default function SupportPage() {
                       {loading ? (
                         <div className="flex items-center gap-3">
                           <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Enviando...
+                           Enviando...
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
@@ -290,6 +289,6 @@ export default function SupportPage() {
           </div>
         </motion.div>
       </div>
-    </DashboardBackground>
+    </div>
   );
 }

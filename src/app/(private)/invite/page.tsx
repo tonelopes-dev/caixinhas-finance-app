@@ -1,9 +1,7 @@
 import { Users } from "lucide-react";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { BackToDashboard } from "@/components/ui/back-to-dashboard";
-
-import { authOptions } from "@/lib/auth";
+import { withPageAccess } from "@/lib/page-access";
 import { VaultService } from "@/services/vault.service";
 import { InvitePageClient } from "@/components/invite/invite-page-client";
 import {
@@ -15,19 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getUserInvitations, getUserSentInvitations } from "./actions";
-import Header from "@/components/dashboard/header";
-import { User } from "@/lib/definitions";
-import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 
 export default async function InvitePage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const { user } = await withPageAccess({ requireFullAccess: true });
+  const userId = user.id;
 
   // Buscar dados necessários
   const [userVaults, receivedInvitations, sentInvitations] = await Promise.all([
-    VaultService.getUserVaults(session.user.id),
+    VaultService.getUserVaults(userId),
     getUserInvitations(),
     getUserSentInvitations()
   ]);
@@ -37,9 +30,7 @@ export default async function InvitePage() {
   const formattedVaults = sharedVaults.map((v) => ({ id: v.id, name: v.name }));
 
   return (
-    <div className="relative flex min-h-[calc(100vh-theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10 pt-24">
-      <DashboardBackground />
-      <Header user={session.user as User} partner={null} />
+    <div className="pb-32 px-4 md:px-8 pt-8 text-[#2D241E]">
       <div className="mx-auto w-full max-w-7xl relative z-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -60,7 +51,7 @@ export default async function InvitePage() {
 
         <InvitePageClient
           userVaults={formattedVaults}
-          userId={session.user.id}
+          userId={userId}
           initialReceivedInvitations={receivedInvitations}
           initialSentInvitations={sentInvitations}
         />

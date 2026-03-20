@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { updatePaidInstallmentsAction } from '@/app/recurring/actions';
+import { updatePaidInstallmentsAction } from '@/app/(private)/recurring/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';

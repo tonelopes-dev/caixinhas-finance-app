@@ -1,12 +1,16 @@
+
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import { ReportsPageClient } from '@/components/reports/reports-page-client';
 import Header from '@/components/dashboard/header';
-import { User } from '@/lib/definitions';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import { User } from '@/lib/definitions';
 
-export default async function ReportsPage() {
+export default async function AuthenticatedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -14,10 +18,12 @@ export default async function ReportsPage() {
   }
 
   return (
-    <main className="relative min-h-screen">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       <DashboardBackground />
       <Header user={session.user as User} partner={null} />
-      <ReportsPageClient />
-    </main>
+      <main className="relative z-10 flex-1 flex flex-col pt-24">
+        {children}
+      </main>
+    </div>
   );
 }

@@ -16,7 +16,7 @@ import {
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { createCategory, updateCategory, addDefaultCategories, type CategoryActionState } from '@/app/accounts/actions';
+import { createCategory, updateCategory, addDefaultCategories, type CategoryActionState } from '@/app/(private)/accounts/actions';
 import type { Category } from '@/services/category.service';
 import { Skeleton } from '../ui/skeleton';
 import { DeleteCategoryDialog } from './delete-category-dialog';
