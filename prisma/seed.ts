@@ -145,7 +145,7 @@ async function main() {
 
   // 3. Categorias
   console.log('🏷️ Criando categorias para cada usuário...');
-  const categoriesList = ['Salário', 'Freelance', 'Alimentação', 'Transporte', 'Lazer', 'Assinaturas', 'Educação', 'Saúde', 'Investimentos', 'Viagem'];
+  const categoriesList = ['Salário', 'Freelance', 'Alimentação', 'Transporte', 'Lazer', 'Assinaturas', 'Educação', 'Saúde', 'Investimentos', 'Viagem', 'Aluguel', 'Moradia'];
   
   for (const user of [clara, joao, ana]) {
     await prisma.category.createMany({
@@ -166,9 +166,8 @@ async function main() {
       type: 'corrente',
       balance: 15400.00,
       logoUrl: BANK_LOGOS.inter,
-      scope: claraVault.id,
+      scope: 'personal',
       ownerId: clara.id,
-      vaultId: claraVault.id,
     },
   });
 
@@ -176,12 +175,36 @@ async function main() {
     data: {
       name: 'Nubank Clara',
       bank: 'Nubank',
-      type: 'corrente',
+      type: 'checking',
       balance: 2150.80,
       logoUrl: BANK_LOGOS.nubank,
-      scope: claraVault.id,
+      scope: 'personal',
       ownerId: clara.id,
-      vaultId: claraVault.id,
+    },
+  });
+
+  const claraBTG = await prisma.account.create({
+    data: {
+      name: 'BTG Invest',
+      bank: 'BTG Pactual',
+      type: 'investment',
+      balance: 45000.00,
+      logoUrl: BANK_LOGOS.btg,
+      scope: 'personal',
+      ownerId: clara.id,
+    },
+  });
+
+  const claraItauCard = await prisma.account.create({
+    data: {
+      name: 'Itaú Personalité',
+      bank: 'Itaú',
+      type: 'credit_card',
+      balance: -12500.00,
+      creditLimit: 60000.00,
+      logoUrl: BANK_LOGOS.itau,
+      scope: 'personal',
+      ownerId: clara.id,
     },
   });
 
@@ -279,6 +302,34 @@ async function main() {
     }
   });
 
+  const sofaGoal = await prisma.goal.create({
+    data: {
+      name: 'Sofá Novo',
+      targetAmount: 4500,
+      currentAmount: 0,
+      emoji: '🛋️',
+      visibility: 'shared',
+      vaultId: sharedVault.id,
+      participants: {
+        create: { userId: clara.id, role: 'owner' }
+      }
+    }
+  });
+
+  const iphoneGoal = await prisma.goal.create({
+    data: {
+      name: 'Comprar um iPhone',
+      targetAmount: 8500,
+      currentAmount: 0,
+      emoji: '📱',
+      visibility: 'shared',
+      vaultId: sharedVault.id,
+      participants: {
+        create: { userId: clara.id, role: 'owner' }
+      }
+    }
+  });
+
   // 6. Transações e Colaborações
   console.log('💸 Gerando histórico de transações e colaborações...');
 
@@ -298,6 +349,52 @@ async function main() {
         userId: clara.id,
         sourceAccountId: claraInter.id,
         categoryId: getCat(clara.id, 'Salário').id,
+        vaultId: claraVault.id,
+      }
+    });
+
+    // Freelance da Clara (diversificação)
+    if (i < 3) {
+      await prisma.transaction.create({
+        data: {
+          amount: 2500,
+          date: getDaysAgo(i * 10 + 2),
+          description: 'Freelance - Rebranding Cliente X',
+          type: 'income',
+          actorId: clara.id,
+          userId: clara.id,
+          sourceAccountId: claraNubank.id,
+          categoryId: getCat(clara.id, 'Freelance').id,
+          vaultId: claraVault.id,
+        }
+      });
+    }
+
+    // Pagamentos Fixos - Clara
+    await prisma.transaction.create({
+      data: {
+        amount: -3200,
+        date: date,
+        description: 'Aluguel Apartamento',
+        type: 'expense',
+        actorId: clara.id,
+        userId: clara.id,
+        sourceAccountId: claraInter.id,
+        categoryId: getCat(clara.id, 'Aluguel')?.id || getCat(clara.id, 'Moradia')?.id || getCat(clara.id, 'Lazer')?.id,
+        vaultId: claraVault.id,
+      }
+    });
+
+    await prisma.transaction.create({
+      data: {
+        amount: -250,
+        date: date,
+        description: 'Internet Fibra Vivo',
+        type: 'expense',
+        actorId: clara.id,
+        userId: clara.id,
+        sourceAccountId: claraNubank.id,
+        categoryId: getCat(clara.id, 'Assinaturas').id,
         vaultId: claraVault.id,
       }
     });
@@ -433,6 +530,71 @@ async function main() {
   });
   totalReserve += 5000;
   await prisma.goal.update({ where: { id: reserveGoal.id }, data: { currentAmount: totalReserve } });
+
+  // Movimentações nas novas Caixinhas (Sofá e iPhone)
+  console.log('   - Registrando movimentações nas novas caixinhas...');
+  
+  // Sofá
+  await prisma.transaction.create({
+    data: {
+      amount: 400,
+      date: getDaysAgo(5),
+      description: 'Dinerinho pro sofá!',
+      type: 'income',
+      actorId: clara.id,
+      userId: clara.id,
+      goalId: sofaGoal.id,
+      sourceAccountId: claraNubank.id,
+      vaultId: sharedVault.id,
+      categoryId: getCat(clara.id, 'Investimentos').id,
+    }
+  });
+  await prisma.transaction.create({
+    data: {
+      amount: 400,
+      date: getDaysAgo(15),
+      description: 'Contribuição João - Sofá',
+      type: 'income',
+      actorId: joao.id,
+      userId: joao.id,
+      goalId: sofaGoal.id,
+      sourceAccountId: joaoBTG.id,
+      vaultId: sharedVault.id,
+      categoryId: getCat(joao.id, 'Investimentos').id,
+    }
+  });
+  await prisma.goal.update({ where: { id: sofaGoal.id }, data: { currentAmount: 800 } });
+
+  // iPhone
+  await prisma.transaction.create({
+    data: {
+      amount: 1500,
+      date: getDaysAgo(10),
+      description: 'Início do projeto iPhone',
+      type: 'income',
+      actorId: clara.id,
+      userId: clara.id,
+      goalId: iphoneGoal.id,
+      sourceAccountId: claraBTG.id,
+      vaultId: sharedVault.id,
+      categoryId: getCat(clara.id, 'Investimentos').id,
+    }
+  });
+  await prisma.transaction.create({
+    data: {
+      amount: 500,
+      date: getDaysAgo(2),
+      description: 'Bônus do Freela pro iPhone',
+      type: 'income',
+      actorId: clara.id,
+      userId: clara.id,
+      goalId: iphoneGoal.id,
+      sourceAccountId: claraNubank.id,
+      vaultId: sharedVault.id,
+      categoryId: getCat(clara.id, 'Freelance').id,
+    }
+  });
+  await prisma.goal.update({ where: { id: iphoneGoal.id }, data: { currentAmount: 2000 } });
 
   // 7. Transações Diversas para parecer real
   console.log('🛒 Adicionando gastos cotidianos para todos...');

@@ -16,6 +16,8 @@
     "test:integration": "jest --testPathPattern=__tests__/integration",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:mobile": "playwright test --project=mobile",
+    "test:e2e:mobile:ui": "playwright test --ui --project=mobile",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:recurring": "playwright test tests/recurring.spec.ts",
     "test:e2e:emails": "playwright test tests/emails.spec.ts",

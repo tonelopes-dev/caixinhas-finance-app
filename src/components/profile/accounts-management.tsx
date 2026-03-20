@@ -311,7 +311,7 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
                     <div className="space-y-2">
                         <Label htmlFor="account-type" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 ml-1">Tipo de Conta</Label>
                         <Select name="account-type" value={accountType} onValueChange={(v) => setAccountType(v as Account['type'])}>
-                            <SelectTrigger className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
+                            <SelectTrigger id="account-type" className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
                                 <SelectValue placeholder="Selecione o tipo" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">
@@ -516,7 +516,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
                 <div className="space-y-3">
                   <Label htmlFor="account-type" className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40 ml-1">Tipo de Conta</Label>
                   <Select name="account-type" onValueChange={(v) => setAccountType(v as Account['type'])}>
-                    <SelectTrigger className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
+                    <SelectTrigger id="account-type" className="h-14 rounded-2xl border-2 border-[#2D241E]/5 bg-white text-lg font-bold text-[#2D241E] transition-all shadow-sm">
                       <SelectValue placeholder="Selecione o tipo..." />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">

@@ -219,6 +219,8 @@ function LoginPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRedirectingRef.current) return;
+    
     setError('');
 
     try {
@@ -232,49 +234,39 @@ function LoginPageContent() {
         redirect: false,
       });
 
-      // Aguardar pelo menos 3 segundos
-      const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+      // Aguardar pelo menos 2 segundos para o usuário ver a animação premium
+      const minimumTimePromise = new Promise(resolve => setTimeout(resolve, 2000));
 
       // Aguardar tanto o login quanto o tempo mínimo
       const [result] = await Promise.all([loginPromise, minimumTimePromise]);
 
       if (result?.error) {
         console.log('❌ Erro no login:', result.error);
-        
-        // Esconder loading antes de mostrar erro
         setAuthLoading(false);
-        
-        // Diferentes tipos de erro
         if (result.error === 'CredentialsSignin') {
-          setError('Email ou senha incorretos');
-        } else if (result.error === 'CallbackRouteError') {
-          setError('Erro de autenticação. Tente novamente.');
+          setError('E-mail ou senha incorretos.');
         } else {
           setError('Erro ao fazer login. Tente novamente.');
         }
       } else if (result?.ok) {
-        console.log('✅ Login bem-sucedido, redirecionando...');
+        console.log('✅ Login bem-sucedido! Redirecionando...');
+        setAuthLoading(true, "✅ Bem-vindo(a)! Carregando painel...");
         
-        // Atualizar mensagem de loading
-        setAuthLoading(true, "✅ Login realizado! Redirecionando...");
+        isRedirectingRef.current = true;
+        sessionStorage.setItem('redirecting', 'true');
         
-        // Marcar que o login foi bem-sucedido para manter o loading ativo
-        sessionStorage.setItem('login_in_progress', 'true');
-        
-        // Redirecionar - o loading continua até chegarmos no destino
         setTimeout(() => {
           const callbackUrl = searchParams.get('callbackUrl') || '/vaults';
           window.location.href = callbackUrl;
         }, 800);
       } else {
-        console.log('⚠️ Resultado inesperado do login:', result);
         setAuthLoading(false);
-        setError('Erro inesperado. Tente novamente.');
+        setError('Ocorreu um erro inesperado.');
       }
     } catch (error) {
       console.error('❌ Erro no login:', error);
       setAuthLoading(false);
-      setError('Erro ao fazer login. Tente novamente.');
+      setError('Erro de conexão. Tente novamente.');
     }
   };
 

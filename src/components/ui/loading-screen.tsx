@@ -27,6 +27,12 @@ export function LoadingScreen({
     "Construindo seu futuro..."
   ];
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Sincronizar com progresso externo se fornecido
   useEffect(() => {
     if (externalProgress !== undefined) {
@@ -64,9 +70,9 @@ export function LoadingScreen({
       
       {/* Container do loading com fundo gradiente */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-accent/10">
-      {/* Partículas de fundo animadas */}
+      {/* Partículas de fundo animadas - apenas renderizar após montagem para evitar hydration mismatch */}
       <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
+        {mounted && [...Array(20)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float opacity-30"
