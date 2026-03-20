@@ -11,27 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { ResponsiveTransactionList } from '@/components/transactions/responsive-transaction-list';
 import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import {
   Select,
@@ -42,8 +22,6 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
-import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -444,71 +422,12 @@ export function TransactionsPageClient({
             </div>
 
             <div className="p-0">
-                {/* Mobile View */}
-                <div className="md:hidden space-y-6 p-4">
-                    {filteredTransactions.length > 0 ? (
-                        filteredTransactions.map((t) => (
-                            <div key={t.id} className="bg-white/40 backdrop-blur-3xl rounded-[32px] p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500">
-                                {/* Top Row: Icon and Amount */}
-                                <div className="flex justify-between items-center mb-6">
-                                    <div className={cn(
-                                        "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-700",
-                                        t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
-                                        t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
-                                        "bg-blue-50 text-blue-600"
-                                    )}>
-                                        {t.type === 'income' ? <TrendingUp size={24} /> : 
-                                         t.type === 'expense' ? <TrendingDown size={24} /> : 
-                                         <ArrowRightLeft size={24} />}
-                                    </div>
-                                    <div className={cn(
-                                        "text-3xl font-black tracking-tighter font-headline italic leading-none text-right",
-                                        t.type === 'income' ? "text-emerald-600" : 
-                                        t.type === 'expense' ? "text-[#ff6b7b]" : 
-                                        "text-blue-600"
-                                    )}>
-                                        {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
-                                    </div>
-                                </div>
-
-                                {/* Description */}
-                                <div className="mb-6 min-w-0">
-                                    <h4 className="font-headline italic text-[#2D241E] text-2xl font-black leading-tight break-words pr-2">
-                                        {t.description}
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        <Badge variant="secondary" className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[9px] uppercase tracking-[0.2em] px-3 py-1 rounded-lg">
-                                            {t.category?.name || 'Geral'}
-                                        </Badge>
-                                        {t.isRecurring && (
-                                            <Badge variant="outline" className="border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-lg px-3 py-1">Fixo</Badge>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                {/* Bottom Row: Info and Actions */}
-                                <div className="pt-6 border-t border-[#2D241E]/5 flex items-end justify-between">
-                                    <div className="space-y-1.5 flex-1 min-w-0 pr-4">
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em]">
-                                            <Calendar className="h-3 w-3" />
-                                            <span>{formatDate(t.date)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.1em] truncate italic">
-                                            <Wallet className="h-3 w-3 shrink-0" />
-                                            <span>
-                                                {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
-                                                 t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 shrink-0">
-                                        <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                        <DeleteTransactionDialog transactionId={t.id} />
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
+                <ResponsiveTransactionList 
+                    transactions={filteredTransactions}
+                    accounts={allAccounts}
+                    goals={allGoals}
+                    categories={allCategories}
+                    emptyState={
                         <div className="py-24 text-center text-[#2D241E]/20 space-y-8">
                             <div className="p-10 bg-white/30 w-fit mx-auto rounded-[48px] border border-white/50">
                                 <Search size={56} className="animate-pulse" />
@@ -518,119 +437,8 @@ export function TransactionsPageClient({
                                 <p className="text-sm font-bold uppercase tracking-widest opacity-60">Ajuste seus filtros e tente novamente</p>
                             </div>
                         </div>
-                    )}
-                </div>
-
-                {/* Desktop View */}
-                <div className="hidden md:block">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-b border-white/10 hover:bg-transparent">
-                                    <TableHead className="py-10 px-12 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Data</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Descrição</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Categoria</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Conta</TableHead>
-                                    <TableHead className="py-10 text-right text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 pr-12">Valor</TableHead>
-                                    <TableHead className="py-10 text-center text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredTransactions.length > 0 ? (
-                                    filteredTransactions.map((t) => (
-                                        <TableRow 
-                                            key={t.id} 
-                                            className="group border-b border-white/5 hover:bg-white/60 transition-all duration-500"
-                                        >
-                                            <TableCell className="py-8 px-12">
-                                                <div className="flex flex-col">
-                                                    <span className="text-base font-black text-[#2D241E] font-inter italic">{formatDate(t.date)}</span>
-                                                    <span className="text-[11px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em] mt-1.5">
-                                                        {new Date(t.date).toLocaleDateString('pt-BR', { weekday: 'long' })}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center gap-5">
-                                                    <div className={cn(
-                                                        "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm",
-                                                        t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
-                                                        t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
-                                                        "bg-blue-50 text-blue-600"
-                                                    )}>
-                                                        {t.type === 'income' ? <TrendingUp size={20} /> : 
-                                                         t.type === 'expense' ? <TrendingDown size={20} /> : 
-                                                         <ArrowRightLeft size={20} />}
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-lg font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic">{t.description}</span>
-                                                        <div className="flex items-center gap-3 mt-2">
-                                                            {t.isRecurring && (
-                                                                <Badge variant="outline" className="h-6 px-3 border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-xl">Fixo</Badge>
-                                                            )}
-                                                            {t.isInstallment && (
-                                                                <Badge variant="outline" className="h-6 px-3 border-blue-100 bg-blue-50 text-blue-600 text-[9px] font-black tracking-widest uppercase rounded-xl">
-                                                                    {t.installmentNumber}/{t.totalInstallments}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <Badge variant="secondary" className="px-5 py-2 rounded-2xl bg-white/80 text-[#2D241E]/60 border-none font-black text-[11px] uppercase tracking-widest shadow-sm">
-                                                    {t.category?.name || 'Geral'}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-2.5 w-2.5 rounded-full bg-[#2D241E]/10" />
-                                                    <span className="text-[12px] font-black text-[#2D241E]/40 uppercase tracking-[0.15em]">
-                                                        {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
-                                                         t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className={cn(
-                                                "py-8 text-right font-black text-2xl tracking-tighter pr-12 font-headline italic",
-                                                t.type === 'income' ? "text-emerald-600" : 
-                                                t.type === 'expense' ? "text-[#ff6b7b]" : 
-                                                "text-blue-600"
-                                            )}>
-                                                {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                                    <EditTransactionDialog 
-                                                        transaction={t as Transaction} 
-                                                        accounts={allAccounts} 
-                                                        goals={allGoals} 
-                                                        categories={allCategories}
-                                                    />
-                                                    <DeleteTransactionDialog transactionId={t.id} />
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-96 text-center">
-                                            <div className="flex flex-col items-center justify-center gap-8 text-[#2D241E]/20">
-                                                <div className="p-12 bg-white/30 rounded-[60px] border border-white/50 shadow-inner">
-                                                    <Search size={80} className="animate-pulse" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <p className="font-black text-3xl tracking-tight text-[#2D241E]/30 font-headline italic">Nenhum resultado</p>
-                                                    <p className="text-sm font-bold uppercase tracking-[0.3em] opacity-50">Refine seus termos de busca ou filtros</p>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-                </div>
+                    }
+                />
             </div>
         </div>
       </motion.div>

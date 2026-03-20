@@ -9,17 +9,9 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { ResponsiveTransactionList } from '@/components/transactions/responsive-transaction-list';
 import {
   Repeat,
-  Repeat1,
   MoreHorizontal,
   TrendingDown,
   TrendingUp,
@@ -33,7 +25,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { DeleteTransactionDialog } from '../transactions/delete-transaction-dialog';
 import { InstallmentCard } from './installment-purchase-card';
 import { cn } from '@/lib/utils';
@@ -159,74 +150,17 @@ export function RecurringPageClient({
           />
         </div>
         <div className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-                <TableHeader>
-                    <TableRow className="border-b border-white/10 hover:bg-transparent">
-                        <TableHead className="py-8 px-10 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Descrição</TableHead>
-                        <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Categoria</TableHead>
-                        <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 text-center">Próxima Data</TableHead>
-                        <TableHead className="py-8 text-right text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40">Valor</TableHead>
-                        <TableHead className="py-8 text-center text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/40 pr-10">Ações</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                {[...recurringExpenses, ...recurringIncomes].length > 0 ? (
-                    [...recurringExpenses, ...recurringIncomes].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((t) => (
-                    <TableRow key={t.id} className="group border-b border-white/5 hover:bg-white/60 transition-all duration-500">
-                        <TableCell className="py-7 px-10">
-                            <div className="flex items-center gap-4">
-                                <div className={cn(
-                                    "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm border border-white/20",
-                                    t.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-[#ff6b7b]/10 text-[#ff6b7b]"
-                                )}>
-                                    <Repeat1 size={20} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-bold text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors">{t.description}</span>
-                                    <span className="text-[10px] font-black text-[#2D241E]/20 uppercase tracking-[0.1em] mt-0.5">{t.type === 'income' ? 'Receita Mensal' : 'Despesa Fixa'}</span>
-                                </div>
-                            </div>
-                        </TableCell>
-                        <TableCell className="py-7">
-                            <Badge variant="secondary" className="px-5 py-2 rounded-xl bg-white/60 text-[#2D241E]/60 border border-white/40 font-black text-[9px] uppercase tracking-[0.15em] shadow-sm">
-                                {typeof t.category === 'object' ? (t.category as any).name : t.category}
-                            </Badge>
-                        </TableCell>
-                        <TableCell className="py-7 text-center">
-                            <span className="text-sm font-bold text-[#2D241E]/40 italic">
-                                Próximo: {formatDate(t.date)}
-                            </span>
-                        </TableCell>
-                        <TableCell className={cn(
-                            "py-7 text-right font-black text-2xl tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity",
-                            t.type === 'income' ? "text-emerald-600" : "text-[#ff6b7b]"
-                        )}>
-                            {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
-                        </TableCell>
-                        <TableCell className="py-6 pr-10">
-                        <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <EditTransactionDialog
-                                transaction={t}
-                                accounts={allAccounts}
-                                goals={allGoals}
-                                categories={allCategories}
-                            />
-                            <DeleteTransactionDialog transactionId={t.id} />
-                        </div>
-                        </TableCell>
-                    </TableRow>
-                    ))
-                ) : (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-64 text-center">
-                            <p className="text-[#2D241E]/20 font-black uppercase tracking-widest text-xs">Nenhuma transação recorrente encontrada</p>
-                        </TableCell>
-                    </TableRow>
-                )}
-                </TableBody>
-            </Table>
-          </div>
+          <ResponsiveTransactionList 
+            transactions={[...recurringExpenses, ...recurringIncomes].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())}
+            accounts={allAccounts}
+            goals={allGoals}
+            categories={allCategories}
+            emptyState={
+               <div className="py-20 text-center text-[#2D241E]/20 space-y-4">
+                  <p className="font-black uppercase tracking-widest text-xs">Nenhuma transação recorrente encontrada</p>
+               </div>
+            }
+          />
         </div>
       </section>
 
