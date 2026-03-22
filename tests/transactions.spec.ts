@@ -1,104 +1,157 @@
 import { test, expect } from '@playwright/test';
+import { TransactionsPage } from './transactions.pom';
 
-test.describe('Gestão de Transações - CRUD Completo', () => {
-    
+test.describe('Módulo de Transações - Fluxos Financeiros', () => {
+    let txPage: TransactionsPage;
+    const mainAccount = 'Inter Beatriz';
+    const secondaryAccount = 'Nubank Clara';
+
     test.beforeEach(async ({ page }) => {
-        // LOGIN
+        // Logar console do browser no terminal do teste
+        page.on('console', msg => {
+            if (msg.type() === 'error' || msg.type() === 'warning' || msg.text().includes('🔍')) {
+                console.log(`  🌐 [BROWSER] ${msg.type()}: ${msg.text()}`);
+            }
+        });
+
+        // 1. LOGIN
         await page.goto('/login');
         await page.getByLabel(/E-mail/i).fill('clara.beatriz@caixinhas.app');
         await page.getByLabel(/Senha/i).fill('password123');
         await page.getByRole('button', { name: 'Entrar' }).click();
         
-        // Esperar chegar na página de seleção de cofres e entrar no primeiro
-        await page.waitForURL(/.*vaults/, { timeout: 15000 });
-        await page.locator('div, button').filter({ hasText: 'Cofre' }).first().click();
+        // 2. Aguardar login e ir direto para Transações (Workspace Pessoal por padrão)
+        await page.waitForURL(/.*(dashboard|vaults|transactions)/, { timeout: 15000 });
         
-        // Ir para transações
-        await page.goto('/transactions');
-        await page.waitForURL(/.*transactions/, { timeout: 15000 });
+        // 3. Inicializar POM
+        txPage = new TransactionsPage(page);
+        await txPage.goto();
     });
 
-    test('Deve criar uma despesa simples de 3 passos', async ({ page }) => {
-        const description = `Almoço Executivo ${Date.now()}`;
+    test('Deve registrar uma Despesa Simples e atualizar o Saldo Líquido', async ({ page }) => {
+        const description = `Jantar E2E ${Date.now()}`;
+        const amount = '50,00';
         
-        // 1. Abrir diálogo de criação
-        await page.getByRole('button', { name: /Adicionar/i }).first().click();
-        
-        // Step 1: Descrição e Categoria
-        await page.getByPlaceholder(/O que você está pagando ou recebendo/i).fill(description);
-        await page.getByLabel(/Categoria/i).click();
-        // Clicar em uma categoria do dropdown (ex: Alimentação)
-        await page.getByRole('option', { name: /Alimentação/i }).first().click();
-        await page.getByRole('button', { name: /Próximo Passo/i }).click();
-        
-        // Step 2: Detalhes (Tipo e Conta)
-        await page.getByLabel(/Tipo de Operação/i).click();
-        await page.getByRole('option', { name: /Saída/i }).first().click();
-        await page.getByLabel(/De onde sai o dinheiro/i).click();
-        await page.getByRole('option').first().click(); // Seleciona a primeira conta disponível
-        await page.getByRole('button', { name: /Próximo Passo/i }).click();
-        
-        // Step 3: Valor
-        await page.getByLabel(/Valor Total/i).fill('45,90');
-        await page.getByRole('button', { name: /Finalizar e Salvar/i }).click();
-        
-        // Verificação final
+        // Capturar saldo inicial
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
+
+        // Fluxo de criação
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Alimentação');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        // Asserção 1: Visibilidade na lista
         await expect(page.getByText(description)).toBeVisible();
+
+        // Asserção 2: Efeito colateral no Saldo Líquido
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance - 50);
     });
 
-    test('Deve criar uma despesa parcelada (3x)', async ({ page }) => {
-        const description = `Notebook ${Date.now()}`;
+    test('Deve registrar uma Receita e atualizar o Saldo Líquido', async ({ page }) => {
+        const description = `Freelance E2E ${Date.now()}`;
+        const amount = '500,00';
         
-        await page.getByRole('button', { name: /Adicionar/i }).first().click();
-        
-        // Step 1
-        await page.getByPlaceholder(/O que você está pagando ou recebendo/i).fill(description);
-        await page.getByLabel(/Categoria/i).click();
-        await page.getByRole('option', { name: /Eletrônicos|Outros/i }).first().click();
-        await page.getByRole('button', { name: /Próximo Passo/i }).click();
-        
-        // Step 2
-        await page.getByLabel(/Tipo de Operação/i).click();
-        await page.getByRole('option', { name: /Saída/i }).first().click();
-        await page.getByLabel(/De onde sai o dinheiro/i).click();
-        await page.getByRole('option').first().click();
-        
-        // Habilitar parcelamento (Splits)
-        await page.getByLabel(/Dividir em parcelas/i).click();
-        await page.getByLabel(/Número de Parcelas/i).fill('3');
-        await page.getByRole('button', { name: /Próximo Passo/i }).click();
-        
-        // Step 3
-        await page.getByLabel(/Valor Total/i).fill('3000,00');
-        await page.getByRole('button', { name: /Finalizar e Salvar/i }).click();
-        
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
+
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Entrada', undefined, mainAccount); // Entrada usa destinationAccount
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
         await expect(page.getByText(description)).toBeVisible();
+
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance + 500);
     });
 
-    test('Deve editar e depois excluir uma transação', async ({ page }) => {
-        // Encontrar a primeira transação da lista
-        const firstTransaction = page.locator('div, button').filter({ hasText: /R\$/ }).first();
-        const description = await firstTransaction.locator('h3, p').first().textContent();
+    test('Deve realizar uma Transferência entre contas', async ({ page }) => {
+        const description = `Transfer E2E ${Date.now()}`;
+        const amount = '100,00';
         
-        // 1. Editar
-        await firstTransaction.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') }).click();
-        await page.getByRole('menuitem', { name: /Editar/i }).click();
+        // Em uma transferência entre contas do mesmo workspace, o Saldo Líquido total não muda,
+        // mas o saldo individual de cada conta muda. 
+        // Para simplificar esta asserção sem ir ao Dashboard, validamos que o Saldo Líquido permanece IGUAL.
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
+
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Transferência', mainAccount, secondaryAccount); // Transferindo de uma conta para outra
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        await expect(page.getByText(description)).toBeVisible();
+
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance); // Não muda o total do workspace
+    });
+
+    test('Deve registrar uma Despesa Parcelada (12x)', async ({ page }) => {
+        const description = `Smartphone E2E ${Date.now()}`;
+        const installmentAmount = '200,00'; // Valor da parcela
         
-        const newDescription = `${description} (Editado)`;
-        await page.getByPlaceholder(/O que você está pagando ou recebendo/i).fill(newDescription);
-        await page.getByRole('button', { name: /Salvar Alterações/i }).click();
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Eletrônicos');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3(installmentAmount, { 
+            chargeType: 'Parcelado', 
+            installments: '12' 
+        });
+        await txPage.submitAndAwaitSave();
+
+        await expect(page.getByText(description)).toBeVisible();
+        // O app deve mostrar o indicador de parcela (ex: 1/12)
+        await expect(page.getByText('1/12')).toBeVisible();
+    });
+
+    test('Deve editar uma transação e recalcular o saldo (Ajuste de Valor)', async ({ page }) => {
+        const description = `Ajuste E2E ${Date.now()}`;
         
-        await expect(page.getByText(newDescription)).toBeVisible();
+        // 1. Criar transação inicial de 100
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3('100,00', { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        const balanceAfterCreate = await txPage.getSummaryBalance('Saldo Líquido');
+
+        // 2. Editar para 150 (deve debitar mais 50)
+        await txPage.editFirstTransaction(description);
         
+        // Ir para Passo 3 do Edit
+        await txPage.nextStepButton.click(); // Passo 1 -> 2
+        await txPage.nextStepButton.click(); // Passo 2 -> 3
+        
+        await txPage.amountInput.fill('150,00');
+        await txPage.submitAndAwaitSave();
+
+        // 3. Validar novo saldo
+        const finalBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(finalBalance).toBe(balanceAfterCreate - 50);
+    });
+
+    test('Deve excluir uma transação e estornar o saldo', async ({ page }) => {
+        const description = `Delete E2E ${Date.now()}`;
+        
+        // 1. Criar transação de 200
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3('200,00', { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        const balanceAfterCreate = await txPage.getSummaryBalance('Saldo Líquido');
+
         // 2. Excluir
-        const editedTransaction = page.locator('div, button').filter({ hasText: newDescription }).last();
-        await editedTransaction.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') }).click();
-        await page.getByRole('menuitem', { name: /Excluir/i }).click();
-        
-        // Confirmar exclusão no AlertDialog
-        await page.getByRole('button', { name: /Sim, excluir/i }).click();
-        
-        await expect(page.getByText(newDescription)).not.toBeVisible();
+        await txPage.deleteFirstTransaction(description);
+
+        // 3. Validar estorno (+200)
+        const finalBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(finalBalance).toBe(balanceAfterCreate + 200);
     });
 
 });
