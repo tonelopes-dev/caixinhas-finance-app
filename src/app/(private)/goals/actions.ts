@@ -144,8 +144,8 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
     }
     
     const transactionData = {
-        userId: goal.userId,
-        vaultId: goal.vaultId,
+        userId: goal.userId || undefined,
+        vaultId: goal.vaultId || undefined,
         amount,
         goalId,
         actorId: userId,

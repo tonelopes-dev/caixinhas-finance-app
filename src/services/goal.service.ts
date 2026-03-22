@@ -1,5 +1,6 @@
 
 import { prisma } from './prisma';
+import type { PrismaTx } from './account.service';
 
 /**
  * GoalService
@@ -257,11 +258,13 @@ export class GoalService {
   }
 
   /**
-   * Adiciona um valor à meta (depósito)
+   * Adiciona um valor à meta (depósito).
+   * Aceita um `tx` opcional para participar de uma transação Prisma atômica.
    */
-  static async addToGoal(goalId: string, amount: number): Promise<any> {
+  static async addToGoal(goalId: string, amount: number, tx?: PrismaTx): Promise<any> {
     try {
-      const goal = await prisma.goal.findUnique({
+      const db = tx || prisma;
+      const goal = await db.goal.findUnique({
         where: { id: goalId },
       });
 
@@ -269,7 +272,7 @@ export class GoalService {
         throw new Error('Meta não encontrada');
       }
 
-      return await prisma.goal.update({
+      return await db.goal.update({
         where: { id: goalId },
         data: {
           currentAmount: goal.currentAmount + amount,
@@ -282,11 +285,13 @@ export class GoalService {
   }
 
   /**
-   * Remove um valor da meta (retirada)
+   * Remove um valor da meta (retirada).
+   * Aceita um `tx` opcional para participar de uma transação Prisma atômica.
    */
-  static async removeFromGoal(goalId: string, amount: number): Promise<any> {
+  static async removeFromGoal(goalId: string, amount: number, tx?: PrismaTx): Promise<any> {
     try {
-      const goal = await prisma.goal.findUnique({
+      const db = tx || prisma;
+      const goal = await db.goal.findUnique({
         where: { id: goalId },
       });
 
@@ -296,7 +301,7 @@ export class GoalService {
 
       const newAmount = Math.max(0, goal.currentAmount - amount);
 
-      return await prisma.goal.update({
+      return await db.goal.update({
         where: { id: goalId },
         data: {
           currentAmount: newAmount,

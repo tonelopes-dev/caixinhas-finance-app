@@ -1,7 +1,10 @@
 
-
 import { prisma } from './prisma';
+import type { PrismaClient } from '@prisma/client';
 import type { Account } from '@/lib/definitions';
+
+/** Prisma transactional client — aceita tanto o client global quanto o `tx` de $transaction */
+export type PrismaTx = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 
 /**
  * Serviço para gerenciar contas bancárias
@@ -168,12 +171,14 @@ export class AccountService {
   }
 
   /**
-   * Atualiza o saldo de uma conta
+   * Atualiza o saldo de uma conta.
+   * Aceita um `tx` opcional para participar de uma transação Prisma atômica.
    */
-  static async updateBalance(accountId: string, amount: number, type: 'income' | 'expense'): Promise<void> {
+  static async updateBalance(accountId: string, amount: number, type: 'income' | 'expense', tx?: PrismaTx): Promise<void> {
     try {
+        const db = tx || prisma;
         const operation = type === 'income' ? 'increment' : 'decrement';
-        await prisma.account.update({
+        await db.account.update({
             where: { id: accountId },
             data: { 
                 balance: { [operation]: amount }
