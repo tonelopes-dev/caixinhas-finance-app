@@ -202,7 +202,7 @@ export function ResponsiveTransactionList({
               <TableHead className="py-8 px-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">
                 Data
               </TableHead>
-              <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">
+              <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 w-[30%]">
                 Descrição
               </TableHead>
               <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">
@@ -211,7 +211,7 @@ export function ResponsiveTransactionList({
               <TableHead className="py-8 text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">
                 Conta
               </TableHead>
-              <TableHead className="py-8 text-right text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 pr-8">
+              <TableHead className="py-8 text-right text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30 pr-8 w-[180px]">
                 Valor
               </TableHead>
               <TableHead className="py-8 text-center text-[11px] font-black uppercase tracking-[0.2em] text-[#2D241E]/30">
@@ -258,8 +258,8 @@ export function ResponsiveTransactionList({
                         <ArrowRightLeft size={18} />
                       )}
                     </div>
-                    <div>
-                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic">
+                    <div className="flex flex-col truncate">
+                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic truncate">
                         {t.description}
                       </span>
                       {t.isRecurring && (
