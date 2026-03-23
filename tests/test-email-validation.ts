@@ -1,4 +1,4 @@
-import { VaultService } from './src/services/vault.service';
+import { VaultService } from '@/services/vault.service';
 
 async function testValidation() {
     console.log('🧪 Iniciando teste de validação de e-mail...');
