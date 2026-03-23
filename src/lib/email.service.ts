@@ -22,6 +22,19 @@ export interface EmailOptions {
  */
 export async function sendEmail(options: EmailOptions) {
   const { to, subject, html, text, replyTo, fromName, attachments } = options;
+  
+  // 🛡️ SEGURANÇA FINAL: Validar formato do destinatário antes de chamar qualquer API
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Nota: O Resend também aceita "Name <email@example.com>", mas aqui validamos o e-mail puro 
+  // que é o que o sistema passa na maioria das vezes. 
+  // Se contiver "<", extraímos o e-mail entre os parênteses angulares.
+  const emailToValidate = to.includes('<') ? to.split('<')[1].split('>')[0] : to;
+  
+  if (!emailRegex.test(emailToValidate)) {
+    console.error(`❌ Tentativa de envio para e-mail inválido: ${to}`);
+    throw new Error(`Endereço de e-mail inválido: ${to}`);
+  }
+
   const apiKey = process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY;
 
   if (!apiKey) {

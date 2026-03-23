@@ -560,10 +560,14 @@ export function EditVaultDialog({ open, onOpenChange, vault }: EditVaultDialogPr
                                 <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
                                   <UserPlus className="h-4 w-4 text-muted-foreground" />
                                 </div>
-                                <div>
-                                  <p className="text-sm font-black text-[#2D241E] truncate max-w-[150px] sm:max-w-none">{invitation.email}</p>
-                                  <p className="text-[10px] font-bold text-[#ff6b7b] italic">Convite enviado</p>
-                                </div>
+                                  <div>
+                                    <p className="text-sm font-black text-[#2D241E] truncate max-w-[150px] sm:max-w-none">
+                                      {invitation.email}
+                                    </p>
+                                    <p className="text-[10px] font-bold text-[#ff6b7b] italic">
+                                      Aguardando aceitação
+                                    </p>
+                                  </div>
                               </div>
                               <Button 
                                 type="button" 

@@ -15,8 +15,13 @@ const createVaultSchema = z.object({
 const updateVaultSchema = z.object({
   vaultId: z.string().min(1),
   name: z.string().min(1, { message: 'O nome é obrigatório.' }),
-  imageUrl: z.string().url().optional().nullable(), // Permitir null
+  imageUrl: z.string().url().optional().nullable(),
   isPrivate: z.boolean().optional(),
+});
+
+const inviteToVaultSchema = z.object({
+  vaultId: z.string().min(1),
+  email: z.string().email({ message: 'E-mail inválido.' }),
 });
 
 export type VaultActionState = {
@@ -357,7 +362,13 @@ export async function inviteToVaultAction(
       return { success: false, message: 'Você não tem permissão para convidar para este cofre' };
     }
     
-    await VaultService.createInvitation(vaultId, userId, email); // Usar createInvitation do VaultService
+    // Validar formato de e-mail
+    const validated = inviteToVaultSchema.safeParse({ vaultId, email });
+    if (!validated.success) {
+      return { success: false, message: validated.error.flatten().fieldErrors.email?.[0] || 'E-mail inválido' };
+    }
+
+    await VaultService.createInvitation(vaultId, userId, email);
     revalidatePath(`/vaults/${vaultId}/manage`);
     return { success: true, message: 'Convite enviado com sucesso!' };
   } catch (error) {
@@ -395,6 +406,12 @@ export async function inviteToVaultWithContext(
       return { success: false, message: 'Você não tem permissão para convidar para este cofre' };
     }
     
+    // Validar formato de e-mail
+    const validated = inviteToVaultSchema.safeParse({ vaultId, email });
+    if (!validated.success) {
+      return { success: false, message: validated.error.flatten().fieldErrors.email?.[0] || 'E-mail inválido' };
+    }
+
     // Passar contexto de goalName para o template de email
     await VaultService.createInvitation(vaultId, userId, email, {
       source: 'goal',
@@ -435,6 +452,7 @@ export async function getVaultPendingInvitationsAction(
       targetName: inv.targetName,
       senderName: inv.sender.name,
       status: inv.status,
+      email: inv.receiverEmail, // Adicionando o e-mail
     }));
   } catch (error) {
     console.error('Erro ao buscar convites pendentes do cofre:', error);

@@ -151,14 +151,6 @@ export function InviteForm({ userVaults, userId, onInviteSent }: InviteFormProps
             </Alert>
           )}
           
-          {selectedVaultId && selectedVaultId !== 'personal' && (
-            <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800 dark:text-blue-200">
-                O usuário convidado precisa estar cadastrado no sistema para receber o convite.
-              </AlertDescription>
-            </Alert>
-          )}
           <div className="space-y-2">
             <Label htmlFor="email">E-mail do Convidado(a)</Label>
             <Input
