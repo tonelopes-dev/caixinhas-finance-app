@@ -107,6 +107,23 @@ export default async function DashboardPage() {
 
   const { accounts = [], recentTransactions = [] } = dashboardData || {};
 
+  // Mapeamento de Transações (Prisma -> Frontend Definition)
+  const mappedTransactions = recentTransactions.map((t: any) => ({
+    ...t,
+    date: t.date.toISOString(),
+    ownerId: t.userId || t.vaultId || "",
+    ownerType: t.userId ? ("user" as const) : ("vault" as const),
+  }));
+
+  // Mapeamento de Objetivos (Prisma -> Frontend Definition)
+  const mappedGoals = (allGoals || []).map((g: any) => ({
+    ...g,
+    ownerId: g.userId || g.vaultId || "",
+    ownerType: g.userId ? ("user" as const) : ("vault" as const),
+    createdAt: g.createdAt.toISOString(),
+    updatedAt: g.updatedAt?.toISOString(),
+  }));
+
   return (
     <div className="mx-auto w-full max-w-[1472px] px-4 md:px-8 pb-12 flex flex-col gap-8 pt-8">
       <Suspense fallback={<DashboardSkeleton />}>
@@ -118,8 +135,8 @@ export default async function DashboardPage() {
           isPersonalWorkspace={workspaceId === userId}
           members={members}
           accounts={accounts}
-          goals={allGoals || []}
-          transactions={recentTransactions || []}
+          goals={mappedGoals as any}
+          transactions={mappedTransactions as any}
           categories={categories || []}
           patrimonyData={patrimonyData}
         />

@@ -44,6 +44,7 @@ type RecentTransactionsProps = {
   ownerType: "user" | "vault";
   typeFilter: "all" | "income" | "expense" | "transfer";
   onFilterChange: (filter: "all" | "income" | "expense" | "transfer") => void;
+  disablePrivacyMode?: boolean;
 };
 
 export default function RecentTransactions({
@@ -55,6 +56,7 @@ export default function RecentTransactions({
   ownerType,
   typeFilter,
   onFilterChange,
+  disablePrivacyMode = false,
 }: RecentTransactionsProps) {
   const baseTransactions = useMemo(() => {
     // Sort by most recent
@@ -138,6 +140,7 @@ export default function RecentTransactions({
             accounts={accounts}
             goals={goals}
             categories={categories}
+            disablePrivacyMode={disablePrivacyMode}
           />
         </div>
 
