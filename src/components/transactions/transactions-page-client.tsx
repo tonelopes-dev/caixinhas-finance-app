@@ -73,6 +73,8 @@ const getTypeDisplay = (type: Transaction['type']) => {
 
 type TransactionsPageClientProps = {
   initialTransactions: any[];
+  totalTransactions: number;
+  currentPage: number;
   allAccounts: Account[];
   allGoals: Goal[];
   allCategories: any[];
@@ -81,6 +83,8 @@ type TransactionsPageClientProps = {
 
 export function TransactionsPageClient({
   initialTransactions,
+  totalTransactions,
+  currentPage,
   allAccounts,
   allGoals,
   allCategories,
@@ -94,69 +98,72 @@ export function TransactionsPageClient({
   const [monthFilter, setMonthFilter] = useState<string>('all');
   const [yearFilter, setYearFilter] = useState<string>('all');
 
+  const limit = 10;
+  const totalPages = Math.ceil(totalTransactions / limit);
+
+  // Use initialTransactions directly as they are already filtered by the server
+  const filteredTransactions = initialTransactions;
+
+  // Function to update URL with new filters and page
+  const updateFilters = (newFilters: {
+    page?: number;
+    q?: string;
+    type?: string;
+    month?: string;
+    year?: string;
+  }) => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (newFilters.page !== undefined) params.set('page', newFilters.page.toString());
+    if (newFilters.q !== undefined) {
+      if (newFilters.q) params.set('q', newFilters.q);
+      else params.delete('q');
+      params.set('page', '1'); // Reset to page 1 on search
+    }
+    if (newFilters.type !== undefined) {
+      params.set('type', newFilters.type);
+      params.set('page', '1');
+    }
+    if (newFilters.month !== undefined) {
+      params.set('month', newFilters.month);
+      params.set('page', '1');
+    }
+    if (newFilters.year !== undefined) {
+      params.set('year', newFilters.year);
+      params.set('page', '1');
+    }
+
+    router.push(`/transactions?${params.toString()}`);
+  };
+
+  // Sync filters from URL whenever it changes
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearchQuery(params.get('q') || '');
+    setTypeFilter((params.get('type') as any) || 'all');
+    setMonthFilter(params.get('month') || 'all');
+    setYearFilter(params.get('year') || 'all');
+  }, [router]); // router changes on navigation
+
   const years = useMemo(() => {
       const currentYear = new Date().getFullYear();
-      if (!initialTransactions || initialTransactions.length === 0) {
-          return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-      }
-      
-      const transactionYears = initialTransactions.map(t => new Date(t.date).getFullYear());
-      const minYear = Math.min(...transactionYears, currentYear - 2); // Pelo menos 2 anos atrás
-      const maxYear = Math.max(...transactionYears, currentYear + 1); // Pelo menos ano que vem
-      
       const yearsList = [];
-      for (let y = maxYear; y >= minYear; y--) {
+      for (let y = currentYear + 1; y >= currentYear - 5; y--) {
         yearsList.push(y.toString());
       }
-      return [...new Set(yearsList)]; // Remove duplicates
-  }, [initialTransactions]);
-
-  useEffect(() => {
-    setMonthFilter((new Date().getMonth() + 1).toString());
-    setYearFilter(new Date().getFullYear().toString());
+      return yearsList;
   }, []);
-
-  const getAccountName = (id: string) => {
-    if (id.startsWith('goal')) {
-        const goal = allGoals.find(g => g.id === id);
-        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
-    }
-    const account = allAccounts.find(a => a.id === id);
-    return account ? account.name : 'Conta desconhecida';
-  }
-
-  const filteredTransactions = useMemo(() => {
-    return initialTransactions.filter((transaction) => {
-      const transactionDate = new Date(transaction.date);
-      
-      const searchMatch = searchQuery === '' || 
-        transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.amount.toString().includes(searchQuery);
-
-      const typeMatch = typeFilter === 'all' || transaction.type === typeFilter;
-      
-      const monthMatch =
-        monthFilter === 'all' ||
-        transactionDate.getMonth() + 1 === parseInt(monthFilter);
-      
-      const yearMatch =
-        yearFilter === 'all' ||
-        transactionDate.getFullYear() === parseInt(yearFilter);
-        
-      return searchMatch && typeMatch && monthMatch && yearMatch;
-    });
-  }, [initialTransactions, searchQuery, typeFilter, monthFilter, yearFilter]);
 
   const summary = useMemo(() => {
     const income = filteredTransactions
-      .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'income')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const expenses = filteredTransactions
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'expense')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const transfers = filteredTransactions
-      .filter((t) => t.type === 'transfer')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'transfer')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const balance = income - expenses;
     return { income, expenses, balance, transfers };
   }, [filteredTransactions]);
@@ -373,6 +380,13 @@ export function TransactionsPageClient({
                             className="pl-16 h-20 bg-white/40 border-white/40 rounded-[28px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-bold text-[#2D241E] text-xl placeholder:text-[#2D241E]/15 placeholder:italic"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') updateFilters({ q: searchQuery });
+                                if (e.key === 'Escape') {
+                                    setSearchQuery('');
+                                    updateFilters({ q: '' });
+                                }
+                            }}
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500">
                              <div className="px-2 py-1 rounded-md bg-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/30 uppercase tracking-widest">ESC para limpar</div>
@@ -385,8 +399,10 @@ export function TransactionsPageClient({
                                 <Filter size={16} className="text-[#2D241E]/30" />
                                 <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Refinar</span>
                             </div>
-                            
-                            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
+                                               <Select value={typeFilter} onValueChange={(value) => {
+                                setTypeFilter(value as any);
+                                updateFilters({ type: value });
+                             }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[160px]">
                                     <SelectValue placeholder="Tipo" />
                                 </SelectTrigger>
@@ -398,7 +414,10 @@ export function TransactionsPageClient({
                                 </SelectContent>
                             </Select>
                             
-                            <Select value={monthFilter} onValueChange={setMonthFilter}>
+                            <Select value={monthFilter} onValueChange={(value) => {
+                                setMonthFilter(value);
+                                updateFilters({ month: value });
+                            }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[180px]">
                                     <Calendar className="h-4 w-4 text-[#2D241E]/30" />
                                     <SelectValue placeholder="Mês" />
@@ -408,13 +427,13 @@ export function TransactionsPageClient({
                                 </SelectContent>
                             </Select>
                             
-                            <Select value={yearFilter} onValueChange={setYearFilter}>
+                            <Select value={yearFilter} onValueChange={(value) => {
+                                setYearFilter(value);
+                                updateFilters({ year: value });
+                            }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all">
                                     <SelectValue placeholder="Ano" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    {years.map(y => <SelectItem key={y} value={y} className="font-black text-center rounded-xl py-3">{y}</SelectItem>)}
-                                </SelectContent>
                             </Select>
                         </div>
                     </div>
@@ -441,6 +460,33 @@ export function TransactionsPageClient({
                     }
                 />
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="p-8 md:p-12 border-t border-white/20 bg-white/10 flex items-center justify-between">
+                    <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 font-inter italic">
+                        Página {currentPage} de {totalPages} ({totalTransactions} transações)
+                    </p>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="outline"
+                            className="h-14 px-8 rounded-2xl border-white/40 bg-white/40 backdrop-blur-sm font-black text-[#2D241E] hover:bg-white transition-all disabled:opacity-30"
+                            disabled={currentPage <= 1}
+                            onClick={() => updateFilters({ page: currentPage - 1 })}
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="h-14 px-8 rounded-2xl border-white/40 bg-white/40 backdrop-blur-sm font-black text-[#2D241E] hover:bg-white transition-all disabled:opacity-30"
+                            disabled={currentPage >= totalPages}
+                            onClick={() => updateFilters({ page: currentPage + 1 })}
+                        >
+                            Próximo <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
       </motion.div>
     </>

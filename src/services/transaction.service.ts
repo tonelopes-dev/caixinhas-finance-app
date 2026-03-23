@@ -97,23 +97,92 @@ export class TransactionService {
     }
   }
 
-  /** Busca transações de um contexto (usuário ou vault). */
+  /** Busca transações de um contexto (usuário ou vault) com suporte a paginação e filtros. */
   static async getTransactions(
     ownerId: string,
-    ownerType: 'user' | 'vault'
-  ): Promise<TransactionWithRelations[]> {
+    ownerType: 'user' | 'vault',
+    options: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      type?: 'income' | 'expense' | 'transfer' | 'all';
+      month?: string;
+      year?: string;
+    } = {}
+  ): Promise<{ transactions: TransactionWithRelations[]; total: number }> {
     try {
+      const { 
+        page = 1, 
+        limit = 10, 
+        search, 
+        type = 'all', 
+        month, 
+        year 
+      } = options;
+      
+      const skip = (page - 1) * limit;
+      
       const whereClause: Prisma.TransactionWhereInput =
         ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
 
-      return await prisma.transaction.findMany({
-        where: whereClause,
-        include: TRANSACTION_INCLUDE,
-        orderBy: { date: 'desc' },
-      }) as TransactionWithRelations[];
+      if (type && type !== 'all') {
+        whereClause.type = type;
+      }
+
+      if (search) {
+        whereClause.OR = [
+          { description: { contains: search, mode: 'insensitive' } },
+        ];
+        // Se a busca for um número, tenta buscar por valor exato também
+        const searchNumber = parseFloat(search.replace(',', '.'));
+        if (!isNaN(searchNumber)) {
+           whereClause.OR.push({ amount: searchNumber });
+        }
+      }
+
+      if (month && month !== 'all') {
+        const m = parseInt(month);
+        const y = year && year !== 'all' ? parseInt(year) : new Date().getFullYear();
+        const start = new Date(y, m - 1, 1);
+        const end = new Date(y, m, 0, 23, 59, 59);
+        whereClause.date = { gte: start, lte: end };
+      } else if (year && year !== 'all') {
+        const y = parseInt(year);
+        const start = new Date(y, 0, 1);
+        const end = new Date(y, 11, 31, 23, 59, 59);
+        whereClause.date = { gte: start, lte: end };
+      }
+
+      const [transactions, total] = await Promise.all([
+        prisma.transaction.findMany({
+          where: whereClause,
+          include: TRANSACTION_INCLUDE,
+          orderBy: { date: 'desc' },
+          skip,
+          take: limit,
+        }) as Promise<TransactionWithRelations[]>,
+        prisma.transaction.count({ where: whereClause }),
+      ]);
+
+      return { transactions, total };
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
       throw new Error('Não foi possível buscar as transações');
+    }
+  }
+
+  /** Retorna o total de transações de um contexto para cálculo de paginação. */
+  static async getTransactionsCount(
+    ownerId: string,
+    ownerType: 'user' | 'vault'
+  ): Promise<number> {
+    try {
+      const whereClause: Prisma.TransactionWhereInput =
+        ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      return await prisma.transaction.count({ where: whereClause });
+    } catch (error) {
+      console.error('Erro ao contar transações:', error);
+      throw new Error('Não foi possível contar as transações');
     }
   }
 
