@@ -242,7 +242,7 @@ export function ResponsiveTransactionList({
                   <div className="flex items-center gap-4">
                     <div
                       className={cn(
-                        "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm border border-white/40",
+                        "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-700 shadow-sm border border-white/40",
                         t.type === "income"
                           ? "bg-emerald-50 text-emerald-600"
                           : t.type === "expense"

@@ -147,7 +147,7 @@ export default function RecentTransactions({
         {filteredTransactions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 px-6 text-center space-y-8 bg-[#fdfcf7] rounded-[48px] border-2 border-dashed border-[#2D241E]/5 mt-6 group">
             <div className="relative">
-              <div className="h-24 w-24 rounded-[32px] bg-white flex items-center justify-center shadow-sm border border-[#2D241E]/5 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+              <div className="h-24 w-24 rounded-[32px] bg-white flex items-center justify-center shadow-sm border border-[#2D241E]/5">
                 <Filter className="h-10 w-10 text-[#2D241E]/20" />
               </div>
               <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-[#ff6b7b] flex items-center justify-center text-white shadow-lg animate-bounce">

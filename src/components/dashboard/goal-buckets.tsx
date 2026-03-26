@@ -107,7 +107,7 @@ export default function GoalBuckets({
                 className="group relative flex flex-col gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
               >
                 <div className="flex items-center gap-5">
-                  <div className="text-5xl bg-white p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
+                  <div className="text-5xl bg-white p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110">
                     {goal.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
