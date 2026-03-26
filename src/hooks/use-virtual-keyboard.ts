@@ -32,17 +32,6 @@ export function useVirtualKeyboard() {
       const keyboardThreshold = window.innerWidth > 768 ? 150 : 100;
       const isKeyboardOpen = heightDifference > keyboardThreshold;
       
-      // Log para debug no mobile
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 Virtual Keyboard Detection:', {
-          initial: initialHeight,
-          current: currentViewportHeight,
-          difference: heightDifference,
-          threshold: keyboardThreshold,
-          isOpen: isKeyboardOpen
-        });
-      }
-      
       setIsVirtualKeyboardOpen(isKeyboardOpen);
       setViewportHeight(currentViewportHeight);
     };

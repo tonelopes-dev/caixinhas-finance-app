@@ -9,16 +9,9 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { Transaction, Account, Goal } from "@/lib/definitions";
+import { ResponsiveTransactionList } from "@/components/transactions/responsive-transaction-list";
 import { AddTransactionDialog } from "@/components/transactions/add-transaction-dialog";
 import {
   Select,
@@ -51,6 +44,7 @@ type RecentTransactionsProps = {
   ownerType: "user" | "vault";
   typeFilter: "all" | "income" | "expense" | "transfer";
   onFilterChange: (filter: "all" | "income" | "expense" | "transfer") => void;
+  disablePrivacyMode?: boolean;
 };
 
 export default function RecentTransactions({
@@ -62,6 +56,7 @@ export default function RecentTransactions({
   ownerType,
   typeFilter,
   onFilterChange,
+  disablePrivacyMode = false,
 }: RecentTransactionsProps) {
   const baseTransactions = useMemo(() => {
     // Sort by most recent
@@ -139,105 +134,14 @@ export default function RecentTransactions({
       </CardHeader>
 
       <CardContent>
-        <div className="overflow-x-auto sm:-mx-6 sm:px-6 px-4">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-[#2D241E]/5 hover:bg-transparent">
-                <TableHead className="py-6 px-4 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[2px]">
-                  Descrição
-                </TableHead>
-                <TableHead className="py-6 px-4 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[2px] hidden md:table-cell">
-                  Categoria
-                </TableHead>
-                <TableHead className="py-6 px-4 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[2px] hidden lg:table-cell">
-                  Frequência
-                </TableHead>
-                <TableHead className="py-6 px-4 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[2px] hidden sm:table-cell">
-                  Data
-                </TableHead>
-                <TableHead className="py-6 px-4 text-right text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[2px]">
-                  Valor
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.slice(0, 5).map((tx, index) => (
-                <motion.tr
-                  key={tx.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 * index }}
-                  className="group border-b border-[#2D241E]/5 hover:bg-[#f6f3f1]/50 transition-colors"
-                >
-                  <TableCell className="py-6 px-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm border border-[#2D241E]/5 text-xl group-hover:scale-110 transition-transform">
-                        {tx.type === "income" ? "💰" : "💸"}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-black text-[#2D241E] text-base leading-tight">
-                          {tx.description}
-                        </span>
-                        <span className="text-[10px] font-bold text-[#201C1C]/40 uppercase tracking-widest block sm:hidden">
-                          {formatDate(tx.date)}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-6 px-4 hidden md:table-cell">
-                    <Badge
-                      variant="outline"
-                      className="border-[#2D241E]/10 bg-white text-[#2D241E]/60 rounded-xl px-3 py-1 font-black text-[10px] uppercase tracking-widest whitespace-nowrap"
-                    >
-                      {typeof tx.category === "object"
-                        ? (tx.category as any)?.name
-                        : tx.category ||
-                          (tx.type === "income" ? "Ganho" : "Gasto")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="py-6 px-4 hidden lg:table-cell">
-                    {tx.isRecurring ? (
-                      <Badge className="bg-blue-50 text-blue-700 border border-blue-100 rounded-xl px-3 py-1 font-black text-[10px] uppercase tracking-widest shadow-none">
-                        Fixo
-                      </Badge>
-                    ) : tx.isInstallment ? (
-                      <Badge className="bg-purple-50 text-purple-700 border border-purple-100 rounded-xl px-3 py-1 font-black text-[10px] uppercase tracking-widest shadow-none">
-                        Parcelas
-                      </Badge>
-                    ) : (
-                      <span className="text-sm font-bold text-[#2D241E]/30 uppercase italic tracking-widest">
-                        Única
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-6 px-4 text-sm font-black text-[#2D241E]/70 hidden sm:table-cell">
-                    {formatDate(tx.date)}
-                  </TableCell>
-                  <TableCell className="py-6 px-4 text-right">
-                    <div
-                      className={cn(
-                        "text-xl font-bold tracking-tighter",
-                        tx.type === "income"
-                          ? "text-emerald-600"
-                          : "text-rose-600",
-                      )}
-                    >
-                      {!isLoaded || isPrivate ? (
-                        <PrivacyBlur />
-                      ) : (
-                        <div className="flex items-center justify-end gap-1">
-                          <span className="text-sm md:text-base opacity-70">
-                            {tx.type === "income" ? "+" : "-"}
-                          </span>
-                          <span>{formatCurrency(Math.abs(tx.amount))}</span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="px-0">
+          <ResponsiveTransactionList 
+            transactions={filteredTransactions.slice(0, 5)}
+            accounts={accounts}
+            goals={goals}
+            categories={categories}
+            disablePrivacyMode={disablePrivacyMode}
+          />
         </div>
 
         {filteredTransactions.length === 0 && (

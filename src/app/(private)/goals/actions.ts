@@ -115,63 +115,80 @@ export async function updateGoalAction(prevState: GoalFormState, formData: FormD
   return { success: true, message: "Caixinha atualizada com sucesso!" };
 }
 
+/**
+ * Orquestra depósitos e retiradas de Caixinhas (Goals).
+ * Cria uma transação do tipo 'transfer' vinculada à goal.
+ * 
+ * O TransactionService.createTransaction já lida com:
+ * - Atualizar o saldo da conta bancária
+ * - Atualizar o currentAmount da Goal
+ * - Tudo dentro de uma $transaction atômica
+ */
 async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw'): Promise<TransactionFormState> {
+    // 1. Autenticação
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     if (!userId) return { message: 'Usuário não autenticado' };
 
+    // 2. Validação Zod
     const validatedFields = goalTransactionSchema.safeParse(Object.fromEntries(formData.entries()));
-
     if (!validatedFields.success) {
         return { errors: validatedFields.error.flatten().fieldErrors };
     }
 
     const { amount, goalId, accountId, description } = validatedFields.data;
     
-    // Buscar a caixinha para obter userId ou vaultId
+    // 3. Buscar a caixinha para obter contexto (userId ou vaultId)
     const goal = await GoalService.getGoalById(goalId);
     if (!goal) {
-        return { message: 'Caixinha não encontrada' };
+        return { message: 'Caixinha não encontrada.' };
     }
     
-    // Validar saldo para retiradas
-    if (type === 'withdraw') {
-        if (goal.currentAmount < amount) {
-            return { 
-                message: `Saldo insuficiente. Saldo disponível: R$ ${goal.currentAmount.toFixed(2)}` 
-            };
-        }
+    // 4. Validar saldo para retiradas
+    if (type === 'withdraw' && goal.currentAmount < amount) {
+        return { 
+            message: `Saldo insuficiente na caixinha. Disponível: R$ ${goal.currentAmount.toFixed(2)}` 
+        };
     }
-    
-    const transactionData = {
-        userId: goal.userId,
-        vaultId: goal.vaultId,
-        amount,
-        goalId,
-        actorId: userId,
-        type: 'transfer' as 'transfer',
-        date: new Date(),
-        category: type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha',
-        description: description || (type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha'),
-        sourceAccountId: type === 'deposit' ? accountId : null,
-        destinationAccountId: type === 'withdraw' ? accountId : null,
-    };
 
+    // 5. Chamar o serviço (atômico: cria transação + atualiza saldo da conta + atualiza goal)
     try {
-        await TransactionService.createTransaction(transactionData);
-
+        await TransactionService.createTransaction({
+            userId: goal.userId || undefined,
+            vaultId: goal.vaultId || undefined,
+            amount,
+            goalId,
+            actorId: userId,
+            type: 'transfer',
+            date: new Date(),
+            category: type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha',
+            description: description || (type === 'deposit' ? 'Depósito na Caixinha' : 'Retirada da Caixinha'),
+            sourceAccountId: type === 'deposit' ? accountId : null,
+            destinationAccountId: type === 'withdraw' ? accountId : null,
+        });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
         console.error(`❌ Erro ao processar ${type}:`, error);
-        return { message: `Ocorreu um erro ao realizar o ${type}: ${errorMessage}` };
+        return { message: `Não foi possível realizar o ${type === 'deposit' ? 'depósito' : 'a retirada'}: ${errorMessage}` };
     }
 
+    // 6. Invalidar caches em cascata
+    // - /goals e /goals/{id}: saldo da caixinha mudou
+    // - /dashboard: saldos gerais e transações recentes mudaram
+    // - /transactions: nova transação do tipo 'transfer' aparece na lista
+    // - /accounts: saldo da conta bancária foi atualizado
+    // - /reports e /recurring: dados derivados podem ter mudado
+    revalidatePath('/', 'layout');
     revalidatePath('/goals');
     revalidatePath(`/goals/${goalId}`);
     revalidatePath('/dashboard');
     revalidatePath('/transactions');
+    revalidatePath('/accounts');
+    revalidatePath('/reports');
     revalidatePath('/recurring');
-    return { success: true, message: `${type === 'deposit' ? 'Depósito' : 'Retirada'} realizado com sucesso!` };
+
+    const label = type === 'deposit' ? 'Depósito' : 'Retirada';
+    return { success: true, message: `${label} realizado com sucesso!` };
 }
 
 export async function depositToGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {

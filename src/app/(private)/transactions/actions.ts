@@ -3,15 +3,15 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { TransactionService } from '@/services/transaction.service';
-import { AccountService } from '@/services/account.service';
-import { GoalService } from '@/services/goal.service';
-import { CategoryService } from '@/services/category.service';
+import { TransactionService, type CreateTransactionInput } from '@/services/transaction.service';
 import { invalidateReportCache } from '../reports/actions';
-import { cookies } from 'next/headers';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+
+// ---------------------------------------------------------------------------
+// Schema de validação
+// ---------------------------------------------------------------------------
 
 const transactionSchema = z.object({
   id: z.string().optional(),
@@ -52,15 +52,9 @@ const transactionSchema = z.object({
     const hasSource = !!data.sourceAccountId || !!data.goalId;
     const hasDestination = !!data.destinationAccountId || !!data.goalId;
 
-    if (data.type === 'expense') {
-        return hasSource;
-    }
-    if (data.type === 'income') {
-        return hasDestination;
-    }
-    if (data.type === 'transfer') {
-        return hasSource && hasDestination;
-    }
+    if (data.type === 'expense') return hasSource;
+    if (data.type === 'income') return hasDestination;
+    if (data.type === 'transfer') return hasSource && hasDestination;
     return true;
 }, {
     message: "A conta de origem e/ou destino é necessária dependendo do tipo de transação.",
@@ -68,25 +62,29 @@ const transactionSchema = z.object({
 });
 
 
+// ---------------------------------------------------------------------------
+// Tipo de retorno compartilhado
+// ---------------------------------------------------------------------------
+
 export type TransactionState = {
   success: boolean;
   message?: string | null;
   errors?: Record<string, string[] | undefined>;
 }
 
-export async function addTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  // Verifica se o usuário tem acesso completo
-  const { requireFullAccess } = await import('@/lib/action-helpers');
-  const accessCheck = await requireFullAccess();
 
-  if (!accessCheck.success || !accessCheck.data) {
-    return { success: false, message: accessCheck.error || 'Acesso negado.' };
-  }
-  const userId = accessCheck.data.id;
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
+/**
+ * Extrai e normaliza os dados do FormData da UI para o formato do schema.
+ * Lida com a convenção `goal-{id}` e o cálculo de valor de parcelas.
+ */
+function parseTransactionFormData(formData: FormData, userId: string) {
   const ownerId = formData.get('ownerId') as string;
   const isPersonal = ownerId === userId;
-  
+
   const sourceValue = formData.get('sourceAccountId') as string | null;
   const destinationValue = formData.get('destinationAccountId') as string | null;
 
@@ -113,63 +111,26 @@ export async function addTransaction(prevState: TransactionState, formData: Form
     vaultId: !isPersonal ? ownerId : undefined,
   };
 
-  // Se for parcelado, o valor recebido é o TOTAL. Precisamos converter para o valor da PARCELA.
+  // Se for parcelado, o valor recebido é o TOTAL. Converter para valor da PARCELA.
   if (processedData.isInstallment && processedData.totalInstallments) {
-      const total = parseFloat(processedData.amount as string);
-      const installments = parseInt(processedData.totalInstallments as string);
-      if (!isNaN(total) && !isNaN(installments) && installments > 0) {
-          processedData.amount = (total / installments).toFixed(2);
-      }
-  }
-  
-  const validatedFields = transactionSchema.safeParse(processedData);
-
-  if (!validatedFields.success) {
-    console.log("--- DEBUG: ERRO DE VALIDAÇÃO ---");
-    console.log(JSON.stringify(validatedFields.error.flatten().fieldErrors, null, 2));
-    return {
-      success: false,
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Falha na validação. Por favor, verifique os campos.',
-    };
-  }
-  
-  try {
-    await TransactionService.createTransaction(validatedFields.data as any);
-    
-    try {
-        await invalidateReportCache(validatedFields.data.date, ownerId);
-        revalidatePath('/', 'layout');
-        revalidatePath('/transactions');
-        revalidatePath('/dashboard');
-        revalidatePath('/reports');
-        revalidatePath('/recurring');
-        if (validatedFields.data.goalId) {
-            revalidatePath(`/goals/${validatedFields.data.goalId}`);
-        }
-    } catch (secondaryError) {
-        console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
+    const total = parseFloat(processedData.amount as string);
+    const installments = parseInt(processedData.totalInstallments as string);
+    if (!isNaN(total) && !isNaN(installments) && installments > 0) {
+      processedData.amount = (total / installments).toFixed(2);
     }
-    
-    return { success: true, message: 'Transação adicionada com sucesso!' };
-
-  } catch(error) {
-     console.error('Erro ao criar transação:', error);
-     return { success: false, message: 'Ocorreu um erro no servidor ao salvar a transação.' };
   }
+
+  return { processedData, ownerId };
 }
 
-export async function updateTransaction(prevState: TransactionState, formData: FormData): Promise<TransactionState> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user.id) {
-    return { success: false, message: 'Usuário não autenticado.' };
-  }
-
-  const ownerId = formData.get('ownerId') as string;
+/**
+ * Extrai e normaliza os dados do FormData de edição.
+ */
+function parseUpdateFormData(formData: FormData) {
   const sourceValue = formData.get('sourceAccountId') as string | null;
   const destinationValue = formData.get('destinationAccountId') as string | null;
 
-  const rawData = {
+  return {
     id: formData.get('id'),
     description: formData.get('description'),
     amount: formData.get('amount'),
@@ -186,11 +147,135 @@ export async function updateTransaction(prevState: TransactionState, formData: F
     isInstallment: formData.get('chargeType') === 'installment',
     installmentNumber: formData.get('installmentNumber'),
     totalInstallments: formData.get('totalInstallments'),
-    paidInstallments: formData.get('paidInstallments')
+    paidInstallments: formData.get('paidInstallments'),
   };
+}
 
+/**
+ * Invalida TODAS as rotas que podem ter sido afetadas por uma mutação de transação.
+ * 
+ * Por quê cada rota?
+ * - `/transactions` — A lista de transações mudou.
+ * - `/dashboard` — Os saldos, gráficos e transações recentes mudaram.
+ * - `/reports` — Os relatórios mensais podem estar desatualizados.
+ * - `/recurring` — Se a transação era recorrente/parcelada, a lista mudou.
+ * - `/goals/{id}` — Se a transação envolve uma caixinha, o saldo da goal mudou.
+ * - `/accounts` — Saldos de contas bancárias foram atualizados.
+ * - `layout` — Força rerenderização do layout compartilhado (sidebar/header com saldos).
+ */
+async function revalidateTransactionCaches(opts: {
+  dateIso?: string;
+  ownerId?: string;
+  goalId?: string | null;
+  previousGoalId?: string | null;
+}) {
+  // Report cache (assíncrono, falha silenciosa)
+  try {
+    await invalidateReportCache(opts.dateIso, opts.ownerId);
+  } catch (e) {
+    console.warn('Aviso: Falha ao invalidar cache de relatórios:', e);
+  }
+
+  // Rotas que SEMPRE devem ser revalidadas em qualquer mutação de transação
+  revalidatePath('/', 'layout');
+  revalidatePath('/transactions');
+  revalidatePath('/dashboard');
+  revalidatePath('/reports');
+  revalidatePath('/recurring');
+  revalidatePath('/accounts');
+
+  // Rotas condicionais — só se a transação envolve uma goal
+  if (opts.goalId) {
+    revalidatePath('/goals');
+    revalidatePath(`/goals/${opts.goalId}`);
+  }
+  if (opts.previousGoalId && opts.previousGoalId !== opts.goalId) {
+    revalidatePath(`/goals/${opts.previousGoalId}`);
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// Actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Cria uma nova transação.
+ * Fluxo: Autenticação → Parsing → Validação Zod → Service → Cache → Retorno.
+ */
+export async function addTransaction(
+  prevState: TransactionState,
+  formData: FormData
+): Promise<TransactionState> {
+  // 1. Autenticação
+  const { requireFullAccess } = await import('@/lib/action-helpers');
+  const accessCheck = await requireFullAccess();
+  if (!accessCheck.success || !accessCheck.data) {
+    return { success: false, message: accessCheck.error || 'Acesso negado.' };
+  }
+  const userId = accessCheck.data.id;
+
+  // 2. Parsing do FormData
+  const { processedData, ownerId } = parseTransactionFormData(formData, userId);
+
+  // 3. Validação Zod
+  const validatedFields = transactionSchema.safeParse(processedData);
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Falha na validação. Por favor, verifique os campos.',
+    };
+  }
+
+  // 4. Chamar o serviço (que já é atômico e gerencia saldos)
+  try {
+    const { date, actorId, installmentNumber, totalInstallments, ...rest } = validatedFields.data;
+    const serviceInput: CreateTransactionInput = {
+      ...rest,
+      date: date ? new Date(date) : new Date(),
+      actorId: actorId || userId,
+      installmentNumber: installmentNumber ?? undefined,
+      totalInstallments: totalInstallments ?? undefined,
+    };
+    await TransactionService.createTransaction(serviceInput);
+  } catch (error) {
+    console.error('Erro ao criar transação:', error);
+    return { success: false, message: 'Ocorreu um erro no servidor ao salvar a transação.' };
+  }
+
+  // 5. Invalidar caches
+  await revalidateTransactionCaches({
+    dateIso: validatedFields.data.date,
+    ownerId,
+    goalId: validatedFields.data.goalId,
+  });
+
+  return { success: true, message: 'Transação adicionada com sucesso!' };
+}
+
+/**
+ * Atualiza uma transação existente.
+ * O TransactionService já faz compensação de saldos (reverse → update → apply).
+ * A action só precisa orquestrar parsing, validação, chamada e cache.
+ */
+export async function updateTransaction(
+  prevState: TransactionState,
+  formData: FormData
+): Promise<TransactionState> {
+  // 1. Autenticação
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return { success: false, message: 'Usuário não autenticado.' };
+  }
+
+  const ownerId = formData.get('ownerId') as string;
+
+  // 2. Parsing
+  const rawData = parseUpdateFormData(formData);
+
+  // 3. Validação Zod
   const validatedFields = transactionSchema.safeParse(rawData);
-
   if (!validatedFields.success) {
     return {
       success: false,
@@ -200,83 +285,93 @@ export async function updateTransaction(prevState: TransactionState, formData: F
   }
 
   const { id, ...data } = validatedFields.data;
-
   if (!id) {
     return { success: false, message: 'Erro: ID da transação não encontrado.' };
   }
 
+  // 4. Buscar original (para saber a goalId antiga e a data antiga para cache)
+  let previousGoalId: string | null = null;
+  let previousDateIso: string | undefined;
+
   try {
-    const originalTransaction = await TransactionService.getTransactionById(id);
-    if (!originalTransaction) {
-        return { success: false, message: 'Erro: Transação não encontrada.' };
+    const original = await TransactionService.getTransactionById(id);
+    if (!original) {
+      return { success: false, message: 'Erro: Transação não encontrada.' };
     }
+    previousGoalId = original.goalId ?? null;
+    previousDateIso = original.date.toISOString();
 
-    await TransactionService.updateTransaction(id, data as any);
-    
-    try {
-        await invalidateReportCache(originalTransaction.date.toISOString(), ownerId);
-        if(data.date && originalTransaction.date.toISOString() !== data.date) {
-            await invalidateReportCache(data.date, ownerId);
-        }
-        
-        revalidatePath('/', 'layout');
-        revalidatePath('/transactions');
-        revalidatePath('/dashboard');
-        revalidatePath('/reports');
-        revalidatePath('/recurring');
-        if (originalTransaction.goalId) revalidatePath(`/goals/${originalTransaction.goalId}`);
-        if (data.goalId) revalidatePath(`/goals/${data.goalId}`);
-    } catch (secondaryError) {
-        console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
-    }
-    
-    return { success: true, message: 'Transação atualizada com sucesso!' };
-
-  } catch(error) {
-     console.error('Erro ao atualizar transação:', error);
-     return { success: false, message: 'Ocorreu um erro no servidor ao atualizar a transação.' };
+    // 5. Chamar o serviço (que já faz reverse → update → apply internamente)
+    const { date: dateStr, installmentNumber: instNum, totalInstallments: totalInst, ...updateRest } = data;
+    await TransactionService.updateTransaction(id, {
+      ...updateRest,
+      date: dateStr ? new Date(dateStr) : undefined,
+      installmentNumber: instNum ?? undefined,
+      totalInstallments: totalInst ?? undefined,
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar transação:', error);
+    return { success: false, message: 'Ocorreu um erro no servidor ao atualizar a transação.' };
   }
+
+  // 6. Invalidar caches (ambas as datas se mudou de mês)
+  await revalidateTransactionCaches({
+    dateIso: previousDateIso,
+    ownerId,
+    goalId: data.goalId,
+    previousGoalId,
+  });
+
+  // Se a data mudou, invalidar o relatório do novo mês também
+  if (data.date && previousDateIso !== data.date) {
+    try {
+      await invalidateReportCache(data.date, ownerId);
+    } catch (e) {
+      console.warn('Aviso: Falha ao invalidar cache do novo mês:', e);
+    }
+  }
+
+  return { success: true, message: 'Transação atualizada com sucesso!' };
 }
 
-export async function deleteTransaction(prevState: { message: string | null }, formData: FormData): Promise<{ message: string | null, success: boolean }> {
-  const deleteTransactionSchema = z.object({
-    id: z.string(),
-  });
-  const validatedFields = deleteTransactionSchema.safeParse({
-    id: formData.get('id'),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      success: false,
-      message: 'ID da transação inválido.',
-    };
+/**
+ * Exclui uma transação.
+ * O TransactionService já reverte saldos automaticamente.
+ */
+export async function deleteTransaction(
+  prevState: { message: string | null },
+  formData: FormData
+): Promise<{ message: string | null; success: boolean }> {
+  // 1. Validação mínima
+  const id = formData.get('id') as string | null;
+  if (!id) {
+    return { success: false, message: 'ID da transação inválido.' };
   }
-  
-  const { id } = validatedFields.data;
-  
-  try {
-    const deletedTransaction = await TransactionService.getTransactionById(id);
-    if (deletedTransaction) {
-        await TransactionService.deleteTransaction(id);
-        
-        try {
-            await invalidateReportCache(deletedTransaction.date.toISOString(), deletedTransaction.vaultId || deletedTransaction.userId);
-            revalidatePath('/');
-            revalidatePath('/transactions');
-            revalidatePath('/dashboard');
-            revalidatePath('/reports');
-            revalidatePath('/recurring');
-            if (deletedTransaction.goalId) revalidatePath(`/goals/${deletedTransaction.goalId}`);
-        } catch (secondaryError) {
-            console.warn("Aviso: Falha na operação secundária (cache/revalidação):", secondaryError);
-        }
 
-        return { success: true, message: 'Transação excluída com sucesso!' };
+  // 2. Buscar a transação antes de deletar (para informações de cache)
+  let dateIso: string | undefined;
+  let ownerId: string | undefined;
+  let goalId: string | null = null;
+
+  try {
+    const transaction = await TransactionService.getTransactionById(id);
+    if (!transaction) {
+      return { success: false, message: 'Erro: Transação não encontrada.' };
     }
-    return { success: false, message: 'Erro: Transação não encontrada.' };
+
+    dateIso = transaction.date.toISOString();
+    ownerId = transaction.vaultId || transaction.userId || undefined;
+    goalId = transaction.goalId ?? null;
+
+    // 3. Chamar o serviço (que já reverte saldos dentro de $transaction)
+    await TransactionService.deleteTransaction(id);
   } catch (error) {
     console.error('Erro ao deletar transação:', error);
     return { success: false, message: 'Ocorreu um erro no servidor ao deletar a transação.' };
   }
+
+  // 4. Invalidar caches
+  await revalidateTransactionCaches({ dateIso, ownerId, goalId });
+
+  return { success: true, message: 'Transação excluída com sucesso!' };
 }

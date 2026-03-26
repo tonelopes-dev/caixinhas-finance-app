@@ -1,261 +1,157 @@
 import { test, expect } from '@playwright/test';
+import { TransactionsPage } from './transactions.pom';
 
-/**
- * Testes E2E - Sistema de Transações
- * 
- * Cobertura:
- * - Visualização da página de transações
- * - Filtros (tipo, mês, ano)
- * - Busca de transações
- * - Navegação para criação de transação
- * - Exibição de categorias e contas
- */
+test.describe('Módulo de Transações - Fluxos Financeiros', () => {
+    let txPage: TransactionsPage;
+    const mainAccount = 'Inter Beatriz';
+    const secondaryAccount = 'Nubank Clara';
 
-test.describe('Sistema de Transações', () => {
-  
-  test.beforeEach(async ({ page }) => {
-    // Login
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'clara@caixinhas.app');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/vaults', { timeout: 10000 });
-  });
+    test.beforeEach(async ({ page }) => {
+        // Logar console do browser no terminal do teste
+        page.on('console', msg => {
+            if (msg.type() === 'error' || msg.type() === 'warning' || msg.text().includes('🔍')) {
+                console.log(`  🌐 [BROWSER] ${msg.type()}: ${msg.text()}`);
+            }
+        });
 
-  test('deve exibir a página de transações corretamente', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Verificar que está na URL correta
-    expect(page.url()).toContain('/transactions');
-    
-    // Verificar se a página carregou (qualquer elemento visível)
-    const bodyVisible = await page.locator('body').isVisible();
-    expect(bodyVisible).toBeTruthy();
-    
-    console.log('✅ Página de transações exibida');
-  });
+        // 1. LOGIN
+        await page.goto('/login');
+        await page.getByLabel(/E-mail/i).fill('clara.beatriz@caixinhas.app');
+        await page.getByLabel(/Senha/i).fill('password123');
+        await page.getByRole('button', { name: 'Entrar' }).click();
+        
+        // 2. Aguardar login e ir direto para Transações (Workspace Pessoal por padrão)
+        await page.waitForURL(/.*(dashboard|vaults|transactions)/, { timeout: 15000 });
+        
+        // 3. Inicializar POM
+        txPage = new TransactionsPage(page);
+        await txPage.goto();
+    });
 
-  test('deve exibir filtros de transações', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Procurar por selects de filtro
-    const filterSelects = page.locator('select').or(
-      page.locator('[role="combobox"]')
-    );
-    
-    if (await filterSelects.count() > 0) {
-      console.log('✅ Filtros encontrados');
-    } else {
-      // Pode estar em dropdowns
-      const pageContent = await page.content();
-      const hasFilters = pageContent.includes('Tipo') || 
-                        pageContent.includes('Mês') ||
-                        pageContent.includes('Ano');
-      
-      if (hasFilters) {
-        console.log('✅ Área de filtros encontrada');
-      } else {
-        console.log('✅ Página sem filtros visíveis (OK)');
-      }
-    }
-  });
+    test('Deve registrar uma Despesa Simples e atualizar o Saldo Líquido', async ({ page }) => {
+        const description = `Jantar E2E ${Date.now()}`;
+        const amount = '50,00';
+        
+        // Capturar saldo inicial
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
 
-  test('deve exibir campo de busca', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Procurar por campo de busca
-    const searchInput = page.locator('input[type="search"]').or(
-      page.locator('input[placeholder*="usca"]').or(
-        page.locator('input[placeholder*="iltrar"]')
-      )
-    );
-    
-    if (await searchInput.count() > 0) {
-      await expect(searchInput.first()).toBeVisible();
-      console.log('✅ Campo de busca encontrado');
-    } else {
-      console.log('✅ Campo de busca não visível (OK)');
-    }
-  });
+        // Fluxo de criação
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Alimentação');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
 
-  test('deve listar transações existentes', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Procurar por tabela ou lista de transações
-    const transactionTable = page.locator('table').or(
-      page.locator('[role="table"]')
-    );
-    
-    if (await transactionTable.count() > 0) {
-      console.log('✅ Tabela de transações encontrada');
-      
-      // Verificar se tem linhas de dados
-      const rows = page.locator('tbody tr').or(
-        page.locator('[role="row"]')
-      );
-      
-      const rowCount = await rows.count();
-      if (rowCount > 0) {
-        console.log(`✅ ${rowCount} transação(ões) encontrada(s)`);
-      }
-    } else {
-      console.log('✅ Nenhuma transação ou formato diferente de exibição');
-    }
-  });
+        // Asserção 1: Visibilidade na lista
+        await expect(page.getByText(description)).toBeVisible();
 
-  test('deve exibir valores monetários formatados', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Procurar por valores em reais
-    const pageContent = await page.content();
-    const hasMoneyValues = pageContent.includes('R$') || pageContent.includes('R$');
-    
-    if (hasMoneyValues) {
-      console.log('✅ Valores monetários encontrados');
-    } else {
-      console.log('✅ Página pode estar vazia ou formato diferente');
-    }
-  });
+        // Asserção 2: Efeito colateral no Saldo Líquido
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance - 50);
+    });
 
-  test('deve exibir categorias nas transações', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Procurar por badges de categoria
-    const categoryBadges = page.locator('[class*="badge"]').or(
-      page.locator('[class*="tag"]')
-    );
-    
-    if (await categoryBadges.count() > 0) {
-      console.log('✅ Categorias exibidas nas transações');
-    } else {
-      console.log('✅ Categorias podem estar em outro formato ou não há transações');
-    }
-  });
+    test('Deve registrar uma Receita e atualizar o Saldo Líquido', async ({ page }) => {
+        const description = `Freelance E2E ${Date.now()}`;
+        const amount = '500,00';
+        
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
 
-  test('deve exibir tipos de transação (entrada/saída/transferência)', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    const pageContent = await page.content();
-    
-    // Procurar por indicadores de tipo
-    const hasTypes = pageContent.includes('Entrada') || 
-                    pageContent.includes('Saída') ||
-                    pageContent.includes('Transferência') ||
-                    pageContent.includes('income') ||
-                    pageContent.includes('expense');
-    
-    if (hasTypes) {
-      console.log('✅ Tipos de transação visíveis');
-    } else {
-      console.log('✅ Tipos podem estar representados de outra forma');
-    }
-  });
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Entrada', undefined, mainAccount); // Entrada usa destinationAccount
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
 
-  test('deve exibir contas de origem e destino', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Procurar por informações de conta
-    const pageContent = await page.content();
-    const hasAccountInfo = pageContent.includes('Origem') || 
-                          pageContent.includes('Destino') ||
-                          pageContent.includes('Conta');
-    
-    if (hasAccountInfo) {
-      console.log('✅ Informações de conta encontradas');
-    } else {
-      console.log('✅ Formato de exibição pode variar');
-    }
-  });
+        await expect(page.getByText(description)).toBeVisible();
 
-  test('deve permitir navegação para nova transação', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Procurar por botão de nova transação
-    const newTransactionButton = page.getByRole('button', { name: /nova|adicionar|criar/i }).or(
-      page.getByRole('link', { name: /nova|adicionar|criar/i })
-    );
-    
-    if (await newTransactionButton.count() > 0) {
-      console.log('✅ Botão de nova transação encontrado');
-      
-      // Não vamos clicar para não abrir diálogo, apenas validar presença
-    } else {
-      console.log('✅ Botão pode estar em outra localização');
-    }
-  });
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance + 500);
+    });
 
-  test('deve exibir datas nas transações', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Procurar por formatação de data (dd/mm/yyyy ou similar)
-    const pageContent = await page.content();
-    const hasDateFormat = pageContent.match(/\d{1,2}\/\d{1,2}\/\d{2,4}/) || 
-                         pageContent.match(/\d{4}-\d{2}-\d{2}/);
-    
-    if (hasDateFormat) {
-      console.log('✅ Datas encontradas nas transações');
-    } else {
-      console.log('✅ Formato de data pode variar');
-    }
-  });
+    test('Deve realizar uma Transferência entre contas', async ({ page }) => {
+        const description = `Transfer E2E ${Date.now()}`;
+        const amount = '100,00';
+        
+        // Em uma transferência entre contas do mesmo workspace, o Saldo Líquido total não muda,
+        // mas o saldo individual de cada conta muda. 
+        // Para simplificar esta asserção sem ir ao Dashboard, validamos que o Saldo Líquido permanece IGUAL.
+        const initialBalance = await txPage.getSummaryBalance('Saldo Líquido');
 
-  test('deve exibir descrições das transações', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    
-    // Verificar se há células de tabela com texto
-    const tableCells = page.locator('td').or(
-      page.locator('[role="cell"]')
-    );
-    
-    if (await tableCells.count() > 0) {
-      const firstCell = tableCells.first();
-      const cellText = await firstCell.textContent();
-      
-      if (cellText && cellText.trim().length > 0) {
-        console.log('✅ Descrições de transações encontradas');
-      }
-    } else {
-      console.log('✅ Tabela pode estar vazia ou em formato diferente');
-    }
-  });
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Transferência', mainAccount, secondaryAccount); // Transferindo de uma conta para outra
+        await txPage.fillStep3(amount, { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
 
-  test('deve permitir filtrar por tipo de transação', async ({ page }) => {
-    await page.goto('/transactions');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Procurar por filtro de tipo
-    const typeFilter = page.locator('select').filter({ hasText: /tipo|type/i }).or(
-      page.locator('[role="combobox"]').filter({ hasText: /tipo/i })
-    );
-    
-    if (await typeFilter.count() > 0) {
-      console.log('✅ Filtro de tipo disponível');
-    } else {
-      console.log('✅ Filtro pode estar em dropdown ou formato diferente');
-    }
-  });
+        await expect(page.getByText(description)).toBeVisible();
+
+        const newBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(newBalance).toBe(initialBalance); // Não muda o total do workspace
+    });
+
+    test('Deve registrar uma Despesa Parcelada (12x)', async ({ page }) => {
+        const description = `Smartphone E2E ${Date.now()}`;
+        const installmentAmount = '200,00'; // Valor da parcela
+        
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Eletrônicos');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3(installmentAmount, { 
+            chargeType: 'Parcelado', 
+            installments: '12' 
+        });
+        await txPage.submitAndAwaitSave();
+
+        await expect(page.getByText(description)).toBeVisible();
+        // O app deve mostrar o indicador de parcela (ex: 1/12)
+        await expect(page.getByText('1/12')).toBeVisible();
+    });
+
+    test('Deve editar uma transação e recalcular o saldo (Ajuste de Valor)', async ({ page }) => {
+        const description = `Ajuste E2E ${Date.now()}`;
+        
+        // 1. Criar transação inicial de 100
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3('100,00', { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        const balanceAfterCreate = await txPage.getSummaryBalance('Saldo Líquido');
+
+        // 2. Editar para 150 (deve debitar mais 50)
+        await txPage.editFirstTransaction(description);
+        
+        // Ir para Passo 3 do Edit
+        await txPage.nextStepButton.click(); // Passo 1 -> 2
+        await txPage.nextStepButton.click(); // Passo 2 -> 3
+        
+        await txPage.amountInput.fill('150,00');
+        await txPage.submitAndAwaitSave();
+
+        // 3. Validar novo saldo
+        const finalBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(finalBalance).toBe(balanceAfterCreate - 50);
+    });
+
+    test('Deve excluir uma transação e estornar o saldo', async ({ page }) => {
+        const description = `Delete E2E ${Date.now()}`;
+        
+        // 1. Criar transação de 200
+        await txPage.openAddDialog();
+        await txPage.fillStep1(description, 'Outros');
+        await txPage.fillStep2('Saída', mainAccount);
+        await txPage.fillStep3('200,00', { chargeType: 'Único' });
+        await txPage.submitAndAwaitSave();
+
+        const balanceAfterCreate = await txPage.getSummaryBalance('Saldo Líquido');
+
+        // 2. Excluir
+        await txPage.deleteFirstTransaction(description);
+
+        // 3. Validar estorno (+200)
+        const finalBalance = await txPage.getSummaryBalance('Saldo Líquido');
+        expect(finalBalance).toBe(balanceAfterCreate + 200);
+    });
 
 });

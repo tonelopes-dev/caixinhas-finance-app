@@ -319,7 +319,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                     <SelectValue placeholder="Selecione a categoria" />
                                   </SelectTrigger>
                                   <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name} className="font-black rounded-xl py-3 px-4">{cat.name}</SelectItem>)}
+                                    {categories.map(cat => <SelectItem key={cat.id} value={cat.name} className="font-black rounded-xl py-3">{cat.name}</SelectItem>)}
                                   </SelectContent>
                               </Select>
                               {state?.errors?.category && <p className="text-xs font-black text-[#ff6b7b] ml-1 uppercase tracking-widest">{state.errors.category[0]}</p>}
@@ -337,9 +337,9 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                             <SelectValue placeholder="Tipo" />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                            <SelectItem value="expense" className="font-black rounded-xl py-3 px-4 text-[#ff6b7b]">Saída / Despesa</SelectItem>
-                                            <SelectItem value="income" className="font-black rounded-xl py-3 px-4 text-emerald-600">Entrada / Receita</SelectItem>
-                                            <SelectItem value="transfer" className="font-black rounded-xl py-3 px-4 text-blue-600">Transferência</SelectItem>
+                                            <SelectItem value="expense" className="font-black rounded-xl py-3 text-[#ff6b7b]">Saída / Despesa</SelectItem>
+                                            <SelectItem value="income" className="font-black rounded-xl py-3 text-emerald-600">Entrada / Receita</SelectItem>
+                                            <SelectItem value="transfer" className="font-black rounded-xl py-3 text-blue-600">Transferência</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -379,7 +379,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                             <SelectValue placeholder="Selecione a conta de origem" />
                                           </SelectTrigger>
                                           <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                            {availableSources.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3 px-4">{item.name}</SelectItem>)}
+                                            {availableSources.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3">{item.name}</SelectItem>)}
                                           </SelectContent>
                                       </Select>
                                   </div>
@@ -393,7 +393,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                             <SelectValue placeholder="Selecione a conta de destino" />
                                           </SelectTrigger>
                                           <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                            {availableDestinations.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3 px-4">{item.name}</SelectItem>)}
+                                            {availableDestinations.map(item => <SelectItem key={item.value} value={item.value} className="font-black rounded-xl py-3">{item.name}</SelectItem>)}
                                           </SelectContent>
                                       </Select>
                                   </div>
@@ -485,7 +485,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                             <SelectValue placeholder="Como você pagou?" />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                            {paymentMethods.map(method => <SelectItem key={method.value} value={method.value} className="font-black rounded-xl py-3 px-4">{method.label}</SelectItem>)}
+                                            {paymentMethods.map(method => <SelectItem key={method.value} value={method.value} className="font-black rounded-xl py-3">{method.label}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>

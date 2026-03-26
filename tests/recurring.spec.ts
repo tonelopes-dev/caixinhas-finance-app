@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
 
 const TEST_USER = {
-  email: 'clara@caixinhas.app',
+  email: 'clara.beatriz@caixinhas.app',
   password: 'password123',
 };
 
 test.beforeEach(async ({ page }) => {
   // Login antes de cada teste
   await page.goto('/login');
-  await page.fill('input[name="email"]', TEST_USER.email);
-  await page.fill('input[name="password"]', TEST_USER.password);
-  await page.click('button[type="submit"]');
+  await page.getByLabel(/E-mail/i).fill('clara.beatriz@caixinhas.app');
+  await page.getByLabel(/Senha/i).fill('password123');
+  await page.getByRole('button', { name: 'Entrar' }).click();
   
   // Aguarda redirecionamento após login
-  await page.waitForURL(/\/(dashboard|vaults)/, { timeout: 10000 });
+  await page.waitForURL(/.*vaults/, { timeout: 15000 });
 });
 
 test.describe('Página de Transações Recorrentes e Parceladas', () => {

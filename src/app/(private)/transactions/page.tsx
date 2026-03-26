@@ -15,12 +15,24 @@ import { VaultService } from '@/services/vault.service';
 import { getUserAllGoals } from '@/app/(private)/goals/actions';
 import { User } from '@/lib/definitions';
 
-export default async function TransactionsPage() {
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect('/login');
   }
+
+  const { 
+    page = '1', 
+    q: search, 
+    type = 'all', 
+    month = 'all', 
+    year = 'all' 
+  } = (await searchParams) as { [key: string]: string };
 
   const userId = session.user.id;
   
@@ -38,14 +50,21 @@ export default async function TransactionsPage() {
   const isPersonal = workspaceId === userId;
   const ownerType = isPersonal ? 'user' : 'vault';
 
-  // Buscar todos os dados necessários no servidor
+  // Buscar todos os dados registrados no servidor com paginação e filtros
   const [
-    transactions, 
+    { transactions, total }, 
     accounts, 
     goalsData,
     categories 
   ] = await Promise.all([
-    TransactionService.getTransactions(workspaceId, ownerType),
+    TransactionService.getTransactions(workspaceId, ownerType, {
+      page: parseInt(page),
+      limit: 10,
+      search,
+      type: type as any,
+      month,
+      year
+    }),
     AccountService.getUserAccounts(userId),
     getUserAllGoals(userId),
     CategoryService.getUserCategories(userId),
@@ -55,6 +74,8 @@ export default async function TransactionsPage() {
     <div className="mx-auto w-full max-w-6xl px-4 md:px-8 pb-12 pt-8">
       <TransactionsPageClient
         initialTransactions={transactions}
+        totalTransactions={total}
+        currentPage={parseInt(page)}
         allAccounts={accounts}
         allGoals={goalsData.goals}
         allCategories={categories}

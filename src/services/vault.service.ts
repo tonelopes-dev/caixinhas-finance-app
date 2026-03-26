@@ -309,8 +309,14 @@ export class VaultService {
     vaultId: string, 
     senderId: string, 
     receiverEmail: string,
-    context?: { source: 'goal', goalName: string } // Contexto opcional
+    context?: { source: 'goal', goalName: string }
   ): Promise<void> {
+    // Validação básica de formato de e-mail (guarda de segurança)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(receiverEmail)) {
+        throw new Error('Formato de e-mail inválido.');
+    }
+
     try {
         const [vault, sender] = await Promise.all([
             prisma.vault.findUnique({ where: { id: vaultId } }),

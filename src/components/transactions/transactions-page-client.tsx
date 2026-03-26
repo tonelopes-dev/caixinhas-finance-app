@@ -11,27 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { ResponsiveTransactionList } from '@/components/transactions/responsive-transaction-list';
 import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
 import {
   Select,
@@ -42,8 +22,6 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
-import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -95,6 +73,8 @@ const getTypeDisplay = (type: Transaction['type']) => {
 
 type TransactionsPageClientProps = {
   initialTransactions: any[];
+  totalTransactions: number;
+  currentPage: number;
   allAccounts: Account[];
   allGoals: Goal[];
   allCategories: any[];
@@ -103,6 +83,8 @@ type TransactionsPageClientProps = {
 
 export function TransactionsPageClient({
   initialTransactions,
+  totalTransactions,
+  currentPage,
   allAccounts,
   allGoals,
   allCategories,
@@ -116,69 +98,72 @@ export function TransactionsPageClient({
   const [monthFilter, setMonthFilter] = useState<string>('all');
   const [yearFilter, setYearFilter] = useState<string>('all');
 
+  const limit = 10;
+  const totalPages = Math.ceil(totalTransactions / limit);
+
+  // Use initialTransactions directly as they are already filtered by the server
+  const filteredTransactions = initialTransactions;
+
+  // Function to update URL with new filters and page
+  const updateFilters = (newFilters: {
+    page?: number;
+    q?: string;
+    type?: string;
+    month?: string;
+    year?: string;
+  }) => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (newFilters.page !== undefined) params.set('page', newFilters.page.toString());
+    if (newFilters.q !== undefined) {
+      if (newFilters.q) params.set('q', newFilters.q);
+      else params.delete('q');
+      params.set('page', '1'); // Reset to page 1 on search
+    }
+    if (newFilters.type !== undefined) {
+      params.set('type', newFilters.type);
+      params.set('page', '1');
+    }
+    if (newFilters.month !== undefined) {
+      params.set('month', newFilters.month);
+      params.set('page', '1');
+    }
+    if (newFilters.year !== undefined) {
+      params.set('year', newFilters.year);
+      params.set('page', '1');
+    }
+
+    router.push(`/transactions?${params.toString()}`);
+  };
+
+  // Sync filters from URL whenever it changes
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearchQuery(params.get('q') || '');
+    setTypeFilter((params.get('type') as any) || 'all');
+    setMonthFilter(params.get('month') || 'all');
+    setYearFilter(params.get('year') || 'all');
+  }, [router]); // router changes on navigation
+
   const years = useMemo(() => {
       const currentYear = new Date().getFullYear();
-      if (!initialTransactions || initialTransactions.length === 0) {
-          return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-      }
-      
-      const transactionYears = initialTransactions.map(t => new Date(t.date).getFullYear());
-      const minYear = Math.min(...transactionYears, currentYear - 2); // Pelo menos 2 anos atrás
-      const maxYear = Math.max(...transactionYears, currentYear + 1); // Pelo menos ano que vem
-      
       const yearsList = [];
-      for (let y = maxYear; y >= minYear; y--) {
+      for (let y = currentYear + 1; y >= currentYear - 5; y--) {
         yearsList.push(y.toString());
       }
-      return [...new Set(yearsList)]; // Remove duplicates
-  }, [initialTransactions]);
-
-  useEffect(() => {
-    setMonthFilter((new Date().getMonth() + 1).toString());
-    setYearFilter(new Date().getFullYear().toString());
+      return yearsList;
   }, []);
-
-  const getAccountName = (id: string) => {
-    if (id.startsWith('goal')) {
-        const goal = allGoals.find(g => g.id === id);
-        return goal ? `Caixinha: ${goal.name}` : 'Caixinha';
-    }
-    const account = allAccounts.find(a => a.id === id);
-    return account ? account.name : 'Conta desconhecida';
-  }
-
-  const filteredTransactions = useMemo(() => {
-    return initialTransactions.filter((transaction) => {
-      const transactionDate = new Date(transaction.date);
-      
-      const searchMatch = searchQuery === '' || 
-        transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.amount.toString().includes(searchQuery);
-
-      const typeMatch = typeFilter === 'all' || transaction.type === typeFilter;
-      
-      const monthMatch =
-        monthFilter === 'all' ||
-        transactionDate.getMonth() + 1 === parseInt(monthFilter);
-      
-      const yearMatch =
-        yearFilter === 'all' ||
-        transactionDate.getFullYear() === parseInt(yearFilter);
-        
-      return searchMatch && typeMatch && monthMatch && yearMatch;
-    });
-  }, [initialTransactions, searchQuery, typeFilter, monthFilter, yearFilter]);
 
   const summary = useMemo(() => {
     const income = filteredTransactions
-      .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'income')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const expenses = filteredTransactions
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'expense')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const transfers = filteredTransactions
-      .filter((t) => t.type === 'transfer')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === 'transfer')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
     const balance = income - expenses;
     return { income, expenses, balance, transfers };
   }, [filteredTransactions]);
@@ -395,6 +380,13 @@ export function TransactionsPageClient({
                             className="pl-16 h-20 bg-white/40 border-white/40 rounded-[28px] shadow-sm focus:ring-[#ff6b7b]/10 focus:border-[#ff6b7b]/30 transition-all font-bold text-[#2D241E] text-xl placeholder:text-[#2D241E]/15 placeholder:italic"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') updateFilters({ q: searchQuery });
+                                if (e.key === 'Escape') {
+                                    setSearchQuery('');
+                                    updateFilters({ q: '' });
+                                }
+                            }}
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500">
                              <div className="px-2 py-1 rounded-md bg-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/30 uppercase tracking-widest">ESC para limpar</div>
@@ -407,36 +399,41 @@ export function TransactionsPageClient({
                                 <Filter size={16} className="text-[#2D241E]/30" />
                                 <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Refinar</span>
                             </div>
-                            
-                            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as any)}>
+                                               <Select value={typeFilter} onValueChange={(value) => {
+                                setTypeFilter(value as any);
+                                updateFilters({ type: value });
+                             }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[160px]">
                                     <SelectValue placeholder="Tipo" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    <SelectItem value="all" className="font-black rounded-xl py-3 px-4">Todos</SelectItem>
-                                    <SelectItem value="income" className="font-black text-emerald-600 rounded-xl py-3 px-4">Entradas</SelectItem>
-                                    <SelectItem value="expense" className="font-black text-[#ff6b7b] rounded-xl py-3 px-4">Saídas</SelectItem>
-                                    <SelectItem value="transfer" className="font-black text-blue-600 rounded-xl py-3 px-4">Transferências</SelectItem>
+                                    <SelectItem value="all" className="font-black rounded-xl py-3">Todos</SelectItem>
+                                    <SelectItem value="income" className="font-black text-emerald-600 rounded-xl py-3">Entradas</SelectItem>
+                                    <SelectItem value="expense" className="font-black text-[#ff6b7b] rounded-xl py-3">Saídas</SelectItem>
+                                    <SelectItem value="transfer" className="font-black text-blue-600 rounded-xl py-3">Transferências</SelectItem>
                                 </SelectContent>
                             </Select>
                             
-                            <Select value={monthFilter} onValueChange={setMonthFilter}>
+                            <Select value={monthFilter} onValueChange={(value) => {
+                                setMonthFilter(value);
+                                updateFilters({ month: value });
+                            }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all min-w-[180px]">
                                     <Calendar className="h-4 w-4 text-[#2D241E]/30" />
                                     <SelectValue placeholder="Mês" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2 max-h-[400px]">
-                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-black rounded-xl py-3 px-4">{m.label}</SelectItem>)}
+                                    {months.map(m => <SelectItem key={m.value} value={m.value} className="font-black rounded-xl py-3">{m.label}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             
-                            <Select value={yearFilter} onValueChange={setYearFilter}>
+                            <Select value={yearFilter} onValueChange={(value) => {
+                                setYearFilter(value);
+                                updateFilters({ year: value });
+                            }}>
                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all">
                                     <SelectValue placeholder="Ano" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2">
-                                    {years.map(y => <SelectItem key={y} value={y} className="font-black text-center rounded-xl py-3 px-4">{y}</SelectItem>)}
-                                </SelectContent>
                             </Select>
                         </div>
                     </div>
@@ -444,71 +441,13 @@ export function TransactionsPageClient({
             </div>
 
             <div className="p-0">
-                {/* Mobile View */}
-                <div className="md:hidden space-y-6 p-4">
-                    {filteredTransactions.length > 0 ? (
-                        filteredTransactions.map((t) => (
-                            <div key={t.id} className="bg-white/40 backdrop-blur-3xl rounded-[32px] p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500">
-                                {/* Top Row: Icon and Amount */}
-                                <div className="flex justify-between items-center mb-6">
-                                    <div className={cn(
-                                        "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-700",
-                                        t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
-                                        t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
-                                        "bg-blue-50 text-blue-600"
-                                    )}>
-                                        {t.type === 'income' ? <TrendingUp size={24} /> : 
-                                         t.type === 'expense' ? <TrendingDown size={24} /> : 
-                                         <ArrowRightLeft size={24} />}
-                                    </div>
-                                    <div className={cn(
-                                        "text-3xl font-black tracking-tighter font-headline italic leading-none text-right",
-                                        t.type === 'income' ? "text-emerald-600" : 
-                                        t.type === 'expense' ? "text-[#ff6b7b]" : 
-                                        "text-blue-600"
-                                    )}>
-                                        {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
-                                    </div>
-                                </div>
-
-                                {/* Description */}
-                                <div className="mb-6 min-w-0">
-                                    <h4 className="font-headline italic text-[#2D241E] text-2xl font-black leading-tight break-words pr-2">
-                                        {t.description}
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        <Badge variant="secondary" className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[9px] uppercase tracking-[0.2em] px-3 py-1 rounded-lg">
-                                            {t.category?.name || 'Geral'}
-                                        </Badge>
-                                        {t.isRecurring && (
-                                            <Badge variant="outline" className="border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-lg px-3 py-1">Fixo</Badge>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                {/* Bottom Row: Info and Actions */}
-                                <div className="pt-6 border-t border-[#2D241E]/5 flex items-end justify-between">
-                                    <div className="space-y-1.5 flex-1 min-w-0 pr-4">
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em]">
-                                            <Calendar className="h-3 w-3" />
-                                            <span>{formatDate(t.date)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.1em] truncate italic">
-                                            <Wallet className="h-3 w-3 shrink-0" />
-                                            <span>
-                                                {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
-                                                 t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 shrink-0">
-                                        <EditTransactionDialog transaction={t as Transaction} accounts={allAccounts} goals={allGoals} categories={allCategories} />
-                                        <DeleteTransactionDialog transactionId={t.id} />
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
+                <ResponsiveTransactionList 
+                    transactions={filteredTransactions}
+                    accounts={allAccounts}
+                    goals={allGoals}
+                    categories={allCategories}
+                    disablePrivacyMode={true}
+                    emptyState={
                         <div className="py-24 text-center text-[#2D241E]/20 space-y-8">
                             <div className="p-10 bg-white/30 w-fit mx-auto rounded-[48px] border border-white/50">
                                 <Search size={56} className="animate-pulse" />
@@ -518,120 +457,36 @@ export function TransactionsPageClient({
                                 <p className="text-sm font-bold uppercase tracking-widest opacity-60">Ajuste seus filtros e tente novamente</p>
                             </div>
                         </div>
-                    )}
-                </div>
+                    }
+                />
+            </div>
 
-                {/* Desktop View */}
-                <div className="hidden md:block">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-b border-white/10 hover:bg-transparent">
-                                    <TableHead className="py-10 px-12 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Data</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Descrição</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Categoria</TableHead>
-                                    <TableHead className="py-10 text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Conta</TableHead>
-                                    <TableHead className="py-10 text-right text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 pr-12">Valor</TableHead>
-                                    <TableHead className="py-10 text-center text-[12px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredTransactions.length > 0 ? (
-                                    filteredTransactions.map((t) => (
-                                        <TableRow 
-                                            key={t.id} 
-                                            className="group border-b border-white/5 hover:bg-white/60 transition-all duration-500"
-                                        >
-                                            <TableCell className="py-8 px-12">
-                                                <div className="flex flex-col">
-                                                    <span className="text-base font-black text-[#2D241E] font-inter italic">{formatDate(t.date)}</span>
-                                                    <span className="text-[11px] font-black text-[#2D241E]/20 uppercase tracking-[0.2em] mt-1.5">
-                                                        {new Date(t.date).toLocaleDateString('pt-BR', { weekday: 'long' })}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center gap-5">
-                                                    <div className={cn(
-                                                        "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm",
-                                                        t.type === 'income' ? "bg-emerald-50 text-emerald-600" : 
-                                                        t.type === 'expense' ? "bg-[#ff6b7b]/10 text-[#ff6b7b]" : 
-                                                        "bg-blue-50 text-blue-600"
-                                                    )}>
-                                                        {t.type === 'income' ? <TrendingUp size={20} /> : 
-                                                         t.type === 'expense' ? <TrendingDown size={20} /> : 
-                                                         <ArrowRightLeft size={20} />}
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-lg font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic">{t.description}</span>
-                                                        <div className="flex items-center gap-3 mt-2">
-                                                            {t.isRecurring && (
-                                                                <Badge variant="outline" className="h-6 px-3 border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-xl">Fixo</Badge>
-                                                            )}
-                                                            {t.isInstallment && (
-                                                                <Badge variant="outline" className="h-6 px-3 border-blue-100 bg-blue-50 text-blue-600 text-[9px] font-black tracking-widest uppercase rounded-xl">
-                                                                    {t.installmentNumber}/{t.totalInstallments}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <Badge variant="secondary" className="px-5 py-2 rounded-2xl bg-white/80 text-[#2D241E]/60 border-none font-black text-[11px] uppercase tracking-widest shadow-sm">
-                                                    {t.category?.name || 'Geral'}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-2.5 w-2.5 rounded-full bg-[#2D241E]/10" />
-                                                    <span className="text-[12px] font-black text-[#2D241E]/40 uppercase tracking-[0.15em]">
-                                                        {t.sourceAccountId ? getAccountName(t.sourceAccountId) : 
-                                                         t.destinationAccountId ? getAccountName(t.destinationAccountId) : '---'}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className={cn(
-                                                "py-8 text-right font-black text-2xl tracking-tighter pr-12 font-headline italic",
-                                                t.type === 'income' ? "text-emerald-600" : 
-                                                t.type === 'expense' ? "text-[#ff6b7b]" : 
-                                                "text-blue-600"
-                                            )}>
-                                                {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(t.amount)}
-                                            </TableCell>
-                                            <TableCell className="py-8">
-                                                <div className="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                                    <EditTransactionDialog 
-                                                        transaction={t as Transaction} 
-                                                        accounts={allAccounts} 
-                                                        goals={allGoals} 
-                                                        categories={allCategories}
-                                                    />
-                                                    <DeleteTransactionDialog transactionId={t.id} />
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-96 text-center">
-                                            <div className="flex flex-col items-center justify-center gap-8 text-[#2D241E]/20">
-                                                <div className="p-12 bg-white/30 rounded-[60px] border border-white/50 shadow-inner">
-                                                    <Search size={80} className="animate-pulse" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <p className="font-black text-3xl tracking-tight text-[#2D241E]/30 font-headline italic">Nenhum resultado</p>
-                                                    <p className="text-sm font-bold uppercase tracking-[0.3em] opacity-50">Refine seus termos de busca ou filtros</p>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="p-8 md:p-12 border-t border-white/20 bg-white/10 flex items-center justify-between">
+                    <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 font-inter italic">
+                        Página {currentPage} de {totalPages} ({totalTransactions} transações)
+                    </p>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="outline"
+                            className="h-14 px-8 rounded-2xl border-white/40 bg-white/40 backdrop-blur-sm font-black text-[#2D241E] hover:bg-white transition-all disabled:opacity-30"
+                            disabled={currentPage <= 1}
+                            onClick={() => updateFilters({ page: currentPage - 1 })}
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="h-14 px-8 rounded-2xl border-white/40 bg-white/40 backdrop-blur-sm font-black text-[#2D241E] hover:bg-white transition-all disabled:opacity-30"
+                            disabled={currentPage >= totalPages}
+                            onClick={() => updateFilters({ page: currentPage + 1 })}
+                        >
+                            Próximo <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
       </motion.div>
     </>

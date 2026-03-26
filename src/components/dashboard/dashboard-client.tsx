@@ -115,7 +115,7 @@ export function DashboardClient({
   return (
     <main className="flex-1">
       <WorkspaceNavigationHandler />
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full max-w-8xl">
         <Suspense
           fallback={<div className="h-20 animate-pulse rounded bg-muted" />}
         >
@@ -139,10 +139,10 @@ export function DashboardClient({
                         Membros
                       </span>
                     </div>
-                    <MemberAvatars 
-                      members={members.map(m => ({
+                    <MemberAvatars
+                      members={members.map((m) => ({
                         name: m.name,
-                        avatarUrl: m.avatarUrl
+                        avatarUrl: m.avatarUrl,
                       }))}
                       size="lg"
                       limit={5}
@@ -189,6 +189,7 @@ export function DashboardClient({
                   ownerType={isPersonalWorkspace ? "user" : "vault"}
                   typeFilter={transactionFilter}
                   onFilterChange={setTransactionFilter}
+                  disablePrivacyMode={true}
                 />
               </AnimatedDiv>
             </Suspense>

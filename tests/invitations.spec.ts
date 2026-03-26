@@ -17,10 +17,10 @@ test.describe('Sistema de Convites', () => {
   // Helper: Login antes de cada teste
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
-    await page.fill('input[name="email"]', 'clara@caixinhas.app');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/vaults', { timeout: 10000 });
+    await page.getByLabel(/E-mail/i).fill('clara.beatriz@caixinhas.app');
+    await page.getByLabel(/Senha/i).fill('password123');
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.waitForURL(/.*vaults/, { timeout: 15000 });
   });
 
   test('deve exibir página de cofres com área de convites', async ({ page }) => {

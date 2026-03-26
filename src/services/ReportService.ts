@@ -66,23 +66,16 @@ export class ReportService {
    */
   static async deleteReport(ownerId: string, monthYear: string): Promise<boolean> {
     try {
-      await prisma.savedReport.delete({
+      // Usamos deleteMany em vez de delete para evitar o erro P2025 
+      // (Record to delete does not exist) que polui os logs e pode confundir o usuário.
+      await prisma.savedReport.deleteMany({
         where: {
-          ownerId_monthYear: {
-            ownerId,
-            monthYear,
-          },
+          ownerId,
+          monthYear,
         },
       });
       return true;
     } catch (error: any) {
-      // Prisma's P2025 error code means "Record to delete does not exist."
-      // We can safely treat this as a success case for cache invalidation.
-      if (error.code === 'P2025') {
-        console.log(`Cache invalidation skipped: Report for ${monthYear} did not exist.`);
-        return true; // <<< THIS IS THE FIX: Return true to indicate success.
-      }
-      // For any other error, log it and re-throw.
       console.error('Erro ao deletar relatório:', error);
       throw error;
     }
@@ -283,37 +276,45 @@ export class ReportService {
       // 2. Verificar se há transações criadas ou editadas após o relatório
       const modifiedTransactions = await prisma.transaction.count({
         where: {
-          OR: [
-            { actorId: ownerId },
-            { 
-              vault: {
-                OR: [
-                  { ownerId: ownerId },
-                  { 
-                    members: {
-                      some: {
-                        userId: ownerId
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          ],
-          date: {
-            gte: startOfMonth,
-            lte: endOfMonth
-          },
-          OR: [
+          AND: [
             {
-              createdAt: {
-                gt: report.updatedAt
+              OR: [
+                { actorId: ownerId },
+                { 
+                  vault: {
+                    OR: [
+                      { ownerId: ownerId },
+                      { 
+                        members: {
+                          some: {
+                            userId: ownerId
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              date: {
+                gte: startOfMonth,
+                lte: endOfMonth
               }
             },
             {
-              updatedAt: {
-                gt: report.updatedAt
-              }
+              OR: [
+                {
+                  createdAt: {
+                    gt: report.updatedAt
+                  }
+                },
+                {
+                  updatedAt: {
+                    gt: report.updatedAt
+                  }
+                }
+              ]
             }
           ]
         }
