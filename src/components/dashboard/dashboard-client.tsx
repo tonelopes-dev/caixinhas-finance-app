@@ -115,15 +115,15 @@ export function DashboardClient({
   return (
     <main className="flex-1">
       <WorkspaceNavigationHandler />
-      <div className="mx-auto w-full max-w-8xl">
+      <div className="mx-auto w-full max-w-8xl px-0 min-w-0 overflow-hidden">
         <Suspense
           fallback={<div className="h-20 animate-pulse rounded bg-muted" />}
         >
           <AnimatedDiv transition={{ duration: 0.8 }}>
-            <div className="flex flex-col gap-4 mb-12">
-              <div className="flex items-center justify-between flex-wrap gap-6">
-                <div className="space-y-2">
-                  <h1 className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
+            <div className="flex flex-col gap-3 md:gap-8 min-w-0 flex-1 mb-8 sm:mb-12">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <h1 className="font-headline text-lg sm:text-3xl font-bold tracking-tight text-[#2D241E] break-words leading-tight">
                     Painel:{" "}
                     <span className="text-[#ff6b7b] uppercase">
                       {workspaceName}
@@ -132,23 +132,25 @@ export function DashboardClient({
                 </div>
 
                 {!isPersonalWorkspace && members && members.length > 1 && (
-                  <div className="flex items-center gap-4 bg-white p-2.5 shadow-sm border-2 border-[#2D241E]/5 rounded-[24px] transition-all hover:shadow-md hover:border-primary/10">
-                    <div className="flex items-center gap-2 pl-2">
-                      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                      <span className="text-sm font-black text-[#2D241E] uppercase tracking-wider">
-                        Membros
-                      </span>
+                  <div className="flex-shrink-0 min-w-0">
+                    <div className="flex items-center gap-3 sm:gap-4 bg-white p-2 sm:p-2.5 shadow-sm border-2 border-[#2D241E]/5 rounded-[24px] hover:border-[#ff6b7b]/20 transition-all">
+                      <div className="flex items-center gap-2 pl-2">
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-sm font-black text-[#2D241E] uppercase tracking-wider">
+                          Membros
+                        </span>
+                      </div>
+                      <MemberAvatars
+                        members={members.map((m) => ({
+                          name: m.name,
+                          avatarUrl: m.avatarUrl,
+                        }))}
+                        size="lg"
+                        limit={4}
+                        borderColor="ring-white"
+                        className="p-1"
+                      />
                     </div>
-                    <MemberAvatars
-                      members={members.map((m) => ({
-                        name: m.name,
-                        avatarUrl: m.avatarUrl,
-                      }))}
-                      size="lg"
-                      limit={5}
-                      borderColor="ring-white"
-                      className="p-1"
-                    />
                   </div>
                 )}
               </div>
@@ -167,10 +169,10 @@ export function DashboardClient({
           </Suspense>
         )}
 
-        <div className="grid gap-8 xl:grid-cols-3">
-          <div className="grid auto-rows-max items-start gap-8 xl:col-span-2">
+        <div className="grid gap-3 md:gap-8 xl:grid-cols-3 min-w-0 w-full">
+          <div className="grid auto-rows-max items-start gap-4 md:gap-8 xl:col-span-2 min-w-0 w-full">
             <Suspense fallback={<CardSkeleton />}>
-              <AnimatedDiv transition={{ delay: 0.2, duration: 0.8 }}>
+              <AnimatedDiv transition={{ delay: 0.2, duration: 0.8 }} className="min-w-0 w-full">
                 <NetWorthSummary
                   liquidAssets={liquidAssets}
                   investedAssets={totalInvestedForGoals}
@@ -179,7 +181,7 @@ export function DashboardClient({
             </Suspense>
 
             <Suspense fallback={<TransactionsSkeleton />}>
-              <AnimatedDiv transition={{ delay: 0.3, duration: 0.8 }}>
+              <AnimatedDiv transition={{ delay: 0.3, duration: 0.8 }} className="min-w-0 w-full">
                 <RecentTransactions
                   transactions={transactions}
                   accounts={accounts}
@@ -194,9 +196,10 @@ export function DashboardClient({
               </AnimatedDiv>
             </Suspense>
           </div>
-          <div className="grid auto-rows-max items-start gap-8">
+
+          <div className="grid auto-rows-max items-start gap-4 md:gap-8 min-w-0 w-full">
             <Suspense fallback={<CardSkeleton />}>
-              <AnimatedDiv transition={{ delay: 0.4, duration: 0.8 }}>
+              <AnimatedDiv transition={{ delay: 0.4, duration: 0.8 }} className="min-w-0 w-full">
                 <GoalBuckets goals={goals} workspaceName={workspaceName} />
               </AnimatedDiv>
             </Suspense>

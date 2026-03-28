@@ -10,13 +10,13 @@ interface ReportDisplayProps {
 
 export function ReportDisplay({ reportHtml, isLoading }: ReportDisplayProps) {
     return (
-        <div className="w-full">
-            <ScrollArea className="w-full h-[600px] md:h-[700px] rounded-[48px] bg-white/20 backdrop-blur-3xl border border-white/60 shadow-2xl overflow-hidden">
-                {isLoading ? (
-                     <div className="p-12 md:p-16">
-                        <ReportSkeleton />
-                     </div>
-                ) : reportHtml ? (
+        <div className="w-full flex-1 flex flex-col min-h-0">
+            {isLoading ? (
+                 <div className="flex-1 flex items-center justify-center p-6 md:p-12">
+                    <ReportSkeleton />
+                 </div>
+            ) : reportHtml ? (
+                <ScrollArea className="w-full flex-1 rounded-[48px] bg-white/20 backdrop-blur-3xl border border-white/60 shadow-2xl overflow-hidden min-h-[600px] md:min-h-[700px]">
                     <div
                         className="p-12 md:p-16 prose prose-amber max-w-none
                         prose-headings:font-headline prose-headings:text-[#2D241E] prose-headings:italic
@@ -33,18 +33,18 @@ export function ReportDisplay({ reportHtml, isLoading }: ReportDisplayProps) {
                         [&_svg]:inline-block [&_svg]:align-middle"
                         dangerouslySetInnerHTML={{ __html: reportHtml }}
                     />
-                ) : (
-                     <div className="flex h-full min-h-[600px] items-center justify-center p-12">
-                        <div className="text-center max-w-xl bg-white/40 backdrop-blur-3xl p-16 rounded-[56px] border border-white/60 shadow-2xl">
-                            <div className="mb-10 text-8xl animate-float">📈</div>
-                            <h3 className="font-headline text-4xl font-black text-[#2D241E] mb-6 italic">Aguardando Estratégia</h3>
-                            <p className="text-xl font-bold text-[#2D241E]/40 leading-relaxed uppercase tracking-[0.2em] font-inter">
-                                Selecione o período acima para iniciar
-                            </p>
-                        </div>
+                </ScrollArea>
+            ) : (
+                 <div className="flex flex-1 items-center justify-center p-4 sm:p-12 min-h-[400px]">
+                    <div className="text-center w-full max-w-xl bg-white/40 backdrop-blur-3xl p-8 sm:p-16 rounded-[56px] border border-white/60 shadow-2xl mx-auto">
+                        <div className="mb-6 sm:mb-10 text-6xl sm:text-8xl animate-float">📈</div>
+                        <h3 className="font-headline text-2xl sm:text-4xl font-black text-[#2D241E] mb-4 sm:mb-6 italic">Aguardando Estratégia</h3>
+                        <p className="text-sm sm:text-xl font-bold text-[#2D241E]/40 leading-relaxed uppercase tracking-[0.2em] font-inter">
+                            Selecione o período acima para iniciar
+                        </p>
                     </div>
-                )}
-            </ScrollArea>
+                </div>
+            )}
         </div>
     );
 }

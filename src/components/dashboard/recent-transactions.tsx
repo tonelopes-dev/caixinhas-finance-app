@@ -96,8 +96,8 @@ export default function RecentTransactions({
   );
 
   return (
-    <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
-      <CardHeader className="pb-2">
+    <Card className="w-full max-w-full border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
+      <CardHeader className="p-3.5 sm:p-6 pb-2">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
           <div className="space-y-1 min-w-0 flex-1">
             <CardTitle className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
@@ -107,14 +107,14 @@ export default function RecentTransactions({
               Acompanhe para onde está indo seu dinheiro.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 sm:gap-3 w-full md:w-auto">
             <Select
               value={typeFilter}
               onValueChange={(value) => onFilterChange(value as any)}
             >
-              <SelectTrigger className="w-auto h-12 bg-[#f6f3f1] border-none rounded-2xl px-4 font-bold text-[#2D241E]">
-                <ListFilter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filtrar" />
+              <SelectTrigger className="w-full md:w-auto h-11 sm:h-12 bg-[#f6f3f1] border-none rounded-2xl px-3 sm:px-4 font-bold text-[#2D241E] text-xs sm:text-sm">
+                <ListFilter className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-[#2D241E]/5 shadow-xl">
                 <SelectItem value="all">Todas</SelectItem>
@@ -133,7 +133,7 @@ export default function RecentTransactions({
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-3.5 sm:p-6">
         <div className="px-0">
           <ResponsiveTransactionList 
             transactions={filteredTransactions.slice(0, 5)}
@@ -179,7 +179,7 @@ export default function RecentTransactions({
         <Button
           variant="outline"
           asChild
-          className="w-full justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-base uppercase tracking-widest group"
+          className="w-full justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-xs sm:text-sm md:text-base uppercase tracking-wider group px-4"
         >
           <Link
             href="/transactions"
