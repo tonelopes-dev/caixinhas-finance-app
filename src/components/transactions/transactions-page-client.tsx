@@ -242,7 +242,7 @@ export function TransactionsPageClient({
                 )}
                 onClick={() => setTypeFilter('all')}
             >
-                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125">
                     <Wallet className="h-24 w-24 text-[#2D241E]" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
@@ -272,7 +272,7 @@ export function TransactionsPageClient({
                 )}
                 onClick={() => setTypeFilter('income')}
             >
-                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125">
                     <TrendingUp className="h-24 w-24 text-emerald-600" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
@@ -302,7 +302,7 @@ export function TransactionsPageClient({
                 )}
                 onClick={() => setTypeFilter('expense')}
             >
-                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-125">
                     <TrendingDown className="h-24 w-24 text-[#ff6b7b]" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between">
@@ -332,12 +332,12 @@ export function TransactionsPageClient({
                     router.push('/recurring');
                 }}
             >
-                <div className="absolute -top-8 -right-8 p-10 opacity-5 group-hover:opacity-15 group-hover:scale-150 transition-all duration-1000 group-hover:rotate-12">
+                <div className="absolute -top-8 -right-8 p-10 opacity-5 group-hover:opacity-15 group-hover:scale-150 transition-all duration-1000">
                     <Repeat className="h-32 w-32 text-purple-600" />
                 </div>
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-all duration-700 group-hover:rotate-[360deg] group-hover:shadow-lg group-hover:shadow-purple-500/20">
+                        <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-all duration-700 group-hover:shadow-lg group-hover:shadow-purple-500/20">
                             <Repeat className="h-5 w-5" />
                         </div>
                         <p className="text-[11px] font-black uppercase tracking-[0.25em] text-purple-600/40 font-inter">Contas Fixas</p>

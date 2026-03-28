@@ -125,7 +125,7 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="mx-auto w-full max-w-[1472px] px-4 md:px-8 pb-12 flex flex-col gap-8 pt-8">
+    <div className="mx-auto w-full max-w-[1600px] px-4 md:px-8 pb-12 flex flex-col gap-8 pt-8">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardClient
           currentUser={currentUser as any}

@@ -116,6 +116,11 @@ export function ReportsPageClient() {
       const status = statusResult.data;
       setReportStatus(status);
       
+      // Se houver relatório, o botão deve continuar habilitado para permitir regeneração manual
+      if (status.exists) {
+        setReportStatus(prev => ({ ...prev, buttonEnabled: true }));
+      }
+      
       // Se existe relatório (mesmo desatualizado), exibe o HTML salvo
       // O botão "Atualizar Relatório" ficará disponível se estiver desatualizado
       if (status.exists && status.report) {
@@ -185,70 +190,75 @@ export function ReportsPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] text-[#2D241E] pb-20 pt-24">
-      <div className="max-w-7xl mx-auto px-6 pt-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
+    <div className="flex flex-col min-h-screen pb-24 md:pb-20 pt-24">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto px-6 w-full">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 md:mb-14">
           <div className="space-y-4">
-            <StandardBackButton href="/dashboard" label="Voltar para o Painel" />
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#2D241E] to-[#4A3B32] flex items-center justify-center shadow-lg">
-                    <FileText className="h-5 w-5 text-white" />
-                </div>
-                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-[#2D241E]">
-                  Relatórios <span className="text-[#ff6b7b]">Financeiros</span>
-                </h1>
-              </div>
-              <p className="text-lg font-bold text-[#2D241E]/40 ml-1">Análise profissional de sua saúde financeira gerada por IA.</p>
+            <StandardBackButton href="/dashboard" label="Voltar ao Dashboard" />
+            <div>
+              <h1 className="font-headline text-4xl md:text-6xl font-black tracking-tight text-[#2D241E] italic">
+                  Relatórios <span className="text-[#ff6b7b] animate-pulse-slow">Financeiros</span>
+              </h1>
+              <p className="text-[#2D241E]/40 font-bold text-base md:text-lg mt-2 italic ml-1">
+                  Análise profissional de sua saúde financeira gerada por IA.
+              </p>
             </div>
           </div>
         </div>
 
-        {hasAnyTransactions === false ? (
-          <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
-            <div className="mb-8 p-10 bg-white/30 w-fit mx-auto rounded-[40px] border border-white/50">
-              <div className="text-7xl">📈</div>
-            </div>
-            <h3 className="text-3xl font-black text-[#2D241E] tracking-tight mb-4">Comece registrando transações</h3>
-            <p className="text-lg font-bold text-[#2D241E]/40 max-w-xl mx-auto uppercase tracking-widest leading-relaxed">
-              Assim que houver transações registradas, nossa IA poderá gerar relatórios financeiros detalhados para você.
-            </p>
-          </div>
-        ) : hasAnyTransactions === true ? (
-          <div className="space-y-12">
-            {isGenerating ? (
-              <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
-                <ReportLoadingProgress isVisible={true} />
+        <div className="flex-1 flex flex-col min-h-0">
+            {hasAnyTransactions === false ? (
+              <div className="flex-1 flex items-center justify-center p-6 sm:p-20 text-center">
+                <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-10 sm:p-20 w-full max-w-3xl">
+                  <div className="mb-8 p-6 sm:p-10 bg-white/30 w-fit mx-auto rounded-[34px] sm:rounded-[48px] border border-white/50">
+                    <div className="text-5xl sm:text-7xl">📈</div>
+                  </div>
+                  <h3 className="font-headline text-2xl sm:text-3xl font-black text-[#2D241E] tracking-tight mb-4 italic">Comece registrando transações</h3>
+                  <p className="text-xs sm:text-sm font-bold text-[#2D241E]/40 max-w-xl mx-auto uppercase tracking-widest leading-relaxed">
+                    Assim que houver transações registradas, nossa IA poderá gerar relatórios financeiros detalhados para você.
+                  </p>
+                </div>
+              </div>
+            ) : hasAnyTransactions === true ? (
+              <div className="flex-1 flex flex-col space-y-8 md:space-y-12">
+                {isGenerating ? (
+                  <div className="flex-1 flex items-center justify-center p-6 sm:p-20 text-center">
+                    <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-10 sm:p-20 w-full max-w-3xl">
+                      <ReportLoadingProgress isVisible={true} />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <ReportGenerator
+                      workspaceId={workspaceId}
+                      month={month}
+                      setMonth={setMonth}
+                      year={year}
+                      setYear={setYear}
+                      availableMonths={availableMonths}
+                      availableYears={availableYears}
+                      handleGenerateReport={handleGenerateReport}
+                      buttonLabel={reportStatus.buttonLabel}
+                      buttonEnabled={reportStatus.buttonEnabled}
+                      isGenerating={false}
+                    />
+    
+                    <ReportDisplay
+                      reportHtml={reportHtml}
+                      isLoading={false}
+                    />
+                  </>
+                )}
               </div>
             ) : (
-              <>
-                <ReportGenerator
-                  workspaceId={workspaceId}
-                  month={month}
-                  setMonth={setMonth}
-                  year={year}
-                  setYear={setYear}
-                  availableMonths={availableMonths}
-                  availableYears={availableYears}
-                  handleGenerateReport={handleGenerateReport}
-                  buttonLabel={reportStatus.buttonLabel}
-                  buttonEnabled={reportStatus.buttonEnabled}
-                  isGenerating={false}
-                />
-
-                <ReportDisplay
-                  reportHtml={reportHtml}
-                  isLoading={false}
-                />
-              </>
+              <div className="flex-1 flex items-center justify-center p-6 sm:p-20 text-center">
+                <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-10 sm:p-20 w-full max-w-3xl">
+                  <div className="h-12 w-12 sm:h-16 sm:w-16 mx-auto animate-spin rounded-full border-4 border-[#ff6b7b] border-t-transparent" />
+                  <p className="text-[10px] sm:text-[11px] font-black text-[#2D241E]/40 mt-8 uppercase tracking-[0.25em]">Sincronizando seus dados...</p>
+                </div>
+              </div>
             )}
-          </div>
-        ) : (
-          <div className="bg-white/40 backdrop-blur-xl rounded-[40px] border border-white/40 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-20 text-center">
-            <div className="h-16 w-16 mx-auto animate-spin rounded-full border-4 border-[#ff6b7b] border-t-transparent" />
-            <p className="text-lg font-bold text-[#2D241E]/40 mt-8 uppercase tracking-[0.2em]">Sincronizando seus dados...</p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

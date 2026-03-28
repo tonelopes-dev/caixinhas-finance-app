@@ -88,17 +88,18 @@ export function ResponsiveTransactionList({
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index * 0.05 }}
               className={cn(
-                "relative bg-white/40 backdrop-blur-3xl rounded-[32px] p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500",
+                "relative bg-white/40 backdrop-blur-3xl rounded-[32px] p-4.5 sm:p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500",
                 t.type === "income"
                   ? "hover:border-emerald-200/50"
                   : "hover:border-rose-200/50",
               )}
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-4">
+                {/* Header: Icon + Info */}
+                <div className="flex items-start gap-4">
                   <div
                     className={cn(
-                      "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm border border-white/40 transition-all duration-700",
+                      "h-11 w-11 rounded-2xl flex items-center justify-center shadow-sm border border-white/40 transition-all duration-700 shrink-0",
                       t.type === "income"
                         ? "bg-emerald-50 text-emerald-600"
                         : t.type === "expense"
@@ -107,86 +108,76 @@ export function ResponsiveTransactionList({
                     )}
                   >
                     {t.type === "income" ? (
-                      <TrendingUp size={24} />
+                      <TrendingUp size={20} />
                     ) : t.type === "expense" ? (
-                      <TrendingDown size={24} />
+                      <TrendingDown size={20} />
                     ) : (
-                      <ArrowRightLeft size={24} />
+                      <ArrowRightLeft size={20} />
                     )}
                   </div>
-                  <div>
-                    <h4 className="font-headline italic text-[#2D241E] text-xl font-black leading-tight break-words pr-2">
-                      {t.description}
-                    </h4>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge
+                  
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                       <Badge
                         variant="secondary"
-                        className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[9px] uppercase tracking-[0.2em] px-3 py-1 rounded-lg"
+                        className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[8px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg"
                       >
                         {t.category?.name || "Geral"}
                       </Badge>
-                      {t.isRecurring && (
-                        <Badge
-                          variant="outline"
-                          className="border-purple-100 bg-purple-50 text-purple-600 text-[9px] font-black tracking-widest uppercase rounded-lg px-3 py-1"
-                        >
-                          <Repeat size={10} className="mr-1" /> Fixo
-                        </Badge>
-                      )}
+                      <span className="text-[9px] font-black text-[#2D241E]/30 uppercase tracking-widest whitespace-nowrap">
+                        {formatDate(t.date)}
+                      </span>
                     </div>
+                    <h4 className="font-headline italic text-[#2D241E] text-base sm:text-lg md:text-xl font-black leading-tight line-clamp-2">
+                      {t.description}
+                    </h4>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-1">
+                {/* Footer: Details + Amount */}
+                <div className="pt-3 border-t border-[#2D241E]/5 flex flex-col items-stretch sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex flex-col gap-2 min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black text-[#2D241E]/40 uppercase tracking-widest truncate italic">
+                      <Wallet className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                      <span className="truncate">
+                        {t.sourceAccountId
+                          ? getAccountName(t.sourceAccountId)
+                          : t.destinationAccountId
+                            ? getAccountName(t.destinationAccountId)
+                            : "---"}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      <EditTransactionDialog
+                        transaction={t}
+                        accounts={accounts}
+                        goals={goals}
+                        categories={categories}
+                      />
+                      <DeleteTransactionDialog transactionId={t.id} />
+                    </div>
+                  </div>
+
                   <div
                     className={cn(
-                      "text-2xl font-black tracking-tighter font-headline italic leading-none",
+                      "text-lg sm:text-xl md:text-2xl font-black tracking-tighter font-headline italic leading-none shrink-0",
                       t.type === "income"
                         ? "text-emerald-600"
                         : t.type === "expense"
                           ? "text-rose-600"
                           : "text-blue-600",
+                      "text-right"
                     )}
                   >
                     {!isLoaded || (isPrivate && !disablePrivacyMode) ? (
                       <PrivacyBlur />
                     ) : (
                       <>
-                        {t.type === "income"
-                          ? "+"
-                          : t.type === "expense"
-                            ? "-"
-                            : ""}
+                        {t.type === "income" ? "+" : t.type === "expense" ? "-" : ""}
                         {formatCurrency(Math.abs(t.amount))}
                       </>
                     )}
                   </div>
-                  <div className="flex gap-1 mt-3">
-                    <EditTransactionDialog
-                      transaction={t}
-                      accounts={accounts}
-                      goals={goals}
-                      categories={categories}
-                    />
-                    <DeleteTransactionDialog transactionId={t.id} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-[#2D241E]/5 flex items-center justify-between text-[10px] font-black text-[#2D241E]/40 uppercase tracking-[0.1em]">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-3 w-3 opacity-50" />
-                  <span>{formatDate(t.date)}</span>
-                </div>
-                <div className="flex items-center gap-2 truncate max-w-[150px] italic">
-                  <Wallet className="h-3 w-3 shrink-0 opacity-50" />
-                  <span>
-                    {t.sourceAccountId
-                      ? getAccountName(t.sourceAccountId)
-                      : t.destinationAccountId
-                        ? getAccountName(t.destinationAccountId)
-                        : "---"}
-                  </span>
                 </div>
               </div>
             </motion.div>
@@ -242,7 +233,7 @@ export function ResponsiveTransactionList({
                   <div className="flex items-center gap-4">
                     <div
                       className={cn(
-                        "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-700 group-hover:rotate-[360deg] shadow-sm border border-white/40",
+                        "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-700 shadow-sm border border-white/40",
                         t.type === "income"
                           ? "bg-emerald-50 text-emerald-600"
                           : t.type === "expense"
@@ -258,8 +249,8 @@ export function ResponsiveTransactionList({
                         <ArrowRightLeft size={18} />
                       )}
                     </div>
-                    <div className="flex flex-col truncate">
-                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic truncate">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic pr-1">
                         {t.description}
                       </span>
                       {t.isRecurring && (

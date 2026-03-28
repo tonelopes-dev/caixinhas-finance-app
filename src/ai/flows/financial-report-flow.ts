@@ -65,7 +65,13 @@ const reportPrompt = ai.definePrompt({
 9. **Recomendações Práticas** (3-5 ações priorizadas por impacto)
 10. **Mensagem Motivacional** (personalizada aos acertos)
 
-Use classes Tailwind: bg-card, border, rounded-lg, p-4/p-6, text-primary, text-muted-foreground, font-bold, grid, flex, space-y-4, etc.
+Use classes Tailwind: bg-card, border, rounded-lg, p-4/p-6, font-bold, grid, flex, space-y-4, etc.
+
+**REGRA DE DESIGN CRÍTICA:** 
+❌ NUNCA use gradientes claros (ex: bg-blue-100, bg-green-200) com texto branco. 
+✅ Para blocos de "Parabéns" ou "Atenção", use fundos suaves com texto escuro: e.g., \`bg-[#ff6b7b]/10 text-[#2D241E]\` ou \`bg-emerald-50 text-emerald-900\`. 
+✅ Garanta que todo texto seja perfeitamente legível sobre o fundo.
+✅ SEMPRE verifique o campo \`paymentMethod\` no JSON de transações para a seção de Métodos de Pagamento.
 `,
 });
 

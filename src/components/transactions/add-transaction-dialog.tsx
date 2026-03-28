@@ -237,9 +237,10 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
           size="sm" 
           onClick={handleTriggerClick}
           className={cn(
-            "h-12 rounded-2xl font-black text-xs uppercase tracking-[0.15em] transition-all active:scale-90 shadow-xl",
+            "h-16 md:h-12 rounded-2xl font-black text-xs sm:text-xs uppercase tracking-[0.1em] sm:tracking-[0.15em] transition-all active:scale-95 shadow-xl px-6",
             "bg-gradient-to-br from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white border-none shadow-[#ff6b7b]/30 hover:shadow-[#ff6b7b]/50 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#ff6b7b] focus-visible:ring-offset-2",
-            fullWidth && "w-full justify-center",
+            fullWidth ? "w-full" : "w-full md:w-auto",
+            "justify-center flex items-center gap-2",
             className
           )}
         >

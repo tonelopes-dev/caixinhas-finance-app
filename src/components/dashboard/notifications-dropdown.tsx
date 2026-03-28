@@ -97,19 +97,19 @@ export function NotificationsDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-[380px] sm:w-[420px] bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[32px] p-2 shadow-[0_25px_80px_rgba(45,36,30,0.15)] animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden" 
+        className="w-[288px] sm:w-[420px] bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[32px] p-2 shadow-[0_25px_80px_rgba(45,36,30,0.15)] animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden" 
         align="end" 
         sideOffset={12}
       >
-        <DropdownMenuLabel className="flex justify-between items-center py-5 px-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff6b7b]/10 text-[#ff6b7b]">
+        <DropdownMenuLabel className="flex justify-between items-center py-5 px-3.5 sm:px-6 pb-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff6b7b]/10 text-[#ff6b7b] shrink-0">
                 <Bell className="h-5 w-5" />
             </div>
-            <div className="flex flex-col">
-                <span className="font-headline text-xl font-bold text-[#2D241E] tracking-tight">Notificações</span>
+            <div className="flex flex-col min-w-0">
+                <span className="font-headline text-lg sm:text-xl font-bold text-[#2D241E] tracking-tight truncate">Notificações</span>
                 {unreadCount > 0 && (
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#ff6b7b]">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#ff6b7b] truncate">
                     {unreadCount} {unreadCount === 1 ? 'nova' : 'novas'}
                 </span>
                 )}
@@ -118,7 +118,7 @@ export function NotificationsDropdown({
           <button
             onClick={handleViewAll}
             disabled={isLoading}
-            className="text-[11px] font-bold uppercase tracking-widest text-[#2D241E]/40 hover:text-[#ff6b7b] transition-all disabled:opacity-50"
+            className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-[#2D241E]/40 hover:text-[#ff6b7b] transition-all disabled:opacity-50 shrink-0 ml-2"
           >
             Ver todas
           </button>

@@ -6,7 +6,7 @@
     "dev": "node scripts/generate-sw.js && npm run prisma:generate && next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "node scripts/generate-sw.js && prisma migrate deploy && prisma generate && next build",
+    "build": "node scripts/wait-for-db.js && node scripts/generate-sw.js && prisma migrate deploy && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "process-logos": "node scripts/process-bank-logos.js",

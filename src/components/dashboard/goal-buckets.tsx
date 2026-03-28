@@ -63,8 +63,8 @@ export default function GoalBuckets({
   const PrivacyBlurPercent = () => <span>••%</span>;
 
   return (
-    <Card className="border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden">
-      <CardHeader>
+    <Card className="w-full max-w-full border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
+      <CardHeader className="p-3.5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0 flex-1">
             <CardTitle className="font-headline text-xl sm:text-3xl font-bold tracking-tight text-[#2D241E]">
@@ -90,7 +90,7 @@ export default function GoalBuckets({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-6">
+      <CardContent className="grid gap-4 md:gap-6 p-3.5 sm:p-6">
         {goalsToShow.map((goal, index) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           const participants = goal.participants || [];
@@ -104,23 +104,23 @@ export default function GoalBuckets({
               <Link
                 href={`/goals/${goal.id}`}
                 onClick={() => showLoading(`Abrindo ${goal.name}...`)}
-                className="group relative flex flex-col gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
+                className="group relative flex flex-col gap-4 sm:gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-3.5 sm:p-5 md:p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
               >
-                <div className="flex items-center gap-5">
-                  <div className="text-5xl bg-white p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
+                <div className="flex items-center gap-3 md:gap-5">
+                  <div className="text-xl sm:text-2xl md:text-5xl bg-white p-2 sm:p-2.5 md:p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 shrink-0">
                     {goal.emoji}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
                       <div className="flex items-center gap-2 overflow-hidden">
                         {goal.isFeatured && (
                           <Heart className="h-4 w-4 text-[#ff6b7b] fill-[#ff6b7b] shrink-0" />
                         )}
-                        <p className="font-black text-xl truncate tracking-tight text-[#2D241E]">
+                        <p className="font-black text-base sm:text-lg md:text-xl truncate tracking-tight text-[#2D241E]">
                           {goal.name}
                         </p>
                       </div>
-                      <p className="text-base font-black text-[#ff6b7b]">
+                      <p className="text-xs sm:text-sm md:text-base font-black text-[#ff6b7b] shrink-0">
                         {!isLoaded || isPrivate ? (
                           <PrivacyBlurPercent />
                         ) : (
@@ -134,7 +134,7 @@ export default function GoalBuckets({
                         )}
                       </p>
                     </div>
-                    <p className="text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic">
+                    <p className="text-[10px] sm:text-sm font-bold text-[#2D241E]/40 uppercase tracking-widest italic truncate">
                       {!isLoaded || isPrivate ? (
                         <PrivacyBlur className="text-muted-foreground/40" />
                       ) : (
@@ -209,7 +209,7 @@ export default function GoalBuckets({
         <Button
           variant="outline"
           asChild
-          className="flex-1 justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-base uppercase tracking-widest group"
+          className="flex-1 justify-center rounded-[20px] h-14 font-black border-2 border-[#2D241E]/10 text-[#2D241E] hover:bg-[#2D241E] hover:text-white hover:border-[#2D241E] active:scale-95 transition-all text-xs sm:text-sm md:text-base uppercase tracking-wider group px-2"
         >
           <Link
             href="/goals"
@@ -220,7 +220,7 @@ export default function GoalBuckets({
           </Link>
         </Button>
         <Button
-          className="w-full flex-1 md:w-auto rounded-[20px] h-14 font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-base uppercase tracking-widest"
+          className="w-full flex-1 md:w-auto rounded-[20px] h-14 font-black bg-[#ff6b7b] hover:bg-[#fa8292] text-white shadow-lg shadow-[#ff6b7b]/30 active:scale-95 transition-all text-xs sm:text-sm md:text-base uppercase tracking-wider px-2"
           asChild
         >
           <Link
