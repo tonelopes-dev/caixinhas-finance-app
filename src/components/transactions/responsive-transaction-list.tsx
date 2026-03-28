@@ -258,8 +258,8 @@ export function ResponsiveTransactionList({
                         <ArrowRightLeft size={18} />
                       )}
                     </div>
-                    <div className="flex flex-col truncate">
-                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic truncate">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-base font-black text-[#2D241E] group-hover:text-[#ff6b7b] transition-colors duration-500 font-headline italic pr-1">
                         {t.description}
                       </span>
                       {t.isRecurring && (

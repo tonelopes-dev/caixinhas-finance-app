@@ -145,14 +145,14 @@ export function GoalCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest">
-              {goal.visibility === "shared" ? (
-                <Users className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest max-w-[160px]">
+              {isPersonal ? (
+                <Lock className="h-3.5 w-3.5 shrink-0" />
               ) : (
-                <Lock className="h-3.5 w-3.5" />
+                <Users className="h-3.5 w-3.5 shrink-0" />
               )}
-              <span>
-                {goal.visibility === "shared" ? "Pública" : "Privada"}
+              <span className="truncate">
+                {ownerName}
               </span>
             </div>
 

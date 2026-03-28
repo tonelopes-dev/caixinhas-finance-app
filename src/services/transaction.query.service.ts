@@ -119,4 +119,44 @@ export class TransactionQueryService {
       throw new Error('Não foi possível buscar as transações por período');
     }
   }
+  
+  /**
+   * Busca todas as transações recorrentes ou parceladas de um contexto.
+   */
+  static async getRecurringAndInstallmentTransactions(
+    ownerId: string,
+    ownerType: 'user' | 'vault'
+  ): Promise<any[]> {
+    try {
+      const whereClause: any = ownerType === 'user' ? { userId: ownerId } : { vaultId: ownerId };
+      whereClause.OR = [
+        { isRecurring: true },
+        { isInstallment: true }
+      ];
+      
+      return await prisma.transaction.findMany({
+        where: whereClause,
+        include: {
+          sourceAccount: true,
+          destinationAccount: true,
+          goal: true,
+          category: true,
+          actor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatarUrl: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar transações recorrentes/parceladas:', error);
+      throw new Error('Não foi possível buscar as transações recorrentes/parceladas');
+    }
+  }
 }

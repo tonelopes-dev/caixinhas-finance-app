@@ -2,6 +2,7 @@
 'use server';
 
 import { TransactionService } from '@/services/transaction.service';
+import { TransactionQueryService } from '@/services/transaction.query.service';
 import type { Transaction } from '@/lib/definitions';
 import { revalidatePath } from 'next/cache';
 
@@ -15,7 +16,7 @@ export async function getRecurringData(
     installmentIncomes: Transaction[];
 }> {
   try {
-    const allTransactions = await TransactionService.getTransactions(workspaceId, ownerType);
+    const allTransactions = await TransactionQueryService.getRecurringAndInstallmentTransactions(workspaceId, ownerType);
 
     const recurringExpensesRaw = allTransactions.filter((t: any) => t.isRecurring && t.type === 'expense');
     const recurringIncomesRaw = allTransactions.filter((t: any) => t.isRecurring && t.type === 'income');

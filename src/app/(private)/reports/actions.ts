@@ -9,7 +9,7 @@ const generateReportSchema = z.object({
     month: z.string().min(1, 'Mês é obrigatório'),
     year: z.string().min(1, 'Ano é obrigatório'),
     ownerId: z.string().min(1, 'Workspace ID é obrigatório'),
-    forceRegenerate: z.string().optional(), // Para forçar regeneração
+    forceRegenerate: z.string().nullable().optional(), // Para forçar regeneração
 });
 
 export type FinancialReportState = {
