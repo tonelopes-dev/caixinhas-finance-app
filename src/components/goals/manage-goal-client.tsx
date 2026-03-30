@@ -118,7 +118,14 @@ export function ManageGoalClient({ goal, currentUser, currentVault, userVaults, 
         ...allParticipants
       ];
 
-  const isOwner = currentUserInParticipants?.role === 'owner' || goal.ownerId === currentUser.id;
+  const isVaultOwner = currentVault?.ownerId === currentUser.id;
+  const isGoalCreator = goal.userId === currentUser.id;
+  
+  const isOwner = 
+    currentUserInParticipants?.role === 'owner' || 
+    goal.ownerId === currentUser.id || 
+    isGoalCreator || 
+    !!isVaultOwner;
 
   const ownerName = goal.vaultId ? (currentVault?.name || 'Cofre') : 'Espaço Pessoal';
 
