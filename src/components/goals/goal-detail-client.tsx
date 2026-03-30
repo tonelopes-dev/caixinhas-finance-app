@@ -183,7 +183,7 @@ export function GoalDetailClient({ goal, transactions, accounts, vaults, userId 
                             {/* Premium Progress Bar */}
                             <div className="relative h-7 w-full bg-[#2D241E]/10 rounded-full overflow-hidden shadow-inner p-1">
                                 <div 
-                                    className="absolute inset-y-1 left-1 bg-gradient-to-r from-[#ff6b7b] to-[#fa8292] rounded-full transition-all duration-[2s] ease-out flex items-center justify-end px-3 shadow-sm"
+                                    className="absolute inset-y-1 left-1 bg-gradient-to-r from-[#ff6b7b] to-[#fa8292] rounded-full transition-all duration-[2000ms] ease-out flex items-center justify-end px-3 shadow-sm"
                                     style={{ width: `calc(${Math.min(progress, 100)}% - 8px)` }}
                                 >
                                     {progress > 15 && <div className="h-2 w-2 bg-white/50 rounded-full shadow-sm" />}

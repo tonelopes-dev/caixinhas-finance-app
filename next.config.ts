@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
   
   // ⚡ PERFORMANCE: Bundle optimization  
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // ⚠️ REMOVED: Causing SIGSEGV in Next.js 15 builds on Vercel
     optimizePackageImports: ['lucide-react', 'framer-motion'],
     serverActions: {
       bodySizeLimit: '10mb',
