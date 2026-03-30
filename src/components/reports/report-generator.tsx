@@ -42,15 +42,15 @@ function GenerateReportButton({
             )}
             
             {isActionPending ? (
-                <div className="flex items-center justify-center gap-3 relative z-10">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    <span className="uppercase tracking-[0.25em] text-sm font-black italic">Processando Análise...</span>
+                <div className="flex items-center justify-center gap-2 sm:gap-3 relative z-10 w-full px-2">
+                    <div className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="uppercase tracking-[0.1em] sm:tracking-[0.25em] text-xs sm:text-sm font-black italic truncate">Processando Análise...</span>
                 </div>
             ) : (
-                <div className="flex items-center justify-center gap-3 relative z-10">
-                    <span className="uppercase tracking-[0.25em] text-sm font-black italic">{label}</span>
-                    <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all">
-                        <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="flex items-center justify-center gap-2 sm:gap-3 relative z-10 w-full px-2">
+                    <span className="uppercase tracking-[0.1em] sm:tracking-[0.25em] text-xs sm:text-sm font-black italic truncate">{label}</span>
+                    <div className="h-6 w-6 sm:h-8 sm:w-8 shrink-0 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all">
+                        <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-emerald-400 animate-pulse" />
                     </div>
                 </div>
             )}
@@ -94,6 +94,8 @@ export function ReportGenerator({
     const hasValidValues = Boolean(month && year && workspaceId);
     
     console.log('🔍 ReportGenerator - valores:', { month, year, workspaceId, hasValidValues, buttonEnabled });
+    
+    const [forceRegenerate, setForceRegenerate] = React.useState(false);
     
     // Atualiza mês quando o ano muda
     React.useEffect(() => {
@@ -170,6 +172,8 @@ export function ReportGenerator({
                                 type="checkbox" 
                                 name="forceRegenerate" 
                                 value="true"
+                                checked={forceRegenerate}
+                                onChange={(e) => setForceRegenerate(e.target.checked)}
                                 className="peer sr-only"
                             />
                             <div className="w-10 h-5 bg-[#2D241E]/10 rounded-full peer-checked:bg-[#ff6b7b]/20 transition-all duration-300" />
@@ -183,8 +187,8 @@ export function ReportGenerator({
                 
                 <div className="pt-4">
                     <GenerateReportButton 
-                        label={buttonLabel}
-                        enabled={buttonEnabled && hasValidValues && monthsForSelectedYear.length > 0}
+                        label={forceRegenerate ? 'Gerar Novo Relatório' : buttonLabel}
+                        enabled={(buttonEnabled || forceRegenerate) && hasValidValues && monthsForSelectedYear.length > 0}
                         isGenerating={isGenerating}
                     />
                 </div>

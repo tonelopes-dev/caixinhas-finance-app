@@ -508,20 +508,25 @@ export class ReportService {
       });
 
       // Converter para o formato esperado pelo gerador de relatórios
-      return transactions.map(t => ({
-        id: t.id,
-        date: t.date.toISOString(),
-        description: t.description,
-        amount: t.amount,
-        type: t.type,
-        paymentMethod: t.paymentMethod,
-        category: t.category?.name || 'Sem categoria',
-        ownerId: t.vaultId || t.actorId, // Para compatibilidade com o código existente
-        isRecurring: t.isRecurring,
-        isInstallment: t.isInstallment,
-        installmentNumber: t.installmentNumber,
-        totalInstallments: t.totalInstallments
-      }));
+      return transactions.map(t => {
+        const accounts = [t.sourceAccount?.name, t.destinationAccount?.name].filter(Boolean);
+        const accountName = accounts.length > 0 ? accounts.join(' -> ') : 'Sem conta';
+        return {
+          id: t.id,
+          date: t.date.toISOString(),
+          description: t.description,
+          amount: t.amount,
+          type: t.type,
+          paymentMethod: t.paymentMethod,
+          category: t.category?.name || 'Sem categoria',
+          account: accountName,
+          ownerId: t.vaultId || t.actorId, // Para compatibilidade com o código existente
+          isRecurring: t.isRecurring,
+          isInstallment: t.isInstallment,
+          installmentNumber: t.installmentNumber,
+          totalInstallments: t.totalInstallments
+        };
+      });
     } catch (error) {
       console.error('Erro ao buscar transações por período:', error);
       return [];

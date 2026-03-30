@@ -39,12 +39,13 @@ const reportPrompt = ai.definePrompt({
 **ANÁLISES OBRIGATÓRIAS (calcule dos dados reais):**
 1. Receitas vs Despesas (separe por tipo: INCOME vs EXPENSE)
 2. Taxa de Poupança (saldo/receita)
-3. Gastos por Categoria (agrupe por category.name)
+3. Gastos por Categoria (agrupe por category.name ou campo category)
 4. Métodos de Pagamento (agrupe por paymentMethod)
-5. Parcelamentos Ativos (APENAS se isInstallment=true)
-6. Patrimônio Líquido (saldo acumulado do mês)
-7. Pontos Positivos e de Atenção (baseados nos dados)
-8. Recomendações Práticas (baseadas em problemas reais identificados)
+5. Contas Movimentadas (agrupe pelo campo account)
+6. Parcelamentos Ativos (APENAS se isInstallment=true)
+7. Patrimônio Líquido (saldo acumulado do mês)
+8. Pontos Positivos e de Atenção (baseados nos dados)
+9. Recomendações Práticas (baseadas em problemas reais identificados)
 
 **Dados (Transações do mês {{month}} em JSON):**
 {{{transactions}}}
@@ -54,7 +55,7 @@ const reportPrompt = ai.definePrompt({
 1. **Saúde Financeira** (score 0-100 baseado em: poupança, comprometimento)
 2. **Cards de Métricas** (receitas, despesas, saldo, média diária)
 3. **Visão Executiva** (parágrafo resumindo o mês)
-4. **Patrimônio** (saldo final, taxa poupança, contas movimentadas)
+4. **Patrimônio** (saldo final, taxa poupança, contas movimentadas listando o NOME das contas)
 5. **Gastos por Categoria** (tabela ou cards com valores e %)
 6. **Métodos de Pagamento** (distribuição real encontrada)
 7. **Parcelamentos** (SOMENTE se existirem nos dados)
