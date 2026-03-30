@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useActionState } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Clock } from 'lucide-react';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -221,6 +221,22 @@ export function ReportsPageClient() {
               </div>
             ) : hasAnyTransactions === true ? (
               <div className="flex-1 flex flex-col space-y-8 md:space-y-12">
+                {/* Advisory Notice */}
+                <div className="p-6 rounded-[32px] bg-white/40 backdrop-blur-xl border border-white/60 shadow-sm flex items-start sm:items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+                  <div className="h-12 w-12 rounded-2xl bg-[#ff6b7b]/10 flex items-center justify-center shrink-0 border border-[#ff6b7b]/20">
+                    <Clock className="h-6 w-6 text-[#ff6b7b]" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-black text-[#2D241E] uppercase tracking-wider italic">
+                      Nota sobre o <span className="text-[#ff6b7b]">Processamento</span>
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-[#2D241E]/50 leading-relaxed max-w-3xl italic">
+                      A geração do relatório por nossa IA pode levar até <span className="text-[#ff6b7b]">5 minutos</span> para uma análise completa. 
+                      Você pode continuar navegando pelo app tranquilamente; o relatório ficará salvo automaticamente assim que estiver pronto.
+                    </p>
+                  </div>
+                </div>
+
                 {isGenerating ? (
                   <div className="flex-1 flex items-center justify-center p-6 sm:p-20 text-center">
                     <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-10 sm:p-20 w-full max-w-3xl">

@@ -220,6 +220,7 @@ async function main() {
       logoUrl: BANK_LOGOS.inter,
       scope: "personal",
       ownerId: clara.id,
+      vaultId: claraVault.id,
     },
   });
 
@@ -232,6 +233,7 @@ async function main() {
       logoUrl: BANK_LOGOS.nubank,
       scope: "personal",
       ownerId: clara.id,
+      vaultId: claraVault.id,
     },
   });
 
@@ -244,6 +246,7 @@ async function main() {
       logoUrl: BANK_LOGOS.btg,
       scope: "personal",
       ownerId: clara.id,
+      vaultId: claraVault.id,
     },
   });
 
@@ -257,6 +260,73 @@ async function main() {
       logoUrl: BANK_LOGOS.itau,
       scope: "personal",
       ownerId: clara.id,
+      vaultId: claraVault.id,
+    },
+  });
+
+  const claraBB = await prisma.account.create({
+    data: {
+      name: "BB Clara",
+      bank: "Banco do Brasil",
+      type: "corrente",
+      balance: 1200.0,
+      logoUrl: BANK_LOGOS.bb,
+      scope: "personal",
+      ownerId: clara.id,
+      vaultId: claraVault.id,
+    },
+  });
+
+  const claraSharedCaixa = await prisma.account.create({
+    data: {
+      name: "Caixa Casal",
+      bank: "Caixa",
+      type: "poupança",
+      balance: 5000.0,
+      logoUrl: BANK_LOGOS.caixa,
+      scope: sharedVault.id,
+      ownerId: clara.id,
+      vaultId: sharedVault.id,
+    },
+  });
+
+  const claraSharedBradesco = await prisma.account.create({
+    data: {
+      name: "Bradesco Prime",
+      bank: "Bradesco",
+      type: "credito",
+      balance: -1500.0,
+      creditLimit: 15000.0,
+      logoUrl: BANK_LOGOS.bradesco,
+      scope: sharedVault.id,
+      ownerId: clara.id,
+      vaultId: sharedVault.id,
+    },
+  });
+
+  const claraSharedBTG = await prisma.account.create({
+    data: {
+      name: "Investimento Casal",
+      bank: "BTG Pactual",
+      type: "investment",
+      balance: 30000.0,
+      logoUrl: BANK_LOGOS.btg,
+      scope: sharedVault.id,
+      ownerId: clara.id,
+      vaultId: sharedVault.id,
+    },
+  });
+
+  const joaoSharedSantander = await prisma.account.create({
+    data: {
+      name: "Santander João",
+      bank: "Santander",
+      type: "corrente",
+      balance: 8900.0,
+      logoUrl: BANK_LOGOS.santander,
+      scope: sharedVault.id,
+      ownerId: joao.id,
+      vaultId: sharedVault.id,
     },
   });
 
@@ -602,7 +672,13 @@ async function main() {
           type: "expense",
           actorId: faker.helpers.arrayElement([clara.id, joao.id]),
           userId: clara.id,
-          sourceAccountId: faker.helpers.arrayElement([claraInter.id, joaoBTG.id]),
+          sourceAccountId: faker.helpers.arrayElement([
+            claraInter.id, 
+            joaoBTG.id, 
+            claraSharedCaixa.id, 
+            claraSharedBradesco.id, 
+            joaoSharedSantander.id
+          ]),
           vaultId: sharedVault.id,
           categoryId: getCat(clara.id, "Mercado").id,
           paymentMethod: "Cartão de Crédito",
@@ -629,7 +705,11 @@ async function main() {
           type: "expense",
           actorId: clara.id,
           userId: clara.id,
-          sourceAccountId: claraNubank.id,
+          sourceAccountId: faker.helpers.arrayElement([
+            claraNubank.id, 
+            claraBB.id, 
+            claraInter.id
+          ]),
           vaultId: claraVault.id,
           categoryId: getCat(clara.id, exp.cat).id,
           paymentMethod: faker.helpers.arrayElement(["Cartão de Débito", "PIX", "Crédito"]),

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, Brain, Sparkles, CheckCircle } from 'lucide-react';
+import { FileText, Brain, Sparkles, CheckCircle, Clock } from 'lucide-react';
 
 interface ReportLoadingProps {
   isVisible: boolean;
@@ -71,26 +71,31 @@ export function ReportLoadingProgress({ isVisible }: ReportLoadingProps) {
   const IconComponent = currentStepData.icon;
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-8">
-        <div className="space-y-6">
+    <Card className="w-full border-none bg-white/20 backdrop-blur-xl rounded-[40px] shadow-none">
+      <CardContent className="p-8 sm:p-12">
+        <div className="space-y-10">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-primary">
-              Gerando seu relatório financeiro
+          <div className="text-center space-y-3">
+            <h3 className="font-headline text-2xl sm:text-3xl font-black text-[#2D241E] italic uppercase tracking-tight">
+              Gerando seu <span className="text-[#ff6b7b]">Relatório Financeiro</span>
             </h3>
-            <p className="text-muted-foreground">
-              Enquanto isso, você pode navegar livremente pela aplicação
+            <p className="text-[11px] font-black text-[#2D241E]/40 uppercase tracking-[0.25em]">
+              Sua estratégia personalizada está sendo preparada
             </p>
           </div>
 
           {/* Barra de progresso principal */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Progresso geral</span>
-              <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#2D241E]/40">Etapa de Progressão</span>
+              <span className="text-sm font-black text-[#ff6b7b] italic">{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} className="h-3" />
+            <div className="h-4 w-full bg-[#2D241E]/5 rounded-full overflow-hidden">
+               <div 
+                 className="h-full bg-gradient-to-r from-[#ff6b7b] to-[#fa8292] rounded-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,107,123,0.3)]" 
+                 style={{ width: `${progress}%` }} 
+               />
+            </div>
           </div>
 
           {/* Step atual */}
@@ -134,12 +139,19 @@ export function ReportLoadingProgress({ isVisible }: ReportLoadingProps) {
             })}
           </div>
 
-          {/* Dica de navegação */}
-          <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              💡 <strong>Dica:</strong> Você pode continuar usando a aplicação normalmente. 
-              Seu relatório será salvo automaticamente quando estiver pronto!
-            </p>
+          <div className="p-6 rounded-[28px] bg-white/60 border border-white/80 shadow-sm flex items-start gap-5">
+            <div className="h-10 w-10 rounded-xl bg-[#ff6b7b]/10 flex items-center justify-center shrink-0">
+               <Clock className="h-5 w-5 text-[#ff6b7b]" />
+            </div>
+            <div className="space-y-1">
+               <p className="text-[11px] font-black text-[#2D241E] uppercase tracking-wider italic">
+                 Dica de <span className="text-[#ff6b7b]">Navegação</span>
+               </p>
+               <p className="text-[13px] font-bold text-[#2D241E]/50 leading-relaxed italic">
+                 A análise pode levar até <span className="text-[#ff6b7b]">5 minutos</span>. 
+                 Sinta-se à vontade para navegar pelo app; o relatório será salvo automaticamente.
+               </p>
+            </div>
           </div>
         </div>
       </CardContent>

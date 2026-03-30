@@ -49,9 +49,6 @@ const reportPrompt = ai.definePrompt({
 **Dados (Transações do mês {{month}} em JSON):**
 {{{transactions}}}
 
-**Dados (Transações do mês {{month}} em JSON):**
-{{{transactions}}}
-
 **Gere um relatório HTML usando Tailwind CSS com estas seções:**
 
 1. **Saúde Financeira** (score 0-100 baseado em: poupança, comprometimento)
@@ -65,10 +62,14 @@ const reportPrompt = ai.definePrompt({
 9. **Recomendações Práticas** (3-5 ações priorizadas por impacto)
 10. **Mensagem Motivacional** (personalizada aos acertos)
 
-Use classes Tailwind: bg-card, border, rounded-lg, p-4/p-6, font-bold, grid, flex, space-y-4, etc.
+Use classes Tailwind: bg-white, border, rounded-[24px] md:rounded-[32px], p-4 md:p-8, font-bold, grid grid-cols-1 md:grid-cols-2, gap-4 md:gap-6, flex flex-col md:flex-row, space-y-6, etc.
 
 **REGRA DE DESIGN CRÍTICA:** 
-❌ NUNCA use gradientes claros (ex: bg-blue-100, bg-green-200) com texto branco. 
+❌ NUNCA use fundos beges ou cremes (ex: bg-[#FBF7F4], bg-amber-50) para as seções principais, pois eles somem no fundo do app.
+❌ NUNCA use grades de colunas fixas (ex: grid-cols-4) sem o prefixo responsivo. 
+✅ SEMPRE comece com \`grid-cols-1\` para mobile e use \`md:grid-cols-2\` ou \`md:grid-cols-4\` para desktop.
+✅ Use \`bg-white\` para as seções de "Saúde Financeira", "Visão Executiva", "Patrimônio", etc., com \`shadow-sm\` e \`border-[#2D241E]/10\`.
+✅ Para blocos de destaque (Cards de Métricas), use \`bg-white\` ou fundos levemente coloridos mas com bordas claras.
 ✅ Para blocos de "Parabéns" ou "Atenção", use fundos suaves com texto escuro: e.g., \`bg-[#ff6b7b]/10 text-[#2D241E]\` ou \`bg-emerald-50 text-emerald-900\`. 
 ✅ Garanta que todo texto seja perfeitamente legível sobre o fundo.
 ✅ SEMPRE verifique o campo \`paymentMethod\` no JSON de transações para a seção de Métodos de Pagamento.
