@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/services/prisma';
-import { sendEmail } from '@/lib/email.service';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import { welcomeEmail } from '@/app/_templates/emails/welcome-email';
-import { AuthService } from '@/services/auth.service';
-import { 
-  renewalEmail, 
-  paymentFailedEmail, 
-  cancellationEmail, 
-  refundEmail 
+import {
+    cancellationEmail,
+    paymentFailedEmail,
+    refundEmail,
+    renewalEmail
 } from '@/app/_templates/emails/notification-emails';
+import { welcomeEmail } from '@/app/_templates/emails/welcome-email';
+import { sendEmail } from '@/lib/email.service';
+import { AuthService } from '@/services/auth.service';
+import { prisma } from '@/services/prisma';
+import crypto from 'crypto';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Secret do webhook da Kiwify (deve ser configurado no .env)
 const KIWIFY_SECRET = process.env.KIWIFY_WEBHOOK_SECRET;

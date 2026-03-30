@@ -1,32 +1,31 @@
 
 'use client';
 
+import { createGoalAction, getCurrentVaultContextAction, getUserVaultsAction } from '@/app/(private)/goals/actions';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { useToast } from '@/hooks/use-toast';
-import { createGoalAction, getUserVaultsAction, getCurrentVaultContextAction } from '@/app/(private)/goals/actions';
-import { cn } from '@/lib/utils';
-import { StandardBackButton } from '@/components/ui/standard-back-button';
 
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Lock, PiggyBank, Users, Check, Sparkles } from 'lucide-react';
-import { DashboardBackground } from '@/components/dashboard/dashboard-background';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Check, Lock, Sparkles, Users } from 'lucide-react';
 
 type Vault = { id: string; name: string };
 type GoalFormState = { errors?: { name?: string[]; emoji?: string[]; targetAmount?: string[]; ownerId?: string[] }; message?: string; success?: boolean };

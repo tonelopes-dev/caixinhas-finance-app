@@ -1,9 +1,8 @@
-import { getAccountsData } from './actions';
-import { withPageAccess } from '@/lib/page-access';
-import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { AccountsManagement } from '@/components/profile/accounts-management';
 import { CategoriesManagement } from '@/components/profile/categories-management';
-import { User } from '@/lib/definitions';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { withPageAccess } from '@/lib/page-access';
+import { getAccountsData } from './actions';
 
 export default async function AccountsPage() {
   // Verifica acesso completo à página

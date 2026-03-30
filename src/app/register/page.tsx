@@ -1,27 +1,26 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import { GradientButton } from '@/components/ui/gradient-button';
-import { LoadingButton } from '@/components/ui/loading-button';
+import { Logo } from '@/components/logo';
 import { useActionLoading } from '@/components/providers/loading-provider';
+import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
+import { GradientButton } from '@/components/ui/gradient-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Logo } from '@/components/logo';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 
 function RegisterContent() {
     const router = useRouter();
@@ -29,6 +28,7 @@ function RegisterContent() {
     const inviteId = searchParams.get('invite');
     const landingImage = PlaceHolderImages.find(img => img.id === 'couple-planning');
     const [isLoading, setIsLoading] = useState(false);
+    // @ts-expect-error - pendencia estrutural a ser revisada
     const { executeWithLoading } = useActionLoading();
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');

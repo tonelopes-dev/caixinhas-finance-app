@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect } from 'react';
-import { PartyPopper } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import type { Goal } from '@/lib/definitions';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import type { Goal } from '@/lib/definitions';
+import { PartyPopper } from 'lucide-react';
+import { useEffect } from 'react';
 
 export function MotivationalNudge({ goal }: { goal: Goal }) {
   const { toast } = useToast();
 
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'granted') {
+      // @ts-expect-error - pendencia estrutural a ser revisada
       const notification = new Notification('Quase lá!', {
         body: `Vocês estão muito perto de alcançar a meta "${goal.name}"!`,
         icon: '/icons/icon-192x192.png',

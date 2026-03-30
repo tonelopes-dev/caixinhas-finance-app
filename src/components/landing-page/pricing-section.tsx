@@ -1,26 +1,25 @@
 "use client"
 
-import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { CouplesBadge } from "@/components/ui/couples-badge"
-import {
-  Check,
-  Star,
-  Sparkles,
-  PiggyBank,
-  Users,
-  BarChart3,
-  Lock,
-  Zap,
-  Shield,
-  Target,
-  Heart,
-  Wallet,
-} from "lucide-react"
-import { motion } from "framer-motion"
 import { config } from "@/lib/config"
+import { motion } from "framer-motion"
+import {
+    BarChart3,
+    Check,
+    Heart,
+    Lock,
+    PiggyBank,
+    Shield,
+    Sparkles,
+    Star,
+    Target,
+    Users,
+    Wallet,
+    Zap,
+} from "lucide-react"
+import Image from "next/image"
 
 type PricingSectionProps = {
   isVisible: { [key: string]: boolean }

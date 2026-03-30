@@ -1,24 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { GradientButton } from '@/components/ui/gradient-button';
+import { Logo } from '@/components/logo';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from '@/components/ui/card';
+import { GradientButton } from '@/components/ui/gradient-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Logo } from '@/components/logo';
-import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { requestPasswordResetAction } from './actions';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

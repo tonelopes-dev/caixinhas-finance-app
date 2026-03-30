@@ -1,12 +1,12 @@
 
 'use server';
 
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
-import { TransactionService, type CreateTransactionInput } from '@/services/transaction.service';
-import { invalidateReportCache } from '../reports/actions';
-import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { TransactionService, type CreateTransactionInput } from '@/services/transaction.service';
+import { getServerSession } from 'next-auth';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { invalidateReportCache } from '../reports/actions';
 
 
 // ---------------------------------------------------------------------------
@@ -204,7 +204,7 @@ async function revalidateTransactionCaches(opts: {
  * Fluxo: Autenticação → Parsing → Validação Zod → Service → Cache → Retorno.
  */
 export async function addTransaction(
-  prevState: TransactionState,
+  _prevState: TransactionState,
   formData: FormData
 ): Promise<TransactionState> {
   // 1. Autenticação
@@ -260,7 +260,7 @@ export async function addTransaction(
  * A action só precisa orquestrar parsing, validação, chamada e cache.
  */
 export async function updateTransaction(
-  prevState: TransactionState,
+  _prevState: TransactionState,
   formData: FormData
 ): Promise<TransactionState> {
   // 1. Autenticação
@@ -339,7 +339,7 @@ export async function updateTransaction(
  * O TransactionService já reverte saldos automaticamente.
  */
 export async function deleteTransaction(
-  prevState: { message: string | null },
+  _prevState: { message: string | null },
   formData: FormData
 ): Promise<{ message: string | null; success: boolean }> {
   // 1. Validação mínima

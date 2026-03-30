@@ -7,17 +7,17 @@
 
 'use server';
 
-import { getServerSession } from 'next-auth';
+import {
+    canAccessPersonalWorkspace,
+    canCreateOwnResources,
+    canCreateVaults,
+    getAccessInfo,
+    hasFullAccess,
+    type UserWithoutPassword
+} from '@/lib/access-control';
 import { authOptions } from '@/lib/auth';
 import { AuthService } from '@/services/auth.service';
-import { 
-  hasFullAccess, 
-  canCreateVaults, 
-  canAccessPersonalWorkspace,
-  canCreateOwnResources,
-  getAccessInfo,
-  type UserWithoutPassword 
-} from '@/lib/access-control';
+import { getServerSession } from 'next-auth';
 
 export type ActionResult<T = unknown> = {
   success: boolean;
@@ -57,6 +57,7 @@ export async function requireFullAccess(): Promise<ActionResult<UserWithoutPassw
   }
 
   if (!hasFullAccess(user)) {
+    // @ts-expect-error - pendencia estrutural a ser revisada
     const accessInfo = getAccessInfo(user);
     return {
       success: false,

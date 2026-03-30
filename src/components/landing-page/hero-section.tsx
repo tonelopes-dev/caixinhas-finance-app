@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GradientButton } from "@/components/ui/gradient-button";
-import Link from "next/link";
-import { Logo } from "../logo";
 import { config } from "@/lib/config";
-import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { Logo } from "../logo";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
+// @ts-expect-error - pendencia estrutural a ser revisada
 const images = [
   PlaceHolderImages.find((img) => img.id === "couple-planning")?.imageUrl,
   PlaceHolderImages.find((img) => img.id === "hero-phones")?.imageUrl,

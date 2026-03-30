@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import { useLoading } from "@/components/providers/loading-provider";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLoading } from "@/components/providers/loading-provider";
 
 interface PremiumLogoProps {
   className?: string;
@@ -16,7 +16,7 @@ export function PremiumLogo({ className, onClick, href }: PremiumLogoProps) {
   const router = useRouter();
   const { showLoading } = useLoading();
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (_e: React.MouseEvent) => {
     if (onClick) {
       onClick();
     }

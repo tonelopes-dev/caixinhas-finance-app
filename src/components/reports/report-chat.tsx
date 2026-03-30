@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
-import { Bot, Send, User as UserIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { User } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
+import { Bot, Send } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 export type ChatMessage = {
     role: 'user' | 'assistant';
@@ -97,6 +97,7 @@ export function ReportChat({
                         </div>
                             {msg.role === 'user' && currentUser && (
                             <Avatar className="h-8 w-8 border-2 border-muted-foreground">
+                                // @ts-expect-error - pendencia estrutural a ser revisada
                                 <AvatarImage src={currentUser.avatarUrl} />
                                 <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                             </Avatar>

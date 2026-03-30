@@ -1,12 +1,10 @@
 
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { notFound, redirect } from 'next/navigation';
 // CORRIGIDO: O caminho de importação foi ajustado para o nível correto.
-import { getGoalManageData } from '../../actions';
 import { ManageGoalClient } from '@/components/goals/manage-goal-client';
-import { Vault } from '@/types';
+import { getGoalManageData } from '../../actions';
 
 export default async function ManageGoalPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; // No Next.js 15, params precisa ser aguardado

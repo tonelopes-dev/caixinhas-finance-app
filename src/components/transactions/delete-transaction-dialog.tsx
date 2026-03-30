@@ -1,25 +1,21 @@
 
 'use client';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { DropdownMenuItem } from '../ui/dropdown-menu';
-import { Trash2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState, useActionState } from 'react';
 import { deleteTransaction } from '@/app/(private)/transactions/actions';
-import { cn } from '@/lib/utils';
 import { useLoading } from '@/components/providers/loading-provider';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Trash2 } from 'lucide-react';
+import { useActionState, useEffect, useState } from 'react';
 
 
 export function DeleteTransactionDialog({ transactionId, trigger }: { transactionId: string, trigger?: React.ReactNode }) {
@@ -55,7 +51,7 @@ export function DeleteTransactionDialog({ transactionId, trigger }: { transactio
         <div className="p-8 space-y-6">
           <form 
             action={dispatch}
-            onSubmit={(e) => {
+            onSubmit={(_e) => {
               showLoading('Excluindo transação...');
             }}
           >
@@ -71,7 +67,7 @@ export function DeleteTransactionDialog({ transactionId, trigger }: { transactio
                   Confirmar <span className="text-[#ff6b7b]">Exclusão</span>?
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-base font-bold text-[#2D241E]/40 leading-relaxed px-4">
-                  Esta ação é irreversível e removerá permanentemente o registro desta transação.
+                  Esta ação é irreversível _e removerá permanentemente o registro desta transação.
                 </AlertDialogDescription>
               </AlertDialogHeader>
             </div>

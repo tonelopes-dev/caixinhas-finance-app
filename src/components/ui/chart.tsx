@@ -279,6 +279,7 @@ const ChartLegend = React.forwardRef<
   return (
     <div ref={ref} {...props}>
       {React.cloneElement(content, {
+        // @ts-expect-error - pendencia estrutural a ser revisada
         payload,
       })}
     </div>

@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect, useActionState } from 'react';
-import { FileText, Clock } from 'lucide-react';
+import { checkHasAnyTransactionsAction, generateNewFinancialReport, getMonthsWithTransactionsAction, getReportStatusAction, type FinancialReportState } from '@/app/(private)/reports/actions';
+import { ReportDisplay } from '@/components/reports/report-display';
+import { ReportGenerator } from '@/components/reports/report-generator';
+import { ReportLoadingProgress } from '@/components/reports/report-loading-progress';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
+import type { User } from '@/lib/definitions';
+import { Clock } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import type { User } from '@/lib/definitions';
-import { ReportGenerator } from '@/components/reports/report-generator';
-import { ReportDisplay } from '@/components/reports/report-display';
-import { ReportLoadingProgress } from '@/components/reports/report-loading-progress';
-import { generateNewFinancialReport, type FinancialReportState } from '@/app/(private)/reports/actions';
-import { checkHasAnyTransactionsAction, getMonthsWithTransactionsAction, getReportStatusAction } from '@/app/(private)/reports/actions';
+import { useActionState, useEffect, useState } from 'react';
 
 export function ReportsPageClient() {
   const router = useRouter();

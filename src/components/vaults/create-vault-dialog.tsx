@@ -1,26 +1,24 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import {
-  Dialog,
-  DialogHeader,
-  DialogTitle,
-  DialogContent,
-} from '@/components/ui/mobile-dialog';
+import { createVaultAction } from '@/app/vaults/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { X, ChevronRight, ChevronLeft, Globe, Lock, Image as ImageIcon, Wallet, Check } from 'lucide-react';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
-import { VaultCreationSuccessDialog } from './vault-creation-success-dialog';
-import { createVaultAction } from '@/app/vaults/actions';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/mobile-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useActionState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { compressImage } from '@/lib/image-utils';
+import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, ChevronLeft, ChevronRight, Globe, Image as ImageIcon, Lock, Wallet } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useActionState, useRef, useState } from 'react';
+import { VaultCreationSuccessDialog } from './vault-creation-success-dialog';
 
 type User = {
   id: string;

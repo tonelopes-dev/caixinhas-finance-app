@@ -22,12 +22,12 @@ export type RegisterState = {
 
 /**
  * Server Action para registrar novo usuário
- * @param prevState - Estado anterior
+ * @param _prevState - Estado anterior
  * @param formData - Dados do formulário
  * @returns Estado atualizado com resultado do registro
  */
 export async function registerAction(
-  prevState: RegisterState,
+  _prevState: RegisterState,
   formData: FormData
 ): Promise<RegisterState> {
   const validatedFields = registerSchema.safeParse({

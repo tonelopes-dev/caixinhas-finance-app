@@ -1,13 +1,12 @@
 
-import { redirect } from 'next/navigation';
-import { withPageAccess } from '@/lib/page-access';
-import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { getUserAllGoals } from '@/app/(private)/goals/actions';
 import { RecurringPageClient } from '@/components/recurring/recurring-page-client';
-import { getRecurringData } from './actions';
-import { cookies } from 'next/headers';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { withPageAccess } from '@/lib/page-access';
 import { AccountService } from '@/services/account.service';
 import { CategoryService } from '@/services/category.service';
-import { getUserAllGoals } from '@/app/(private)/goals/actions';
+import { cookies } from 'next/headers';
+import { getRecurringData } from './actions';
 
 export default async function RecurringPage() {
   const { user } = await withPageAccess({ requireFullAccess: true });

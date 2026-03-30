@@ -1,34 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { useLoading } from "@/components/providers/loading-provider";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowRight,
-  PlusCircle,
-  Users,
-  Lock,
-  Eye,
-  EyeOff,
-  Heart,
-} from "lucide-react";
-import type { Goal } from "@/lib/definitions";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { user, partner } from "@/lib/data";
-import { AnimatedCounter } from "../ui/animated-counter";
-import { cn } from "@/lib/utils";
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { usePrivacyMode } from "@/hooks/use-privacy-mode";
+import type { Goal } from "@/lib/definitions";
 import { motion } from "framer-motion";
+import {
+    ArrowRight,
+    Eye,
+    EyeOff,
+    Heart,
+    Lock,
+    PlusCircle,
+    Users,
+} from "lucide-react";
+import Link from "next/link";
+import { AnimatedCounter } from "../ui/animated-counter";
 import { MemberAvatars } from "../ui/member-avatars";
-import { useLoading } from "@/components/providers/loading-provider";
 
 type GoalBucketsProps = {
   goals: Goal[];

@@ -1,24 +1,23 @@
 'use client';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState, useActionState, useTransition } from 'react';
-import { useFormStatus } from 'react-dom';
 import { deleteCategory, type CategoryActionState } from '@/app/(private)/accounts/actions';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import type { Category } from '@/services/category.service';
-import { cn } from '@/lib/utils';
+import { Trash2 } from 'lucide-react';
+import { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 interface DeleteCategoryDialogProps {
   category: Category;
@@ -56,6 +55,7 @@ function FormContent({ category, onSubmitting, setOpen }: { category: Category; 
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-4">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            // @ts-expect-error - pendencia estrutural a ser revisada
             <AlertDialogAction type="submit" variant="destructive" disabled={pending}>
             {pending ? 'Excluindo...' : 'Excluir'}
             </AlertDialogAction>

@@ -1,9 +1,9 @@
 
 'use server';
 
-import { z } from 'zod';
 import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
 import { ReportService } from '@/services/ReportService';
+import { z } from 'zod';
 
 const generateReportSchema = z.object({
     month: z.string().min(1, 'Mês é obrigatório'),
@@ -18,7 +18,7 @@ export type FinancialReportState = {
   error?: string | null;
 };
 
-export async function generateNewFinancialReport(prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
+export async function generateNewFinancialReport(_prevState: FinancialReportState, formData: FormData): Promise<FinancialReportState> {
     console.log('📊 Dados do formulário:', { 
         month: formData.get('month'),
         year: formData.get('year'),

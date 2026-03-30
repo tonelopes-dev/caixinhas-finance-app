@@ -1,32 +1,32 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import { Bell, CircleDot, ClipboardCheck, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { deleteNotification, markAllNotificationsAsRead, markNotificationAsRead } from '@/app/(private)/notifications/actions';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import Link from 'next/link';
-import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/(private)/notifications/actions';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import type { NotificationData } from '@/services/notification.service';
+import { Bell, CircleDot, ClipboardCheck, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { useState, useTransition } from 'react';
 
 type NotificationsClientProps = {
   initialNotifications: NotificationData[];

@@ -1,15 +1,15 @@
 'use client';
 
-import { PiggyBank, PlusCircle, UserPlus, FileText, Paintbrush, Edit, Wallet, Building2, User, HelpCircle } from 'lucide-react';
-import { StandardBackButton } from '@/components/ui/standard-back-button';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@/components/ui/accordion';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { motion } from 'framer-motion';
+import { Building2, Edit, FileText, HelpCircle, PiggyBank, PlusCircle, User, UserPlus, Wallet } from 'lucide-react';
 
 const tutorialSteps = [
     {

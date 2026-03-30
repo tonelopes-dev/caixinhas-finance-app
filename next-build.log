@@ -1,0 +1,98 @@
+   ▲ Next.js 15.5.14
+   - Environments: .env
+   - Experiments (use with caution):
+     · serverActions
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+
+[1m[33mwarn[39m[22m - The class `duration-[2000ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;2000ms&rsqb;` to silence this warning.
+ ✓ Compiled successfully in 51s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+✅ Prisma conectado ao banco de dados (pooled)
+✅ Prisma conectado ao banco de dados (pooled)
+✅ Prisma conectado ao banco de dados (pooled)
+✅ Prisma conectado ao banco de dados (pooled)
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+🔥 Conexão aquecida com sucesso
+✅ Prisma conectado ao banco de dados (pooled)
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+🔥 Conexão aquecida com sucesso
+🔥 Conexão aquecida com sucesso
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+🔥 Conexão aquecida com sucesso
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+🔥 Conexão aquecida com sucesso
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+   Generating static pages (0/36) ...
+✅ Prisma conectado ao banco de dados (pooled)
+   Generating static pages (9/36) 
+🔥 Conexão aquecida com sucesso
+   Generating static pages (18/36) 
+   Generating static pages (27/36) 
+✅ Prisma conectado ao banco de dados (pooled)
+🔥 Conexão aquecida com sucesso
+ ✓ Generating static pages (36/36)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    3.03 kB         128 kB
+├ ○ /_not-found                            151 B         102 kB
+├ ƒ /accounts                            11.4 kB         206 kB
+├ ƒ /api/auth/[...nextauth]                151 B         102 kB
+├ ƒ /api/auth/register                     151 B         102 kB
+├ ƒ /api/debug/user                        151 B         102 kB
+├ ƒ /api/support                           151 B         102 kB
+├ ƒ /api/test/email                        151 B         102 kB
+├ ƒ /api/test/s3-upload                    151 B         102 kB
+├ ƒ /api/webhooks/kiwify                   151 B         102 kB
+├ ƒ /dashboard                           6.76 kB         145 kB
+├ ○ /dev/bank-logos                      4.22 kB         120 kB
+├ ○ /forgot-password                     7.11 kB         163 kB
+├ ƒ /goals                               14.7 kB         192 kB
+├ ƒ /goals/[id]                          9.28 kB         255 kB
+├ ƒ /goals/[id]/manage                   14.3 kB         205 kB
+├ ƒ /goals/new                           6.46 kB         206 kB
+├ ƒ /invitation/[id]                     6.58 kB         126 kB
+├ ƒ /invitations                         5.42 kB         140 kB
+├ ƒ /invite                              9.61 kB         171 kB
+├ ○ /landing                             24.9 kB         190 kB
+├ ○ /login                               9.52 kB         138 kB
+├ ƒ /notifications                       10.1 kB         180 kB
+├ ○ /offline                             3.78 kB         114 kB
+├ ƒ /patrimonio                          6.83 kB         126 kB
+├ ○ /privacy                               493 B         106 kB
+├ ƒ /profile                             15.1 kB         207 kB
+├ ƒ /recurring                           7.24 kB         255 kB
+├ ○ /register                            9.19 kB         137 kB
+├ ƒ /reports                             10.9 kB         172 kB
+├ ○ /reset-password                      7.43 kB         163 kB
+├ ƒ /support                             7.88 kB         172 kB
+├ ○ /terms                               1.52 kB         121 kB
+├ ○ /test-loading                        6.42 kB         122 kB
+├ ○ /test-s3                             1.05 kB         103 kB
+├ ƒ /transactions                        6.42 kB         248 kB
+├ ○ /tutorial                            7.21 kB         169 kB
+└ ƒ /vaults                              21.2 kB         227 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/1255-dae3977b913d5e96.js      45.2 kB
+  ├ chunks/4bd1b696-182b6b13bdad92e3.js  54.2 kB
+  └ other shared chunks (total)          2.35 kB
+
+
+ƒ Middleware                               61 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

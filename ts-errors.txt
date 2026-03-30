@@ -1,0 +1,119 @@
+.next/types/app/invitation/[id]/page.ts(34,29): error TS2344: Type 'InvitationPageProps' does not satisfy the constraint 'PageProps'.
+  Types of property 'params' are incompatible.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+jest.config.ts(1,29): error TS2307: Cannot find module 'jest' or its corresponding type declarations.
+prisma/seed.ts(240,9): error TS6133: 'claraBTG' is declared but its value is never read.
+prisma/seed.ts(307,9): error TS6133: 'claraSharedBTG' is declared but its value is never read.
+prisma/seed.ts(346,9): error TS6133: 'joaoSantander' is declared but its value is never read.
+prisma/seed.ts(373,9): error TS6133: 'anaItau' is declared but its value is never read.
+src/app/(private)/accounts/actions.ts(115,9): error TS6133: 'bankCode' is declared but its value is never read.
+src/app/(private)/dashboard/page.tsx(46,30): error TS6133: 'accessInfo' is declared but its value is never read.
+src/app/(private)/goals/[id]/page.tsx(30,11): error TS2322: Type 'TransactionWithRelations[]' is not assignable to type 'Transaction[]'.
+  Type 'TransactionWithRelations' is missing the following properties from type 'Transaction': ownerId, ownerType
+src/app/(private)/notifications/page.tsx(8,9): error TS6133: 'user' is declared but its value is never read.
+src/app/api/debug/user/route.ts(9,19): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(14,56): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(29,21): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(30,24): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(31,23): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(32,24): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(33,28): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/debug/user/route.ts(34,36): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/api/test/s3-upload/route.ts(9,19): error TS2339: Property 'user' does not exist on type 'never'.
+src/app/invitation/[id]/page.tsx(29,9): error TS6133: 'session' is declared but its value is never read.
+src/app/login/page.tsx(32,9): error TS6133: 'showLoading' is declared but its value is never read.
+src/app/login/page.tsx(33,9): error TS6133: 'executeWithLoading' is declared but its value is never read.
+src/app/register/page.tsx(31,11): error TS6133: 'executeWithLoading' is declared but its value is never read.
+src/app/vaults/actions.ts(198,27): error TS6133: 'deleteFile' is declared but its value is never read.
+src/components/dashboard/dashboard-client.tsx(61,3): error TS6133: 'currentUser' is declared but its value is never read.
+src/components/dashboard/dashboard-client.tsx(62,3): error TS6133: 'partner' is declared but its value is never read.
+src/components/dashboard/header-client.tsx(26,9): error TS6133: 'themeVersion' is declared but its value is never read.
+src/components/dashboard/invite-button.tsx(11,11): error TS6133: 'showLoading' is declared but its value is never read.
+src/components/dashboard/motivational-nudge.tsx(14,13): error TS6133: 'notification' is declared but its value is never read.
+src/components/dashboard/notifications-dropdown.tsx(46,24): error TS6133: 'hideLoading' is declared but its value is never read.
+src/components/dashboard/recent-transactions.tsx(51,3): error TS6133: 'ownerType' is declared but its value is never read.
+src/components/dashboard/recent-transactions.tsx(72,9): error TS6133: 'formatCurrency' is declared but its value is never read.
+src/components/dashboard/recent-transactions.tsx(79,9): error TS6133: 'formatDate' is declared but its value is never read.
+src/components/dashboard/recent-transactions.tsx(85,9): error TS6198: All destructured elements are unused.
+src/components/dashboard/recent-transactions.tsx(87,9): error TS6133: 'PrivacyBlur' is declared but its value is never read.
+src/components/dev/bank-logos-preview.tsx(20,10): error TS6133: 'showMissing' is declared but its value is never read.
+src/components/dev/bank-logos-preview.tsx(20,23): error TS6133: 'setShowMissing' is declared but its value is never read.
+src/components/dev/bank-logos-preview.tsx(48,17): error TS2322: Type '{ placeholder: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement, HTMLInputElement>) => void; className: string; icon: Element; }' is not assignable to type 'IntrinsicAttributes & Omit<DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, "ref"> & RefAttributes<...>'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & Omit<DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, "ref"> & RefAttributes<...>'.
+src/components/goals/delete-goal-dialog.tsx(63,74): error TS2322: Type '{ children: string; onClick: () => void; disabled: boolean; variant: string; }' is not assignable to type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+src/components/goals/goal-card.tsx(31,3): error TS6133: 'userId' is declared but its value is never read.
+src/components/goals/goal-card.tsx(33,3): error TS6133: 'onGoToWorkspace' is declared but its value is never read.
+src/components/goals/goal-detail-client.tsx(51,74): error TS6133: 'userId' is declared but its value is never read.
+src/components/goals/goal-detail-client.tsx(52,25): error TS6133: 'setCurrentAmount' is declared but its value is never read.
+src/components/goals/goal-detail-client.tsx(54,9): error TS6133: 'hasAccounts' is declared but its value is never read.
+src/components/goals/goal-detail-client.tsx(94,9): error TS6133: 'transactionButtons' is declared but its value is never read.
+src/components/goals/goal-transaction-dialog.tsx(42,10): error TS6133: 'SubmitButton' is declared but its value is never read.
+src/components/goals/remove-participant-dialog.tsx(35,9): error TS6133: 'handleRemove' is declared but its value is never read.
+src/components/goals/remove-participant-dialog.tsx(72,46): error TS2322: Type '{ children: string; type: "submit"; variant: string; }' is not assignable to type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+src/components/landing-page/hero-section.tsx(11,7): error TS6133: 'images' is declared but its value is never read.
+src/components/landing-page/news-section.tsx(230,22): error TS6133: 't' is declared but its value is never read.
+src/components/landing-page/news-section.tsx(248,18): error TS6133: 'event' is declared but its value is never read.
+src/components/landing-page/story-section.tsx(234,22): error TS6133: 't' is declared but its value is never read.
+src/components/landing-page/story-section.tsx(256,18): error TS6133: 'event' is declared but its value is never read.
+src/components/notifications/delete-notification-dialog.tsx(59,55): error TS2322: Type '{ children: string; onClick: () => void; variant: string; }' is not assignable to type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+src/components/notifications/notifications-manager-old.tsx(228,41): error TS2339: Property 'title' does not exist on type 'NotificationData'.
+src/components/notifications/notifications-manager-old.tsx(237,51): error TS2339: Property 'actionUrl' does not exist on type 'NotificationData'.
+src/components/notifications/notifications-manager-old.tsx(239,48): error TS2339: Property 'actionUrl' does not exist on type 'NotificationData'.
+src/components/notifications/notifications-manager.tsx(145,9): error TS6133: 'unreadCount' is declared but its value is never read.
+src/components/profile/accounts-management.tsx(424,88): error TS6133: 'workspaceName' is declared but its value is never read.
+src/components/profile/accounts-management.tsx(424,103): error TS6133: 'isVaultOwner' is declared but its value is never read.
+src/components/profile/accounts-management.tsx(425,11): error TS6133: 'isPersonalWorkspace' is declared but its value is never read.
+src/components/profile/delete-category-dialog.tsx(58,46): error TS2322: Type '{ children: string; type: "submit"; variant: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & Omit<AlertDialogActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<...>'.
+src/components/profile/guests-management.tsx(132,83): error TS6133: 'currentUser' is declared but its value is never read.
+src/components/profile/guests-management.tsx(157,47): error TS6133: 'userName' is declared but its value is never read.
+src/components/profile/profile-form.tsx(24,7): error TS6133: 'pastelColors' is declared but its value is never read.
+src/components/profile/profile-form.tsx(55,10): error TS6133: 'selectedEmoji' is declared but its value is never read.
+src/components/profile/profile-page-client.tsx(34,26): error TS6133: 'status' is declared but its value is never read.
+src/components/profile/profile-page-client.tsx(36,24): error TS6133: 'hideLoading' is declared but its value is never read.
+src/components/recurring/recurring-page-client.tsx(16,10): error TS6133: 'formatCurrency' is declared but its value is never read.
+src/components/recurring/recurring-page-client.tsx(20,10): error TS6133: 'formatDate' is declared but its value is never read.
+src/components/recurring/recurring-page-client.tsx(45,9): error TS6133: 'router' is declared but its value is never read.
+src/components/reports/report-chat.tsx(100,46): error TS2322: Type 'string | null' is not assignable to type 'string | Blob | undefined'.
+  Type 'null' is not assignable to type 'string | Blob | undefined'.
+src/components/transactions/add-transaction-dialog.tsx(32,10): error TS6133: 'SubmitButton' is declared but its value is never read.
+src/components/transactions/add-transaction-dialog.tsx(207,9): error TS6133: 'frequencyLabels' is declared but its value is never read.
+src/components/transactions/edit-transaction-dialog.tsx(31,10): error TS6133: 'SubmitButton' is declared but its value is never read.
+src/components/transactions/edit-transaction-dialog.tsx(215,9): error TS6133: 'frequencyLabels' is declared but its value is never read.
+src/components/transactions/responsive-transaction-list.tsx(215,35): error TS6133: 'index' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(41,10): error TS6133: 'formatDate' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(61,7): error TS6133: 'paymentMethods' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(70,7): error TS6133: 'getTypeDisplay' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(152,9): error TS6133: 'years' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(193,9): error TS6133: 'itemVariants' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(203,9): error TS6133: 'cardBaseClasses' is declared but its value is never read.
+src/components/transactions/transactions-page-client.tsx(204,9): error TS6133: 'activeClasses' is declared but its value is never read.
+src/components/ui/chart.tsx(282,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'payload' does not exist in type 'Partial<unknown> & Attributes'.
+src/components/ui/mobile-dialog.tsx(38,9): error TS6133: 'contentRef' is declared but its value is never read.
+src/components/ui/mobile-floating-nav.tsx(17,10): error TS6133: 'isNavigating' is declared but its value is never read.
+src/components/ui/mobile-floating-nav.tsx(17,24): error TS6133: 'setIsNavigating' is declared but its value is never read.
+src/components/ui/mobile-floating-nav.tsx(18,10): error TS6133: 'targetPath' is declared but its value is never read.
+src/components/ui/mobile-floating-nav.tsx(18,22): error TS6133: 'setTargetPath' is declared but its value is never read.
+src/components/ui/navigation-loader.tsx(47,11): error TS6133: 'handleComplete' is declared but its value is never read.
+src/components/ui/progress.tsx(12,36): error TS6133: 'ref' is declared but its value is never read.
+src/components/ui/update-available-notification.tsx(29,22): error TS6133: 'setNewVersion' is declared but its value is never read.
+src/components/vaults/edit-vault-dialog.tsx(194,9): error TS6133: 'handleRemoveImage' is declared but its value is never read.
+src/components/vaults/vaults-page-client.tsx(327,9): error TS6133: 'remainingMembers' is declared but its value is never read.
+src/components/vaults/vaults-page-client.tsx(438,11): error TS6133: 'isLoading' is declared but its value is never read.
+src/components/vaults/vaults-page-client.tsx(438,22): error TS6133: 'message' is declared but its value is never read.
+src/hooks/use-404-analytics.ts(43,11): error TS6133: 'segments' is declared but its value is never read.
+src/hooks/use-celebration-effects.ts(52,69): error TS6133: 'goalCount' is declared but its value is never read.
+src/lib/access-control.ts(97,38): error TS6133: 'user' is declared but its value is never read.
+src/lib/action-helpers.ts(60,11): error TS6133: 'accessInfo' is declared but its value is never read.
+src/lib/auth.ts(10,7): error TS6133: 'getBaseUrl' is declared but its value is never read.
+src/lib/auth.ts(96,18): error TS6198: All destructured elements are unused.
+src/lib/auth.ts(133,30): error TS6133: 'account' is declared but its value is never read.
+src/lib/data.ts(27,42): error TS6133: 'userId' is declared but its value is never read.
+src/lib/data.ts(27,65): error TS6133: 'workspaceId' is declared but its value is never read.
+src/lib/data.ts(27,93): error TS6133: 'fetchAll' is declared but its value is never read.
+src/services/vault.service.ts(750,16): error TS6133: 'NotificationService' is declared but its value is never read.

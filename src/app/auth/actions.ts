@@ -1,8 +1,8 @@
 'use server';
 
-import { z } from 'zod';
 import { sendEmail } from '@/ai/flows/send-email-flow';
 import { passwordResetEmail } from '@/app/_templates/emails/password-reset-template';
+import { z } from 'zod';
 
 const passwordResetSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
@@ -15,7 +15,7 @@ export type GenericState = {
     }
 }
 
-export async function sendPasswordReset(prevState: GenericState, formData: FormData): Promise<GenericState> {
+export async function sendPasswordReset(_prevState: GenericState, formData: FormData): Promise<GenericState> {
     const validatedFields = passwordResetSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {

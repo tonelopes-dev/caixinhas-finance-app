@@ -2,12 +2,11 @@
 'use client';
 
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Landmark } from 'lucide-react';

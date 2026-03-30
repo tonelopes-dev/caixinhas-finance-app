@@ -1,18 +1,15 @@
 "use client";
 
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import {
-  Check,
-  Wallet,
-  PiggyBank,
-  BarChart3,
-  TrendingUp,
-  ChevronRight,
-} from "lucide-react";
-import { Logo } from "../logo";
 import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
+import {
+    BarChart3,
+    Check,
+    ChevronRight,
+    TrendingUp,
+    Wallet
+} from "lucide-react";
+import { Logo } from "../logo";
 import { LazyVideo } from "./lazy-video";
 
 type FeaturesSectionProps = {

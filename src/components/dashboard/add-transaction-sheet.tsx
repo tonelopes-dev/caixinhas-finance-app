@@ -1,47 +1,45 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
+import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { AddTransactionDialog } from '@/components/transactions/add-transaction-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRightLeft, ListFilter, ArrowRight, Banknote, CreditCard, PiggyBank, MoreHorizontal, Edit, Trash2, Search, Repeat } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
-import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
-import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Table,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui/table';
+import type { Account, Goal, Transaction } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { ArrowRight, ArrowRightLeft, Banknote, CreditCard, Edit, Landmark, MoreHorizontal, PiggyBank, Repeat, Search, Trash2, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {

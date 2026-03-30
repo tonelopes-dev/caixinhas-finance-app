@@ -1,20 +1,19 @@
 "use client"
 
 import {
-  Header,
-  ProblemSolutionSection,
-  FeaturesSection,
-  PWASection,
-  BenefitsSection,
-  HowItWorksSection,
-  StorySection,
-  PricingSection,
-  NewsSection,
-  FAQSection,
-  CTASection,
-  Footer,
-  useScrollAnimations,
-  HeroSection,
+    BenefitsSection,
+    CTASection,
+    FAQSection,
+    FeaturesSection,
+    Footer,
+    Header,
+    HeroSection,
+    HowItWorksSection,
+    NewsSection,
+    PricingSection,
+    ProblemSolutionSection,
+    StorySection,
+    useScrollAnimations
 } from "@/components/landing-page"
 
 export function LandingPageClient() {

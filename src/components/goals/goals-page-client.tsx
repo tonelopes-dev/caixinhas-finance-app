@@ -1,23 +1,15 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
-import { GoalList } from '@/components/goals/goal-list';
-import { CompletedGoalsConfetti } from '@/components/goals/completed-goals-confetti';
 import { toggleFeaturedGoalAction } from '@/app/(private)/goals/actions';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { CompletedGoalsConfetti } from '@/components/goals/completed-goals-confetti';
+import { GoalList } from '@/components/goals/goal-list';
 import { AnimatedDiv } from '@/components/ui/animated-div';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { PlusCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 
 import type { Goal, Vault } from '@/lib/definitions';
 

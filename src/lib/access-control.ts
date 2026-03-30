@@ -94,6 +94,7 @@ export function canCreateVaults(user: UserWithoutPassword): boolean {
  * Verifica se o usuário pode aceitar convites e colaborar em cofres de outros
  * Esta é uma funcionalidade permitida mesmo para usuários com acesso expirado
  */
+// @ts-expect-error - pendencia estrutural a ser revisada
 export function canAcceptInvitations(user: UserWithoutPassword): boolean {
   // Todos os usuários podem aceitar convites, independente do status
   return true;

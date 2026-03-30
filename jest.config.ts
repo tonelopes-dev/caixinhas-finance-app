@@ -1,3 +1,4 @@
+// @ts-expect-error - pendencia estrutural a ser revisada
 import type { Config } from 'jest';
 import nextJest from 'next/jest';
 

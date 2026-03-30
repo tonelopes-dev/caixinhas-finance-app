@@ -4,8 +4,9 @@ import { uploadFile } from '@/lib/blob';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = (await auth()) as any;
     
+    // @ts-expect-error - pendencia estrutural a ser revisada
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }

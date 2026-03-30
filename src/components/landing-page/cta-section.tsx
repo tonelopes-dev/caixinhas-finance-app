@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { GradientButton } from "@/components/ui/gradient-button";
 import { config } from "@/lib/config";
 import { Check, ChevronRight } from "lucide-react";
 

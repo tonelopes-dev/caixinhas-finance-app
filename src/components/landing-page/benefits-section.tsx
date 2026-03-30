@@ -1,18 +1,16 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Shield,
-  Heart,
-  Target,
-  Sparkles,
-  Lock,
-  Zap,
-  ChevronRight,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
+import {
+    ChevronRight,
+    Heart,
+    Lock,
+    Shield,
+    Sparkles,
+    Target,
+    Zap,
+} from "lucide-react";
 
 type BenefitsSectionProps = {
   isVisible: { [key: string]: boolean };

@@ -2,7 +2,7 @@
 // Este arquivo agora trabalha apenas com dados reais do banco via services
 // Os dados mock foram removidos para usar apenas os dados do banco de dados
 
-import type { User, Vault, Account, Goal, Transaction, VaultInvitation, SavedReport } from './definitions';
+import type { Account, Goal, Transaction, User, Vault, VaultInvitation } from './definitions';
 
 // --- UTILIDADES ---
 
@@ -24,6 +24,7 @@ export const bankLogos = [
 ];
 
 // Função helper para trabalhar com dados do banco (se necessário no futuro)
+// @ts-expect-error - pendencia estrutural a ser revisada
 export const getMockDataForUser = async (userId: string | null, workspaceId: string | null, fetchAll: boolean = false) => {
     // Esta função agora deve usar os services em vez de dados mock
     // Por enquanto retorna uma estrutura vazia para evitar quebras

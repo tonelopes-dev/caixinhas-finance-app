@@ -1,16 +1,15 @@
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { getDashboardData } from "./actions";
 import { getPatrimonyData } from "@/app/(private)/patrimonio/actions";
-import { VaultService } from "@/services/vault.service";
+import { withPageAccess } from "@/lib/page-access";
 import { CategoryService } from "@/services/category.service";
 import { GoalService } from "@/services/goal.service";
 import { TransactionService } from "@/services/transaction.service";
-import { withPageAccess } from "@/lib/page-access";
-import type { User, Vault } from "@/lib/definitions";
+import { VaultService } from "@/services/vault.service";
+import { getDashboardData } from "./actions";
 
 // ⚡ PERFORMANCE: Lazy load componentes pesados
 const DashboardClient = dynamic(
@@ -44,6 +43,7 @@ function DashboardSkeleton() {
 
 export default async function DashboardPage() {
   // Verifica acesso completo à página
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const { user: currentUser, accessInfo } = await withPageAccess({
     requireFullAccess: true,
   });

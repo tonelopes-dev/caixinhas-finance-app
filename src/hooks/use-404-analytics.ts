@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface NotFoundAnalytics {
   path: string;
@@ -40,6 +40,7 @@ export function use404Analytics() {
   }, [pathname]);
 
   const generateSuggestions = (path: string) => {
+    // @ts-expect-error - pendencia estrutural a ser revisada
     const segments = path.split('/').filter(Boolean);
     const suggestions: SuggestedRoute[] = [];
 

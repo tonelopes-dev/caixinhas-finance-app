@@ -1,12 +1,10 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { getUserVaultsData } from './actions';
 import { VaultsPageClient } from '@/components/vaults';
-import { AuthService } from '@/services/auth.service';
 import { getAccessInfo } from '@/lib/access-control';
-import { AccessBanner } from '@/components/ui/access-banner';
-import { cache } from 'react';
+import { authOptions } from '@/lib/auth';
+import { AuthService } from '@/services/auth.service';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { getUserVaultsData } from './actions';
 
 const getCachedUserVaultsData = async (userId: string) => {
   console.time('🔍 Vaults: Loading user data');

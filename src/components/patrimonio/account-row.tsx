@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
-import { Landmark, Wallet, TrendingUp } from 'lucide-react';
-import type { Account } from '@/lib/definitions';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import type { Account } from '@/lib/definitions';
+import { TrendingUp, Wallet } from 'lucide-react';
+import Image from 'next/image';
 
 const accountTypeDetails: Record<Account['type'], { label: string, icon: React.ElementType }> = {
     checking: { label: 'Conta Corrente', icon: Wallet },

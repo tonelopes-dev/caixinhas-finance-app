@@ -1,0 +1,23 @@
+
+> nextn@0.1.0 build
+> node scripts/wait-for-db.js && node scripts/generate-sw.js && prisma migrate deploy && prisma generate && next build
+
+⚠️ Nenhuma variável DATABASE_URL ou DIRECT_URL encontrada. Pulando verificação...
+✅ Service Worker gerado com sucesso!
+📦 Versão: v20260330-222404
+🌍 Ambiente: PRODUCTION
+📍 Local: C:\Projetos\caixinhas-finance-app\public\sw.js
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-billowing-union-acm7t5qs.sa-east-1.aws.neon.tech"
+
+13 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Error: 
+EPERM: operation not permitted, rename 'C:\Projetos\caixinhas-finance-app\node_modules\.prisma\client\query_engine-windows.dll.node.tmp23820' -> 'C:\Projetos\caixinhas-finance-app\node_modules\.prisma\client\query_engine-windows.dll.node'
+
+

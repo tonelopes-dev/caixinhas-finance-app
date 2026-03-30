@@ -1,14 +1,14 @@
 'use server';
 
-import { cookies } from 'next/headers';
-import { AuthService } from '@/services/auth.service';
-import { VaultService } from '@/services/vault.service';
-import { prisma } from '@/services/prisma';
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
-import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { AuthService } from '@/services/auth.service';
+import { prisma } from '@/services/prisma';
+import { VaultService } from '@/services/vault.service';
+import { getServerSession } from 'next-auth';
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 /**
  * Busca os dados necessários para a página de perfil
@@ -78,7 +78,7 @@ export type ProfileActionState = {
 /**
  * Server Action para atualizar o perfil do usuário
  */
-export async function updateProfileAction(prevState: ProfileActionState, formData: FormData): Promise<ProfileActionState> {
+export async function updateProfileAction(_prevState: ProfileActionState, formData: FormData): Promise<ProfileActionState> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { message: "Usuário não autenticado." };
@@ -153,7 +153,7 @@ export type InviteMemberState = {
 /**
  * Server Action para convidar um membro para o cofre
  */
-export async function inviteMemberAction(prevState: InviteMemberState, formData: FormData): Promise<InviteMemberState> {
+export async function inviteMemberAction(_prevState: InviteMemberState, formData: FormData): Promise<InviteMemberState> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { message: "Usuário não autenticado." };
@@ -294,7 +294,7 @@ export type UpdateUserState = {
 /**
  * Server Action para atualizar o perfil do usuário
  */
-export async function updateUserAction(prevState: UpdateUserState, formData: FormData): Promise<UpdateUserState> {
+export async function updateUserAction(_prevState: UpdateUserState, formData: FormData): Promise<UpdateUserState> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { message: "Usuário não autenticado.", success: false };

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, Brain, Sparkles, CheckCircle, Clock } from 'lucide-react';
+import { Brain, CheckCircle, Clock, FileText, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ReportLoadingProps {
   isVisible: boolean;

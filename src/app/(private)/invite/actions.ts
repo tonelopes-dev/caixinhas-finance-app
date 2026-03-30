@@ -1,9 +1,9 @@
 
 'use server';
 
-import { z } from 'zod';
-import { VaultService } from '@/services/vault.service';
 import type { GenericState } from '@/app/auth/actions';
+import { VaultService } from '@/services/vault.service';
+import { z } from 'zod';
 
 const inviteSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
@@ -22,7 +22,7 @@ export async function getVaultMembers(vaultId: string) {
 }
 
 export async function sendPartnerInvite(
-  prevState: GenericState,
+  _prevState: GenericState,
   formData: FormData
 ): Promise<GenericState> {
 
@@ -98,10 +98,10 @@ export async function sendPartnerInvite(
 }
 
 // Funções para gerenciar convites
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
 import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function getUserInvitations() {
   const session = await getServerSession(authOptions);

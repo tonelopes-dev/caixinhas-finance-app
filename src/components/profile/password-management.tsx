@@ -1,20 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { changePasswordAction } from '@/app/(private)/profile/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Eye, EyeOff, Key, Shield, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { changePasswordAction } from '@/app/(private)/profile/actions';
 import type { User } from '@/lib/definitions';
+import { Eye, EyeOff, Key, Loader2, Shield } from 'lucide-react';
+import { useState } from 'react';
 
 interface PasswordManagementProps {
   currentUser: User;

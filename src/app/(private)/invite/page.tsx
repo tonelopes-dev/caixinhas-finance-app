@@ -1,17 +1,8 @@
-import { Users } from "lucide-react";
-import { redirect } from "next/navigation";
+import { InvitePageClient } from "@/components/invite/invite-page-client";
 import { BackToDashboard } from "@/components/ui/back-to-dashboard";
 import { withPageAccess } from "@/lib/page-access";
 import { VaultService } from "@/services/vault.service";
-import { InvitePageClient } from "@/components/invite/invite-page-client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Users } from "lucide-react";
 import { getUserInvitations, getUserSentInvitations } from "./actions";
 
 export default async function InvitePage() {

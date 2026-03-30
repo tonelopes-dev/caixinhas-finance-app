@@ -1,12 +1,12 @@
 'use client';
 
-import { BarChart3, Home, ArrowLeft, FileText, TrendingUp, Sparkles, Plus } from 'lucide-react';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GradientButton } from '@/components/ui/gradient-button';
+import { ArrowLeft, BarChart3, Plus, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Logo } from '@/components/logo';
 
 export default function ReportsNotFound() {
   const router = useRouter();

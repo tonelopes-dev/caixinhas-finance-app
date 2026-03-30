@@ -1,31 +1,23 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { getVaultMembers, sendPartnerInvite } from '@/app/(private)/invite/actions';
+import type { GenericState } from '@/app/auth/actions';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Mail, Send, Users, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { sendPartnerInvite, getVaultMembers } from '@/app/(private)/invite/actions';
-import type { GenericState } from '@/app/auth/actions';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Send, Users } from 'lucide-react';
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();

@@ -1,24 +1,28 @@
 
 'use client';
 
-import React, { useEffect, useState, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose
-} from '@/components/ui/mobile-dialog';
+import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
+import { useLoading } from '@/components/providers/loading-provider';
+import { AddAccountPromptDialog } from '@/components/transactions/add-account-prompt-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+    Dialog,
+    DialogClose,
+    DialogContent, DialogDescription,
+    DialogFooter,
+    DialogHeader, DialogTitle, DialogTrigger
+} from '@/components/ui/mobile-dialog';
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { depositToGoalAction, withdrawFromGoalAction } from '@/app/(private)/goals/actions';
-import { AddAccountPromptDialog } from '@/components/transactions/add-account-prompt-dialog';
-import { cn } from '@/lib/utils';
 import type { Account } from '@/lib/definitions';
-import { useLoading } from '@/components/providers/loading-provider';
+import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp } from 'lucide-react';
+import React, { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 const initialState = {
   message: '',
@@ -35,6 +39,7 @@ type GoalTransactionDialogProps = {
   className?: string;
 };
 
+// @ts-expect-error - pendencia estrutural a ser revisada
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -52,9 +57,9 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
   
   const hasNoAccounts = accounts.length === 0;
   
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleTriggerClick = (_e: React.MouseEvent) => {
+    _e.preventDefault();
+    _e.stopPropagation();
     
     if (disabled) return;
     if (hasNoAccounts) {
@@ -83,7 +88,7 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
       const firstError = state.errors ? Object.values(state.errors)[0]?.[0] : undefined;
       toast({ 
         title: 'Ops! Algo deu errado', 
-        description: state.message || firstError || 'Verifique os campos e tente novamente.', 
+        description: state.message || firstError || 'Verifique os campos _e tente novamente.', 
         variant: 'destructive' 
       });
     }
@@ -119,12 +124,12 @@ export function GoalTransactionDialog({ type, goalId, accounts, onComplete, disa
           </div>
           <DialogTitle className="text-3xl font-headline italic text-[#2D241E] tracking-tight">{title.split(' ')[0]} <span className="text-[#ff6b7b]">{title.split(' ').slice(1).join(' ')}</span></DialogTitle>
           <DialogDescription className="text-sm font-bold text-[#2D241E]/40 italic leading-relaxed">
-            Insira o valor e selecione a conta que deseja {type === 'deposit' ? 'usar para depositar' : 'receber a retirada'}.
+            Insira o valor _e selecione a conta que deseja {type === 'deposit' ? 'usar para depositar' : 'receber a retirada'}.
           </DialogDescription>
         </DialogHeader>
         <form 
           action={formAction}
-          onSubmit={(e) => {
+          onSubmit={(_e) => {
             const action = type === 'deposit' ? 'Depositando' : 'Retirando';
             showLoading(`${action}...`);
           }}

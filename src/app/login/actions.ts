@@ -19,12 +19,12 @@ export type LoginState = {
 
 /**
  * Server Action para realizar login
- * @param prevState - Estado anterior
+ * @param _prevState - Estado anterior
  * @param formData - Dados do formulário
  * @returns Estado atualizado com resultado do login
  */
 export async function loginAction(
-  prevState: LoginState,
+  _prevState: LoginState,
   formData: FormData
 ): Promise<LoginState> {
   const email = formData.get('email') as string;

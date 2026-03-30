@@ -1,16 +1,16 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
-import { GoalService } from '@/services/goal.service';
-import { VaultService } from '@/services/vault.service';
-import { TransactionService } from '@/services/transaction.service';
-import { AccountService } from '@/services/account.service'; // Importado
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { AccountService } from '@/services/account.service'; // Importado
+import { GoalService } from '@/services/goal.service';
 import prisma from '@/services/prisma';
+import { TransactionService } from '@/services/transaction.service';
+import { VaultService } from '@/services/vault.service';
+import { getServerSession } from 'next-auth';
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 // --- TIPOS DE ESTADO PARA ACTIONS ---
 export type GoalFormState = {
@@ -59,7 +59,7 @@ const goalTransactionSchema = z.object({
 
 // --- ACTIONS ---
 
-export async function createGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
+export async function createGoalAction(_prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
   // Verifica se o usuário tem acesso completo
   const { requireFullAccess } = await import('@/lib/action-helpers');
   const accessCheck = await requireFullAccess();
@@ -86,7 +86,7 @@ export async function createGoalAction(prevState: GoalFormState, formData: FormD
   redirect('/goals');
 }
 
-export async function updateGoalAction(prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
+export async function updateGoalAction(_prevState: GoalFormState, formData: FormData): Promise<GoalFormState> {
   // Verifica se o usuário tem acesso completo
   const { requireFullAccess } = await import('@/lib/action-helpers');
   const accessCheck = await requireFullAccess();
@@ -191,11 +191,11 @@ async function handleTransaction(formData: FormData, type: 'deposit' | 'withdraw
     return { success: true, message: `${label} realizado com sucesso!` };
 }
 
-export async function depositToGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
+export async function depositToGoalAction(_prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
     return handleTransaction(formData, 'deposit');
 }
 
-export async function withdrawFromGoalAction(prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
+export async function withdrawFromGoalAction(_prevState: TransactionFormState, formData: FormData): Promise<TransactionFormState> {
     return handleTransaction(formData, 'withdraw');
 }
 

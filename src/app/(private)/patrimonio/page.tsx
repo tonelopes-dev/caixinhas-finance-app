@@ -1,14 +1,10 @@
-import { redirect } from 'next/navigation';
-import { StandardBackButton } from '@/components/ui/standard-back-button';
-import { getPatrimonyData } from './actions';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PatrimonySection } from '@/components/patrimonio/patrimony-section';
 import { AccountRow } from '@/components/patrimonio/account-row';
-import { GoalRow } from '@/components/patrimonio/goal-row';
 import { CreditCardRow } from '@/components/patrimonio/credit-card-row';
-import { motion } from 'framer-motion';
+import { GoalRow } from '@/components/patrimonio/goal-row';
+import { PatrimonySection } from '@/components/patrimonio/patrimony-section';
+import { StandardBackButton } from '@/components/ui/standard-back-button';
 import { withPageAccess } from '@/lib/page-access';
+import { getPatrimonyData } from './actions';
 
 export default async function PatrimonioPage() {
   const { user } = await withPageAccess({ requireFullAccess: true });

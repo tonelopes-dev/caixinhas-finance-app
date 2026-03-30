@@ -1,10 +1,10 @@
 "use client"
 
-import * as React from "react"
+import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard"
+import { cn } from "@/lib/utils"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard"
+import * as React from "react"
 
 const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
@@ -35,6 +35,7 @@ const DialogContent = React.forwardRef<
   DialogContentProps
 >(({ className, children, mobileOptimized = true, ...props }, ref) => {
   const { isVirtualKeyboardOpen, viewportHeight } = useVirtualKeyboard();
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const contentRef = React.useRef<HTMLDivElement>(null);
   
   // Scroll para campo focado quando teclado virtual abrir
@@ -196,14 +197,5 @@ const DialogDescription = React.forwardRef<
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+    Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger
 }

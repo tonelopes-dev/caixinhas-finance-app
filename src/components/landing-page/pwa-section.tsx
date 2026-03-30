@@ -1,24 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  ArrowRight, 
-  Sparkles, 
-  Zap, 
-  Laptop, 
-  Monitor, 
-  Smartphone, 
-  RefreshCw, 
-  DownloadCloud,
-  CheckCircle2,
-  Apple,
-  MousePointer2
-} from "lucide-react"
-import { motion } from "framer-motion"
 import { config } from "@/lib/config"
+import { motion } from "framer-motion"
+import {
+    Apple,
+    ArrowRight,
+    CheckCircle2,
+    DownloadCloud,
+    Laptop,
+    Monitor,
+    RefreshCw,
+    Smartphone,
+    Zap
+} from "lucide-react"
+import { useEffect, useState } from "react"
 
 type PWASectionProps = {
   isVisible: { [key: string]: boolean }

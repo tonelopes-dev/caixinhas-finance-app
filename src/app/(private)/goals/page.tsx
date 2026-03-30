@@ -1,10 +1,9 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { GoalsPageClient } from '@/components/goals/goals-page-client';
 import { Button } from '@/components/ui/button';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
-import { GoalsPageClient } from '@/components/goals/goals-page-client';
-import { getGoalsPageData } from './actions';
 import { withPageAccess } from '@/lib/page-access';
+import Link from 'next/link';
+import { getGoalsPageData } from './actions';
 
 export default async function GoalsPage() {
   const { user } = await withPageAccess({ requireFullAccess: true });

@@ -1,8 +1,7 @@
 
 "use server";
-import { prisma } from '@/services/prisma';
-import { AccountService } from '@/services/account.service';
 import { GoalService } from '@/services/goal.service';
+import { prisma } from '@/services/prisma';
 import { VaultService } from '@/services/vault.service';
 
 export type PatrimonyData = {

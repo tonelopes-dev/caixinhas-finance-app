@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle
+    Dialog,
+    DialogContent,
+    DialogTitle
 } from '@/components/ui/dialog';
-import { PartyPopper, CheckCircle2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { CheckCircle2, PartyPopper } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface VaultCreationSuccessDialogProps {
   open: boolean;

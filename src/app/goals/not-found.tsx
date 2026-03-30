@@ -1,12 +1,12 @@
 'use client';
 
-import { Target, Home, ArrowLeft, Plus, TrendingUp, Sparkles } from 'lucide-react';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GradientButton } from '@/components/ui/gradient-button';
+import { ArrowLeft, Plus, Target, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Logo } from '@/components/logo';
 
 export default function GoalsNotFound() {
   const router = useRouter();

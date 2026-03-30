@@ -1,43 +1,39 @@
 'use client';
 
-import { useState, useEffect, useActionState, useTransition } from 'react';
-import { useFormStatus } from 'react-dom';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, Lock, Users, AlertCircle, Trash2, UserPlus, Check, Settings2, ShieldAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import { updateGoalAction } from '@/app/(private)/goals/actions';
+import { DashboardBackground } from '@/components/dashboard/dashboard-background';
 import { DeleteGoalDialog } from '@/components/goals/delete-goal-dialog';
 import { RemoveParticipantDialog } from '@/components/goals/remove-participant-dialog';
 import { VisibilityChangeDialog } from '@/components/goals/visibility-change-dialog';
-import type { Goal, Vault, User } from '@/lib/definitions';
-import { DashboardBackground } from '@/components/dashboard/dashboard-background';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { useToast } from '@/hooks/use-toast';
+import type { Goal, User, Vault } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { AlertCircle, Check, Lock, Settings2, ShieldAlert, Trash2, UserPlus, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useActionState, useEffect, useState, useTransition } from 'react';
+import { useFormStatus } from 'react-dom';
 
 // O tipo Goal agora inclui os campos userId e vaultId globalmente no definitions.ts
 

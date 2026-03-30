@@ -1,16 +1,14 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Users,
-  Wallet,
-  Target,
-  TrendingUp,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react"
 import { config } from "@/lib/config"
+import {
+    ArrowRight,
+    Sparkles,
+    Target,
+    TrendingUp,
+    Wallet
+} from "lucide-react"
 
 type HowItWorksSectionProps = {
   isVisible: { [key: string]: boolean }

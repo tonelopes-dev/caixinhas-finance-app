@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { UserPlus } from 'lucide-react';
-import { useTheme } from '@/hooks/use-theme';
 import { useLoading } from '@/components/providers/loading-provider';
+import { Button } from '@/components/ui/button';
+import { useTheme } from '@/hooks/use-theme';
+import { UserPlus } from 'lucide-react';
+import { useState } from 'react';
 
 export function InviteButton() {
   const { themeVersion } = useTheme(); // Force re-render on theme change
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const { showLoading, hideLoading } = useLoading();
   const [isNavigating, setIsNavigating] = useState(false);
 

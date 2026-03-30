@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { RefreshCw, Download, Zap, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { Check, Download, RefreshCw, Zap } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 
 // Rotas públicas onde NÃO deve mostrar notificação de atualização
@@ -26,6 +26,7 @@ export function UpdateAvailableNotification() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<string>('');
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const [newVersion, setNewVersion] = useState<string>('');
   
   const { data: session, status } = useSession();

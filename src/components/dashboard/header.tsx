@@ -1,31 +1,18 @@
 
-import Link from 'next/link';
 import { PremiumLogo } from '@/components/ui/premium-logo';
 
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, BookOpen, ArrowRightLeft, FileText, Wallet, Landmark, Building2, Gift } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { User } from '@/lib/definitions';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, User as UserIcon } from 'lucide-react';
-import { ThemeSwitcher } from '../theme-switcher';
-import { NotificationsDropdown } from './notifications-dropdown';
 import { NotificationService } from '@/services/notification.service';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { HeaderClient } from './header-client';
 import { InviteButton } from './invite-button';
+import { NotificationsDropdown } from './notifications-dropdown';
 
 
 type HeaderProps = {

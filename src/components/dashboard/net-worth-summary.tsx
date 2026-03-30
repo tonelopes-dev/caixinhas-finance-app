@@ -1,19 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Wallet, PiggyBank, Eye, EyeOff } from "lucide-react";
-import { AnimatedCounter } from "../ui/animated-counter";
-import { Button } from "../ui/button";
-import { usePrivacyMode } from "@/hooks/use-privacy-mode";
-import { motion } from "framer-motion";
 import { useLoading } from "@/components/providers/loading-provider";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { usePrivacyMode } from "@/hooks/use-privacy-mode";
+import { Eye, EyeOff, PiggyBank, Wallet } from "lucide-react";
+import Link from "next/link";
+import { AnimatedCounter } from "../ui/animated-counter";
 
 type NetWorthSummaryProps = {
   liquidAssets: number;

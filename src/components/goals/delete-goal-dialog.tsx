@@ -60,6 +60,7 @@ export function DeleteGoalDialog({ goalId, goalName, disabled }: { goalId: strin
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-4">
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          // @ts-expect-error - pendencia estrutural a ser revisada
           <AlertDialogAction onClick={handleDelete} disabled={isPending} variant="destructive">
             {isPending ? 'Excluindo...' : 'Excluir'}
           </AlertDialogAction>

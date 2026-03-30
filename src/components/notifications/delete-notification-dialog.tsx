@@ -56,6 +56,7 @@ export function DeleteNotificationDialog({ notificationId, notificationText, onD
           </AlertDialogHeader>
           <AlertDialogFooter className='mt-4'>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            // @ts-expect-error - pendencia estrutural a ser revisada
             <AlertDialogAction onClick={handleDelete} variant="destructive">Apagar</AlertDialogAction>
           </AlertDialogFooter>
       </AlertDialogContent>

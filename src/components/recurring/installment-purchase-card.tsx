@@ -1,29 +1,27 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { updatePaidInstallmentsAction } from '@/app/(private)/recurring/actions';
+import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
+import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
-import { ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
-import type { Transaction, Account, Goal } from '@/lib/definitions';
-import { updatePaidInstallmentsAction } from '@/app/(private)/recurring/actions';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import type { Account, Goal, Transaction } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Edit, Trash2 } from 'lucide-react';
-import { EditTransactionDialog } from '@/components/transactions/edit-transaction-dialog';
-import { DeleteTransactionDialog } from '@/components/transactions/delete-transaction-dialog';
+import { ChevronDown, ChevronUp, Edit, MoreHorizontal, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

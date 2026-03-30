@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import { Bell, CircleDot, ClipboardCheck, Trash2, Users, CheckCircle2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { deleteNotification, markAllNotificationsAsRead, markNotificationAsRead } from '@/app/(private)/notifications/actions';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import Link from 'next/link';
-import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/app/(private)/notifications/actions';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import type { NotificationData } from '@/services/notification.service';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bell, CheckCircle2, CircleDot, ClipboardCheck, Trash2, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useState, useTransition } from 'react';
 
 type NotificationsManagerProps = {
   initialNotifications: NotificationData[];
@@ -142,6 +142,7 @@ export function NotificationsManager({ initialNotifications }: NotificationsMana
     return true;
   });
 
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (

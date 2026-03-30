@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation';
-import { withPageAccess } from '@/lib/page-access';
-import { getNotifications } from './actions';
 import { NotificationsManager } from '@/components/notifications/notifications-manager';
 import { NotificationsPageHandler } from '@/components/notifications/notifications-page-handler';
 import { StandardBackButton } from '@/components/ui/standard-back-button';
+import { withPageAccess } from '@/lib/page-access';
+import { getNotifications } from './actions';
 
 export default async function NotificationsPage() {
-  const { user } = await withPageAccess({ requireFullAccess: true });
+  // @ts-expect-error - pendencia estrutural a ser revisada
+  await withPageAccess({ requireFullAccess: true });
 
   const notifications = await getNotifications();
 

@@ -1,17 +1,16 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import React from 'react';
 import { useFormStatus } from 'react-dom';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 
 function GenerateReportButton({ 
     label = 'Gerar Relatório', 

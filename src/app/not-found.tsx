@@ -1,14 +1,13 @@
 'use client';
 
-import { Home, ArrowLeft, Search, Compass, Sparkles, MoveRight } from 'lucide-react';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GradientButton } from '@/components/ui/gradient-button';
+import { use404Analytics, useCommon404Patterns } from '@/hooks/use-404-analytics';
+import { ArrowLeft, Compass, Home, MoveRight, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use404Analytics, useCommon404Patterns } from '@/hooks/use-404-analytics';
-import { Logo } from '@/components/logo';
-import { motion } from 'framer-motion';
 
 export default function NotFound() {
   const router = useRouter();

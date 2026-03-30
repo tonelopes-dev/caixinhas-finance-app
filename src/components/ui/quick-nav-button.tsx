@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useLoading } from '@/components/providers/loading-provider';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface QuickNavButtonProps {
   href: string;

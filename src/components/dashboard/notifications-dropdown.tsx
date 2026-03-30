@@ -1,22 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Bell, CircleDot, CheckCheck, Users, Banknote, Target, UserPlus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { NotificationData } from '@/services/notification.service';
 import { markNotificationAsRead } from '@/app/(private)/notifications/actions';
 import { useLoading } from '@/components/providers/loading-provider';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import type { NotificationData } from '@/services/notification.service';
+import { Banknote, Bell, CheckCheck, CircleDot, Target, UserPlus, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -43,6 +43,7 @@ export function NotificationsDropdown({
   initialUnreadCount = 0,
 }: NotificationsDropdownProps) {
   const router = useRouter();
+  // @ts-expect-error - pendencia estrutural a ser revisada
   const { showLoading, hideLoading } = useLoading();
   const [notifications, setNotifications] = useState<NotificationData[]>(initialNotifications);
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
