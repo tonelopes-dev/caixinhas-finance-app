@@ -74,6 +74,21 @@ Use classes Tailwind: bg-white, border, rounded-[24px] md:rounded-[32px], p-4 md
 ✅ Para blocos de "Parabéns" ou "Atenção", use fundos suaves com texto escuro: e.g., \`bg-[#ff6b7b]/10 text-[#2D241E]\` ou \`bg-emerald-50 text-emerald-900\`. 
 ✅ Garanta que todo texto seja perfeitamente legível sobre o fundo.
 ✅ SEMPRE verifique o campo \`paymentMethod\` no JSON de transações para a seção de Métodos de Pagamento.
+
+**UI MOCKUP EXATO PARA A SEÇÃO "SAÚDE FINANCEIRA":**
+Para mostrar o "Score", você DEVE OBRIGATORIAMENTE usar ESTRITAMENTE o HTML a seguir para criar um gráfico circular, apenas trocando a variável SCORE pelo número real e a COR dependendo se o score for alto (emerald-500) ou baixo (red-500):
+<div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 md:p-8 bg-white rounded-[24px] md:rounded-[32px] border border-[#2D241E]/10">
+  <div class="relative w-24 h-24 shrink-0 flex items-center justify-center rounded-full border-[8px] border-[#2D241E]/5 overflow-hidden">
+    <svg class="absolute inset-0 w-full h-full transform -rotate-90">
+      <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" style="stroke-dasharray: 251; stroke-dashoffset: calc(251 - (251 * SCORE) / 100);" class="text-emerald-500 transition-all duration-1000" />
+    </svg>
+    <span class="font-black text-2xl text-[#2D241E]">SCORE%</span>
+  </div>
+  <div class="space-y-2 text-center sm:text-left">
+    <h3 class="font-bold text-xl text-[#2D241E]">Score: SCORE/100</h3>
+    <p class="text-sm font-bold text-[#2D241E]/60 leading-relaxed max-w-lg">Sua análise e conselho do respectivo score...</p>
+  </div>
+</div>
 `,
 });
 

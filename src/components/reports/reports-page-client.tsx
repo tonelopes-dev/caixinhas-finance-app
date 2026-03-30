@@ -190,8 +190,8 @@ export function ReportsPageClient() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 md:pb-20 pt-24">
-      <div className="flex-1 flex flex-col max-w-7xl mx-auto px-4 sm:px-6 w-full">
+    <div className="flex flex-col min-h-screen pb-24 md:pb-20 pt-24 max-w-[100vw] overflow-x-hidden">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto px-4 sm:px-6 w-full min-w-0">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 md:mb-14">
           <div className="space-y-4">
             <StandardBackButton href="/dashboard" label="Voltar ao Dashboard" />
