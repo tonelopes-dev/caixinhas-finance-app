@@ -13,6 +13,7 @@ import {
 import { Logo } from "../logo";
 import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
+import { LazyVideo } from "./lazy-video";
 
 type FeaturesSectionProps = {
   isVisible: { [key: string]: boolean };
@@ -122,15 +123,12 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-[80px] opacity-40" />
-            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
-              <Image
-                src="/screenshots/workspace-selection.png"
+            <div className="relative z-10 mx-auto w-full max-w-[320px] sm:max-w-[340px] group bg-white/60 p-3 sm:p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden">
+              <LazyVideo
+                src="/landing/videos/caixinhas-cofres-video-landing-lage/caixinhas-cofres-video-landing-lage-480px.mp4"
+                poster="/landing/videos/caixinhas-cofres-video-landing-lage/caixinhas-cofres-video-landing-lage-480px.webp"
                 alt="Seleção de Espaços de Trabalho"
-                width={400}
-                height={800}
-                quality={100}
-                data-ai-hint="app workspace"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                className="relative z-10 mx-auto aspect-[400/800] w-full drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 bg-transparent"
               />
             </div>
           </div>
@@ -149,16 +147,12 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="absolute inset-0 bg-accent/10 rounded-3xl blur-[80px] opacity-40" />
-            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden text-center">
-              <Image
-                src="/screenshots/all-boxes-view.png"
+            <div className="relative z-10 mx-auto w-full max-w-[320px] sm:max-w-[340px] group bg-white/60 p-3 sm:p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden">
+              <LazyVideo
+                src="/landing/videos/lista-de-caixinhas-landing-page/lista-caixinhas-landing-page.mp4"
+                poster="/landing/videos/lista-de-caixinhas-landing-page/lista-caixinhas-landing-page.webp"
                 alt="Visualização de Todas as Caixinhas"
-                width={400}
-                height={800}
-                quality={100}
-                data-ai-hint="app goals"
-                className="relative z-10 drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 inline-block"
-                style={{ marginLeft: "-2px", marginTop: "-2px" }}
+                className="relative z-10 mx-auto aspect-[400/800] w-full drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 bg-transparent"
               />
             </div>
           </div>
@@ -254,15 +248,12 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-[80px] opacity-40" />
-            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
-              <Image
-                src="/screenshots/personal-dashboard.png"
+            <div className="relative z-10 mx-auto w-full max-w-[320px] sm:max-w-[340px] group bg-white/60 p-3 sm:p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden">
+              <LazyVideo
+                src="/landing/videos/dashboard-caixinhas-landing-page/dashboard-caixinhas-landing-page.mp4"
+                poster="/landing/videos/dashboard-caixinhas-landing-page/dashboard-caixinhas-landing-page.webp"
                 alt="Painel com Resumo do Patrimônio"
-                width={400}
-                height={800}
-                quality={100}
-                data-ai-hint="app dashboard"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                className="relative z-10 mx-auto aspect-[400/800] w-full drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 bg-transparent"
               />
             </div>
           </div>
@@ -281,15 +272,12 @@ export function FeaturesSection({ isVisible }: FeaturesSectionProps) {
             }`}
           >
             <div className="absolute inset-0 bg-accent/10 rounded-3xl blur-[80px] opacity-40" />
-            <div className="relative z-10 group bg-white/60 p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md">
-              <Image
-                src="/screenshots/savings-box-detail.png"
+            <div className="relative z-10 mx-auto w-full max-w-[320px] sm:max-w-[340px] group bg-white/60 p-3 sm:p-4 rounded-3xl border border-white shadow-xl backdrop-blur-md overflow-hidden">
+              <LazyVideo
+                src="/landing/videos/detalhes-caixinhas-landing-page/detalhes-caixinhas-landing-page.mp4"
+                poster="/landing/videos/detalhes-caixinhas-landing-page/detalhes-caixinhas-landing-page.webp"
                 alt="Detalhes da Caixinha com Progresso"
-                width={400}
-                height={800}
-                quality={100}
-                data-ai-hint="app goal"
-                className="relative z-10 mx-auto drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                className="relative z-10 mx-auto aspect-[400/800] w-full drop-shadow-2xl rounded-2xl group-hover:scale-[1.02] transition-transform duration-500 bg-transparent"
               />
             </div>
           </div>
