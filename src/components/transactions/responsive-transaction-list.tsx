@@ -88,7 +88,7 @@ export function ResponsiveTransactionList({
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index * 0.05 }}
               className={cn(
-                "relative bg-white/40 backdrop-blur-3xl rounded-[32px] p-4.5 sm:p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500",
+                "relative bg-white/80 backdrop-blur-3xl rounded-[32px] p-2 sm:p-6 border border-white/60 shadow-[0_8px_30px_rgba(45,36,30,0.04)] active:scale-[0.98] transition-all duration-500",
                 t.type === "income"
                   ? "hover:border-emerald-200/50"
                   : "hover:border-rose-200/50",
@@ -96,7 +96,7 @@ export function ResponsiveTransactionList({
             >
               <div className="flex flex-col gap-4">
                 {/* Header: Icon + Info */}
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 p-2">
                   <div
                     className={cn(
                       "h-11 w-11 rounded-2xl flex items-center justify-center shadow-sm border border-white/40 transition-all duration-700 shrink-0",
@@ -115,10 +115,10 @@ export function ResponsiveTransactionList({
                       <ArrowRightLeft size={20} />
                     )}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                       <Badge
+                      <Badge
                         variant="secondary"
                         className="bg-white/80 text-[#2D241E]/40 border-none font-black text-[8px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg"
                       >
@@ -135,7 +135,7 @@ export function ResponsiveTransactionList({
                 </div>
 
                 {/* Footer: Details + Amount */}
-                <div className="pt-3 border-t border-[#2D241E]/5 flex flex-col items-stretch sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
+                <div className="p-3 border-t border-[#2D241E]/5 flex flex-col items-stretch sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
                   <div className="flex flex-col gap-2 min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black text-[#2D241E]/40 uppercase tracking-widest truncate italic">
                       <Wallet className="h-3.5 w-3.5 shrink-0 opacity-50" />
@@ -166,14 +166,18 @@ export function ResponsiveTransactionList({
                         : t.type === "expense"
                           ? "text-rose-600"
                           : "text-blue-600",
-                      "text-right"
+                      "text-right",
                     )}
                   >
                     {!isLoaded || (isPrivate && !disablePrivacyMode) ? (
                       <PrivacyBlur />
                     ) : (
                       <>
-                        {t.type === "income" ? "+" : t.type === "expense" ? "-" : ""}
+                        {t.type === "income"
+                          ? "+"
+                          : t.type === "expense"
+                            ? "-"
+                            : ""}
                         {formatCurrency(Math.abs(t.amount))}
                       </>
                     )}

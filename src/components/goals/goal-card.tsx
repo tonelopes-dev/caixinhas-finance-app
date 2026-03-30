@@ -125,8 +125,8 @@ export function GoalCard({
           </p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3 shrink-0">
             <MemberAvatars
               members={
                 goal.participants?.map((p) => ({
@@ -138,14 +138,14 @@ export function GoalCard({
               limit={3}
             />
             {goal.participants && goal.participants.length > 0 && (
-              <span className="text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[2px]">
+              <span className="hidden sm:inline text-[10px] font-black text-[#2D241E]/30 uppercase tracking-[2px]">
                 Partic.
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest max-w-[160px]">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest min-w-0 max-w-[140px]">
               {isPersonal ? (
                 <Lock className="h-3.5 w-3.5 shrink-0" />
               ) : (
@@ -159,7 +159,7 @@ export function GoalCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full border border-[#2D241E]/5 bg-white text-[#2D241E]/40 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 transition-all shadow-sm"
+              className="h-10 w-10 shrink-0 rounded-full border border-[#2D241E]/5 bg-white text-[#2D241E]/40 hover:text-[#ff6b7b] hover:border-[#ff6b7b]/20 transition-all shadow-sm"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

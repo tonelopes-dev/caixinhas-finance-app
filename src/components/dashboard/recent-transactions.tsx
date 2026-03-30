@@ -96,7 +96,7 @@ export default function RecentTransactions({
   );
 
   return (
-    <Card className="w-full max-w-full border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
+    <Card className="w-full max-w-full border-none bg-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
       <CardHeader className="p-3.5 sm:p-6 pb-2">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
           <div className="space-y-1 min-w-0 flex-1">
@@ -135,7 +135,7 @@ export default function RecentTransactions({
 
       <CardContent className="p-3.5 sm:p-6">
         <div className="px-0">
-          <ResponsiveTransactionList 
+          <ResponsiveTransactionList
             transactions={filteredTransactions.slice(0, 5)}
             accounts={accounts}
             goals={goals}

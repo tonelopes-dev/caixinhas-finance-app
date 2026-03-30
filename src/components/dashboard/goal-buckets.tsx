@@ -63,7 +63,7 @@ export default function GoalBuckets({
   const PrivacyBlurPercent = () => <span>••%</span>;
 
   return (
-    <Card className="w-full max-w-full border-none bg-white shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
+    <Card className="w-full max-w-full border-none bg-white/70 shadow-[0_20px_50px_rgba(45,36,30,0.08)] rounded-[32px] overflow-hidden min-w-0">
       <CardHeader className="p-3.5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0 flex-1">
@@ -104,7 +104,7 @@ export default function GoalBuckets({
               <Link
                 href={`/goals/${goal.id}`}
                 onClick={() => showLoading(`Abrindo ${goal.name}...`)}
-                className="group relative flex flex-col gap-4 sm:gap-6 rounded-[28px] bg-[#f6f3f1]/50 border-2 border-transparent p-3.5 sm:p-5 md:p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
+                className="group relative flex flex-col gap-4 sm:gap-6 rounded-[28px] bg-white border-2 border-transparent p-3.5 sm:p-5 md:p-6 transition-all duration-300 hover:bg-white hover:border-[#ff6b7b]/20 hover:shadow-xl"
               >
                 <div className="flex items-center gap-3 md:gap-5">
                   <div className="text-xl sm:text-2xl md:text-5xl bg-white p-2 sm:p-2.5 md:p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 shrink-0">
@@ -180,14 +180,14 @@ export default function GoalBuckets({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest">
-                      {goal.visibility === "shared" ? (
-                        <Users className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#2D241E]/5 text-[10px] font-black text-[#2D241E]/50 uppercase tracking-widest max-w-[140px] min-w-0">
+                      {workspaceName === "Pessoal" ? (
+                        <Lock className="h-3.5 w-3.5 shrink-0" />
                       ) : (
-                        <Lock className="h-3.5 w-3.5" />
+                        <Users className="h-3.5 w-3.5 shrink-0" />
                       )}
-                      <span>
-                        {goal.visibility === "shared" ? "Pública" : "Privada"}
+                      <span className="truncate">
+                        {workspaceName}
                       </span>
                     </div>
                   </div>
