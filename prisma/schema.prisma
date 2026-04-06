@@ -25,6 +25,7 @@ model User {
   resetTokenExpiry   DateTime? // Data de expiração do token
   magicLinkToken     String?   @unique // Token para login sem senha (Magic Link)
   magicLinkExpires   DateTime? // Expiração do Magic Link
+  telegramChatId     String?   @unique // Chat ID do Telegram para integração do bot
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
