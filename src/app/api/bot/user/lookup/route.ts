@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateBotRequest } from '../middleware';
+import { validateBotRequest } from '../../middleware';
 import { prisma } from '@/services/prisma';
 
 export async function POST(request: NextRequest) {
