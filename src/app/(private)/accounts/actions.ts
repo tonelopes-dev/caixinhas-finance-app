@@ -144,7 +144,7 @@ export async function updateAccount(accountId: string, formData: FormData) {
   revalidatePath('/', 'layout');
 }
 
-export async function deleteAccount(accountId: string) {
+export async function deactivateAccount(accountId: string) {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
@@ -154,10 +154,30 @@ export async function deleteAccount(accountId: string) {
 
   const account = await AccountService.getAccountById(accountId);
   if (!account || account.ownerId !== userId) {
-    throw new Error('Sem permissão para excluir esta conta');
+    throw new Error('Sem permissão para desativar esta conta');
   }
 
-  await AccountService.deleteAccount(accountId);
+  await AccountService.deactivateAccount(accountId);
+  
+  revalidatePath('/accounts');
+  revalidatePath('/dashboard');
+  revalidatePath('/', 'layout');
+}
+
+export async function reactivateAccount(accountId: string) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    throw new Error('Usuário não autenticado');
+  }
+
+  const account = await AccountService.getAccountById(accountId);
+  if (!account || account.ownerId !== userId) {
+    throw new Error('Sem permissão para reativar esta conta');
+  }
+
+  await AccountService.reactivateAccount(accountId);
   
   revalidatePath('/accounts');
   revalidatePath('/dashboard');

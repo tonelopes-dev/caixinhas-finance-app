@@ -142,12 +142,14 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
     }
   }, [installmentValue, totalInstallments, chargeType]);
   
+  const activeWorkspaceAccounts = workspaceAccounts.filter(a => a.isActive !== false);
+  
   const allSourcesAndDestinations = [
-      ...workspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
+      ...activeWorkspaceAccounts.map(a => ({ ...a, value: a.id, name: a.name })), 
       ...workspaceGoals.map(g => ({ ...g, value: `goal-${g.id}`, name: `Caixinha: ${g.name}` }))
   ];
   
-  const sourceAccount = workspaceAccounts.find(a => a.id === sourceAccountId) || null;
+  const sourceAccount = activeWorkspaceAccounts.find(a => a.id === sourceAccountId) || null;
   const isCreditCardTransaction = sourceAccount?.type === 'credit_card';
 
   // Filter destinations to exclude the selected source

@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { createAccount, updateAccount, deleteAccount } from '@/app/(private)/accounts/actions';
+import { createAccount, updateAccount, deactivateAccount, reactivateAccount } from '@/app/(private)/accounts/actions';
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { bankLogos } from '@/lib/data';
-import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Eye } from 'lucide-react';
+import { Landmark, PlusCircle, Trash2, Edit, CreditCard, Wallet, Eye, EyeOff, Power, PowerOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,10 +94,13 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
     return (
         <motion.div 
             variants={itemVariants} 
-            className="group relative overflow-hidden rounded-[40px] bg-white/40 backdrop-blur-3xl border border-white/60 p-8 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.12)] transition-all duration-700 hover:-translate-y-2"
+            className={cn(
+                "group relative overflow-hidden rounded-[40px] backdrop-blur-3xl border p-8 shadow-[0_20px_50px_rgba(45,36,30,0.06)] hover:shadow-[0_30px_70px_rgba(45,36,30,0.12)] transition-all duration-700 hover:-translate-y-2",
+                account.isActive !== false ? "bg-white/40 border-white/60" : "bg-gray-100/40 border-gray-200 opacity-70 grayscale"
+            )}
         >
             {/* Card Pattern Overlay */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ff6b7b]/5 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
+            {account.isActive !== false && <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ff6b7b]/5 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />}
             
             <div className="relative z-10 space-y-6">
                 {/* Header: Bank & Actions */}
@@ -117,8 +120,10 @@ function AccountItem({ account, userVaults, currentUserId }: { account: Account,
                     </div>
 
                     <div className="flex items-center gap-1.5 translate-y-1">
-                        <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
-                        <DeleteAccountDialog 
+                        {account.isActive !== false && (
+                            <EditAccountDialog account={account} disabled={!canEdit} userVaults={userVaults} currentUserId={currentUserId} />
+                        )}
+                        <ToggleAccountStatusDialog 
                             account={account} 
                             disabled={!canDelete} 
                             currentUserId={currentUserId}
@@ -380,28 +385,46 @@ function EditAccountDialog({ account, disabled, userVaults, currentUserId }: { a
     )
 }
 
-function DeleteAccountDialog({ account, disabled, currentUserId }: { account: Account, disabled: boolean, currentUserId: string }) {
-  const owner = account.ownerId === currentUserId ? { name: 'Você' } : { name: 'outro usuário' };
-  const tooltipContent = `Apenas o proprietário (${owner?.name}) pode realizar esta ação.`;
+function ToggleAccountStatusDialog({ account, disabled, currentUserId }: { account: Account, disabled: boolean, currentUserId: string }) {
+  const isOwner = account.ownerId === currentUserId;
+  const ownerName = isOwner ? 'Você' : 'outro usuário';
+  const isActive = account.isActive !== false;
+  
+  let tooltipContent = `Apenas o proprietário (${ownerName}) pode realizar esta ação.`;
+  
+  const hasBalance = Math.abs(account.balance) > 0.01;
+  const cannotDeactivate = isActive && hasBalance;
+  const isDisabled = disabled || cannotDeactivate;
+
+  if (isOwner && cannotDeactivate) {
+      tooltipContent = "Para desativar, é necessário primeiro zerar o saldo da conta.";
+  }
 
   return (
     <AlertDialog>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-xl border-[#2D241E]/5 bg-white/50 text-[#2D241E]/40 hover:text-destructive hover:border-destructive/20 hover:bg-white transition-all shadow-sm"
-                disabled={disabled}
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Remover</span>
-              </Button>
-            </AlertDialogTrigger>
+            <span className="inline-block">
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                        "h-9 w-9 rounded-xl border-[#2D241E]/5 bg-white/50 transition-all shadow-sm",
+                        isActive 
+                            ? "text-[#2D241E]/40 hover:text-destructive hover:border-destructive/20 hover:bg-white" 
+                            : "text-[#2D241E]/40 hover:text-emerald-500 hover:border-emerald-500/20 hover:bg-white"
+                    )}
+                    disabled={isDisabled}
+                  >
+                    {isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                    <span className="sr-only">{isActive ? 'Desativar' : 'Reativar'}</span>
+                  </Button>
+                </AlertDialogTrigger>
+            </span>
           </TooltipTrigger>
-          {disabled && (
+          {isDisabled && (
             <TooltipContent>
               <p>{tooltipContent}</p>
             </TooltipContent>
@@ -410,18 +433,31 @@ function DeleteAccountDialog({ account, disabled, currentUserId }: { account: Ac
       </TooltipProvider>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogTitle>{isActive ? 'Desativar Conta?' : 'Reativar Conta?'}</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta{' '}
-            <span className="font-bold text-foreground">{account.name}</span>.
+            {isActive ? (
+                <>
+                    Ao desativar a conta <span className="font-bold text-foreground">{account.name}</span>, ela não aparecerá mais nas opções de novas transações e seu saldo será removido do cálculo do patrimônio. O histórico será mantido.
+                </>
+            ) : (
+                <>
+                    Deseja reativar a conta <span className="font-bold text-foreground">{account.name}</span>? Ela voltará a estar disponível para transações.
+                </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <form action={async () => {
-            await deleteAccount(account.id);
+            if (isActive) {
+                await deactivateAccount(account.id);
+            } else {
+                await reactivateAccount(account.id);
+            }
           }}>
-            <AlertDialogAction type="submit" className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+            <AlertDialogAction type="submit" className={isActive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-emerald-500 text-white hover:bg-emerald-600"}>
+                {isActive ? 'Desativar' : 'Reativar'}
+            </AlertDialogAction>
           </form>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -439,6 +475,12 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
     const [bankName, setBankName] = React.useState('');
     const [balance, setBalance] = React.useState('');
     const [creditLimit, setCreditLimit] = React.useState('');
+    const [showInactive, setShowInactive] = React.useState(false);
+
+    const filteredAccounts = accounts.filter(acc => {
+        if (showInactive) return acc.isActive === false;
+        return acc.isActive !== false;
+    });
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -452,19 +494,29 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between px-2 flex-wrap gap-4">
         <div className="space-y-1">
           <h2 className="font-headline text-3xl font-bold text-[#2D241E] italic">Contas e <span className="text-[#ff6b7b]">Cartões</span></h2>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2D241E]/30 italic">Gestão de Patrimônio e Limites de Crédito</p>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gradient-button h-12 px-6 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg shadow-[#ff6b7b]/20">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Adicionar
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setShowInactive(!showInactive)}
+            className="h-12 px-6 rounded-full font-black uppercase tracking-widest text-[10px] border-[#2D241E]/10 hover:bg-[#2D241E]/5 text-[#2D241E]/60 transition-all"
+          >
+            {showInactive ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
+            {showInactive ? 'Ver Ativas' : 'Ver Inativas'}
+          </Button>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="gradient-button h-12 px-6 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg shadow-[#ff6b7b]/20">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Adicionar
+              </Button>
+            </DialogTrigger>
           <DialogContent className="bg-[#fdfcf7] border-none rounded-[40px] shadow-2xl overflow-hidden p-0 max-w-lg">
             <DialogHeader className="p-8 pb-4 bg-white/50 backdrop-blur-sm border-b border-[#2D241E]/5">
               <DialogTitle className="text-2xl font-bold font-headline text-[#2D241E] italic">Nova Conta ou Cartão</DialogTitle>
@@ -635,6 +687,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <motion.div 
@@ -643,7 +696,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
         initial="hidden"
         animate="visible"
       >
-        {accounts.map((account) => (
+        {filteredAccounts.map((account) => (
           <AccountItem 
             key={account.id} 
             account={account} 
@@ -651,7 +704,7 @@ export function AccountsManagement({ accounts, currentUserId, userVaults, worksp
             currentUserId={currentUserId}
           />
         ))}
-        {accounts.length === 0 && (
+        {filteredAccounts.length === 0 && (
           <div className="col-span-full py-12 flex flex-col items-center justify-center text-center space-y-4 bg-white/20 backdrop-blur-sm rounded-[40px] border-2 border-dashed border-[#2D241E]/5">
             <div className="p-4 rounded-3xl bg-white shadow-sm border border-[#2D241E]/5">
               <Landmark className="h-10 w-10 text-[#2D241E]/10" />

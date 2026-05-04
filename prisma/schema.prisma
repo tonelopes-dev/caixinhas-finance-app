@@ -96,6 +96,7 @@ model Account {
   logoUrl     String?
   scope       String   // 'personal' ou um vaultId
   visibleIn   String[] @default([]) // Array de vaultIds onde é visível
+  isActive    Boolean  @default(true) // Indicates if the account is active or deactivated (soft delete)
 
   // Relações
   ownerId String
@@ -114,6 +115,7 @@ model Account {
   @@index([ownerId, scope], name: "idx_accounts_owner_scope")
   @@index([vaultId], name: "idx_accounts_vault")
   @@index([ownerId, type], name: "idx_accounts_owner_type")
+  @@index([isActive], name: "idx_accounts_is_active")
   @@map("accounts")
 }
 

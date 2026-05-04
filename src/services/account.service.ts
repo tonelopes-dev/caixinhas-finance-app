@@ -38,6 +38,7 @@ export class AccountService {
           ownerId: data.ownerId,
           vaultId: data.vaultId,
           visibleIn: data.visibleIn || [],
+          isActive: true,
         },
       });
 
@@ -157,7 +158,37 @@ export class AccountService {
   }
 
   /**
-   * Exclui uma conta
+   * Desativa uma conta
+   */
+  static async deactivateAccount(accountId: string): Promise<void> {
+    try {
+      await prisma.account.update({
+        where: { id: accountId },
+        data: { isActive: false }
+      });
+    } catch (error) {
+      console.error('Erro ao desativar conta:', error);
+      throw new Error('Não foi possível desativar a conta');
+    }
+  }
+
+  /**
+   * Reativa uma conta
+   */
+  static async reactivateAccount(accountId: string): Promise<void> {
+    try {
+      await prisma.account.update({
+        where: { id: accountId },
+        data: { isActive: true }
+      });
+    } catch (error) {
+      console.error('Erro ao reativar conta:', error);
+      throw new Error('Não foi possível reativar a conta');
+    }
+  }
+
+  /**
+   * Exclui uma conta permanentemente (não recomendado, prefira deactivateAccount)
    */
   static async deleteAccount(accountId: string): Promise<void> {
     try {
@@ -196,7 +227,8 @@ export class AccountService {
   static async calculateLiquidAssets(userId: string, scope: string): Promise<number> {
     try {
         const whereClause: any = {
-            type: { in: ['checking', 'savings'] }
+            type: { in: ['checking', 'savings'] },
+            isActive: true
         };
 
         if (scope === userId) { // Pessoal
@@ -226,7 +258,7 @@ export class AccountService {
    */
   static async calculateInvestedAssets(userId: string, scope: string): Promise<number> {
     try {
-        const whereClause: any = { type: 'investment' };
+        const whereClause: any = { type: 'investment', isActive: true };
 
         if (scope === userId) {
             whereClause.ownerId = userId;
@@ -259,7 +291,7 @@ export class AccountService {
     creditCardDebt: number;
   }> {
     try {
-      const whereClause: any = {};
+      const whereClause: any = { isActive: true };
 
       if (scope === userId) { // Personal scope
         whereClause.ownerId = userId;

@@ -11,6 +11,7 @@ export type Account = {
   logoUrl?: string;
   visibleIn?: string[]; // Array of vaultIds where a personal account is visible.
   allowFullAccess?: boolean; // If true, all members of the vault can edit/delete.
+  isActive?: boolean;
 };
 
 export type Vault = {
