@@ -79,6 +79,14 @@ type TransactionsPageClientProps = {
   allGoals: Goal[];
   allCategories: any[];
   workspaceId: string;
+  summaryData: {
+    income: number;
+    expenses: number;
+    transfers: number;
+    balance: number;
+    recurringCount: number;
+    installmentsCount: number;
+  };
 };
 
 export function TransactionsPageClient({
@@ -89,6 +97,7 @@ export function TransactionsPageClient({
   allGoals,
   allCategories,
   workspaceId,
+  summaryData,
 }: TransactionsPageClientProps) {
   const router = useRouter();
   const { showLoading } = useLoading();
@@ -153,30 +162,6 @@ export function TransactionsPageClient({
       }
       return yearsList;
   }, []);
-
-  const summary = useMemo(() => {
-    const income = filteredTransactions
-      .filter((t: any) => t.type === 'income')
-      .reduce((sum: number, t: any) => sum + t.amount, 0);
-    const expenses = filteredTransactions
-      .filter((t: any) => t.type === 'expense')
-      .reduce((sum: number, t: any) => sum + t.amount, 0);
-    const transfers = filteredTransactions
-      .filter((t: any) => t.type === 'transfer')
-      .reduce((sum: number, t: any) => sum + t.amount, 0);
-    const balance = income - expenses;
-    return { income, expenses, balance, transfers };
-  }, [filteredTransactions]);
-
-  const recurringSummary = useMemo(() => {
-    const recurring = initialTransactions.filter(t => t.isRecurring);
-    const installments = initialTransactions.filter(t => t.isInstallment);
-    
-    return {
-      recurringCount: recurring.length,
-      installmentsCount: installments.length
-    };
-  }, [initialTransactions]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -257,7 +242,7 @@ export function TransactionsPageClient({
                             <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#2D241E]/30 font-inter">Saldo Líquido</p>
                         </div>
                         <h3 className="text-4xl font-black text-[#2D241E] tracking-tighter mb-1 font-headline italic">
-                            {formatCurrency(summary.balance)}
+                            {formatCurrency(summaryData.balance)}
                         </h3>
                     </div>
                 </div>
@@ -287,7 +272,7 @@ export function TransactionsPageClient({
                             <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600/40 font-inter">Entradas</p>
                         </div>
                         <h3 className="text-4xl font-black text-emerald-600 tracking-tighter mb-1 font-headline italic">
-                            {formatCurrency(summary.income)}
+                            {formatCurrency(summaryData.income)}
                         </h3>
                     </div>
                 </div>
@@ -317,7 +302,7 @@ export function TransactionsPageClient({
                             <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b7b]/40 font-inter">Saídas</p>
                         </div>
                         <h3 className="text-4xl font-black text-[#ff6b7b] tracking-tighter mb-1 font-headline italic">
-                            {formatCurrency(summary.expenses)}
+                            {formatCurrency(summaryData.expenses)}
                         </h3>
                     </div>
                 </div>
@@ -344,7 +329,7 @@ export function TransactionsPageClient({
                     </div>
                     <div className="flex items-baseline gap-2">
                         <h3 className="text-4xl font-black text-purple-600 tracking-tighter font-headline italic">
-                            {recurringSummary.recurringCount + recurringSummary.installmentsCount}
+                            {summaryData.recurringCount + summaryData.installmentsCount}
                         </h3>
                         <span className="text-[10px] font-black text-purple-600/30 uppercase tracking-[0.2em]">Ativas</span>
                     </div>

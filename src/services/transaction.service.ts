@@ -109,7 +109,18 @@ export class TransactionService {
       month?: string;
       year?: string;
     } = {}
-  ): Promise<{ transactions: TransactionWithRelations[]; total: number }> {
+  ): Promise<{ 
+    transactions: TransactionWithRelations[]; 
+    total: number;
+    summary: {
+      income: number;
+      expenses: number;
+      transfers: number;
+      balance: number;
+      recurringCount: number;
+      installmentsCount: number;
+    };
+  }> {
     try {
       const { 
         page = 1, 
@@ -153,7 +164,7 @@ export class TransactionService {
         whereClause.date = { gte: start, lte: end };
       }
 
-      const [transactions, total] = await Promise.all([
+      const [transactions, total, typeAggregations, recurringCount, installmentsCount] = await Promise.all([
         prisma.transaction.findMany({
           where: whereClause,
           include: TRANSACTION_INCLUDE,
@@ -162,9 +173,33 @@ export class TransactionService {
           take: limit,
         }) as Promise<TransactionWithRelations[]>,
         prisma.transaction.count({ where: whereClause }),
+        prisma.transaction.groupBy({
+          by: ['type'],
+          where: whereClause,
+          _sum: { amount: true },
+        }),
+        prisma.transaction.count({ where: { ...whereClause, isRecurring: true } }),
+        prisma.transaction.count({ where: { ...whereClause, isInstallment: true } }),
       ]);
 
-      return { transactions, total };
+      const summary = {
+        income: 0,
+        expenses: 0,
+        transfers: 0,
+        balance: 0,
+        recurringCount,
+        installmentsCount,
+      };
+
+      typeAggregations.forEach(agg => {
+        if (agg.type === 'income') summary.income = agg._sum.amount || 0;
+        if (agg.type === 'expense') summary.expenses = agg._sum.amount || 0;
+        if (agg.type === 'transfer') summary.transfers = agg._sum.amount || 0;
+      });
+
+      summary.balance = summary.income - summary.expenses;
+
+      return { transactions, total, summary };
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
       throw new Error('Não foi possível buscar as transações');

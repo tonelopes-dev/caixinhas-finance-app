@@ -472,7 +472,7 @@ export function AddTransactionDialog({ accounts: workspaceAccounts, goals: works
                                         onChange={(e) => setAmount(e.target.value)} 
                                         readOnly={chargeType === 'installment'}
                                         className={cn(
-                                            "h-24 pl-20 text-4xl font-black rounded-3xl border-white border-4 bg-white shadow-lg tracking-tighter text-[#2D241E] transition-all",
+                                            "h-24 pl-20 text-4xl md:text-4xl font-black rounded-3xl border-white border-4 bg-white shadow-lg tracking-tighter text-[#2D241E] transition-all",
                                             chargeType === 'installment' ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "focus:border-[#ff6b7b] focus:ring-4 focus:ring-[#ff6b7b]/5"
                                         )}
                                     />

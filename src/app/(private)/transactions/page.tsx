@@ -52,7 +52,7 @@ export default async function TransactionsPage({
 
   // Buscar todos os dados registrados no servidor com paginação e filtros
   const [
-    { transactions, total }, 
+    { transactions, total, summary }, 
     accounts, 
     goalsData,
     categories 
@@ -75,6 +75,7 @@ export default async function TransactionsPage({
       <TransactionsPageClient
         initialTransactions={transactions}
         totalTransactions={total}
+        summaryData={summary}
         currentPage={parseInt(page)}
         allAccounts={accounts}
         allGoals={goalsData.goals}
