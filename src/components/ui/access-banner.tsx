@@ -9,9 +9,11 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Terminal, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Terminal, Clock, CheckCircle, AlertTriangle, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { PremiumBadge } from '@/components/ui/premium-badge';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export type AccessBannerProps = {
   status: 'active' | 'trial' | 'inactive';
@@ -38,47 +40,75 @@ export function AccessBanner({
   // Banner para trial ativo (aviso nos últimos 7 dias)
   if (status === 'trial' && daysRemaining > 0 && daysRemaining <= 7) {
     return (
-      <Alert variant="default" className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
-        <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-        <AlertTitle className="text-amber-900 dark:text-amber-100">
-          Período de Teste
-        </AlertTitle>
-        <AlertDescription className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-amber-800 dark:text-amber-200">
-          <span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative p-6 md:p-8 rounded-[40px] bg-white/40 backdrop-blur-xl border border-amber-200/50 shadow-[0_20px_50px_rgba(45,36,30,0.06)] flex flex-col sm:flex-row items-center gap-6 overflow-hidden max-w-2xl"
+      >
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/5 blur-[60px] rounded-full" />
+        
+        <div className="relative z-10 flex items-center justify-center h-14 w-14 rounded-2xl bg-amber-100 shadow-sm shrink-0">
+          <Clock className="w-7 h-7 text-amber-600" />
+        </div>
+        
+        <div className="relative z-10 flex-1 space-y-2 text-center sm:text-left">
+          <h3 className="text-xl font-headline font-bold text-[#2D241E] italic tracking-tight">
+            Período de Teste
+          </h3>
+          <p className="text-[#2D241E]/70 text-sm font-medium leading-relaxed">
             {message || `Seu período de teste expira em ${daysRemaining} ${daysRemaining === 1 ? 'dia' : 'dias'}. Assine agora para manter acesso total!`}
-          </span>
-          {showUpgradeButton && (
-            <Button asChild size="sm" variant="default">
+          </p>
+        </div>
+        
+        {showUpgradeButton && (
+          <div className="relative z-10 shrink-0">
+            <Button asChild className="rounded-2xl px-6 h-12 font-black uppercase tracking-widest text-[10px] bg-amber-500 hover:bg-amber-600 text-white border-none shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95">
               <Link href="/landing">Ver Planos</Link>
             </Button>
-          )}
-        </AlertDescription>
-      </Alert>
+          </div>
+        )}
+      </motion.div>
     );
   }
 
   // Banner para trial expirado / acesso inativo
   if (status === 'inactive' || (status === 'trial' && daysRemaining <= 0)) {
     return (
-      <Alert variant="destructive" className="mb-6">
-        <Terminal className="h-4 w-4" />
-        <AlertTitle>Acesso Restrito</AlertTitle>
-        <AlertDescription className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <p className="mb-2">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative p-6 md:p-8 rounded-[40px] bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] flex flex-col sm:flex-row items-center gap-6 overflow-hidden max-w-2xl"
+      >
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#ff6b7b]/5 blur-[60px] rounded-full" />
+        
+        <div className="relative z-10 flex items-center justify-center h-14 w-14 rounded-2xl bg-[#ff6b7b]/10 shadow-sm shrink-0">
+          <Lock className="w-7 h-7 text-[#ff6b7b]" />
+        </div>
+        
+        <div className="relative z-10 flex-1 space-y-2 text-center sm:text-left">
+          <h3 className="text-xl font-headline font-bold text-[#2D241E] italic tracking-tight">
+            Acesso Restrito
+          </h3>
+          <div className="space-y-3">
+            <p className="text-[#2D241E]/70 text-sm font-medium leading-relaxed">
               {message || 'Seu período de teste terminou. Para continuar usando seu espaço pessoal e criar novos cofres, por favor, assine um de nossos planos.'}
             </p>
-            <p className="text-sm opacity-90">
-              ℹ️ Você ainda pode aceitar convites e colaborar em cofres de outros usuários.
-            </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-white/80 shadow-sm">
+                <span className="text-[9px] font-black text-[#2D241E]/40 uppercase tracking-[0.15em]">
+                  ℹ️ Colaboração em cofres de outros continua disponível
+                </span>
+            </div>
           </div>
-          {showUpgradeButton && (
-            <Button asChild size="sm">
+        </div>
+        
+        {showUpgradeButton && (
+          <div className="relative z-10 shrink-0">
+            <Button asChild className="gradient-button rounded-2xl px-6 h-12 font-black uppercase tracking-widest text-[10px]">
               <Link href="/landing">Ver Planos</Link>
             </Button>
-          )}
-        </AlertDescription>
-      </Alert>
+          </div>
+        )}
+      </motion.div>
     );
   }
 

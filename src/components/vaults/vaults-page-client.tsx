@@ -542,8 +542,8 @@ export function VaultsPageClient({
       </header>
 
       <main className="container relative z-10 mx-auto px-6 pt-40 pb-32 max-w-6xl">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-24">
-          <div className="text-center md:text-left space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-20">
+          <div className="text-center lg:text-left space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/60 backdrop-blur-md border border-white rounded-full shadow-sm">
                 <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff6b7b] opacity-75"></span>
@@ -560,8 +560,8 @@ export function VaultsPageClient({
             </p>
           </div>
 
-          {accessInfo && (
-            <div className="shrink-0 flex justify-center">
+          {accessInfo && (accessInfo.isRestricted || accessInfo.status === 'active') && (
+            <div className="shrink-0 flex justify-center lg:justify-end">
               <AccessBanner
                 status={accessInfo.status}
                 daysRemaining={accessInfo.daysRemaining}
