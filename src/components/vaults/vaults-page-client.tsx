@@ -17,7 +17,8 @@ import {
   Users, 
   Lock, 
   UserPlus,
-  ChevronRight 
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 import {
   Tooltip,
@@ -104,12 +105,13 @@ type VaultsPageClientProps = {
   canCreateVaults?: boolean;
   canAccessPersonal?: boolean;
   currentWorkspaceId?: string;
-  accessInfo?: {
-    status: 'active' | 'trial' | 'inactive';
-    daysRemaining: number;
-    message?: string;
-    isRestricted: boolean;
-  };
+    accessInfo?: {
+      status: 'active' | 'trial' | 'inactive';
+      daysRemaining: number;
+      message?: string;
+      isRestricted: boolean;
+      isFreeMode?: boolean;
+    };
 };
 
 function WorkspaceCard({
@@ -560,14 +562,43 @@ export function VaultsPageClient({
             </p>
           </div>
 
-          {accessInfo && (accessInfo.isRestricted || accessInfo.status === 'active') && (
+          {accessInfo && (
             <div className="shrink-0 flex justify-center lg:justify-end">
+              {/* REVERSAL: Voltar ao AccessBanner original:
               <AccessBanner
                 status={accessInfo.status}
                 daysRemaining={accessInfo.daysRemaining}
                 message={accessInfo.message}
                 showUpgradeButton={accessInfo.isRestricted}
               />
+              */}
+              {accessInfo.isFreeMode ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative p-6 rounded-[32px] bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 shadow-xl backdrop-blur-md max-w-sm overflow-hidden group"
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <h4 className="text-lg font-black text-[#2D241E] italic">Open Access ✨</h4>
+                      <p className="text-[10px] font-bold text-[#2D241E]/40 uppercase tracking-widest">Aproveite tudo 100% grátis</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                (accessInfo.isRestricted || accessInfo.status === 'active') && (
+                  <AccessBanner
+                    status={accessInfo.status}
+                    daysRemaining={accessInfo.daysRemaining}
+                    message={accessInfo.message}
+                    showUpgradeButton={accessInfo.isRestricted}
+                  />
+                )
+              )}
             </div>
           )}
         </div>

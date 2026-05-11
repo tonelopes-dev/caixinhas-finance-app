@@ -4,6 +4,7 @@ import { prisma } from "@/services/prisma";
 import { z } from "zod";
 import { CategoryService } from "@/services/category.service";
 import { VaultService } from "@/services/vault.service";
+import { IS_FREE_MODE } from "@/lib/access-control";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -52,8 +53,13 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         avatarUrl: `https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png`,
+        /* REVERSAL: Para voltar ao trial, remova o bloco IS_FREE_MODE abaixo e descomente o original */
+        subscriptionStatus: IS_FREE_MODE ? "active" : "trial",
+        trialExpiresAt: IS_FREE_MODE ? null : trialExpiresAt,
+        /*
         subscriptionStatus: "trial",
         trialExpiresAt,
+        */
       },
       select: {
         id: true,

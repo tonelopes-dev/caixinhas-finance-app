@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -75,7 +76,8 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 : "opacity-0 translate-y-8"
             }`}
           >
-            Invista no seu futuro (e nas suas conquistas)
+            {/* REVERSAL: Voltar ao título original: "Invista no seu futuro (e nas suas conquistas)" */}
+            Acesso Total Liberado para Você ✨
           </h2>
           <p
             className={`text-xl text-stone-900/70 max-w-2xl mx-auto transition-all duration-700 delay-200 ${
@@ -84,8 +86,8 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                 : "opacity-0 translate-y-8"
             }`}
           >
-            Um investimento pequeno para conquistas gigantes. Sem planos
-            confusos, sem taxas escondidas.
+            {/* REVERSAL: Voltar ao texto original sobre investimento */}
+            Estamos em período de <strong>Acesso Antecipado</strong>. Aproveite todas as funcionalidades Premium de forma gratuita enquanto construímos o futuro das finanças a dois.
           </p>
         </div>
 
@@ -94,7 +96,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
             <div className="absolute -top-5 left-[90px] md:left-[265px] lg:left-[275px] -translate-x-1/2 animate-bounce-slow z-20">
               <Badge className="bg-gradient-to-r from-primary to-accent text-white hover:text-yellow-400 text-base px-6 py-2 shadow-lg">
                 <Star className="w-5 h-5 inline mr-2 fill-current animate-pulse" />
-                Acesso Completo
+                Acesso Aberto: 100% Grátis
               </Badge>
             </div>
 
@@ -114,37 +116,41 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
               >
                 <div className="text-center space-y-4">
                   <h3 className="text-2xl md:text-4xl font-bold text-stone-900">
-                    Assinatura Caixinhas
+                    Plano Pioneiro
                   </h3>
                   <div className="flex flex-col items-center justify-center gap-2">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl text-stone-900/40 line-through decoration-primary/40">
                         De R$ 97,00
                       </span>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold">
-                        -72% OFF
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 border-none font-bold">
+                        100% OFF
                       </Badge>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="md:text-7xl text-5xl   font-bold text-stone-900 animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
-                        R$ 27,00
+                    <div className="flex items-baseline gap-3">
+                      <span className="md:text-8xl text-6xl font-black text-stone-900 animate-gradient-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto]">
+                        Grátis
                       </span>
-                      <span className="text-2xl text-stone-900/60">/anual</span>
                     </div>
+                    <p className="text-xl font-bold text-primary animate-pulse">
+                      Aproveite agora! 🚀
+                    </p>
+                    {/* REVERSAL: Reativar parcelamento se necessário
                     <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-6 py-2 hover:bg-primary/20 transition-colors mt-2">
                       <span className="text-lg font-semibold text-primary">
                         ou 6x de R$ 5,07
                       </span>
                     </div>
+                    */}
                   </div>
-                  <p className="text-lg text-stone-900/70 max-w-xl mx-auto">
-                    Aproveite nossa oferta por tempo limitado!
+                  <p className="text-lg text-stone-900/70 max-w-xl mx-auto italic">
+                    "Nossa missão é ajudar casais a prosperarem. Use agora, sem custos."
                   </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl py-8 px-4 space-y-4">
                   <h4 className="text-2xl font-bold text-stone-900 text-center mb-6">
-                    Tudo que você precisa, incluído:
+                    Tudo liberado para você:
                   </h4>
                   <div className="grid md:grid-cols-2 gap-4">
                     {[
@@ -194,9 +200,10 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
 
                 <div className="space-y-4">
                   <Button asChild className="w-full bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 text-xl h-16 font-bold hover:scale-105 transition-all relative overflow-hidden group shadow-lg">
-                    <a href={config.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                    {/* REVERSAL: Voltar para href={config.checkoutUrl} */}
+                    <Link href="/register">
                       <span className="relative z-10 flex items-center justify-center leading-7 border-0 text-sm">
-                        Começar Minha Jornada Agora
+                        Criar Minha Conta Grátis Agora
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -213,7 +220,7 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                         </svg>
                       </span>
                       <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                    </a>
+                    </Link>
                   </Button>
 
                   
@@ -221,35 +228,30 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
                   <div className="flex items-center justify-center pt-6 gap-6 text-stone-900/60 text-sm flex-wrap">
                     <div className="flex items-center gap-2 hover:text-primary transition-colors">
                       <Check className="w-5 h-5 text-primary" />
-                      <span>Garantia de 7 dias</span>
+                      <span>Acesso Instantâneo</span>
                     </div>
                     <div className="flex items-center gap-2 hover:text-primary transition-colors">
                       <Check className="w-5 h-5 text-primary" />
-                      <span>Cancele quando quiser</span>
+                      <span>Sem Cartão de Crédito</span>
                     </div>
                     <div className="flex items-center gap-2 hover:text-primary transition-colors">
                       <Check className="w-5 h-5 text-primary" />
-                      <span>Suporte prioritário</span>
+                      <span>Suporte à Comunidade</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="border-t border-border py-4 flex justify-center items-center">
-                    <div className="flex justify-center items-center w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                    <div className="flex sm:flex-row flex-col items-center justify-center gap-2 text-stone-900/60 text-sm py-2">
-                    <div className="flex items-center gap-2"><Lock className="w-4 h-4" />
-                    <span>Pagamento processado por</span></div>
-                    <Image
-                      priority
-                      src="/logo-kiwify.webp"
-                      alt="Kiwify"
-                      width={60}
-                      height={20}
-                      quality={100}
-                      data-ai-hint="logo company"
-                      className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
-                    />
-                  </div>
+                <div className="border-t border-border py-6">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-stone-900/40 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5" />
+                      Plataforma Segura
+                    </div>
+                    <div className="hidden sm:block w-1 h-1 rounded-full bg-stone-900/20" />
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-3.5 h-3.5" />
+                      Privacidade Garantida
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -260,15 +262,15 @@ export function PricingSection({ isVisible }: PricingSectionProps) {
             <div className="flex items-center justify-center gap-8 text-stone-900/60 flex-wrap">
               <div className="flex items-center gap-2 hover:scale-110 transition-transform">
                 <Shield className="w-5 h-5" />
-                <span>Pagamento 100% seguro</span>
+                <span>Uso 100% gratuito</span>
               </div>
               <div className="flex items-center gap-2 hover:scale-110 transition-transform">
                 <Lock className="w-5 h-5" />
-                <span>Dados criptografados</span>
+                <span>Privacidade protegida</span>
               </div>
               <div className="flex items-center gap-2 hover:scale-110 transition-transform">
                 <Zap className="w-5 h-5" />
-                <span>Ativação instantânea</span>
+                <span>Liberação imediata</span>
               </div>
             </div>
           </div>

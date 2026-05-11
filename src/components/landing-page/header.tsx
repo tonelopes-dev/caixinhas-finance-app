@@ -76,13 +76,9 @@ export function Header() {
             asChild
             className="bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white text-lg font-semibold hover:scale-105 transition-all relative overflow-hidden group border-none shadow-lg shadow-[#ff6b7b]/20"
           >
-            <a
-              href={config.checkoutUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="/register">
               <span className="relative z-10">Começar Agora</span>
-            </a>
+            </Link>
           </Button>
         </div>
 
@@ -151,14 +147,9 @@ export function Header() {
               asChild
               className="bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow text-white text-lg font-semibold w-full border-none shadow-lg shadow-[#ff6b7b]/20"
             >
-              <a
-                href={config.checkoutUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={handleNavClick}
-              >
+              <Link href="/register" onClick={handleNavClick}>
                 Começar Agora
-              </a>
+              </Link>
             </Button>
           </div>
         </nav>

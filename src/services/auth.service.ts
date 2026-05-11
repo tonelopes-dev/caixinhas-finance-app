@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 import { CategoryService } from './category.service'; // Importar o CategoryService
+import { IS_FREE_MODE } from '@/lib/access-control';
 
 export type UserWithoutPassword = {
   id: string;
@@ -116,8 +117,13 @@ export class AuthService {
           email: data.email,
           password: hashedPassword,
           avatarUrl: data.avatarUrl || `https://caixinhas-finance-app.s3.us-east-1.amazonaws.com/logo-caixinhas.png`,
+          /* REVERSAL: Para voltar ao trial, remova o bloco IS_FREE_MODE abaixo e descomente o original */
+          subscriptionStatus: IS_FREE_MODE ? 'active' : 'trial',
+          trialExpiresAt: IS_FREE_MODE ? null : trialExpiresAt,
+          /*
           subscriptionStatus: 'trial',
           trialExpiresAt: trialExpiresAt,
+          */
         },
         select: {
           id: true,

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { config } from "@/lib/config";
+import Link from "next/link";
 import { Check, ChevronRight } from "lucide-react";
 
 export function CTASection() {
@@ -42,31 +43,27 @@ export function CTASection() {
             asChild
             className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-xl h-16 px-12 rounded-2xl hover:scale-110 transition-all group font-bold shadow-2xl shadow-primary/20"
           >
-            <a
-              href={config.checkoutUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="/register">
               <span className="flex items-center text-white">
                 Começar Agora
                 <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
               </span>
-            </a>
+            </Link>
           </Button>
         </div>
 
         <div className="flex items-center justify-center gap-10 pt-10 text-stone-400 animate-fade-in-up animation-delay-300 flex-wrap">
           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
             <Check className="w-5 h-5 text-primary" />
-            <span className="font-medium">Garantia de 7 dias</span>
+            <span className="font-medium">100% Grátis hoje</span>
           </div>
           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
             <Check className="w-5 h-5 text-primary" />
-            <span className="font-medium">Cancele quando quiser</span>
+            <span className="font-medium">Sem compromisso</span>
           </div>
           <div className="flex items-center gap-3 hover:text-white transition-colors cursor-default">
             <Check className="w-5 h-5 text-primary" />
-            <span className="font-medium">100% seguro</span>
+            <span className="font-medium">Segurança total</span>
           </div>
         </div>
       </div>

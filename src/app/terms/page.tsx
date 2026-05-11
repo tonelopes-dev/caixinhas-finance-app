@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Shield, FileText, Scale, Users, Lock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, Scale, Users, Lock, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -101,6 +101,22 @@ export default function TermsOfServicePage() {
                     uma solução inovadora para gestão financeira compartilhada entre casais. 
                     Ao utilizar nossos serviços, você concorda com todos os termos aqui estabelecidos.
                   </p>
+                </div>
+
+                {/* EARLY ACCESS CLAUSE */}
+                <div className="bg-primary/5 p-6 rounded-lg border-2 border-primary/30 animate-pulse-slow">
+                  <h2 className="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Período de Early Access (Acesso Antecipado)
+                  </h2>
+                  <p className="text-foreground font-medium mb-2">
+                    A partir de 11 de Maio de 2026, o Caixinhas inicia sua fase de <strong>Open Access</strong>.
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• O uso de todas as funcionalidades Premium é gratuito para novos usuários e contas existentes durante este período.</li>
+                    <li>• Esta condição é temporária e visa coletar feedbacks para aprimoramento da plataforma.</li>
+                    <li>• Qualquer mudança futura no modelo de cobrança será comunicada com no mínimo 30 dias de antecedência via e-mail.</li>
+                  </ul>
                 </div>
 
                 <Separator className="my-6" />

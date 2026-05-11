@@ -135,14 +135,12 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
                   asChild
                   className="h-16 px-10 text-xl font-bold bg-gradient-to-r from-[#ff6b7b] via-[#fa8292] to-[#ff6b7b] bg-[length:200%_auto] animate-gradient-slow shadow-2xl shadow-[#ff6b7b]/30 hover:scale-110 transition-all border-none text-white"
                 >
-                  <a
-                    href={config.checkoutUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/register"
                     className="flex items-center no-underline"
                   >
                     Começar a planejar <ChevronRight className="ml-2 h-6 w-6" />
-                  </a>
+                  </Link>
                 </Button>
               </div>
 

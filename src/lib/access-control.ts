@@ -20,10 +20,23 @@ export type AccessLevel = 'full' | 'restricted' | 'none';
 export type SubscriptionStatus = 'active' | 'inactive' | 'trial';
 
 /**
+ * FLAG GLOBAL DE ACESSO GRATUITO
+ * Quando true, todos os usuários (novos e antigos) têm status 'active' e acesso total.
+ */
+export const IS_FREE_MODE = true;
+
+/**
  * Verifica o status efetivo da assinatura do usuário
  * Considera trial expirado como inactive
  */
 export function getEffectiveStatus(user: UserWithoutPassword): SubscriptionStatus {
+  // Se o modo gratuito estiver ativado, todos são 'active'
+  if (IS_FREE_MODE) {
+    return 'active';
+  }
+
+  /* REVERSAL: Para voltar a cobrar, remova o bloco acima e descomente o código abaixo */
+  /*
   // Se já é active ou inactive, retorna direto
   if (user.subscriptionStatus === 'active') {
     return 'active';
@@ -56,6 +69,8 @@ export function getEffectiveStatus(user: UserWithoutPassword): SubscriptionStatu
 
   // Fallback: qualquer outro status é tratado como inactive
   return 'inactive';
+  */
+  return 'inactive'; // Fallback necessário para o TS quando comentado
 }
 
 /**
@@ -63,8 +78,16 @@ export function getEffectiveStatus(user: UserWithoutPassword): SubscriptionStatu
  * (trial válido ou assinatura ativa)
  */
 export function hasFullAccess(user: UserWithoutPassword): boolean {
+  if (IS_FREE_MODE) {
+    return true;
+  }
+
+  /* REVERSAL: Remova o bloco acima e descomente abaixo */
+  /*
   const status = getEffectiveStatus(user);
   return status === 'active' || status === 'trial';
+  */
+  return false;
 }
 
 /**
@@ -163,6 +186,7 @@ export function getAccessInfo(user: UserWithoutPassword) {
     isTrialActive: status === 'trial',
     isActive: status === 'active',
     isRestricted: !fullAccess,
+    isFreeMode: IS_FREE_MODE,
     daysRemaining,
     canCreateVaults: canCreateVaults(user),
     canAccessPersonalWorkspace: canAccessPersonalWorkspace(user),
