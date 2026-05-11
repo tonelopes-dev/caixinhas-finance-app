@@ -11,6 +11,7 @@ import {
   cancellationEmail, 
   refundEmail 
 } from '@/app/_templates/emails/notification-emails';
+import { IS_FREE_MODE } from '@/lib/access-control';
 
 // Secret do webhook da Kiwify (deve ser configurado no .env)
 const KIWIFY_SECRET = process.env.KIWIFY_WEBHOOK_SECRET;
@@ -173,6 +174,12 @@ async function handleAccessRevoked(data: WebhookData, type: 'canceled' | 'refund
     const user = await prisma.user.findUnique({ where: { email: customer.email } });
     if (!user) return;
 
+    // /* REVERSAL: No modo free, não revogamos acesso nem enviamos emails de cancelamento */
+    if (IS_FREE_MODE) {
+      console.log(`ℹ️ IS_FREE_MODE ativo: Ignorando revogação de acesso para ${customer.email}`);
+      return;
+    }
+
     await prisma.user.update({
       where: { id: user.id },
       data: { subscriptionStatus: 'inactive' }
@@ -201,6 +208,12 @@ async function handleAccessRevoked(data: WebhookData, type: 'canceled' | 'refund
 async function handlePaymentIssue(data: WebhookData, isLate: boolean = false) {
   const { Customer: customer } = data;
   
+  // /* REVERSAL: No modo free, não enviamos emails de falha de pagamento */
+  if (IS_FREE_MODE) {
+    console.log(`ℹ️ IS_FREE_MODE ativo: Ignorando alerta de pagamento para ${customer.email}`);
+    return;
+  }
+
   try {
     const customerName = customer.full_name || customer.first_name || customer.name || 'Cliente';
     const emailHtml = paymentFailedEmail(customerName, isLate);
