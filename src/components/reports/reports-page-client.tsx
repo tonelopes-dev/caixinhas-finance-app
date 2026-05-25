@@ -237,33 +237,33 @@ export function ReportsPageClient() {
                   </div>
                 </div>
 
-                {isGenerating ? (
+                <div style={{ display: isGenerating ? 'none' : 'flex' }} className="flex-col space-y-8 md:space-y-12">
+                  <ReportGenerator
+                    workspaceId={workspaceId}
+                    month={month}
+                    setMonth={setMonth}
+                    year={year}
+                    setYear={setYear}
+                    availableMonths={availableMonths}
+                    availableYears={availableYears}
+                    handleGenerateReport={handleGenerateReport}
+                    buttonLabel={reportStatus.buttonLabel}
+                    buttonEnabled={reportStatus.buttonEnabled}
+                    isGenerating={isGenerating}
+                  />
+  
+                  <ReportDisplay
+                    reportHtml={reportHtml}
+                    isLoading={false}
+                  />
+                </div>
+
+                {isGenerating && (
                   <div className="flex-1 flex items-center justify-center p-6 sm:p-20 text-center">
                     <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-[0_20px_50px_rgba(45,36,30,0.06)] p-10 sm:p-20 w-full max-w-3xl">
                       <ReportLoadingProgress isVisible={true} />
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <ReportGenerator
-                      workspaceId={workspaceId}
-                      month={month}
-                      setMonth={setMonth}
-                      year={year}
-                      setYear={setYear}
-                      availableMonths={availableMonths}
-                      availableYears={availableYears}
-                      handleGenerateReport={handleGenerateReport}
-                      buttonLabel={reportStatus.buttonLabel}
-                      buttonEnabled={reportStatus.buttonEnabled}
-                      isGenerating={false}
-                    />
-    
-                    <ReportDisplay
-                      reportHtml={reportHtml}
-                      isLoading={false}
-                    />
-                  </>
                 )}
               </div>
             ) : (
