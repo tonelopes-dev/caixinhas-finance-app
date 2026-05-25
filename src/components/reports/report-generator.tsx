@@ -88,7 +88,9 @@ export function ReportGenerator({
     const { pending } = useFormStatus();
     
     // Filtra meses do ano selecionado
-    const monthsForSelectedYear = availableMonths.filter(m => m.year.toString() === year);
+    const monthsForSelectedYear = React.useMemo(() => {
+        return availableMonths.filter(m => m.year.toString() === year);
+    }, [availableMonths, year]);
     
     // Verifica se os valores necessários estão presentes
     const hasValidValues = Boolean(month && year && workspaceId);
