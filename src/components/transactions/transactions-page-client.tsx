@@ -47,7 +47,7 @@ const months = [
     { value: '5', label: 'Maio' },
     { value: '6', label: 'Junho' },
     { value: '7', label: 'Julho' },
-    { value: '8', 'label': 'Agosto' },
+    { value: '8', label: 'Agosto' },
     { value: '9', label: 'Setembro' },
     { value: '10', label: 'Outubro' },
     { value: '11', label: 'Novembro' },
@@ -412,14 +412,19 @@ export function TransactionsPageClient({
                                 </SelectContent>
                             </Select>
                             
-                            <Select value={yearFilter} onValueChange={(value) => {
-                                setYearFilter(value);
-                                updateFilters({ year: value });
-                            }}>
-                                <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all">
-                                    <SelectValue placeholder="Ano" />
-                                </SelectTrigger>
-                            </Select>
+                             <Select value={yearFilter} onValueChange={(value) => {
+                                 setYearFilter(value);
+                                 updateFilters({ year: value });
+                             }}>
+                                 <SelectTrigger className="h-14 border-none bg-white/60 hover:bg-white rounded-2xl shadow-sm focus:ring-4 focus:ring-[#ff6b7b]/5 font-black text-[#2D241E] gap-3 px-6 transition-all">
+                                     <SelectValue placeholder="Ano" />
+                                 </SelectTrigger>
+                                 <SelectContent className="rounded-[28px] border-white/40 shadow-2xl backdrop-blur-3xl bg-[#fdfcf7]/95 p-2 max-h-[400px]">
+                                   {years.map(y => (
+                                     <SelectItem key={y} value={y} className="font-black rounded-xl py-3">{y}</SelectItem>
+                                   ))}
+                                 </SelectContent>
+                             </Select>
                         </div>
                     </div>
                 </div>
